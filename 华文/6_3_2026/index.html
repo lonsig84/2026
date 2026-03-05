@@ -38,15 +38,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-700/50 p-4 rounded-xl backdrop-blur-sm">
                 <div class="flex flex-col">
                     <label class="text-blue-100 text-sm mb-1">姓名 (Nama)</label>
-                    <input type="text" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition" placeholder="请填写姓名">
+                    <input type="text" id="studentName" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition" placeholder="请填写姓名">
                 </div>
                 <div class="flex flex-col">
                     <label class="text-blue-100 text-sm mb-1">班级 (Kelas)</label>
-                    <input type="text" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition" value="五年级" readonly>
+                    <input type="text" id="studentClass" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition" value="五年级" readonly>
                 </div>
                 <div class="flex flex-col">
                     <label class="text-blue-100 text-sm mb-1">日期 (Tarikh)</label>
-                    <input type="date" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition">
+                    <input type="date" id="studentDate" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition">
                 </div>
             </div>
 
@@ -78,7 +78,7 @@
                         <span class="font-bold text-gray-700 mr-2">1.</span> 
                         运动员苦练了四年，终于站在了奥运会的冠军领奖台上，唱着国歌，泪水模糊了双眼。
                     </div>
-                    <select class="p-2 border border-gray-300 rounded-md bg-white text-gray-700 outline-none focus:ring-2 focus:ring-blue-400">
+                    <select id="partA_q1" class="p-2 border border-gray-300 rounded-md bg-white text-gray-700 outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="">-- 请选择情绪 --</option>
                         <option value="感动">深深的感动</option>
                         <option value="激动">激动与喜悦</option>
@@ -92,7 +92,7 @@
                         <span class="font-bold text-gray-700 mr-2">2.</span> 
                         看到消防员叔叔为了救出受困的小猫，满脸灰尘、手受了伤却依然微笑着，小明红了眼眶。
                     </div>
-                    <select class="p-2 border border-gray-300 rounded-md bg-white text-gray-700 outline-none focus:ring-2 focus:ring-blue-400">
+                    <select id="partA_q2" class="p-2 border border-gray-300 rounded-md bg-white text-gray-700 outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="">-- 请选择情绪 --</option>
                         <option value="感动">深深的感动</option>
                         <option value="激动">激动与喜悦</option>
@@ -181,6 +181,13 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Submit and Download CSV Action -->
+            <div class="mt-10 flex justify-center">
+                <button onclick="downloadCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1 flex items-center">
+                    <i class="fas fa-download mr-2"></i> 提交并下载为 CSV
+                </button>
+            </div>
         </div>
         
         <!-- Footer -->
@@ -192,7 +199,7 @@
         </div>
     </div>
 
-    <!-- JavaScript for Dynamic Scaffolding and Real-time Rendering -->
+    <!-- JavaScript for Dynamic Scaffolding, Real-time Rendering and CSV Download -->
     <script>
         // Toggle Hint Scaffolding
         function toggleHint(elementId) {
@@ -254,6 +261,71 @@
 
         // Listen for typing events
         outlineEditor.addEventListener('input', updatePreview);
+
+        // CSV Download Logic
+        function downloadCSV() {
+            // 1. Gather all data
+            const studentName = document.getElementById('studentName').value.trim() || '未填姓名';
+            const studentClass = document.getElementById('studentClass').value.trim();
+            const studentDate = document.getElementById('studentDate').value.trim() || '未填日期';
+
+            const partA_q1 = document.getElementById('partA_q1').value;
+            const partA_q2 = document.getElementById('partA_q2').value;
+
+            const bubbleInputs = Array.from(document.querySelectorAll('.bubble-input')).map(input => input.value.trim());
+
+            const partC_outline = document.getElementById('outlineEditor').value.trim();
+
+            // 2. Helper function to escape CSV values
+            const escapeCSV = (str) => {
+                if (str === null || str === undefined) return '""';
+                let text = String(str);
+                // Replace double quotes with two double quotes to escape them in CSV
+                text = text.replace(/"/g, '""');
+                // Wrap every value in double quotes to handle commas and newlines properly
+                return `"${text}"`;
+            };
+
+            // 3. Build CSV string
+            // Add BOM (\uFEFF) so Excel reads UTF-8 characters properly
+            let csvContent = "\uFEFF";
+            
+            // Define Headers
+            const headers = [
+                "姓名", "班级", "日期", 
+                "A项-第1题(运动员)", "A项-第2题(消防员)", 
+                "B项-原因1", "B项-原因2", "B项-原因3", "B项-原因4", "B项-原因5", "B项-原因6", 
+                "C项-分享大纲"
+            ];
+            
+            csvContent += headers.map(escapeCSV).join(",") + "\n";
+
+            // Define Row Data
+            const rowData = [
+                studentName, studentClass, studentDate,
+                partA_q1, partA_q2,
+                ...bubbleInputs,
+                partC_outline
+            ];
+
+            csvContent += rowData.map(escapeCSV).join(",") + "\n";
+
+            // 4. Create Blob and Trigger Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            // Filename includes the student's name
+            link.setAttribute("download", `华文作业单_${studentName}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('🎉 提交成功！作答记录已下载为 CSV 文件。');
+        }
     </script>
 </body>
 </html>
