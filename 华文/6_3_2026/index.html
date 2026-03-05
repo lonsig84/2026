@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年级华文作业单 - 蜕变之旅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .paper { background-image: linear-gradient(#e5e7eb 1px, transparent 1px); background-size: 100% 2rem; line-height: 2rem; }
+        .bubble-map { position: relative; width: 100%; max-width: 500px; height: 350px; margin: 0 auto; }
+        .bubble-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border-radius: 50%; background-color: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;}
+        .bubble-node { position: absolute; width: 100px; height: 100px; border-radius: 50%; background-color: #eff6ff; border: 2px dashed #93c5fd; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s;}
+        .bubble-node:focus-within { border-color: #3b82f6; border-style: solid; transform: scale(1.05); background-color: white;}
+        .bubble-input { width: 80%; text-align: center; border: none; background: transparent; outline: none; font-size: 0.9rem; color: #1f2937; }
+        
+        /* Bubble Positions */
+        .node-1 { top: 0; left: 50%; transform: translateX(-50%); }
+        .node-2 { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .node-3 { top: 50%; left: 0; transform: translateY(-50%); }
+        .node-4 { top: 50%; right: 0; transform: translateY(-50%); }
+        .node-5 { top: 15%; left: 15%; }
+        .node-6 { top: 15%; right: 15%; }
+
+        /* Scaffolding Animation */
+        .scaffold-reveal { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+        <!-- Header Section -->
+        <div class="bg-blue-600 text-white p-6 md:p-8">
+            <h1 class="text-3xl font-bold text-center mb-6 tracking-wider">🌟 课堂互动与表达作业单 🌟</h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-700/50 p-4 rounded-xl backdrop-blur-sm">
+                <div class="flex flex-col">
+                    <label class="text-blue-100 text-sm mb-1">姓名 (Nama)</label>
+                    <input type="text" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition" placeholder="请填写姓名">
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-blue-100 text-sm mb-1">班级 (Kelas)</label>
+                    <input type="text" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition" value="五年级" readonly>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-blue-100 text-sm mb-1">日期 (Tarikh)</label>
+                    <input type="date" class="bg-transparent border-b-2 border-blue-300 text-white outline-none focus:border-white transition">
+                </div>
+            </div>
+
+            <div class="mt-6 text-sm md:text-base grid grid-cols-1 md:grid-cols-2 gap-2 text-blue-50">
+                <p><i class="fas fa-book mr-2"></i><strong>科目：</strong>华文</p>
+                <p><i class="fas fa-bookmark mr-2"></i><strong>单元/课题：</strong>单元1-蜕变之旅 / 互动平台(三)</p>
+                <p class="md:col-span-2"><i class="fas fa-bullseye mr-2"></i><strong>学习标准：</strong>1.1.1 (参与讨论, 理解并表达意见), 1.3.2 (条理分明地说明事理)</p>
+            </div>
+        </div>
+
+        <!-- Part A: Basic -->
+        <div class="p-6 md:p-8 border-b border-gray-100">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800"><span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full mr-2">A 项</span>情境辨识与情绪连接</h2>
+                <button onclick="toggleHint('hintA')" class="text-amber-500 hover:text-amber-600 transition flex items-center text-sm font-semibold bg-amber-50 py-1 px-3 rounded-full border border-amber-200">
+                    <i class="fas fa-lightbulb mr-1"></i> 老师的提示
+                </button>
+            </div>
+            
+            <p class="text-gray-600 mb-4">指示：细读以下情境，想一想情境中的人为什么会流泪？请从下拉菜单中选择最合适的“情绪原因”。</p>
+            
+            <div id="hintA" class="hidden scaffold-reveal bg-amber-50 border-l-4 border-amber-400 p-4 mb-4 text-amber-800 text-sm rounded-r-lg">
+                💡 <strong>脚手架提示：</strong> 眼泪不一定代表难过哦！有时候，当人“开心到了极点”或者“深深体会到别人的辛苦”时，也会流下眼泪。
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                    <div class="flex-1 mb-2 md:mb-0">
+                        <span class="font-bold text-gray-700 mr-2">1.</span> 
+                        运动员苦练了四年，终于站在了奥运会的冠军领奖台上，唱着国歌，泪水模糊了双眼。
+                    </div>
+                    <select class="p-2 border border-gray-300 rounded-md bg-white text-gray-700 outline-none focus:ring-2 focus:ring-blue-400">
+                        <option value="">-- 请选择情绪 --</option>
+                        <option value="感动">深深的感动</option>
+                        <option value="激动">激动与喜悦</option>
+                        <option value="伤心">伤心与失落</option>
+                        <option value="害怕">极度的害怕</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-center bg-gray-50 p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                    <div class="flex-1 mb-2 md:mb-0">
+                        <span class="font-bold text-gray-700 mr-2">2.</span> 
+                        看到消防员叔叔为了救出受困的小猫，满脸灰尘、手受了伤却依然微笑着，小明红了眼眶。
+                    </div>
+                    <select class="p-2 border border-gray-300 rounded-md bg-white text-gray-700 outline-none focus:ring-2 focus:ring-blue-400">
+                        <option value="">-- 请选择情绪 --</option>
+                        <option value="感动">深深的感动</option>
+                        <option value="激动">激动与喜悦</option>
+                        <option value="伤心">伤心与失落</option>
+                        <option value="委屈">觉得很委屈</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Part B: Intermediate -->
+        <div class="p-6 md:p-8 border-b border-gray-100 bg-blue-50/30">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800"><span class="bg-indigo-100 text-indigo-800 py-1 px-3 rounded-full mr-2">B 项</span>起泡图梳理 (Peta Buih)</h2>
+                <button onclick="toggleHint('hintB')" class="text-amber-500 hover:text-amber-600 transition flex items-center text-sm font-semibold bg-amber-50 py-1 px-3 rounded-full border border-amber-200">
+                    <i class="fas fa-magic mr-1"></i> 获取灵感
+                </button>
+            </div>
+
+            <p class="text-gray-600 mb-6">指示：回想刚才课堂上的小组讨论。人们在什么情况下会流泪？请在起泡图中填入<strong>不同的原因或情绪</strong>。</p>
+
+            <div id="hintB" class="hidden scaffold-reveal bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 text-amber-800 text-sm rounded-r-lg">
+                💡 <strong>灵感词库：</strong> 伤心欲绝、喜极而泣、感动、委屈、痛楚、离别的不舍、久别重逢。你可以选几个填入圈圈中！
+            </div>
+
+            <!-- Interactive Bubble Map -->
+            <div class="bubble-map my-8">
+                <!-- Lines connecting bubbles (simplified via CSS) -->
+                <svg width="100%" height="100%" style="position:absolute; top:0; left:0; z-index: 1;">
+                    <line x1="50%" y1="50%" x2="50%" y2="15%" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="50%" y1="50%" x2="50%" y2="85%" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="50%" y1="50%" x2="15%" y2="50%" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="50%" y1="50%" x2="85%" y2="50%" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="50%" y1="50%" x2="25%" y2="25%" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="50%" y1="50%" x2="75%" y2="25%" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+                </svg>
+
+                <div class="bubble-center shadow-lg">
+                    流泪的<br>原因
+                </div>
+                
+                <div class="bubble-node node-1 z-10"><input type="text" class="bubble-input" placeholder="输入原因..."></div>
+                <div class="bubble-node node-2 z-10"><input type="text" class="bubble-input" placeholder="输入原因..."></div>
+                <div class="bubble-node node-3 z-10"><input type="text" class="bubble-input" placeholder="输入原因..."></div>
+                <div class="bubble-node node-4 z-10"><input type="text" class="bubble-input" placeholder="输入原因..."></div>
+                <div class="bubble-node node-5 z-10"><input type="text" class="bubble-input" placeholder="输入原因..."></div>
+                <div class="bubble-node node-6 z-10"><input type="text" class="bubble-input" placeholder="输入原因..."></div>
+            </div>
+        </div>
+
+        <!-- Part C: Advanced & Real-time Rendering -->
+        <div class="p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800"><span class="bg-purple-100 text-purple-800 py-1 px-3 rounded-full mr-2">C 项</span>深度分析与口头分享大纲</h2>
+                <button onclick="injectTemplate()" class="text-white hover:bg-purple-700 transition flex items-center text-sm font-semibold bg-purple-600 py-1.5 px-3 rounded-lg shadow">
+                    <i class="fas fa-layer-group mr-1"></i> 载入大纲结构模板
+                </button>
+            </div>
+
+            <div class="bg-gray-800 text-gray-100 p-4 rounded-lg mb-6 shadow-inner border-l-4 border-purple-500">
+                <p class="font-bold mb-1"><i class="fas fa-quote-left text-gray-500 mr-2"></i>情境探讨：英雄的眼泪</p>
+                <p class="text-sm leading-relaxed">在一部抗灾纪录片中，一位连续奋战了三天三夜的救援队长，在成功救出最后一名幸存者后，突然蹲在地上放声大哭。他平时是个非常坚强、“流血不流泪”的硬汉。</p>
+            </div>
+
+            <p class="text-gray-600 mb-2">指示：请结合情境，拟定一份准备在班上分享的**演讲大纲**。你输入的内容将实时渲染下方的“演讲提示卡”。</p>
+            <p class="text-sm text-gray-500 mb-4">要求：条理分明，说出你的观点（他为什么哭？这眼泪代表什么意义？）</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Editor (Input) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">大纲草稿区 (Drafting Area)</label>
+                    <textarea id="outlineEditor" rows="8" class="w-full p-4 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-purple-400 outline-none transition resize-none paper font-mono text-gray-800" placeholder="在这里输入你的大纲，或者点击右上角的『载入大纲结构模板』..."></textarea>
+                </div>
+
+                <!-- Real-time Preview Card (Output) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">实时演讲提示卡预览 (Live Cue Card)</label>
+                    <div class="w-full h-full min-h-[16rem] bg-amber-50/80 border-2 border-dashed border-amber-300 rounded-xl p-5 shadow-sm flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-amber-400"></div>
+                        <h3 class="text-center font-bold text-amber-800 mb-4 border-b border-amber-200 pb-2 flex items-center justify-center">
+                            <i class="fas fa-microphone-alt mr-2 text-amber-600"></i> 我的分享卡
+                        </h3>
+                        <div id="previewCard" class="text-gray-700 whitespace-pre-wrap flex-1 text-sm md:text-base leading-relaxed break-words font-sans">
+                            <span class="text-amber-600/50 italic text-center block mt-10">（你在左侧输入的内容，将自动显示在这里...）</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="bg-gray-100 p-4 text-center text-gray-500 text-sm border-t border-gray-200">
+            教师评估 (Pentaksiran Guru): 
+            <span class="inline-block w-8 h-8 rounded-full border border-gray-400 mx-1"></span> TP1/2
+            <span class="inline-block w-8 h-8 rounded-full border border-gray-400 mx-1"></span> TP3/4
+            <span class="inline-block w-8 h-8 rounded-full border border-gray-400 mx-1"></span> TP5/6
+        </div>
+    </div>
+
+    <!-- JavaScript for Dynamic Scaffolding and Real-time Rendering -->
+    <script>
+        // Toggle Hint Scaffolding
+        function toggleHint(elementId) {
+            const el = document.getElementById(elementId);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                // Optional: Scroll to it slightly
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        // Inject Template Scaffolding
+        function injectTemplate() {
+            const editor = document.getElementById('outlineEditor');
+            const template = `1. 开场白（打招呼与引入话题）：
+大家好，我想分享的是关于...
+
+2. 原因分析（他为什么流泪？）：
+我认为这位救援队长流泪是因为...（激动/释怀/长期紧绷后的释放）
+
+3. 意义与看法（这反映了什么？）：
+这眼泪不是软弱，而是代表了...（责任感/对生命的敬畏）
+
+4. 总结：
+总的来说，英雄也会流泪，我们应该...`;
+            
+            // Only inject if it's relatively empty to prevent overwriting student's work
+            if (editor.value.trim().length < 20) {
+                editor.value = template;
+                updatePreview(); // trigger render
+            } else {
+                alert("你的草稿区已经有内容啦！为避免覆盖你的努力，请先清空或在新行继续写。");
+            }
+        }
+
+        // Real-time Rendering Logic
+        const outlineEditor = document.getElementById('outlineEditor');
+        const previewCard = document.getElementById('previewCard');
+
+        function updatePreview() {
+            const text = outlineEditor.value;
+            if (text.trim() === '') {
+                previewCard.innerHTML = '<span class="text-amber-600/50 italic text-center block mt-10">（你在左侧输入的内容，将自动显示在这里...）</span>';
+            } else {
+                // Escape HTML to prevent XSS, then format lists/bolding roughly for visual appeal
+                let formattedText = text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+                
+                // Highlight numbers like "1.", "2." to make them stand out on the cue card
+                formattedText = formattedText.replace(/^(\d+\.)(.*)/gm, '<strong class="text-amber-700 block mt-2 mb-1 text-lg">$1$2</strong>');
+                
+                previewCard.innerHTML = formattedText;
+            }
+        }
+
+        // Listen for typing events
+        outlineEditor.addEventListener('input', updatePreview);
+    </script>
+</body>
+</html>
