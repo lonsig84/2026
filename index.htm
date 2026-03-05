@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华文互动练习：我诚实我守信</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f0fdf4; /* Light green background */
+        }
+        .question-box {
+            transition: all 0.3s ease;
+        }
+        .correct-bg { background-color: #dcfce7 !important; border-color: #22c55e !important; }
+        .wrong-bg { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-emerald-500 text-white p-6 text-center">
+            <h1 class="text-3xl font-bold mb-2">五年级华文单元评估</h1>
+            <p class="text-lg opacity-90">单元一：蜕变之旅 | 4.1 我诚实我守信</p>
+            <p class="text-sm mt-2">学习标准 5.4.1：认识并正确使用关联词语</p>
+        </div>
+
+        <!-- Student Info -->
+        <div class="p-6 bg-emerald-50 border-b border-emerald-100 flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <label class="block text-gray-700 font-bold mb-1">姓名:</label>
+                <input type="text" id="studentName" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="请输入你的名字">
+            </div>
+            <div class="flex-1">
+                <label class="block text-gray-700 font-bold mb-1">班级:</label>
+                <input type="text" id="studentClass" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="例如：5M">
+            </div>
+        </div>
+
+        <form id="quizForm" class="p-6 space-y-8">
+
+            <!-- Part A -->
+            <section>
+                <h2 class="text-xl font-bold text-emerald-700 mb-4 flex items-center">
+                    <span class="bg-emerald-100 text-emerald-800 rounded-full w-8 h-8 flex items-center justify-center mr-2">A</span>
+                    选择正确的关联词语填空。(4分)
+                </h2>
+                <div class="space-y-4">
+                    <!-- Q1 -->
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-a1">
+                        <p class="text-lg text-gray-800 leading-relaxed">
+                            1. 伟明 
+                            <select id="a1" class="border border-emerald-300 rounded text-emerald-700 font-bold px-2 py-1 mx-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">[请选择]</option>
+                                <option value="因为……所以……">因为……所以……</option>
+                                <option value="不但……而且……">不但……而且……</option>
+                                <option value="虽然……但是……">虽然……但是……</option>
+                                <option value="如果……就……">如果……就……</option>
+                            </select> 
+                            是个诚实的孩子，而且也是个信守承诺的好学生。
+                        </p>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-a2">
+                        <p class="text-lg text-gray-800 leading-relaxed">
+                            2. 
+                            <select id="a2" class="border border-emerald-300 rounded text-emerald-700 font-bold px-2 py-1 mx-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">[请选择]</option>
+                                <option value="因为……所以……">因为……所以……</option>
+                                <option value="不但……而且……">不但……而且……</option>
+                                <option value="虽然……但是……">虽然……但是……</option>
+                                <option value="如果……就……">如果……就……</option>
+                            </select> 
+                            你不小心打破了邻居的花盆，就应该勇敢地承认错误。
+                        </p>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-a3">
+                        <p class="text-lg text-gray-800 leading-relaxed">
+                            3. 
+                            <select id="a3" class="border border-emerald-300 rounded text-emerald-700 font-bold px-2 py-1 mx-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">[请选择]</option>
+                                <option value="因为……所以……">因为……所以……</option>
+                                <option value="不但……而且……">不但……而且……</option>
+                                <option value="虽然……但是……">虽然……但是……</option>
+                                <option value="如果……就……">如果……就……</option>
+                            </select> 
+                            我今天忘了带课本，但是我还是专心地听老师讲课。
+                        </p>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-a4">
+                        <p class="text-lg text-gray-800 leading-relaxed">
+                            4. 
+                            <select id="a4" class="border border-emerald-300 rounded text-emerald-700 font-bold px-2 py-1 mx-1 outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="">[请选择]</option>
+                                <option value="因为……所以……">因为……所以……</option>
+                                <option value="不但……而且……">不但……而且……</option>
+                                <option value="既然……就……">既然……就……</option>
+                                <option value="如果……就……">如果……就……</option>
+                            </select> 
+                            小华没有遵守诺言，所以朋友们都不再信任他了。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part B -->
+            <section>
+                <h2 class="text-xl font-bold text-emerald-700 mb-4 flex items-center">
+                    <span class="bg-emerald-100 text-emerald-800 rounded-full w-8 h-8 flex items-center justify-center mr-2">B</span>
+                    哪个句子正确地使用了关联词？请选择。(3分)
+                </h2>
+                <div class="space-y-4">
+                    
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-b1">
+                        <p class="font-bold text-gray-800 mb-2">1. 句子一：天气非常恶劣。 / 句子二：邮递员叔叔依然准时送信。</p>
+                        <div class="space-y-2 pl-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="b1" value="A" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">A. <b>虽然</b>天气非常恶劣，<b>但是</b>邮递员叔叔依然准时送信。</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="b1" value="B" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">B. <b>因为</b>天气非常恶劣，<b>所以</b>邮递员叔叔依然准时送信。</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-b2">
+                        <p class="font-bold text-gray-800 mb-2">2. 句子一：你答应了要帮弟弟修理玩具。 / 句子二：你应该抽出时间去完成。</p>
+                        <div class="space-y-2 pl-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="b2" value="A" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">A. <b>即使</b>你答应了要帮弟弟修理玩具，<b>也</b>不应该抽出时间去完成。</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="b2" value="B" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">B. <b>既然</b>你答应了要帮弟弟修理玩具，<b>就</b>应该抽出时间去完成。</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-b3">
+                        <p class="font-bold text-gray-800 mb-2">3. 句子一：明华不小心打破了花盆。 / 句子二：明华主动向邻居道歉。</p>
+                        <div class="space-y-2 pl-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="b3" value="A" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">A. <b>因为</b>明华不小心打破了花盆，<b>所以</b>他主动向邻居道歉。</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="b3" value="B" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">B. <b>如果</b>明华不小心打破了花盆，他<b>才</b>主动向邻居道歉。</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Part C (Simplified KBAT) -->
+            <section>
+                <h2 class="text-xl font-bold text-emerald-700 mb-4 flex items-center">
+                    <span class="bg-emerald-100 text-emerald-800 rounded-full w-8 h-8 flex items-center justify-center mr-2">C</span>
+                    情境应用：根据情况选择最诚实守信的回答。(3分)
+                </h2>
+                <div class="space-y-4">
+                    
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-c1">
+                        <p class="font-bold text-gray-800 mb-2">1. 丽丽答应借一本故事书给小明，但她今天忘了带。她该怎么对小明说？</p>
+                        <div class="space-y-2 pl-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="c1" value="A" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">A. “<b>因为</b>我忘了带，<b>所以</b>你明天再向别人借吧！”</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="c1" value="B" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">B. “<b>虽然</b>我今天忘了带，<b>但是</b>我明天一定会带来借给你，对不起。”</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-box p-4 border border-gray-200 rounded-lg bg-gray-50" id="box-c2">
+                        <p class="font-bold text-gray-800 mb-2">2. 考试时，你发现一道题很难，同桌故意把答案露出来给你看。你会怎么想？</p>
+                        <div class="space-y-2 pl-4">
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="c2" value="A" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">A. <b>即使</b>这道题很难，我<b>也</b>不能作弊，因为我要做一个诚实的孩子。</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="radio" name="c2" value="B" class="form-radio h-5 w-5 text-emerald-600">
+                                <span class="text-gray-700">B. <b>既然</b>同桌大方地给我看了，我<b>就</b>直接抄下来，不抄白不抄。</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Submit Button -->
+            <div class="text-center pt-6 border-t border-gray-200">
+                <button type="button" onclick="calculateScore()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-10 rounded-full shadow-lg transform transition hover:scale-105 text-lg">
+                    提交答案并查看分数
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Result Modal (Hidden by default) -->
+        <div id="resultModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform transition-all scale-95 opacity-0" id="modalContent">
+                <div id="scoreIcon" class="text-6xl mb-4">🏆</div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2" id="resultName">同学你好！</h2>
+                <p class="text-gray-600 mb-6">你的最终得分是：</p>
+                <div class="text-5xl font-extrabold text-emerald-600 mb-6" id="scoreDisplay">0 / 10</div>
+                <p id="scoreMessage" class="font-medium text-lg mb-6 text-gray-700"></p>
+                <button onclick="closeModal()" class="w-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold py-2 px-4 rounded-lg transition">
+                    查看正确答案
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 定义正确答案
+        const correctAnswers = {
+            a1: "不但……而且……",
+            a2: "如果……就……",
+            a3: "虽然……但是……",
+            a4: "因为……所以……",
+            b1: "A",
+            b2: "B",
+            b3: "A",
+            c1: "B",
+            c2: "A"
+        };
+
+        function calculateScore() {
+            let score = 0;
+            const totalQuestions = 9; // 总题数
+
+            // 检查A项 (Select)
+            ['a1', 'a2', 'a3', 'a4'].forEach(id => {
+                const element = document.getElementById(id);
+                const box = document.getElementById(`box-${id}`);
+                const userAnswer = element.value;
+
+                // 重置样式
+                box.classList.remove('correct-bg', 'wrong-bg');
+                
+                if (userAnswer === correctAnswers[id]) {
+                    score++;
+                    box.classList.add('correct-bg');
+                } else if (userAnswer !== "") {
+                    box.classList.add('wrong-bg');
+                }
+            });
+
+            // 检查B和C项 (Radio)
+            ['b1', 'b2', 'b3', 'c1', 'c2'].forEach(name => {
+                const radios = document.getElementsByName(name);
+                const box = document.getElementById(`box-${name}`);
+                let userAnswer = "";
+                
+                for(let i=0; i<radios.length; i++){
+                    if(radios[i].checked){
+                        userAnswer = radios[i].value;
+                        break;
+                    }
+                }
+
+                // 重置样式
+                box.classList.remove('correct-bg', 'wrong-bg');
+
+                if (userAnswer === correctAnswers[name]) {
+                    score++;
+                    box.classList.add('correct-bg');
+                } else if (userAnswer !== "") {
+                    box.classList.add('wrong-bg');
+                }
+            });
+
+            // 准备显示结果
+            const nameInput = document.getElementById('studentName').value;
+            const displayName = nameInput.trim() === "" ? "同学" : nameInput;
+            
+            document.getElementById('resultName').innerText = `${displayName}，你好！`;
+            
+            // 算分数 (总分 10 分。A: 4, B: 3, C: 3，这里有9题，我们按每题10分或换算成百分制，为了简单，直接展示答对题数，比如 9/9)
+            // 假设我们要展示 100 分满分，每题约 11.1 分，这里我们直接显示题数得分，共9分。
+            document.getElementById('scoreDisplay').innerText = `${score} / ${totalQuestions}`;
+
+            // 根据得分给予评语
+            const messageEl = document.getElementById('scoreMessage');
+            const iconEl = document.getElementById('scoreIcon');
+            if (score === totalQuestions) {
+                messageEl.innerText = "太棒了！你是个掌握关联词又诚实守信的好孩子！";
+                iconEl.innerText = "🌟";
+            } else if (score >= 6) {
+                messageEl.innerText = "表现不错！继续努力，你会更棒的！";
+                iconEl.innerText = "👍";
+            } else {
+                messageEl.innerText = "没关系，再复习一下关联词的用法吧，加油！";
+                iconEl.innerText = "💪";
+            }
+
+            // 显示 Modal
+            const modal = document.getElementById('resultModal');
+            const modalContent = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            
+            // 触发动画
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modalContent = document.getElementById('modalContent');
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                document.getElementById('resultModal').classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
