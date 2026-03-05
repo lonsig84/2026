@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Worksheet: The Sandwich</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;700&display=swap');
+        body { font-family: 'Nunito', sans-serif; background-color: #f0fdf4; }
+        .poem-font { font-family: 'Caveat', cursive; }
+        .word-pill { cursor: pointer; transition: all 0.2s; }
+        .word-pill:hover { transform: scale(1.05); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto glass-card rounded-2xl shadow-xl overflow-hidden border border-green-100">
+        <!-- Header Section -->
+        <div class="bg-green-600 text-white p-6 md:p-8">
+            <div class="flex flex-col md:flex-row justify-between items-center border-b border-green-400 pb-4 mb-4">
+                <h1 class="text-3xl font-bold"><i class="fas fa-sandwich mr-2"></i> Worksheet: The Sandwich</h1>
+                <span class="bg-green-500 px-3 py-1 rounded-full text-sm font-semibold mt-2 md:mt-0">Subject: ENGLISH | Year 6</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-green-100">Name:</label>
+                    <input type="text" id="studentName" class="mt-1 block w-full rounded-md border-transparent focus:border-green-300 focus:bg-white focus:ring-0 bg-green-700/50 text-white px-3 py-2 placeholder-green-300" placeholder="Enter your full name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-green-100">Class:</label>
+                    <input type="text" id="studentClass" class="mt-1 block w-full rounded-md border-transparent focus:border-green-300 focus:bg-white focus:ring-0 bg-green-700/50 text-white px-3 py-2 placeholder-green-300" placeholder="e.g., 6 Bestari">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-green-100">Date:</label>
+                    <input type="date" id="worksheetDate" class="mt-1 block w-full rounded-md border-transparent focus:border-green-300 focus:bg-white focus:ring-0 bg-green-700/50 text-white px-3 py-2">
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-green-100">
+                <strong>Learning Standards:</strong> 4.3.2 Spell high frequency words | 5.3.1 Respond imaginatively through simple poems.
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-10">
+            
+            <!-- Part A -->
+            <section class="bg-orange-50 rounded-xl p-6 border-l-4 border-orange-400 shadow-sm">
+                <h2 class="text-xl font-bold text-orange-800 mb-2">Part A: The Basic Recipe</h2>
+                <p class="text-gray-600 mb-4 font-medium"><i class="fas fa-info-circle text-orange-400"></i> Fill in the blanks using the words from the Word Bank to complete the sandwich poem.</p>
+                
+                <div class="flex flex-wrap gap-2 mb-6 bg-white p-3 rounded-lg border border-orange-200">
+                    <span class="font-bold text-orange-600 mr-2">Word Bank:</span>
+                    <span class="word-pill bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm border border-orange-300">cheese</span>
+                    <span class="word-pill bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm border border-orange-300">made</span>
+                    <span class="word-pill bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm border border-orange-300">tomatoes</span>
+                    <span class="word-pill bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm border border-orange-300">was</span>
+                    <span class="word-pill bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm border border-orange-300">took</span>
+                </div>
+
+                <div class="text-lg leading-loose font-medium text-gray-700 space-y-2">
+                    <p>I <select id="q1" class="border-b-2 border-orange-400 bg-transparent focus:outline-none focus:border-orange-600 text-orange-600 font-bold px-1 mx-1"><option value="">---</option><option value="took">took</option><option value="made">made</option><option value="was">was</option></select> two slices of fresh bread,</p>
+                    <p>And added yellow <select id="q2" class="border-b-2 border-orange-400 bg-transparent focus:outline-none focus:border-orange-600 text-orange-600 font-bold px-1 mx-1"><option value="">---</option><option value="cheese">cheese</option><option value="tomatoes">tomatoes</option><option value="took">took</option></select> inside.</p>
+                    <p>I <select id="q3" class="border-b-2 border-orange-400 bg-transparent focus:outline-none focus:border-orange-600 text-orange-600 font-bold px-1 mx-1"><option value="">---</option><option value="took">took</option><option value="made">made</option><option value="was">was</option></select> a bite so big and red,</p>
+                    <p>It <select id="q4" class="border-b-2 border-orange-400 bg-transparent focus:outline-none focus:border-orange-600 text-orange-600 font-bold px-1 mx-1"><option value="">---</option><option value="took">took</option><option value="made">made</option><option value="was">was</option></select> the best sandwich, I can't hide!</p>
+                </div>
+            </section>
+
+            <!-- Part B with Real-time Rendering -->
+            <section class="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-400 shadow-sm">
+                <h2 class="text-xl font-bold text-blue-800 mb-2">Part B: Your Imaginative Sandwich</h2>
+                <p class="text-gray-600 mb-4 font-medium"><i class="fas fa-pen-nib text-blue-400"></i> Write your own 4-line poem about an imaginative sandwich. Ensure you spell your food words correctly!</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <textarea id="partBText" rows="6" class="w-full p-4 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400 focus:outline-none resize-none shadow-inner" placeholder="Line 1: I made a sandwich out of...\nLine 2: ...\nLine 3: ...\nLine 4: ..."></textarea>
+                    </div>
+                    <!-- Real-time Render Box -->
+                    <div class="bg-[url('https://www.transparenttextures.com/patterns/notebook.png')] bg-white p-6 rounded-lg border border-gray-300 shadow-md flex items-center justify-center min-h-[150px]">
+                        <div id="poemPreviewB" class="poem-font text-2xl text-blue-900 text-center whitespace-pre-wrap leading-relaxed">
+                            Start typing to see your poem magically appear here...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part C with Dynamic Scaffolding -->
+            <section class="bg-purple-50 rounded-xl p-6 border-l-4 border-purple-400 shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-xl font-bold text-purple-800">Part C: The Magical Sandwich (Challenge)</h2>
+                    <!-- Scaffolding Toggle Button -->
+                    <button id="helpBtn" class="bg-purple-200 text-purple-700 hover:bg-purple-300 px-4 py-2 rounded-full font-bold text-sm transition-colors flex items-center">
+                        <i class="fas fa-lightbulb mr-2"></i> Need Help?
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-4 font-medium"><i class="fas fa-magic text-purple-400"></i> Write a 6-line poem or short story about a MAGICAL sandwich. Use the past tense and at least 3 descriptive adjectives.</p>
+                
+                <!-- Dynamic Scaffolding Tool (Hidden by default) -->
+                <div id="scaffoldingBox" class="hidden mb-4 p-4 bg-white rounded-lg border border-purple-200 shadow-inner">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-bold text-sm text-purple-600 mb-2 uppercase tracking-wider">Past Tense Verbs</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">created</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">mixed</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">discovered</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">glowed</span>
+                                <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">floated</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-pink-600 mb-2 uppercase tracking-wider">Descriptive Adjectives</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">gigantic</span>
+                                <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">sparkling</span>
+                                <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">slimy</span>
+                                <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">invisible</span>
+                                <span class="bg-pink-100 text-pink-800 px-2 py-1 rounded text-xs">crunchy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <textarea id="partCText" rows="8" class="w-full p-4 rounded-lg border border-purple-200 focus:ring-2 focus:ring-purple-400 focus:outline-none resize-none shadow-inner" placeholder="Once upon a time, I created..."></textarea>
+                        
+                        <!-- Real-time analysis hints -->
+                        <div class="mt-2 text-xs text-gray-500 flex justify-between">
+                            <span id="wordCountC">Word count: 0</span>
+                            <span id="adjectiveHint" class="text-orange-500"><i class="fas fa-exclamation-circle"></i> Try adding more descriptive adjectives!</span>
+                        </div>
+                    </div>
+                     <!-- Real-time Render Box -->
+                     <div class="bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] bg-purple-900 p-6 rounded-lg border border-purple-800 shadow-lg flex items-center justify-center min-h-[200px] relative overflow-hidden">
+                        <div id="poemPreviewC" class="poem-font text-2xl text-purple-100 text-center whitespace-pre-wrap leading-relaxed relative z-10 drop-shadow-md">
+                            Your magical creation will appear here...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Actions and Results -->
+            <div class="border-t border-gray-200 pt-8 mt-8 flex flex-col items-center">
+                <button id="submitBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:-translate-y-1 text-lg mb-6">
+                    <i class="fas fa-paper-plane mr-2"></i> Submit Worksheet
+                </button>
+
+                <!-- Result Box -->
+                <div id="resultBox" class="hidden w-full max-w-2xl bg-white p-6 rounded-xl border-2 border-green-500 shadow-2xl text-center">
+                    <h3 class="text-2xl font-bold text-green-700 mb-2">Great Job, <span id="resName"></span>! 🎉</h3>
+                    
+                    <div class="grid grid-cols-3 gap-4 my-6">
+                        <div class="p-4 bg-orange-50 rounded-lg">
+                            <p class="text-sm text-gray-500 uppercase font-bold">Part A Score</p>
+                            <p id="resScoreA" class="text-3xl font-black text-orange-600 mt-1">0/4</p>
+                        </div>
+                        <div class="p-4 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-gray-500 uppercase font-bold">Part B Effort</p>
+                            <p id="resScoreB" class="text-3xl font-black text-blue-600 mt-1"><i class="fas fa-check-circle"></i></p>
+                        </div>
+                        <div class="p-4 bg-purple-50 rounded-lg">
+                            <p class="text-sm text-gray-500 uppercase font-bold">Part C Creativity</p>
+                            <p id="resScoreC" class="text-3xl font-black text-purple-600 mt-1"><i class="fas fa-star"></i></p>
+                        </div>
+                    </div>
+                    
+                    <p id="teacherFeedback" class="text-gray-700 italic mb-6">Feedback goes here...</p>
+
+                    <button id="downloadBtn" class="bg-gray-800 hover:bg-black text-white py-2 px-6 rounded-lg shadow-md transition">
+                        <i class="fas fa-file-csv mr-2"></i> Download Result as CSV
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 1. Real-time Rendering Logic
+        const partBInput = document.getElementById('partBText');
+        const previewB = document.getElementById('poemPreviewB');
+        
+        partBInput.addEventListener('input', (e) => {
+            const text = e.target.value;
+            if(text.trim() === '') {
+                previewB.innerHTML = '<span class="text-blue-300 opacity-50">Start typing to see your poem magically appear here...</span>';
+            } else {
+                previewB.textContent = text;
+            }
+        });
+
+        const partCInput = document.getElementById('partCText');
+        const previewC = document.getElementById('poemPreviewC');
+        const wordCountC = document.getElementById('wordCountC');
+        const adjectiveHint = document.getElementById('adjectiveHint');
+
+        // Simple list of adjectives to check against for dynamic feedback
+        const commonAdjectives = ['gigantic', 'sparkling', 'slimy', 'invisible', 'crunchy', 'big', 'small', 'huge', 'magical', 'beautiful', 'delicious', 'weird', 'strange', 'yummy', 'spicy', 'sweet', 'sour'];
+
+        partCInput.addEventListener('input', (e) => {
+            const text = e.target.value;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+            
+            // Render text
+            if(text.trim() === '') {
+                previewC.innerHTML = '<span class="text-purple-300 opacity-50">Your magical creation will appear here...</span>';
+            } else {
+                previewC.textContent = text;
+            }
+
+            // Word count
+            wordCountC.textContent = `Word count: ${words.length}`;
+
+            // Adjective hint logic
+            const usedAdjectives = words.filter(word => commonAdjectives.includes(word.toLowerCase().replace(/[^a-z]/g, '')));
+            if(usedAdjectives.length >= 3) {
+                adjectiveHint.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Great use of adjectives!';
+                adjectiveHint.className = "text-green-600 font-bold";
+            } else {
+                adjectiveHint.innerHTML = '<i class="fas fa-exclamation-circle"></i> Try adding more descriptive adjectives!';
+                adjectiveHint.className = "text-orange-500";
+            }
+        });
+
+        // 2. Dynamic Scaffolding Tool Logic
+        const helpBtn = document.getElementById('helpBtn');
+        const scaffoldingBox = document.getElementById('scaffoldingBox');
+        
+        helpBtn.addEventListener('click', () => {
+            scaffoldingBox.classList.toggle('hidden');
+            if(scaffoldingBox.classList.contains('hidden')) {
+                helpBtn.innerHTML = '<i class="fas fa-lightbulb mr-2"></i> Need Help?';
+            } else {
+                helpBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Close Hints';
+            }
+        });
+
+        // 3. Auto-Grading and Submit Logic
+        const submitBtn = document.getElementById('submitBtn');
+        const resultBox = document.getElementById('resultBox');
+        
+        // Answers for Part A
+        const answersA = { q1: 'took', q2: 'cheese', q3: 'took', q4: 'was' };
+
+        let finalData = {};
+
+        submitBtn.addEventListener('click', () => {
+            // Collect User Info
+            const name = document.getElementById('studentName').value || 'Student';
+            const stuClass = document.getElementById('studentClass').value || 'N/A';
+            const date = document.getElementById('worksheetDate').value || new Date().toLocaleDateString();
+
+            // Validate Part A
+            let scoreA = 0;
+            if(document.getElementById('q1').value === answersA.q1) scoreA++;
+            if(document.getElementById('q2').value === answersA.q2) scoreA++;
+            if(document.getElementById('q3').value === answersA.q3) scoreA++;
+            if(document.getElementById('q4').value === answersA.q4) scoreA++;
+
+            // Collect Part B & C
+            const textB = partBInput.value;
+            const textC = partCInput.value;
+
+            // Generate Feedback
+            let feedback = "";
+            if(scoreA === 4) feedback += "Perfect score on the basics! ";
+            else feedback += "Review the word bank carefully next time. ";
+            
+            if(textB.length > 20 && textC.length > 30) {
+                feedback += "Your imaginative poems are wonderfully creative!";
+            } else {
+                feedback += "Try to write a bit more for your creative sections next time.";
+            }
+
+            // Display Results
+            document.getElementById('resName').textContent = name;
+            document.getElementById('resScoreA').textContent = `${scoreA}/4`;
+            
+            // Dynamic Icons based on completion
+            document.getElementById('resScoreB').innerHTML = textB.length > 10 ? '<i class="fas fa-check-circle text-blue-500"></i>' : '<i class="fas fa-spinner text-gray-400"></i>';
+            document.getElementById('resScoreC').innerHTML = textC.length > 20 ? '<i class="fas fa-star text-purple-500"></i>' : '<i class="fas fa-star-half-alt text-gray-400"></i>';
+
+            document.getElementById('teacherFeedback').textContent = feedback;
+            
+            // Show result box smoothly
+            resultBox.classList.remove('hidden');
+            resultBox.scrollIntoView({ behavior: 'smooth' });
+
+            // Store data for CSV
+            finalData = {
+                Name: name,
+                Class: stuClass,
+                Date: date,
+                PartAScore: scoreA,
+                PartBPoem: textB.replace(/\n/g, ' '), // Clean newlines for CSV
+                PartCPoem: textC.replace(/\n/g, ' ')
+            };
+        });
+
+        // 4. CSV Download Logic
+        const downloadBtn = document.getElementById('downloadBtn');
+        downloadBtn.addEventListener('click', () => {
+            const headers = Object.keys(finalData).join(",");
+            const values = Object.values(finalData).map(val => `"${val}"`).join(","); // Wrap in quotes to prevent comma issues
+            
+            const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + values;
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${finalData.Name.replace(/\s+/g, '_')}_TheSandwich_Result.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Set today's date by default
+        document.getElementById('worksheetDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>
