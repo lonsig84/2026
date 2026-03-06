@@ -130,7 +130,7 @@
         // ==========================================
         // Sila masukkan URL Google Apps Script anda di sini:
         // ==========================================
-        const GOOGLE_SHEET_SCRIPT_URL = "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI";
+        const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_-lCnNBtunSP2Fn9I5GnDMHbVA-ofGfWFU5Pj3TJRoW1PbTkQl_RwyrirA8Ulphmj/exec";
 
         let quizData = [];
 
@@ -324,7 +324,7 @@
             const allInputs = document.querySelectorAll('input[type="radio"], input[type="text"]');
             allInputs.forEach(input => input.disabled = true);
 
-            if (GOOGLE_SHEET_SCRIPT_URL.trim() !== "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI") {
+            if (GOOGLE_SHEET_SCRIPT_URL.trim() !== "") {
                 const formData = new FormData();
                 formData.append('action', 'submitScore');
                 formData.append('name', nameInput);
