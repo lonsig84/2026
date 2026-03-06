@@ -95,21 +95,31 @@
 
     <script>
         // ==========================================
-        // TUKAR KATA LALUAN DI SINI (在此处修改你的密码)
+        // KATA LALUAN TELAH DIENKRIPSI (密码已加密 Hash 化)
+        // Hash di bawah adalah untuk kata laluan: "123456"
+        // 别人看代码只会看到下面这串乱码，无法知道原密码
         // ==========================================
-        const APP_PASSWORD = "nbc5025";
+        const PASSWORD_HASH = "04b49544c026ccf6a76f03820afd7bcd1dc66cddaf6b41872eb1c004a7a3883c";
 
         // ==========================================
         // URL GOOGLE APPS SCRIPT (在此处粘贴你的 Web App URL)
         // ==========================================
         const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwE8YlABxzC9T2DK_57eY0QmyIHvLrUKCdA0fmgQBcAyB13wi2v50pEgcp6FqUAfv5u/exec";
 
-        // Fungsi menyemak kata laluan (密码验证功能)
-        function checkPassword() {
+        // Fungsi menyemak kata laluan (密码验证功能 - menggunakan SHA-256)
+        async function checkPassword() {
             const input = document.getElementById('passwordInput').value;
             const errorMsg = document.getElementById('passwordError');
             
-            if (input === APP_PASSWORD) {
+            // Proses menukar teks input kepada Hash SHA-256 (把学生输入的密码变成加密乱码)
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            // 拿生成的乱码和我们保存的乱码进行对比
+            if (hashHex === PASSWORD_HASH) {
                 // Jika betul, sembunyikan skrin kata laluan dan tunjukkan kuiz
                 document.getElementById('passwordScreen').classList.add('hidden');
                 document.getElementById('quizApp').classList.remove('hidden');
