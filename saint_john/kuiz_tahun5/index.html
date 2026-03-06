@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz Saint John Ambulance Malaysia Tahun 5 (2025)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #ecfdf5 0%, #ccfbf1 100%);
+            min-height: 100vh;
+        }
+        .option-label { transition: all 0.3s ease; }
+        .option-input:checked + .option-label { 
+            border-color: #10b981; 
+            background-color: #ecfdf5; 
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
+            transform: translateY(-2px);
+        }
+        .correct-answer { border-color: #10b981 !important; background-color: #ecfdf5 !important; color: #065f46 !important; }
+        .wrong-answer { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #991b1b !important; }
+        .image-placeholder { 
+            background-color: #f3f4f6; 
+            border: 2px dashed #9ca3af; 
+            display: flex; align-items: center; justify-content: center; 
+            color: #6b7280; font-size: 0.875rem; text-align: center; 
+            padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1rem; min-height: 120px; 
+        }
+        .glass-header {
+            background: rgba(16, 185, 129, 0.9);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="text-gray-800 pb-24">
+
+    <!-- 密码登录页面 (Password Screen) -->
+    <div id="passwordScreen" class="fixed inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full border-t-8 border-emerald-500 transform transition-all">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-500 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">Log Masuk Kuiz</h2>
+                <p class="text-emerald-600 font-medium text-sm">SJAM Tahun 5 (2025)</p>
+            </div>
+            
+            <div class="mb-5">
+                <input type="password" id="passwordInput" placeholder="Masukkan Kata Laluan..." class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 text-center text-lg tracking-widest" onkeypress="handlePasswordKeyPress(event)">
+                <p id="passwordError" class="text-red-500 text-sm mt-3 font-semibold hidden text-center whitespace-pre-line"></p>
+            </div>
+            
+            <button id="loginBtn" onclick="checkPassword()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition duration-300 transform hover:-translate-y-1">
+                Akses Kuiz
+            </button>
+        </div>
+    </div>
+
+    <!-- 测验主要内容 (默认隐藏，密码正确后显示) -->
+    <div id="quizApp" class="hidden">
+        <!-- Header -->
+        <header class="glass-header text-white shadow-lg py-5 px-4 sticky top-0 z-10 transition-all">
+            <div class="max-w-4xl mx-auto flex flex-col md:flex-row md:justify-between items-center gap-4">
+                <div class="text-center md:text-left">
+                    <h1 class="text-2xl font-bold tracking-wide">Kuiz SJAM Tahun 5 (2025)</h1>
+                    <p class="text-emerald-100 text-sm mt-1 font-light">Jawab semua soalan dengan teliti. Semoga berjaya!</p>
+                </div>
+                <div id="scoreDisplay" class="hidden bg-white text-emerald-600 font-bold px-6 py-2 rounded-full shadow-md text-xl border-2 border-emerald-100">
+                    0 / 34
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-4xl mx-auto mt-8 px-4">
+            <form id="quizForm">
+                <!-- Ruangan Maklumat Pelajar -->
+                <div class="bg-white rounded-2xl shadow-sm p-8 border border-gray-100 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        Maklumat Pelajar
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label for="studentName" class="block text-gray-700 font-semibold mb-2 text-sm">Nama Penuh:</label>
+                            <input type="text" id="studentName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-colors" placeholder="Contoh: Ali bin Abu" required>
+                        </div>
+                        <div>
+                            <label for="studentMyKid" class="block text-gray-700 font-semibold mb-2 text-sm">MyKid / No. KP:</label>
+                            <input type="text" id="studentMyKid" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-colors" placeholder="Contoh: 120101-14-1234" required>
+                        </div>
+                        <div>
+                            <label for="schoolName" class="block text-gray-700 font-semibold mb-2 text-sm">Nama Sekolah:</label>
+                            <input type="text" id="schoolName" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-colors" placeholder="Contoh: SK Seremban" required>
+                        </div>
+                        <div>
+                            <label for="schoolCode" class="block text-gray-700 font-semibold mb-2 text-sm">Kod Sekolah:</label>
+                            <input type="text" id="schoolCode" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-colors" placeholder="Contoh: NBA4011" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="questionsContainer" class="grid grid-cols-1 gap-6">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <!-- Submit Button Area -->
+                <div class="mt-12 bg-white p-8 rounded-2xl shadow-sm text-center border border-emerald-100 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+                    <h3 id="resultMessage" class="text-2xl font-bold mb-4 text-gray-800 hidden"></h3>
+                    
+                    <button type="button" id="submitBtn" onclick="calculateScore()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 px-10 rounded-full shadow-lg transition transform hover:scale-105 text-lg">
+                        Hantar Jawapan & Lihat Keputusan
+                    </button>
+
+                    <p id="submitError" class="text-red-500 text-sm font-bold mt-4 hidden"></p>
+
+                    <button type="button" id="retryBtn" onclick="location.reload()" class="hidden bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full shadow-md transition mt-6 mx-auto">
+                        Cuba Lagi
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        // ==========================================
+        // Sila masukkan URL Google Apps Script anda di sini:
+        // ==========================================
+        const GOOGLE_SHEET_SCRIPT_URL = "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI";
+
+        let quizData = [];
+
+        async function checkPassword() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const errorMsg = document.getElementById('passwordError');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            errorMsg.classList.add('hidden');
+            errorMsg.innerText = "";
+
+            if (!input) {
+                errorMsg.innerText = "Sila masukkan kata laluan.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            loginBtn.innerText = "Menyemak...";
+            loginBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'verifyPassword');
+                formData.append('password', input);
+
+                const response = await fetch(GOOGLE_SHEET_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const textResult = await response.text();
+                let result;
+                
+                try {
+                    result = JSON.parse(textResult);
+                } catch (e) {
+                    console.error("Format pelayan salah:", textResult);
+                    if (textResult === "CORRECT") {
+                        errorMsg.innerText = "⚠️ Google Apps Script masih guna kod lama!\nSila Deploy -> 'New version'.";
+                    } else if (textResult.includes("<html")) {
+                        errorMsg.innerText = "⚠️ Akses ditolak!\nPastikan 'Who has access' ditetapkan kepada 'Anyone'.";
+                    } else {
+                        errorMsg.innerText = "⚠️ Ralat Format Pelayan. Sila semak URL.";
+                    }
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+                
+                if (result.status === "CORRECT") {
+                    if (!result.data || result.data.length === 0) {
+                        errorMsg.innerText = "⚠️ Tiada soalan dijumpai di Sheet3!";
+                        errorMsg.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    quizData = result.data;
+                    renderQuestions();
+                    document.getElementById('passwordScreen').classList.add('hidden');
+                    document.getElementById('quizApp').classList.remove('hidden');
+                } else if (result.status === "WRONG") {
+                    errorMsg.innerText = "❌ Kata laluan salah. Sila cuba lagi.";
+                    errorMsg.classList.remove('hidden');
+                } else {
+                    errorMsg.innerText = "⚠️ Ralat pelayan tidak diketahui.";
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Ralat Network:", error);
+                errorMsg.innerText = "🔴 Ralat Sambungan!\nTidak dapat menghubungi Google Sheet.\nSila semak URL dan internet anda.";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                loginBtn.innerText = "Akses Kuiz";
+                loginBtn.disabled = false;
+            }
+        }
+
+        function handlePasswordKeyPress(event) {
+            if (event.key === "Enter") {
+                checkPassword();
+            }
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            quizData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-sm p-6 md:p-8 border border-gray-100 relative transition-all duration-300";
+                card.id = `card-${index}`;
+
+                let htmlContent = `
+                    <div class="flex items-start mb-6">
+                        <span class="bg-emerald-100 text-emerald-700 font-bold rounded-xl w-10 h-10 flex items-center justify-center mr-4 flex-shrink-0 text-lg">${index + 1}</span>
+                        <h3 class="font-semibold text-gray-800 text-lg leading-relaxed pt-1">${item.q}</h3>
+                    </div>
+                `;
+
+                if (item.img) {
+                    if (item.img.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                        htmlContent += `<div class="mb-6 flex justify-center"><img src="${item.img}" alt="Soalan bergambar" class="max-h-64 rounded-xl shadow-md border border-gray-100 object-contain"></div>`;
+                    } else {
+                        htmlContent += `<div class="image-placeholder">${item.img}</div>`;
+                    }
+                }
+
+                htmlContent += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">`;
+                
+                item.options.forEach((opt, optIndex) => {
+                    let optContent = opt;
+                    if (opt.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                        optContent = `<img src="${opt}" class="max-h-24 rounded-lg shadow-sm inline-block object-contain">`;
+                    } else if (opt.includes("[Gambar:")) {
+                        optContent = `<div class="bg-emerald-50 text-emerald-700 p-2 text-sm text-center border border-emerald-200 rounded-lg font-medium">${opt}</div>`;
+                    }
+
+                    htmlContent += `
+                        <label class="relative flex cursor-pointer items-stretch h-full">
+                            <input type="radio" name="q${index}" value="${optIndex}" class="peer sr-only option-input" />
+                            <div id="label-q${index}-o${optIndex}" class="option-label w-full rounded-xl border-2 border-gray-100 bg-white p-4 hover:bg-gray-50 peer-focus:outline-none flex items-center">
+                                <div class="h-6 w-6 rounded-full border-2 border-gray-300 bg-white peer-checked:border-[7px] peer-checked:border-emerald-500 flex-shrink-0 mr-4 transition-all"></div>
+                                <span class="text-[0.95rem] font-medium text-gray-700">${optContent}</span>
+                            </div>
+                        </label>
+                    `;
+                });
+
+                htmlContent += `</div>`;
+                card.innerHTML = htmlContent;
+                container.appendChild(card);
+            });
+        }
+
+        function calculateScore() {
+            const submitError = document.getElementById('submitError');
+            submitError.classList.add('hidden');
+
+            const nameInput = document.getElementById('studentName').value.trim();
+            const mykidInput = document.getElementById('studentMyKid').value.trim();
+            const schoolNameInput = document.getElementById('schoolName').value.trim();
+            const schoolCodeInput = document.getElementById('schoolCode').value.trim();
+
+            if (!nameInput || !mykidInput || !schoolNameInput || !schoolCodeInput) {
+                submitError.innerText = "⚠️ Sila lengkapkan semua Maklumat Pelajar di atas sebelum menghantar.";
+                submitError.classList.remove('hidden');
+                // Scroll to top to show missing info
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            let score = 0;
+            let answeredAll = true;
+
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                const card = document.getElementById(`card-${index}`);
+                
+                if (!selected) {
+                    answeredAll = false;
+                    card.classList.add('ring-2', 'ring-red-400', 'bg-red-50');
+                } else {
+                    card.classList.remove('ring-2', 'ring-red-400', 'bg-red-50');
+                    const selectedVal = parseInt(selected.value);
+                    
+                    const correctLabel = document.getElementById(`label-q${index}-o${item.answer}`);
+                    correctLabel.classList.add('correct-answer');
+                    
+                    // Prevent duplicate tags if clicked multiple times (though inputs are disabled later)
+                    if(!correctLabel.querySelector('.badge-tag')) {
+                        correctLabel.innerHTML += `<span class="badge-tag absolute right-4 -top-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Betul</span>`;
+                    }
+
+                    if (selectedVal === item.answer) {
+                        score++;
+                    } else {
+                        const wrongLabel = document.getElementById(`label-q${index}-o${selectedVal}`);
+                        wrongLabel.classList.add('wrong-answer');
+                        if(!wrongLabel.querySelector('.badge-tag')) {
+                            wrongLabel.innerHTML += `<span class="badge-tag absolute right-4 -top-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Salah</span>`;
+                        }
+                    }
+                }
+            });
+
+            if (!answeredAll) {
+                submitError.innerText = "⚠️ Terdapat soalan yang belum dijawab. Sila semak ruangan berwarna merah.";
+                submitError.classList.remove('hidden');
+                return;
+            }
+
+            const allInputs = document.querySelectorAll('input[type="radio"], input[type="text"]');
+            allInputs.forEach(input => input.disabled = true);
+
+            if (GOOGLE_SHEET_SCRIPT_URL.trim() !== "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI") {
+                const formData = new FormData();
+                formData.append('action', 'submitScore');
+                formData.append('name', nameInput);
+                formData.append('mykid', mykidInput);
+                formData.append('schoolName', schoolNameInput);
+                formData.append('schoolCode', schoolCodeInput);
+                formData.append('score', `${score}/${quizData.length}`);
+
+                fetch(GOOGLE_SHEET_SCRIPT_URL, { method: 'POST', body: formData })
+                    .then(response => console.log('Markah berjaya direkodkan.'))
+                    .catch(error => console.error('Ralat menghantar data!', error.message));
+            }
+
+            document.getElementById('scoreDisplay').innerText = `${score} / ${quizData.length}`;
+            document.getElementById('scoreDisplay').classList.remove('hidden');
+            
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.getElementById('retryBtn').classList.remove('hidden');
+            
+            const msg = document.getElementById('resultMessage');
+            msg.classList.remove('hidden');
+            
+            let grade = "";
+            let percentage = (score / quizData.length) * 100;
+            if(percentage >= 80) grade = "Syabas, pencapaian Cemerlang! 🏆";
+            else if(percentage >= 50) grade = "Baik, teruskan usaha! 👍";
+            else grade = "Jangan putus asa, cuba lagi! 💪";
+
+            msg.innerHTML = `Tahniah <span class="text-emerald-600">${nameInput}</span>!<br><span class="text-3xl mt-2 block">Markah: ${score}/${quizData.length} (${percentage.toFixed(0)}%)</span><span class="text-lg font-normal text-gray-500 block mt-2">${grade}</span>`;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
