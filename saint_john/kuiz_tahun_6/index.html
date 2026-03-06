@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz Interaktif Tahun 6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .option-label { transition: all 0.2s; }
+        .option-input:checked + .option-label { border-color: #3b82f6; background-color: #eff6ff; }
+        .correct-answer { border-color: #22c55e !important; background-color: #f0fdf4 !important; color: #166534 !important; }
+        .wrong-answer { border-color: #ef4444 !important; background-color: #fef2f2 !important; color: #991b1b !important; }
+        .image-placeholder { background-color: #e5e7eb; border: 2px dashed #9ca3af; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 0.875rem; text-align: center; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; min-height: 120px; }
+    </style>
+</head>
+<body class="text-gray-800 pb-24">
+
+    <!-- 密码登录页面 (Password Screen) -->
+    <div id="passwordScreen" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50 px-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-sm w-full border-t-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Log Masuk Kuiz</h2>
+            <p class="text-center text-gray-600 mb-6 text-sm">Sila masukkan kata laluan untuk mengakses kuiz.</p>
+            
+            <div class="mb-4">
+                <input type="password" id="passwordInput" placeholder="Kata Laluan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" onkeypress="handlePasswordKeyPress(event)">
+                <p id="passwordError" class="text-red-500 text-sm mt-2 hidden">Kata laluan salah. Sila cuba lagi.</p>
+            </div>
+            
+            <button onclick="checkPassword()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-2">
+                Masuk
+            </button>
+        </div>
+    </div>
+
+    <!-- 测验主要内容 (默认隐藏，密码正确后显示) -->
+    <div id="quizApp" class="hidden">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-md py-6 px-4 sticky top-0 z-10">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">Kuiz Tahun 6</h1>
+                    <p class="text-blue-100 text-sm mt-1">Sila jawab semua soalan. Markah akan dipaparkan di akhir kuiz.</p>
+                </div>
+                <div id="scoreDisplay" class="hidden bg-white text-blue-600 font-bold px-4 py-2 rounded-lg text-xl shadow">
+                    0 / 40
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-4xl mx-auto mt-8 px-4">
+            <form id="quizForm">
+                <!-- Ruangan Nama Pelajar -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6 border-l-4 border-blue-500">
+                    <label for="studentName" class="block text-gray-700 font-bold mb-2">Sila masukkan nama anda:</label>
+                    <input type="text" id="studentName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nama Penuh Pelajar" required>
+                </div>
+
+                <div id="questionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Questions will be dynamically inserted here -->
+                </div>
+
+                <!-- Submit Button Area -->
+                <div class="mt-10 bg-white p-6 rounded-xl shadow-sm text-center border-t-4 border-blue-500">
+                    <h3 id="resultMessage" class="text-xl font-semibold mb-4 text-gray-700 hidden">Tahniah! Anda telah selesai menjawab.</h3>
+                    <button type="button" id="submitBtn" onclick="calculateScore()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
+                        Hantar Jawapan & Lihat Keputusan
+                    </button>
+                    <button type="button" id="retryBtn" onclick="location.reload()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition mt-4 mx-auto">
+                        Cuba Lagi
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        // ==========================================
+        // TUKAR KATA LALUAN DI SINI (在此处修改你的密码)
+        // ==========================================
+        const APP_PASSWORD = "123456";
+
+        // Fungsi menyemak kata laluan (密码验证功能)
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('passwordError');
+            
+            if (input === APP_PASSWORD) {
+                // Jika betul, sembunyikan skrin kata laluan dan tunjukkan kuiz
+                document.getElementById('passwordScreen').classList.add('hidden');
+                document.getElementById('quizApp').classList.remove('hidden');
+            } else {
+                // Jika salah, tunjukkan mesej ralat
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function handlePasswordKeyPress(event) {
+            if (event.key === "Enter") {
+                checkPassword();
+            }
+        }
+
+        // Data Kuiz (answer: index of correct option, 0-3)
+        const quizData = [
+            {
+                q: "Berikut merupakan punca-punca terhenti pernafasan, KECUALI",
+                options: ["Batuk kering", "Lemas dalam asap, gas beracun atau asap", "Terkena kejutan elektrik atau panahan petir", "Termakan atau terminum bahan-bahan beracun"],
+                answer: 0
+            },
+            {
+                q: "Berikut merupakan cara menjaga penampilan diri, KECUALI",
+                img: "images/3 orang berpakaian formal.png",
+                options: ["Sentiasa senyum", "Menjaga kebersihan diri", "Memilih pakaian yang sesuai", "Berdandan secara berlebihan"],
+                answer: 3
+            },
+            {
+                q: "Bahagian atau komponen manakah yang mengawal pergerakan basikal ke kiri dan ke kanan?",
+                img: "images/bahagian basikal.png",
+                options: ["rim", "brek", "pedal", "hendal"],
+                answer: 3
+            },
+            {
+                q: "Setelah mangsa beransur pulih dan mula bernafas serta nadi dapat dirasai, letakkan mangsa dalam kedudukan seperti gambar berikut. Apakah nama kedudukan tersebut?",
+                img: "images/Posisi pemulihan.png",
+                options: ["Posisi Tidur", "Posisi Baring", "Posisi Tiarap", "Posisi Pemulihan"],
+                answer: 3
+            },
+            {
+                q: "Apakah lencana yang ditunjukkan di bawah?",
+                img: "images/Lencana St. John (Bintang).png",
+                options: ["Lencana Kemahiran Kadet", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda"],
+                answer: 3
+            },
+            {
+                q: "Apakah yang harus anda lakukan sekiranya anda terjumpa seorang pengsan?",
+                img: "images/Kanak-kanak pengsan.png",
+                options: ["melarikan diri", "memulakan CPR", "meminta pertolongan", "longgarkan pakaian yang ketat"],
+                answer: 2
+            },
+            {
+                q: "Sila lengkapkan lagu St. John Ambulans Malaysia?<br><br>Anggota ............... Bersiap Sedia<br>Untuk Berkhidmat Bagi Manusia<br>Tanpa Mengira ............... Bangsa<br>Agama dan Budaya",
+                options: ["St. John, Pelbagai", "St. John, Banyak", "Kita, Pelbagai", "Kita, Banyak"],
+                answer: 2
+            },
+            {
+                q: "Berikut adalah langkah-langkah untuk menjadikan dapur selamat KECUALI",
+                options: ["Simpan peralatan tajam supaya tidak boleh diambil oleh anak.", "Pasangkan kunci atau penghalang pada laci, kabinet dan pintu.", "Jauhkan makanan dan minuman panas dari hujung meja.", "Guna alas meja yang berjuntai supaya nampak cantik."],
+                answer: 3
+            },
+            {
+                q: "Apakah tanda trafik lalu lintas yang ditunjukkan dalam gambarajah di bawah?",
+                img: "images/Bulatan biru dengan basikal.png",
+                options: ["Laluan Motosikal", "Laluan Basikal", "Dilarang memandu motosikal", "Dilarang memandu basikal"],
+                answer: 1
+            },
+            {
+                q: "Nyatakan bahasa hukuman \"belakang pusing semasa berjalan\".",
+                options: ["\"Tukar langkah cepat, cepat jalan\".", "\"Bergerak ke kiri, belakang....pusing\".", "\"Menghadap ke belakang, kiri......pusing\".", "\"Menghadap ke belakang, kanan....pusing\""],
+                answer: 1
+            },
+            {
+                q: "Apakah kaedah pembalutan yang ditunjukkan dalam gambarajah di bawah?",
+                img: "images/Anduh Lengan.png",
+                options: ["Anduh Lengan (Arm Sling)", "Anduh Pengangkat (Elevation Sling)", "Penutup Lengan (Arm Wrap)", "Pembalut Lengan (Arm Bandage)"],
+                answer: 0
+            },
+            {
+                q: "Apabila berlaku sebarang kecemasan, apakah nombor yang perlu anda hubungi?",
+                img: "images/Panggilan kecemasan 999.png",
+                options: ["911", "991", "994", "999"],
+                answer: 3
+            },
+            {
+                q: "Apakah bahasa hukuman bagi pergerakan kawad berikut?",
+                img: "images/Skuad kawad memandang ke kanan.png",
+                options: ["\"Ke kanan....Lurus\"", "\"Menghadap ke belakang, Kanan....Pusing\"", "\"Hormat ke kanan....Hormat\"", "\"Hormat ke hadapan....Hormat\""],
+                answer: 2
+            },
+            {
+                q: "C.P.R. adalah singkatan untuk",
+                img: "images/Ikon CPR.png",
+                options: ["Cardio Pulmonary Resuscitation", "Carry Pulmonary Resuscitation", "Cardio Pushing Resuscitation", "Cardio Pulmonary Rescue"],
+                answer: 0
+            },
+            {
+                q: "Apakah Ibu Negeri bagi Negeri Pahang?",
+                img: "images/Peta Malaysia.png",
+                options: ["Kampar", "Kuantan", "Kuala Lumpur", "Klang"],
+                answer: 1
+            },
+            {
+                q: "Merujuk kepada gambar di bawah, apakah situasi kecemasan yang dialami mangsa?",
+                img: "images/Mangsa tercekik (bayi dan dewasa).png",
+                options: ["batuk", "tercekik", "terseliuh", "serangan jantung"],
+                answer: 1
+            },
+            {
+                q: "Apakah maksud warna biru pada bendera Jalur Gemilang?",
+                img: "images/Bendera Malaysia.png",
+                options: ["menunjukkan keberanian dan kesediaan dalam mengharungi segala jenis cabaran", "Menggambarkan perpaduan rakyat yang terdiri daripada berbilang kaum", "Melambangkan kesucian dan keluhuran hati rakyat", "melambangkan warna Diraja"],
+                answer: 1
+            },
+            {
+                q: "Nyatakan tanda isyarat lalu lintas yang melarang penunggang basikal memasuki kawasan tersebut.",
+                options: ["images/opt_Tanda Dilarang Berhenti.png", "images/opt_Tanda Dilarang Masuk.png", "images/opt_Tanda Dilarang Membunyikan Hon.png", "images/opt_Tanda Dilarang Pusingan U.png"],
+                answer: 1
+            },
+            {
+                q: "Amalan mencuci tangan dengan sabun perlu dijadikan amalan seharian untuk mencegah penularan COVID-19. Nyatakan langkah KELIMA.",
+                img: "images/7 Langkah membasuh tangan.png",
+                options: ["Keringkan tangan dengan tisu", "Gosok dengan kuku di tapak tangan", "Basahkan tangan dan ratakan sabun", "Gosok belakang tangan dan celah jari"],
+                answer: 3
+            },
+            {
+                q: "Anda berbasikal ke sekolah, dan anda sampai ke simpang lampu isyarat, apa yang harus anda lakukan sekiranya lampu kuning menyala?",
+                img: "images/Lampu isyarat kuning.png",
+                options: ["turun dari basikal", "terus berbasikal", "patah balik", "perlahankan basikal dan bersedia untuk berhenti"],
+                answer: 3
+            },
+            {
+                q: "Berikut tip penjagaan gigi yang tepat untuk diamalkan, KECUALI",
+                img: "images/Senyuman dan penjagaan gigi.png",
+                options: ["Berus gigi setiap kali bangun tidur dan sebelum tidur.", "Pilih berus yang lembut dan berus dengan gerakan menegak.", "Kurangkan makanan manis yang sering melekat pada gigi apabila dikunyah.", "Kerap minum air berkarbonat kerana kandungan asidnya boleh membunuh kuman."],
+                answer: 3
+            },
+            {
+                q: "Apakah kegunaan kain anduh?",
+                img: "images/Kain Anduh.png",
+                options: ["membersihkan meja", "mengelap tingkap", "mengikat rambut", "membalut luka"],
+                answer: 3
+            },
+            {
+                q: "Berikut merupakan protokol melakukan Pemulihan Kardio Pulmonari (CPR). Yang manakah urutan yang betul?",
+                options: ["\"Danger, Shout, Response, Airway, Breathing, Compression\"", "\"Danger, Response, Shout, Airway, Breathing, Compression\"", "\"Shout, Response, Danger, Airway, Breathing, Compression\"", "\"Shout, Danger, Response, Airway, Compression, Breathing\""],
+                answer: 1
+            },
+            {
+                q: "Apakah Ibu Negara bagi Malaysia?",
+                img: "images/Pemandangan KLCC.png",
+                options: ["Ipoh", "Klang", "Putrajaya", "Kuala Lumpur"],
+                answer: 3
+            },
+            {
+                q: "Apakah peralatan yang ditunjukkan di dalam gambar di bawah?",
+                img: "images/Pengusung (Stretcher).png",
+                options: ["Katil", "Usungan", "Pembebat", "Peti Pertolongan Cemas"],
+                answer: 1
+            },
+            {
+                q: "Berikut merupakan risiko-risiko mandi di sungai, KECUALI",
+                img: "images/Kanak-kanak mandi sungai.png",
+                options: ["Arus deras", "Ombak besar", "Haiwan berbahaya", "Penyakit bawaan air"],
+                answer: 1
+            },
+            {
+                q: "Apabila anda terhidu bau gas di dalam dapur rumah, apakah tindakan awal yang perlu anda lakukan?",
+                img: "images/Kebocoran gas.png",
+                options: ["Lari keluar dari rumah", "Jerit dan minta bantuan", "Buka tingkap untuk peredaran udara", "Pastikan gas dapur memasak ditutupkan"],
+                answer: 2
+            },
+            {
+                q: "Semua yang berikut boleh mendatangkan bahaya kepada kanak-kanak di dapur, KECUALI",
+                options: ["Wayar yang tergantung disorok dengan penutup wayar", "Minyak masak yang panas", "Air mendidih", "Kuali panas"],
+                answer: 0
+            },
+            {
+                q: "Merujuk kepada gambar di bawah, namakan nadi yang diperiksa.",
+                img: "images/Pemeriksaan nadi leher.png",
+                options: ["Nadi Radial", "Nadi Brachial", "Nadi Karotid", "Nadi Femoral"],
+                answer: 2
+            },
+            {
+                q: "Jika pakaian yang anda pakai terbakar, apa yang anda harus lakukan?",
+                img: "images/Kartun pakaian terbakar.png",
+                options: ["mengguling di atas lantai", "menelefon bomba", "menjerit", "berlari"],
+                answer: 0
+            },
+            {
+                q: "Berapakah kelajuan tekanan yang diberi untuk memulihkan mangsa serangan jantung?",
+                options: ["Kadar tekanan adalah 100 hingga 110 setiap minit", "Kadar tekanan adalah 100 hingga 120 setiap minit", "Kadar tekanan adalah 100 hingga 130 setiap minit", "Kadar tekanan adalah 100 hingga 140 setiap minit"],
+                answer: 1
+            },
+            {
+                q: "Apakah lencana yang ditunjukkan di bawah?",
+                img: "images/Lencana St. John Muda.png",
+                options: ["Lencana Kemahiran St. John Muda", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda"],
+                answer: 1
+            },
+            {
+                q: "Apakah nama ikatan berikut?",
+                img: "images/Cara ikatan.png",
+                options: ["Buku Sila", "Simpul Mati", "Simpul Manuk", "Tindih Kasih"],
+                answer: 0
+            },
+            {
+                q: "Namakan kaedah yang digunakan untuk membantu mangsa berikut :",
+                img: "images/Kaedah Heimlich.png",
+                options: ["CPR", "Mulut ke Mulut", "Heimlich Manoeuvre", "Tekanan Jantung dari Luar"],
+                answer: 2
+            },
+            {
+                q: "Berikut merupakan tanda-tanda dan gejala tercekik, KECUALI",
+                img: "images/Gejala tercekik.png",
+                options: ["Batuk", "Muka menjadi pucat", "Menjerit dengan kuat", "Kedua-dua tangan mangsa memegang lehernya"],
+                answer: 2
+            },
+            {
+                q: "Berikut merupakan perkara-perkara yang patut dielakkan ketika mandi di sungai, KECUALI",
+                options: ["Jangan melakukan aktiviti di air ketika air mulai pasang, mulai surut dan cuaca buruk.", "Jangan menggunakan peralatan keselamatan di air walaupun tidak tahun berenang.", "Jangan berenang ketika terlalu kenyang atau terlalu lapar.", "Jangan bergurau secara kasar semasa berhampitan di air."],
+                answer: 1
+            },
+            {
+                q: "Berapakah tekanan dan hembusan yang harus dilakukan semasa melakukan Pemulihan Kardio Pulmonari?",
+                img: "images/Tekanan CPR.png",
+                options: ["15 kali tekanan, 1 kali hembusan", "15 kali tekanan, 2 kali hembusan", "30 kali tekanan, 1 kali hembusan", "30 kali tekanan, 2 kali hembusan"],
+                answer: 3
+            },
+            {
+                q: "Apakah yang perlu kita lakukan apabila seseorang pesakit tidak sedarkan diri?",
+                img: "images/Pesakit pengsan.png",
+                options: ["meletakkan pesakit dalam posisi pemulihan", "menyimbah air ke atas pesakit", "memberi pesakit minuman", "menampar muka pesakit"],
+                answer: 0
+            },
+            {
+                q: "Kaedah yang betul untuk melintas jalan ialah",
+                img: "images/Melintas jalan.png",
+                options: ["menggunakan jejantas", "menggunakan jambatan", "menggunakan simpang empat", "menunggu sehingga tiada kenderaan"],
+                answer: 0
+            },
+            {
+                q: "Apakah nama lagu St. John Ambulans Malaysia?",
+                options: ["Perkhidmatan Bagi Manusia", "Berkhidmat Bagi Manusia", "Bertugas untuk Manusia", "Tolong untuk Manusia"],
+                answer: 1
+            }
+        ];
+
+        const container = document.getElementById('questionsContainer');
+
+        // Render Questions
+        quizData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = "bg-white rounded-xl shadow-sm p-6 border border-gray-200 relative";
+            card.id = `card-${index}`;
+
+            let htmlContent = `
+                <div class="flex items-start mb-4">
+                    <span class="bg-blue-100 text-blue-700 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">${index + 1}</span>
+                    <h3 class="font-semibold text-gray-800 leading-relaxed">${item.q}</h3>
+                </div>
+            `;
+
+            if (item.img) {
+                if (item.img.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                    htmlContent += `<div class="mb-4 flex justify-center"><img src="${item.img}" alt="Soalan bergambar" class="max-h-64 rounded-lg shadow-sm border border-gray-200"></div>`;
+                } else {
+                    htmlContent += `<div class="image-placeholder">${item.img}</div>`;
+                }
+            }
+
+            htmlContent += `<div class="space-y-3">`;
+            
+            item.options.forEach((opt, optIndex) => {
+                let optContent = opt;
+                if (opt.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+                    optContent = `<img src="${opt}" class="max-h-20 rounded shadow-sm inline-block">`;
+                } else if (opt.includes("[Gambar:")) {
+                    optContent = `<div class="bg-gray-100 p-2 text-xs text-center border-dashed border-2 border-gray-300 rounded text-gray-500">${opt}</div>`;
+                }
+
+                htmlContent += `
+                    <label class="relative flex cursor-pointer items-start">
+                        <input type="radio" name="q${index}" value="${optIndex}" class="peer sr-only option-input" />
+                        <div id="label-q${index}-o${optIndex}" class="option-label w-full rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500">
+                            <div class="flex items-center">
+                                <div class="h-5 w-5 rounded-full border border-gray-300 bg-white peer-checked:border-[6px] peer-checked:border-blue-600 flex-shrink-0 mr-3"></div>
+                                <span class="text-sm font-medium text-gray-900 text-left">${optContent}</span>
+                            </div>
+                        </div>
+                    </label>
+                `;
+            });
+
+            htmlContent += `</div>`;
+            card.innerHTML = htmlContent;
+            container.appendChild(card);
+        });
+
+        // Calculate Score function
+        function calculateScore() {
+            const nameInput = document.getElementById('studentName').value.trim();
+            if (!nameInput) {
+                alert("Sila masukkan nama anda sebelum menghantar jawapan.");
+                document.getElementById('studentName').focus();
+                return;
+            }
+
+            let score = 0;
+            let answeredAll = true;
+
+            quizData.forEach((item, index) => {
+                const selected = document.querySelector(`input[name="q${index}"]:checked`);
+                
+                if (!selected) {
+                    answeredAll = false;
+                    document.getElementById(`card-${index}`).classList.add('ring-2', 'ring-red-400');
+                } else {
+                    document.getElementById(`card-${index}`).classList.remove('ring-2', 'ring-red-400');
+                    const selectedVal = parseInt(selected.value);
+                    
+                    const correctLabel = document.getElementById(`label-q${index}-o${item.answer}`);
+                    correctLabel.classList.add('correct-answer');
+                    correctLabel.innerHTML += `<span class="absolute right-4 -top-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow">Betul</span>`;
+
+                    if (selectedVal === item.answer) {
+                        score++;
+                    } else {
+                        const wrongLabel = document.getElementById(`label-q${index}-o${selectedVal}`);
+                        wrongLabel.classList.add('wrong-answer');
+                        wrongLabel.innerHTML += `<span class="absolute right-4 -top-2 bg-red-500 text-white text-xs px-2 py-1 rounded shadow">Salah</span>`;
+                    }
+                }
+            });
+
+            if (!answeredAll) {
+                alert("Sila jawab semua soalan yang ditandakan merah sebelum menghantar.");
+                return;
+            }
+
+            // Disable all inputs
+            const allInputs = document.querySelectorAll('input[type="radio"]');
+            allInputs.forEach(input => input.disabled = true);
+
+            // Update UI
+            document.getElementById('scoreDisplay').innerText = `${score} / ${quizData.length}`;
+            document.getElementById('scoreDisplay').classList.remove('hidden');
+            
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.getElementById('retryBtn').classList.remove('hidden');
+            
+            const msg = document.getElementById('resultMessage');
+            msg.classList.remove('hidden');
+            
+            let grade = "";
+            let percentage = (score / quizData.length) * 100;
+            if(percentage >= 80) grade = "Cemerlang! 🎉";
+            else if(percentage >= 50) grade = "Baik, teruskan usaha! 👍";
+            else grade = "Jangan putus asa, cuba lagi! 💪";
+
+            msg.innerHTML = `Tahniah <span class="text-blue-600">${nameInput}</span>!<br>Markah anda: ${score}/${quizData.length} (${percentage.toFixed(0)}%). ${grade}`;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
