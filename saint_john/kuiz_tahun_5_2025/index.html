@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz St. John Muda</title>
+    <!-- 引入 Tailwind CSS 以实现现代化和响应式设计 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #faebd7; /* 类似原图的浅色背景 */
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            border-top: 8px solid #6b21a8; /* 顶部紫色装饰线 */
+        }
+        .required-star {
+            color: red;
+            margin-left: 0.25rem;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        .radio-label input {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+        }
+        .image-placeholder {
+            display: inline-block;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px dashed #9ca3af;
+            border-radius: 0.25rem;
+            font-style: italic;
+        }
+        .correct-ans {
+            color: #166534;
+            font-weight: bold;
+            background-color: #dcfce7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        .wrong-ans {
+            color: #991b1b;
+            text-decoration: line-through;
+            background-color: #fee2e2;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        /* 新增加载动画样式 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6b21a8;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-800 font-sans">
+
+    <div class="max-w-3xl mx-auto">
+        
+        <!-- 新增：密码登录区域 -->
+        <div id="loginSection" class="bg-white rounded-lg p-8 shadow-md border border-gray-200 border-t-8 border-t-purple-800 text-center mt-10">
+            <h2 class="text-2xl font-bold mb-4 text-purple-800">Log Masuk Kuiz</h2>
+            <p class="mb-6 text-gray-600">Sila masukkan kata laluan untuk memulakan kuiz.<br>(请输入你在 Google Sheet 设置的密码)</p>
+            <div class="max-w-sm mx-auto">
+                <input type="password" id="quizPassword" placeholder="Kata Laluan (密码)" class="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg tracking-widest">
+                <button id="verifyBtn" type="button" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-4 rounded transition duration-200 flex justify-center items-center">
+                    <span id="verifyText">Masuk / 进入</span>
+                    <div id="verifyLoader" class="loader ml-2 hidden"></div>
+                </button>
+                <p id="loginMsg" class="mt-4 text-red-600 font-medium hidden"></p>
+            </div>
+        </div>
+
+        <!-- 测验内容区，默认隐藏 -->
+        <div id="mainQuizSection" class="hidden">
+            <!-- 测验标题 -->
+            <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200 border-t-8 border-t-purple-800">
+                <h1 class="text-3xl font-normal mb-2">KUIZ ST. JOHN MUDA</h1>
+                <p class="text-red-500 text-sm">* Menunjukkan soalan yang wajib diisi</p>
+            </div>
+
+            <!-- 成绩显示区域 (默认隐藏) -->
+            <div id="resultSection" class="hidden bg-green-50 rounded-lg p-6 mb-6 shadow-sm border border-green-200">
+                <h2 class="text-2xl font-bold text-green-800 mb-2">Keputusan Kuiz</h2>
+                <div id="resultText" class="text-lg text-green-900"></div>
+            </div>
+
+            <form id="quizForm">
+                <!-- 考生个人信息 -->
+                <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200 border-t-8 border-t-blue-600">
+                    <h2 class="text-xl font-semibold mb-4">Maklumat Peserta</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">NAMA <span class="required-star">*</span></label>
+                            <input type="text" id="studentName" required placeholder="Contoh: Ali bin Abu" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">MY KID NO. <span class="required-star">*</span></label>
+                            <input type="text" id="myKidNo" required placeholder="Contoh: 120101-01-1234" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">NAMA SEKOLAH <span class="required-star">*</span></label>
+                            <input type="text" id="schoolName" required placeholder="Contoh: SK Taman Tun Dr Ismail" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">KOD SEKOLAH <span class="required-star">*</span></label>
+                            <input type="text" id="schoolCode" required placeholder="Contoh: WBA0001" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 动态题目容器 -->
+                <div id="questionsContainer"></div>
+
+                <!-- 提交按钮 -->
+                <div class="flex justify-between mt-6" id="actionButtons">
+                    <button type="submit" id="submitBtn" class="bg-purple-700 hover:bg-purple-800 text-white font-medium py-2 px-6 rounded shadow transition duration-200 flex items-center">
+                        <span id="submitText">Submit / Hantar</span>
+                        <div id="submitLoader" class="loader ml-2 hidden" style="border-top-color: white;"></div>
+                    </button>
+                    <button type="reset" class="text-purple-700 font-medium py-2 px-4 hover:bg-purple-50 rounded transition duration-200">Clear form</button>
+                </div>
+            </form>
+        </div>
+    </div> 
+
+    <script>
+        // ==========================================
+        // Google Apps Script Web App URL
+        // ==========================================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxa2K9mGRszFAQ0Y9dBlZkPWXbdjY6sJTtL01DWpF4jTIGFOHUYx8Fq4M51ts1IA-hbrQ/exec";
+
+        // 全局变量保存从云端获取的考题数据
+        window.quizData = [];
+
+        // 密码验证逻辑，同时获取考题
+        document.getElementById('verifyBtn').addEventListener('click', function() {
+            const password = document.getElementById('quizPassword').value;
+            const msgEl = document.getElementById('loginMsg');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const verifyText = document.getElementById('verifyText');
+            const verifyLoader = document.getElementById('verifyLoader');
+
+            if (!password) {
+                msgEl.textContent = "Sila masukkan kata laluan! (请输入密码)";
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            // UI Loading 状态
+            msgEl.classList.add('hidden');
+            verifyBtn.disabled = true;
+            verifyBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            verifyText.textContent = "Memuat turun soalan... (读取题目中...)";
+            verifyLoader.classList.remove('hidden');
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'verifyPassword');
+            formData.append('password', password);
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "CORRECT") {
+                    // 密码正确，接收题目数据
+                    window.quizData = data.data;
+                    renderQuestions(window.quizData);
+                    
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('mainQuizSection').classList.remove('hidden');
+                } else {
+                    msgEl.textContent = "Kata laluan salah! (密码错误)";
+                    msgEl.classList.remove('hidden');
+                    msgEl.classList.remove('text-green-600');
+                    msgEl.classList.add('text-red-600');
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                msgEl.textContent = "Ralat rangkaian. Sila cuba lagi. (网络错误)";
+                msgEl.classList.remove('hidden');
+            })
+            .finally(() => {
+                verifyBtn.disabled = false;
+                verifyBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                verifyText.textContent = "Masuk / 进入";
+                verifyLoader.classList.add('hidden');
+            });
+        });
+
+        // 动态生成题目的函数
+        function renderQuestions(questions) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = ''; // 清空容器
+            
+            questions.forEach((q, index) => {
+                const qNum = index + 1;
+                let optionsHtml = '';
+                
+                // 遍历4个选项
+                q.options.forEach((opt, oIndex) => {
+                    if(opt && opt.trim() !== "") {
+                        optionsHtml += `
+                            <label class="radio-label">
+                                <input type="radio" name="q${qNum}" value="${oIndex + 1}" required> 
+                                <span>${opt}</span>
+                            </label>
+                        `;
+                    }
+                });
+
+                // 处理图片占位符
+                let imageHtml = q.img ? `<div class="image-placeholder w-full text-center">${q.img}</div>` : '';
+                // 处理题目中的换行符 (如第12题)
+                let questionText = q.q.replace(/\n/g, '<br>');
+
+                container.innerHTML += `
+                    <div class="question-card">
+                        <p class="text-base mb-4 font-semibold">${qNum}. ${questionText}<span class="required-star">*</span></p>
+                        ${imageHtml}
+                        ${optionsHtml}
+                    </div>
+                `;
+            });
+        }
+
+        // 提交表单时的逻辑 (批改并上传成绩)
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            let score = 0;
+            let totalQuestions = window.quizData.length;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitLoader = document.getElementById('submitLoader');
+            
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            submitText.textContent = "Menghantar...";
+            submitLoader.classList.remove('hidden');
+
+            // 批改每道题
+            window.quizData.forEach((q, index) => {
+                const qNum = index + 1;
+                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
+                const allOptions = document.querySelectorAll(`input[name="q${qNum}"]`);
+                const correctValue = q.answer.toString();
+
+                allOptions.forEach(opt => opt.disabled = true);
+
+                if (selectedOption) {
+                    if (selectedOption.value === correctValue) {
+                        score++;
+                        selectedOption.parentElement.classList.add('correct-ans');
+                        selectedOption.parentElement.innerHTML += ' <span class="ml-2">✅</span>';
+                    } else {
+                        selectedOption.parentElement.classList.add('wrong-ans');
+                        selectedOption.parentElement.innerHTML += ' <span class="ml-2">❌</span>';
+                        
+                        const correctLabel = document.querySelector(`input[name="q${qNum}"][value="${correctValue}"]`);
+                        if(correctLabel) {
+                            correctLabel.parentElement.classList.add('correct-ans');
+                            correctLabel.parentElement.innerHTML += ' <span class="ml-2 text-sm text-green-800">(Jawapan Betul)</span>';
+                        }
+                    }
+                }
+            });
+
+            const name = document.getElementById('studentName').value;
+            const myKid = document.getElementById('myKidNo').value;
+            const school = document.getElementById('schoolName').value;
+            const code = document.getElementById('schoolCode').value;
+
+            // 提交分数到 Google Sheet
+            const formData = new URLSearchParams();
+            formData.append('action', 'submitScore');
+            formData.append('name', name);
+            formData.append('mykid', myKid);
+            formData.append('schoolName', school);
+            formData.append('schoolCode', code);
+            formData.append('score', score + " / " + totalQuestions);
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(result => {
+                console.log("Save Result:", result);
+                showResults(name, myKid, school, code, score, totalQuestions);
+            })
+            .catch(error => {
+                console.error("Save Error:", error);
+                showResults(name, myKid, school, code, score, totalQuestions);
+            });
+        });
+
+        function showResults(name, myKid, school, code, score, totalQuestions) {
+            const resultSection = document.getElementById('resultSection');
+            const resultText = document.getElementById('resultText');
+            
+            resultText.innerHTML = `
+                <p class="mb-2">Tahniah, <strong>${name}</strong> (No. MyKid: ${myKid})!</p>
+                <p class="mb-2">Sekolah: ${school} (${code})</p>
+                <p class="text-3xl mt-4 font-black">Markah anda: <span class="text-purple-800">${score}</span> / ${totalQuestions}</p>
+            `;
+            
+            resultSection.classList.remove('hidden');
+            document.getElementById('actionButtons').classList.add('hidden'); 
+            
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
