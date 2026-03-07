@@ -77,7 +77,7 @@
 
     <div class="max-w-3xl mx-auto">
         
-        <!-- 新增：密码登录区域 -->
+        <!-- 密码登录区域 -->
         <div id="loginSection" class="bg-white rounded-lg p-8 shadow-md border border-gray-200 border-t-8 border-t-purple-800 text-center mt-10">
             <h2 class="text-2xl font-bold mb-4 text-purple-800">Log Masuk Kuiz</h2>
             <p class="mb-6 text-gray-600">Sila masukkan kata laluan untuk memulakan kuiz.<br>(请输入你在 Google Sheet 设置的密码)</p>
@@ -232,9 +232,20 @@
                     }
                 });
 
-                // 处理图片占位符
-                let imageHtml = q.img ? `<div class="image-placeholder w-full text-center">${q.img}</div>` : '';
-                // 处理题目中的换行符 (如第12题)
+                // 处理图片显示逻辑 (非常重要！)
+                let imageHtml = '';
+                if (q.img && q.img.trim() !== "") {
+                    let imgStr = q.img.trim();
+                    // 判断如果包含 http 或者是图片格式后缀，就用 <img> 标签真实渲染图片
+                    if (imgStr.startsWith('http') || imgStr.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)/i.test(imgStr)) {
+                        imageHtml = `<img src="${imgStr}" alt="Gambar Soalan" class="max-w-full h-auto mx-auto my-4 rounded shadow-sm max-h-64 object-contain">`;
+                    } else {
+                        // 否则当做文字占位符（例如  ）
+                        imageHtml = `<div class="image-placeholder w-full text-center">${imgStr}</div>`;
+                    }
+                }
+
+                // 处理题目中的换行符
                 let questionText = q.q.replace(/\n/g, '<br>');
 
                 container.innerHTML += `
