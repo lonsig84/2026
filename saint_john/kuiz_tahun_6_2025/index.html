@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuiz SJAM Tahun 6 (2025)</title>
+    <!-- Tailwind CSS untuk gaya moden & responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0ebf8; /* Warna latar belakang seakan Google Forms */
+            font-family: 'Google Sans', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .question-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+            border: 1px solid #dadce0;
+        }
+        .header-card {
+            border-top: 10px solid #673ab7; /* Tema warna Indigo/Purple Google Forms */
+        }
+        .required-star {
+            color: #d93025;
+            margin-left: 0.25rem;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        .radio-label:hover {
+            background-color: #f6f8fe;
+        }
+        .radio-label input[type="radio"] {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+            accent-color: #673ab7;
+        }
+        .image-placeholder {
+            display: inline-block;
+            background-color: #f8f9fa;
+            color: #5f6368;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px dashed #dadce0;
+            border-radius: 0.25rem;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+        .correct-ans {
+            color: #137333;
+            font-weight: bold;
+            background-color: #e6f4ea;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        .wrong-ans {
+            color: #c5221f;
+            text-decoration: line-through;
+            background-color: #fce8e6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #673ab7;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-4 md:p-6 text-gray-800">
+
+    <div class="max-w-3xl mx-auto">
+        
+        <!-- Bahagian Log Masuk Kata Laluan -->
+        <div id="loginSection" class="bg-white rounded-lg p-8 shadow-md border border-gray-200 header-card text-center mt-10">
+            <h2 class="text-3xl font-normal mb-4 text-gray-800">Kuiz SJAM Tahun 6 (2025)</h2>
+            <p class="mb-6 text-gray-600">Sila masukkan kata laluan untuk memulakan kuiz.</p>
+            <div class="max-w-xl mx-auto">
+                
+                <div class="bg-blue-50 border border-blue-200 p-4 mb-6 text-left flex items-start text-sm text-blue-800 rounded-lg">
+                    <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>Masa anda akan direkodkan. Masa mula dikira sebaik sahaja anda berjaya log masuk.</p>
+                </div>
+
+                <div class="max-w-sm mx-auto">
+                    <input type="password" id="quizPassword" placeholder="Kata Laluan" class="w-full border-b-2 border-gray-300 p-3 mb-6 focus:outline-none focus:border-[#673ab7] text-center text-xl tracking-widest transition-colors bg-gray-50 rounded-t-md" onkeypress="handlePasswordKeyPress(event)">
+                    <button id="verifyBtn" type="button" class="w-full bg-[#673ab7] hover:bg-[#5e35b1] text-white font-medium py-2.5 px-4 rounded transition duration-200 flex justify-center items-center">
+                        <span id="verifyText">Seterusnya</span>
+                        <div id="verifyLoader" class="loader ml-2 hidden" style="border-top-color: white;"></div>
+                    </button>
+                    <p id="loginMsg" class="mt-4 text-red-600 font-medium hidden"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bahagian Utama Kuiz (Disembunyikan pada asalnya) -->
+        <div id="mainQuizSection" class="hidden relative">
+            
+            <!-- Pengepala Sticky -->
+            <div class="sticky top-2 z-50 bg-white/95 backdrop-blur-md rounded-lg p-4 mb-4 shadow-sm border border-gray-200 header-card">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <div>
+                        <h1 class="text-2xl font-normal text-gray-800 mb-1">KUIZ SJAM TAHUN 6 (2025)</h1>
+                        <p class="text-gray-600 text-sm">* Menunjukkan soalan yang diwajibkan</p>
+                    </div>
+                    
+                    <div class="flex items-center text-[#673ab7] font-medium text-sm bg-purple-50 py-1.5 px-3 rounded-full border border-purple-100 shadow-sm w-fit">
+                        <svg class="h-4 w-4 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Masa direkodkan
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keputusan Kuiz -->
+            <div id="resultSection" class="hidden bg-white rounded-lg p-6 mb-6 shadow-md border-t-8 border-t-green-600">
+                <h2 class="text-2xl font-normal text-gray-800 mb-4">Keputusan Kuiz</h2>
+                <div id="resultText" class="text-lg text-gray-700"></div>
+            </div>
+
+            <form id="quizForm">
+                <!-- Maklumat Peserta -->
+                <div class="question-card">
+                    <h2 class="text-lg font-normal mb-4">Maklumat Peserta</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">NAMA <span class="required-star">*</span></label>
+                            <input type="text" id="studentName" required placeholder="Jawapan anda" class="w-full border-b-2 border-gray-300 p-2 focus:outline-none focus:border-[#673ab7] bg-gray-50 rounded-t-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">MY KID NO. <span class="required-star">*</span></label>
+                            <input type="text" id="myKidNo" required placeholder="Jawapan anda" class="w-full border-b-2 border-gray-300 p-2 focus:outline-none focus:border-[#673ab7] bg-gray-50 rounded-t-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">NAMA SEKOLAH <span class="required-star">*</span></label>
+                            <input type="text" id="schoolName" required placeholder="Jawapan anda" class="w-full border-b-2 border-gray-300 p-2 focus:outline-none focus:border-[#673ab7] bg-gray-50 rounded-t-sm transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-gray-700">KOD SEKOLAH <span class="required-star">*</span></label>
+                            <input type="text" id="schoolCode" required placeholder="Jawapan anda" class="w-full border-b-2 border-gray-300 p-2 focus:outline-none focus:border-[#673ab7] bg-gray-50 rounded-t-sm transition-colors">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bekas Soalan -->
+                <div id="questionsContainer"></div>
+
+                <!-- Butang Tindakan -->
+                <div class="flex justify-between items-center mt-4 bg-transparent py-4" id="actionButtons">
+                    <button type="submit" id="submitBtn" class="bg-[#673ab7] hover:bg-[#5e35b1] text-white font-medium py-2 px-6 rounded shadow transition duration-200 flex items-center">
+                        <span id="submitText">Hantar</span>
+                        <div id="submitLoader" class="loader ml-2 hidden" style="border-top-color: white;"></div>
+                    </button>
+                    <button type="reset" class="text-[#673ab7] font-medium py-2 px-4 hover:bg-purple-50 rounded transition duration-200">Kosongkan borang</button>
+                </div>
+                
+                <p id="submitError" class="text-[#d93025] text-sm font-medium mt-2 hidden"></p>
+
+            </form>
+        </div>
+    </div> 
+
+    <script>
+        // =========================================================================
+        // MASUKKAN URL GOOGLE APPS SCRIPT (WEB APP) ANDA DI SINI
+        // =========================================================================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwqIX9HHs0Cd8UmJ7timbXQM3fVbzlsakLV-hicoIcTvoM-1YkmtMsDcMomZojGvQZm/exec";
+
+        // Fallback data (Untuk membolehkan ujian tanpa URL GAS)
+        const fallbackQuizData = [
+            ["Sila lengkapkan lagu St. John Ambulans Malaysia?\nAnggota .......... Bersiap Sedia\nUntuk Berkhidmat Bagi Manusia\nTanpa Mengira .......... Bangsa\nAgama dan Budaya", "", "St. John, Pelbagai", "St. John, Banyak", "Kita, Pelbagai", "Kita, Banyak", 1],
+            ["Mandi di sungai aktiviti yang menyeronokan. Berikut langkah-langkah keselamatan mandi di sungai, KECUALI", "[Gambar Kanak-Kanak Mandi Sungai]", "Jangan mandi terlalu dekat dengan bendungan atau saluran air", "Jangan mandi seorangan", "Jangan mandi bila cuaca berubah secara mendadak terutamanya setelah hujan", "Jangan gunakan alas kaki anti-slip", 4],
+            ["Apakah nama lambang ini?", "[Gambar Jata Negara]", "Jata Malaysia", "Jata Negara", "Lambang Malaysia", "Lambang Negara", 2],
+            ["Nyatakan tanda isyarat lalu lintas yang melarang penunggang basikal memasuki kawasan tersebut.", "[Gambar Papan Tanda]", "A (Berhenti)", "B (Dilarang Masuk)", "C (Dilarang Meletak Kenderaan)", "D (Dilarang Kenderaan Bermotor)", 2],
+            ["Berikut merupakan protokol melakukan Pemulihan Kardio Pulmonari (CPR). Yang manakah urutan yang betul?", "", "\"Danger, Shout for help, Response, Airway, Breathing, Compression\"", "\"Danger, Response, Shout for help, Airway, Breathing, Compression\"", "\"Shout for help, Response, Danger, Airway, Breathing, Compression\"", "\"Shout for help, Danger, Response, Airway, Compression, Breathing\"", 2],
+            ["Apakah lencana yang ditunjukkan di bawah?", "[Gambar Lencana Bulat Biru Merah]", "Lencana Kemahiran Kadet", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda", 2],
+            ["Merujuk kepada gambar di bawah, apakah situasi kecemasan yang dialami mangsa?", "[Gambar Mangsa Tercekik]", "batuk", "tercekik", "terseliuh", "serangan jantung", 2],
+            ["Apakah maksud warna biru pada bendera Jalur Gemilang?", "[Gambar Bendera Malaysia]", "menunjukkan keberanian dan kesediaan dalam mengharungi segala jenis cabaran", "Menggambarkan perpaduan rakyat yang terdiri daripada berbilang kaum", "Melambangkan kesucian dan keluhuran hati rakyat", "melambangkan warna Diraja", 2],
+            ["Anda berbasikal ke sekolah, dan anda sampai ke simpang lampu isyarat, apa yang harus anda lakukan sekiranya lampu kuning menyala?", "[Gambar Lampu Isyarat Kuning]", "turun dari basikal", "terus berbasikal", "patah balik", "perlahankan basikal dan bersedia untuk berhenti", 4],
+            ["Apakah bahasa hukuman bagi pergerakan kawad berikut?", "[Gambar Kawad Hormat Kanan]", "\"Ke kanan....Lurus\"", "\"Menghadap ke belakang, Kanan....Pusing\"", "\"Hormat ke kanan....Hormat\"", "\"Hormat ke hadapan....Hormat\"", 3],
+            ["Nyatakan bahasa hukuman \"belakang pusing semasa berjalan\".", "", "\"Tukar langkah cepat, cepat jalan\".", "\"Bergerak ke kiri, belakang....pusing\".", "\"Menghadap ke belakang, kiri......pusing\".", "\"Menghadap ke belakang, kanan....pusing\"", 2],
+            ["Apakah yang perlu kita lakukan apabila seseorang pesakit yang bernafas tidak sedarkan diri?", "[Gambar Posisi Pemulihan]", "meletakkan pesakit dalam posisi pemulihan", "menyimbah air ke atas pesakit", "memberi pesakit minuman", "menampar muka pesakit", 1],
+            ["Berapakah tekanan dan hembusan yang harus dilakukan semasa melakukan Pemulihan Kardio Pulmonari (CPR) ?", "[Gambar Teknik CPR]", "15 kali tekanan, 1 kali hembusan", "15 kali tekanan, 2 kali hembusan", "30 kali tekanan, 1 kali hembusan", "30 kali tekanan, 2 kali hembusan", 4],
+            ["Bilakah peralatan berikut digunakan?", "[Gambar Pengusung/Stretcher Lipat]", "Bila hendak memindahkan mangsa yang pengsan", "Bila hendak memindahkan mangsa yang tercedera di tangan", "Bila hendak memindahkan mangsa yang tercekik", "Bila hendak memindahkan mangsa yang demam", 1],
+            ["Jika pakaian yang anda pakai terbakar, apa yang anda harus lakukan?", "[Gambar Pakaian Terbakar]", "mengguling di atas lantai", "menelefon bomba", "menjerit", "berlari", 1],
+            ["Apakah lencana yang ditunjukkan di bawah?", "[Gambar Lencana Poket Bulat SJAM]", "Lencana Kemahiran Kadet", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda", 2],
+            ["Berikut tip penjagaan gigi yang tepat untuk diamalkan, KECUALI", "[Gambar Penjagaan Gigi]", "Berus gigi setiap kali bangun tidur dan sebelum tidur.", "Pilih berus yang lembut dan berus dengan gerakan menegak.", "Kurangkan makanan manis yang sering melekat pada gigi apabila dikunyah.", "Kerap minum air berkarbonat kerana kandungan asidnya boleh membunuh kuman.", 4],
+            ["Bilakah peralatan berikut digunakan?", "[Gambar Mesin AED]", "Bila mangsa tidak sedarkan diri", "Bila mangsa pengsan", "Selepas CPR dimulakan", "Sebelum CPR dimulakan", 3],
+            ["Anduh Lengan (Arm Sling) sesuai digunakan untuk kecederaan berikut, KECUALI", "[Gambar Anduh Lengan Wanita Tua]", "Menopang kepatahan kaki", "Menopang dislokasi lengan sendi", "Mengurangkan rasa sakit pergelangan tangan yang cedera", "Membatasi gerakan lengan yang patah", 1],
+            ["Apakah Ibu Negeri bagi Negeri Kelantan?", "[Gambar Peta Malaysia]", "Kuantan", "Kota Tinggi", "Kota Bharu", "Kota Kinabalu", 3],
+            ["Apakah nama ikatan berikut?", "[Gambar Ikatan Buku Sila]", "Buku Sila", "Simpul Mati", "Simpul Manuk", "Tindih Kasih", 1],
+            ["Apakah tanda trafik lalu lintas yang ditunjukkan dalam gambarajah di bawah?", "[Gambar Papan Tanda Basikal Bulat Biru]", "Laluan Motosikal", "Laluan Basikal", "Dilarang memandu motosikal", "Dilarang memandu basikal", 2],
+            ["Semua yang berikut boleh mendatangkan bahaya kepada kanak-kanak di dapur, KECUALI", "", "Wayar yang tergantung disorok dengan penutup wayar", "Minyak masak yang panas", "Air mendidih", "Kuali panas", 1],
+            ["Merujuk kepada gambar di bawah, namakan nadi yang diperiksa.", "[Gambar Periksa Nadi Leher]", "Nadi Radial", "Nadi Brachial", "Nadi Karotid", "Nadi Femoral", 3],
+            ["Berapakah kelajuan tekanan yang diberi untuk memulihkan mangsa yang jantung terhenti?", "[Gambar Latihan Tekanan Dada Atas Patung]", "Kadar tekanan adalah 100 hingga 110 setiap minit", "Kadar tekanan adalah 100 hingga 120 setiap minit", "Kadar tekanan adalah 100 hingga 130 setiap minit", "Kadar tekanan adalah 100 hingga 140 setiap minit", 2],
+            ["Apakah yang harus anda lakukan sekiranya anda terjumpa seorang pengsan?", "[Gambar Kanak-kanak Baring Di Rumput]", "melarikan diri", "memulakan CPR", "meminta pertolongan", "longgarkan pakaian yang ketat", 3],
+            ["Apabila anda terhidu bau gas di dalam dapur rumah, lakukan tindakan berikut, KECUALI", "[Gambar Lelaki Terhidu Gas]", "Lari keluar dari rumah", "Jerit dan minta bantuan", "Buka tingkap untuk peredaran udara", "Menyalakan lampu untuk menarik perhatian penyelamat", 4],
+            ["Berikut adalah langkah-langkah untuk menjadikan dapur selamat KECUALI", "[Gambar Tip Keselamatan Dapur]", "Simpan peralatan tajam supaya tidak boleh diambil oleh anak.", "Pasangkan kunci atau penghalang pada laci, kabinet dan pintu.", "Jauhkan makanan dan minuman panas dari hujung meja.", "Guna alas meja yang berjuntai supaya nampak cantik.", 4],
+            ["Namakan kaedah yang digunakan untuk membantu mangsa berikut :", "[Gambar Teknik Heimlich Manoeuvre]", "CPR", "Mulut ke Mulut", "Heimlich Manoeuvre", "Tekanan Jantung dari Luar", 3],
+            ["Setelah mangsa beransur pulih dan mula bernafas serta nadi dapat dirasai, letakkan mangsa dalam kedudukan seperti gambar berikut. Apakah nama kedudukan tersebut?", "[Gambar Posisi Pemulihan Baring Sisi]", "Posisi Tidur", "Posisi Baring", "Posisi Tiarap", "Posisi Pemulihan", 4],
+            ["Berikut merupakan perkara-perkara yang patut dielakkan ketika mandi di sungai, KECUALI", "", "Jangan melakukan aktiviti di air ketika air mulai pasang, mulai surut dan cuaca buruk.", "Jangan menggunakan peralatan keselamatan di air walaupun tidak tahu berenang.", "Jangan berenang ketika terlalu kenyang atau terlalu lapar.", "Jangan bergurau secara kasar semasa mandi di sungai.", 2],
+            ["Apabila berlaku sebarang kecemasan, apakah nombor yang perlu anda hubungi?", "[Gambar Panggilan Kecemasan Telefon Pintar]", "991", "911", "999", "994", 3],
+            ["Apakah nama lagu St. John Ambulans Malaysia?", "", "Perkhidmatan Bagi Manusia", "Berkhidmat Bagi Manusia", "Bertugas untuk Manusia", "Tolong untuk Manusia", 2],
+            ["Berikut merupakan punca-punca terhenti pernafasan, KECUALI", "", "Batuk kering", "Lemas dalam asap, gas beracun atau asap", "Terkena kejutan elektrik atau panahan petir", "Termakan atau terminum bahan-bahan beracun", 1],
+            ["Apakah Ibu Negara bagi Malaysia?", "[Gambar Pemandangan Kuala Lumpur KLCC]", "Ipoh", "Klang", "Putrajaya", "Kuala Lumpur", 4],
+            ["Berikut merupakan kaedah yang betul untuk melintas jalan KECUALI", "[Gambar Kanak-kanak Melintas Jalan]", "menggunakan jejantas", "menggunakan jambatan", "menggunakan lintasan kuda belang", "menunggu sehingga tiada kenderaan", 2],
+            ["Berikut merupakan tanda-tanda dan gejala tercekik, KECUALI", "[Gambar Wanita Pegang Leher Tercekik]", "Batuk", "Muka menjadi pucat", "Menjerit dengan kuat", "Kedua-dua tangan mangsa memegang lehernya", 3],
+            ["Merujuk situasi berikut, keadaan manakah yang harus diberikan keutamaan rawatan?", "[Gambar Kemalangan Basikal Terbaring]", "pendarahan ringan", "patah tulang tertutup", "pengsan", "pernafasan terhenti", 4],
+            ["Berikut merupakan kegunaan kain pembalut segi tiga, KECUALI", "[Gambar Kain Anduh Tiga Segi]", "Mengampu bahagian yang cedera atau patah", "mengelap tingkap atau jadikan hiasan", "Menghenti atau menahan pendarahan", "Menutup tempat yang luka atau cedera", 2]
+        ];
+
+        window.quizData = [];
+        let startTime = 0;
+
+        function handlePasswordKeyPress(event) {
+            if (event.key === "Enter") {
+                document.getElementById('verifyBtn').click();
+            }
+        }
+
+        document.getElementById('verifyBtn').addEventListener('click', function() {
+            const password = document.getElementById('quizPassword').value;
+            const msgEl = document.getElementById('loginMsg');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const verifyText = document.getElementById('verifyText');
+            const verifyLoader = document.getElementById('verifyLoader');
+
+            if (!password) {
+                msgEl.textContent = "Sila masukkan kata laluan!";
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            msgEl.classList.add('hidden');
+            verifyBtn.disabled = true;
+            verifyBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            verifyText.textContent = "Memuat turun soalan...";
+            verifyLoader.classList.remove('hidden');
+
+            // --- SISTEM FALLBACK UNTUK UJIAN ---
+            if(GAS_URL === "LETAK_URL_WEB_APP_ANDA_DI_SINI") {
+                setTimeout(() => {
+                    if(password === "123456") {
+                        window.quizData = fallbackQuizData.map(q => ({
+                            q: q[0], img: q[1], options: [q[2], q[3], q[4], q[5]], answer: q[6]
+                        }));
+                        mulakanKuiz();
+                    } else {
+                        tunjukRalat("Kata laluan salah! (Cuba '123456' untuk mod percubaan)");
+                    }
+                }, 800);
+                return;
+            }
+            // ------------------------------------
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'verifyPassword');
+            formData.append('password', password);
+
+            fetch(GAS_URL, { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "CORRECT") {
+                    window.quizData = data.data;
+                    mulakanKuiz();
+                } else {
+                    tunjukRalat("Kata laluan salah!");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                tunjukRalat("Ralat rangkaian. Sila cuba lagi.");
+            });
+            
+            function tunjukRalat(teks) {
+                msgEl.textContent = teks;
+                msgEl.classList.remove('hidden');
+                verifyBtn.disabled = false;
+                verifyBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                verifyText.textContent = "Seterusnya";
+                verifyLoader.classList.add('hidden');
+            }
+        });
+
+        function mulakanKuiz() {
+            renderQuestions(window.quizData);
+            startTime = Date.now();
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainQuizSection').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderQuestions(questions) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = ''; 
+            
+            questions.forEach((q, index) => {
+                const qNum = index + 1;
+                let optionsHtml = '';
+                
+                q.options.forEach((opt, oIndex) => {
+                    if(opt && opt.trim() !== "") {
+                        let optStr = opt.trim();
+                        let displayContent = `<span class="text-gray-700 leading-relaxed ml-2">${optStr}</span>`;
+                        
+                        optionsHtml += `
+                            <label class="radio-label">
+                                <input type="radio" name="q${qNum}" value="${oIndex + 1}" required> 
+                                ${displayContent}
+                            </label>
+                        `;
+                    }
+                });
+
+                let imageHtml = '';
+                if (q.img && q.img.trim() !== "") {
+                    let imgStr = q.img.trim();
+                    if (imgStr.startsWith('http') || imgStr.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)/i.test(imgStr)) {
+                        imageHtml = `<img src="${imgStr}" alt="Gambar Soalan" class="max-w-full h-auto mx-auto my-4 rounded shadow-sm max-h-64 object-contain border border-gray-200 p-1">`;
+                    } else {
+                        imageHtml = `<div class="image-placeholder w-full text-center">${imgStr}</div>`;
+                    }
+                }
+
+                let questionText = q.q.replace(/\n/g, '<br>');
+
+                container.innerHTML += `
+                    <div class="question-card" id="card-q${qNum}">
+                        <p class="text-[1.05rem] mb-4 text-gray-900 leading-relaxed font-normal">${qNum}. ${questionText} <span class="required-star">*</span></p>
+                        ${imageHtml}
+                        <div class="space-y-1 mt-4">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            let endTime = Date.now();
+            let timeTakenMs = endTime - startTime;
+            let minutes = Math.floor(timeTakenMs / 60000);
+            let seconds = Math.floor((timeTakenMs % 60000) / 1000);
+            let durationStr = `${minutes} minit ${seconds} saat`;
+
+            let score = 0;
+            let totalQuestions = window.quizData.length;
+            let answeredAll = true;
+
+            const submitError = document.getElementById('submitError');
+            submitError.classList.add('hidden');
+
+            window.quizData.forEach((q, index) => {
+                const qNum = index + 1;
+                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
+                const card = document.getElementById(`card-q${qNum}`);
+                
+                if (!selectedOption) {
+                    answeredAll = false;
+                    card.classList.add('border-red-400', 'border-2');
+                } else {
+                    card.classList.remove('border-red-400', 'border-2');
+                }
+            });
+
+            if (!answeredAll) {
+                submitError.innerHTML = "⚠️ Terdapat soalan yang belum dijawab. Sila semak kotak yang ditandakan merah.";
+                submitError.classList.remove('hidden');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitLoader = document.getElementById('submitLoader');
+            
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            submitText.textContent = "Menghantar...";
+            submitLoader.classList.remove('hidden');
+
+            window.quizData.forEach((q, index) => {
+                const qNum = index + 1;
+                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
+                const allOptions = document.querySelectorAll(`input[name="q${qNum}"]`);
+                const correctValue = q.answer.toString();
+
+                allOptions.forEach(opt => opt.disabled = true);
+
+                if (selectedOption) {
+                    if (selectedOption.value === correctValue) {
+                        score++;
+                        selectedOption.parentElement.classList.add('correct-ans');
+                    } else {
+                        selectedOption.parentElement.classList.add('wrong-ans');
+                        const correctLabel = document.querySelector(`input[name="q${qNum}"][value="${correctValue}"]`);
+                        if(correctLabel) {
+                            correctLabel.parentElement.classList.add('correct-ans');
+                            correctLabel.parentElement.innerHTML += ' <span class="ml-auto text-sm text-green-800 font-semibold italic">Jawapan Sebenar</span>';
+                        }
+                    }
+                }
+            });
+
+            const name = document.getElementById('studentName').value;
+            const myKid = document.getElementById('myKidNo').value;
+            const school = document.getElementById('schoolName').value;
+            const code = document.getElementById('schoolCode').value;
+
+            // --- JIKA MENGGUNAKAN FALLBACK MODE (UJIAN) ---
+            if(GAS_URL === "LETAK_URL_WEB_APP_ANDA_DI_SINI") {
+                setTimeout(() => {
+                    showResults(name, myKid, school, code, score, totalQuestions, durationStr);
+                }, 1000);
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'submitScore');
+            formData.append('name', name);
+            formData.append('mykid', myKid);
+            formData.append('schoolName', school);
+            formData.append('schoolCode', code);
+            formData.append('score', score + " / " + totalQuestions);
+            formData.append('duration', durationStr);
+
+            fetch(GAS_URL, { method: 'POST', body: formData })
+            .then(response => response.text())
+            .then(result => {
+                showResults(name, myKid, school, code, score, totalQuestions, durationStr);
+            })
+            .catch(error => {
+                console.error("Save Error:", error);
+                showResults(name, myKid, school, code, score, totalQuestions, durationStr); // Tetap tunjuk markah jika gagal simpan
+            });
+        });
+
+        function showResults(name, myKid, school, code, score, totalQuestions, durationStr) {
+            const resultSection = document.getElementById('resultSection');
+            const resultText = document.getElementById('resultText');
+            
+            let percentage = (score / totalQuestions) * 100;
+            let grade = "";
+            if(percentage >= 80) grade = "Cemerlang! 🎉";
+            else if(percentage >= 50) grade = "Baik, teruskan usaha! 👍";
+            else grade = "Jangan putus asa, cuba lagi! 💪";
+
+            resultText.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-md border border-gray-200 mb-4">
+                    <p class="mb-1 text-sm text-gray-500">Nama Peserta</p>
+                    <p class="font-medium text-gray-800 mb-3">${name} <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full ml-2">${myKid}</span></p>
+                    
+                    <p class="mb-1 text-sm text-gray-500">Sekolah</p>
+                    <p class="font-medium text-gray-800">${school} (${code})</p>
+                </div>
+                
+                <div class="text-center py-6">
+                    <p class="text-5xl mb-2 font-normal text-gray-800">${score} <span class="text-2xl text-gray-500">/ ${totalQuestions}</span></p>
+                    <p class="text-lg font-medium text-[#137333] mb-4">${grade}</p>
+                    <p class="inline-block text-sm font-medium text-gray-600 bg-gray-100 px-4 py-2 rounded-full">Masa yang diambil: ⏱️ ${durationStr}</p>
+                </div>
+            `;
+            
+            resultSection.classList.remove('hidden');
+            document.getElementById('actionButtons').classList.add('hidden'); 
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
