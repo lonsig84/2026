@@ -103,18 +103,15 @@
         </div>
 
         <!-- 测验内容区，默认隐藏 -->
-        <div id="mainQuizSection" class="hidden">
-            <!-- 测验标题 -->
-            <div class="bg-white rounded-lg p-6 mb-4 shadow-sm border border-gray-200 border-t-8 border-t-purple-800">
-                <h1 class="text-3xl font-normal mb-2">KUIZ SJAM TAHUN 5(2025)</h1>
-                <p class="text-red-500 text-sm">* Menunjukkan soalan yang wajib diisi</p>
-            </div>
-
-            <!-- 绿色横幅提醒 -->
-            <div style="background-color: #38b28b;" class="rounded-lg p-5 md:p-6 mb-6 shadow-sm">
-                <h2 class="text-xl md:text-2xl font-medium text-white mb-2 tracking-wide">Jawab semua soalan dengan teliti. Semoga berjaya!</h2>
+        <div id="mainQuizSection" class="hidden relative">
+            
+            <!-- Sticky 测验标题 & 绿色横幅提醒 (Freeze di atas) -->
+            <div class="sticky top-0 md:top-4 z-50 -mx-4 md:mx-0 px-5 md:px-8 py-5 md:py-6 mb-6 shadow-xl bg-[#38b28b] md:rounded-xl border-b-4 border-[#2c8f6f]">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-1">KUIZ SJAM TAHUN 5 (2025)</h1>
+                <p class="text-white opacity-90 text-sm mb-4 font-medium">* Menunjukkan soalan yang wajib diisi</p>
+                <p class="text-lg md:text-xl text-white mb-2">Jawab semua soalan dengan teliti. Semoga berjaya!</p>
                 <div class="flex items-center text-[#ffdd57] font-semibold text-base md:text-lg">
-                    <svg class="w-6 h-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <p>Masa menjawab sedang direkodkan oleh sistem.</p>
@@ -217,6 +214,9 @@
                     
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('mainQuizSection').classList.remove('hidden');
+                    
+                    // Supaya sticky header bermula di atas dengan kemas selepas login
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     msgEl.textContent = "Kata laluan salah! (密码错误)";
                     msgEl.classList.remove('hidden');
