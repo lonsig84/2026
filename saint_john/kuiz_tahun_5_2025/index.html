@@ -223,16 +223,34 @@
                 // 遍历4个选项
                 q.options.forEach((opt, oIndex) => {
                     if(opt && opt.trim() !== "") {
+                        let optStr = opt.trim();
+                        let displayContent = '';
+                        
+                        // 匹配 "A. https://..." 这种带有字母前缀的图片链接
+                        let prefixMatch = optStr.match(/^([a-zA-Z][\.\)]?\s*)(http[^\s]+|data:image[^\s]+)/i);
+                        
+                        if (prefixMatch) {
+                            displayContent = `<span class="font-bold mr-2">${prefixMatch[1]}</span><img src="${prefixMatch[2]}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1">`;
+                        } 
+                        // 匹配纯图片链接
+                        else if (optStr.startsWith('http') || optStr.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(optStr)) {
+                            displayContent = `<img src="${optStr}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1">`;
+                        } 
+                        // 普通文字
+                        else {
+                            displayContent = `<span>${optStr}</span>`;
+                        }
+
                         optionsHtml += `
                             <label class="radio-label">
                                 <input type="radio" name="q${qNum}" value="${oIndex + 1}" required> 
-                                <span>${opt}</span>
+                                ${displayContent}
                             </label>
                         `;
                     }
                 });
 
-                // 处理图片显示逻辑 (非常重要！)
+                // 处理题目图片显示逻辑 (非常重要！)
                 let imageHtml = '';
                 if (q.img && q.img.trim() !== "") {
                     let imgStr = q.img.trim();
@@ -240,7 +258,7 @@
                     if (imgStr.startsWith('http') || imgStr.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)/i.test(imgStr)) {
                         imageHtml = `<img src="${imgStr}" alt="Gambar Soalan" class="max-w-full h-auto mx-auto my-4 rounded shadow-sm max-h-64 object-contain">`;
                     } else {
-                        // 否则当做文字占位符（例如  ）
+                        // 否则当做文字占位符
                         imageHtml = `<div class="image-placeholder w-full text-center">${imgStr}</div>`;
                     }
                 }
