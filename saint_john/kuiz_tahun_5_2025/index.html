@@ -81,22 +81,44 @@
         <div id="loginSection" class="bg-white rounded-lg p-8 shadow-md border border-gray-200 border-t-8 border-t-purple-800 text-center mt-10">
             <h2 class="text-2xl font-bold mb-4 text-purple-800">Log Masuk Kuiz SJAM Tahun 5(2025)</h2>
             <p class="mb-6 text-gray-600">Sila masukkan kata laluan untuk memulakan kuiz.</p>
-            <div class="max-w-sm mx-auto">
-                <input type="password" id="quizPassword" placeholder="Kata Laluan (密码)" class="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg tracking-widest">
-                <button id="verifyBtn" type="button" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-4 rounded transition duration-200 flex justify-center items-center">
-                    <span id="verifyText">Masuk / 进入</span>
-                    <div id="verifyLoader" class="loader ml-2 hidden"></div>
-                </button>
-                <p id="loginMsg" class="mt-4 text-red-600 font-medium hidden"></p>
+            <div class="max-w-xl mx-auto">
+                
+                <!-- 蓝色提醒框 -->
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6 text-left flex items-start text-sm text-blue-800 shadow-sm rounded-r">
+                    <svg class="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>Perhatian: Sistem akan merekodkan masa yang diambil untuk anda menjawab kuiz ini. Masa mula dikira sebaik sahaja anda log masuk.</p>
+                </div>
+
+                <div class="max-w-sm mx-auto">
+                    <input type="password" id="quizPassword" placeholder="Kata Laluan (密码)" class="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500 text-center text-lg tracking-widest">
+                    <button id="verifyBtn" type="button" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-4 rounded transition duration-200 flex justify-center items-center">
+                        <span id="verifyText">Masuk / 进入</span>
+                        <div id="verifyLoader" class="loader ml-2 hidden"></div>
+                    </button>
+                    <p id="loginMsg" class="mt-4 text-red-600 font-medium hidden"></p>
+                </div>
             </div>
         </div>
 
         <!-- 测验内容区，默认隐藏 -->
         <div id="mainQuizSection" class="hidden">
             <!-- 测验标题 -->
-            <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200 border-t-8 border-t-purple-800">
+            <div class="bg-white rounded-lg p-6 mb-4 shadow-sm border border-gray-200 border-t-8 border-t-purple-800">
                 <h1 class="text-3xl font-normal mb-2">KUIZ SJAM TAHUN 5(2025)</h1>
                 <p class="text-red-500 text-sm">* Menunjukkan soalan yang wajib diisi</p>
+            </div>
+
+            <!-- 绿色横幅提醒 -->
+            <div style="background-color: #38b28b;" class="rounded-lg p-5 md:p-6 mb-6 shadow-sm">
+                <h2 class="text-xl md:text-2xl font-medium text-white mb-2 tracking-wide">Jawab semua soalan dengan teliti. Semoga berjaya!</h2>
+                <div class="flex items-center text-[#ffdd57] font-semibold text-base md:text-lg">
+                    <svg class="w-6 h-6 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>Masa menjawab sedang direkodkan oleh sistem.</p>
+                </div>
             </div>
 
             <!-- 成绩显示区域 (默认隐藏) -->
@@ -152,6 +174,7 @@
 
         // 全局变量保存从云端获取的考题数据
         window.quizData = [];
+        let startTime = 0; // 用于记录作答开始时间
 
         // 密码验证逻辑，同时获取考题
         document.getElementById('verifyBtn').addEventListener('click', function() {
@@ -188,6 +211,9 @@
                     // 密码正确，接收题目数据
                     window.quizData = data.data;
                     renderQuestions(window.quizData);
+                    
+                    // 记录开始作答的时间
+                    startTime = Date.now();
                     
                     document.getElementById('loginSection').classList.add('hidden');
                     document.getElementById('mainQuizSection').classList.remove('hidden');
@@ -280,6 +306,13 @@
         document.getElementById('quizForm').addEventListener('submit', function(e) {
             e.preventDefault(); 
             
+            // 计算作答时间
+            let endTime = Date.now();
+            let timeTakenMs = endTime - startTime;
+            let minutes = Math.floor(timeTakenMs / 60000);
+            let seconds = Math.floor((timeTakenMs % 60000) / 1000);
+            let durationStr = `${minutes} minit ${seconds} saat`;
+
             let score = 0;
             let totalQuestions = window.quizData.length;
 
@@ -324,7 +357,7 @@
             const school = document.getElementById('schoolName').value;
             const code = document.getElementById('schoolCode').value;
 
-            // 提交分数到 Google Sheet
+            // 提交分数和作答时间到 Google Sheet
             const formData = new URLSearchParams();
             formData.append('action', 'submitScore');
             formData.append('name', name);
@@ -332,6 +365,7 @@
             formData.append('schoolName', school);
             formData.append('schoolCode', code);
             formData.append('score', score + " / " + totalQuestions);
+            formData.append('duration', durationStr);
 
             fetch(GAS_URL, {
                 method: 'POST',
@@ -340,15 +374,15 @@
             .then(response => response.text())
             .then(result => {
                 console.log("Save Result:", result);
-                showResults(name, myKid, school, code, score, totalQuestions);
+                showResults(name, myKid, school, code, score, totalQuestions, durationStr);
             })
             .catch(error => {
                 console.error("Save Error:", error);
-                showResults(name, myKid, school, code, score, totalQuestions);
+                showResults(name, myKid, school, code, score, totalQuestions, durationStr);
             });
         });
 
-        function showResults(name, myKid, school, code, score, totalQuestions) {
+        function showResults(name, myKid, school, code, score, totalQuestions, durationStr) {
             const resultSection = document.getElementById('resultSection');
             const resultText = document.getElementById('resultText');
             
@@ -356,6 +390,7 @@
                 <p class="mb-2">Tahniah, <strong>${name}</strong> (No. MyKid: ${myKid})!</p>
                 <p class="mb-2">Sekolah: ${school} (${code})</p>
                 <p class="text-3xl mt-4 font-black">Markah anda: <span class="text-purple-800">${score}</span> / ${totalQuestions}</p>
+                <p class="text-md mt-2 text-emerald-700 font-semibold bg-emerald-100 inline-block px-3 py-1 rounded">Masa diambil: ${durationStr}</p>
             `;
             
             resultSection.classList.remove('hidden');
