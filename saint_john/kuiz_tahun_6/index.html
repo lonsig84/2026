@@ -1,460 +1,153 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuiz SJAM Tahun 6(2024)</title>
-    <!-- 引入 Tailwind CSS 以实现现代化和响应式设计 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #f3f4f6; /* Warna latar belakang biru/kelabu cair */
-        }
-        .question-card {
-            background-color: white;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e5e7eb;
-            border-top: 8px solid #2563eb; /* 顶部蓝色装饰线 (Blue-600) */
-        }
-        .required-star {
-            color: red;
-            margin-left: 0.25rem;
-        }
-        .radio-label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s;
-        }
-        .radio-label:hover {
-            background-color: #eff6ff; /* Warna hover biru cair */
-        }
-        .radio-label input {
-            margin-right: 0.75rem;
-            width: 1.25rem;
-            height: 1.25rem;
-            flex-shrink: 0;
-            accent-color: #2563eb; /* Warna tick biru */
-        }
-        .image-placeholder {
-            display: inline-block;
-            background-color: #f3f4f6;
-            color: #4b5563;
-            padding: 1rem;
-            margin: 1rem 0;
-            border: 1px dashed #9ca3af;
-            border-radius: 0.25rem;
-            font-style: italic;
-        }
-        .correct-ans {
-            color: #166534;
-            font-weight: bold;
-            background-color: #dcfce7 !important;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            border: 1px solid #22c55e;
-        }
-        .wrong-ans {
-            color: #991b1b;
-            text-decoration: line-through;
-            background-color: #fee2e2 !important;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            border: 1px solid #ef4444;
-        }
-        /* 加载动画样式 */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2563eb; /* Biru loader */
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="p-4 md:p-8 text-gray-800 font-sans pb-24">
-
-    <div class="max-w-3xl mx-auto">
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // ==========================================
+  // Fungsi 1: Sahkan kata laluan & muat turun soalan (Sheet2 & Sheet3)
+  // ==========================================
+  if (e.parameter.action === "verifyPassword") {
+    var sheet2 = ss.getSheetByName("Sheet2");
+    // Jika tiada Sheet2, hasilkan secara automatik
+    if (!sheet2) sheet2 = ss.insertSheet("Sheet2");
+    
+    var passwordCell = sheet2.getRange("A1");
+    var correctPassword = passwordCell.getValue().toString();
+    
+    // Jika tiada kata laluan, hasilkan "123456" sebagai lalai
+    if (correctPassword === "") {
+      correctPassword = "123456";
+      passwordCell.setValue(correctPassword);
+      sheet2.getRange("B1").setValue("<- Kata Laluan (Di sini untuk ubah laluan)");
+      sheet2.getRange("B1").setFontColor("red");
+    }
+    
+    // Sahkan kata laluan
+    if (e.parameter.password === correctPassword) {
+      // Kata laluan betul, baca soalan dari Sheet3
+      var sheet3 = ss.getSheetByName("Sheet3");
+      // Jika tiada Sheet3, hasilkan dan masukkan 40 soalan lalai
+      if (!sheet3) {
+        sheet3 = ss.insertSheet("Sheet3");
+        initializeSheet3(sheet3); 
+      }
+      
+      var data = sheet3.getDataRange().getValues();
+      var quizData = [];
+      
+      // Mula baca dari baris ke-2 (Abaikan tajuk)
+      for (var i = 1; i < data.length; i++) {
+        var row = data[i];
+        if (row[0] === "") continue; // Abaikan baris kosong
         
-        <!-- 密码登录区域 -->
-        <div id="loginSection" class="bg-white rounded-lg p-8 shadow-md border border-gray-200 border-t-8 border-t-blue-600 text-center mt-10">
-            <h2 class="text-2xl font-bold mb-4 text-blue-800">Log Masuk Kuiz SJAM Tahun 6(2024)</h2>
-            <p class="mb-6 text-gray-600">Sila masukkan kata laluan untuk memulakan kuiz.</p>
-            
-            <!-- Notis Masa Mula di halaman Login -->
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg shadow-sm text-left">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-blue-800 font-medium">
-                            Perhatian: Sistem akan merekodkan masa yang diambil untuk anda menjawab kuiz ini. Masa mula dikira sebaik sahaja anda log masuk.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="max-w-sm mx-auto">
-                <input type="password" id="quizPassword" placeholder="Kata Laluan (密码)" class="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-lg tracking-widest" onkeypress="handlePasswordKeyPress(event)">
-                <button id="verifyBtn" type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200 flex justify-center items-center">
-                    <span id="verifyText">Masuk / 进入</span>
-                    <div id="verifyLoader" class="loader ml-2 hidden"></div>
-                </button>
-                <p id="loginMsg" class="mt-4 text-red-600 font-medium hidden"></p>
-            </div>
-        </div>
-
-        <!-- 测验内容区，默认隐藏 -->
-        <div id="mainQuizSection" class="hidden">
-            <!-- 测验标题 -->
-            <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200 border-t-8 border-t-blue-600">
-                <h1 class="text-3xl font-bold mb-2 text-gray-800">KUIZ SJAM TAHUN 6(2024)</h1>
-                <p class="text-gray-600 mb-3 font-medium">Jawab semua soalan dengan teliti. Semoga berjaya!</p>
-                
-                <div class="flex items-center text-blue-700 font-semibold text-sm mb-4 bg-blue-50 p-2.5 rounded-lg border border-blue-200 inline-flex shadow-sm">
-                    <svg class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Masa menjawab sedang direkodkan oleh sistem.
-                </div>
-                
-                <p class="text-red-500 text-sm block">* Menunjukkan soalan yang wajib diisi</p>
-            </div>
-
-            <!-- 成绩显示区域 (默认隐藏) -->
-            <div id="resultSection" class="hidden bg-green-50 rounded-lg p-6 mb-6 shadow-sm border border-green-200 border-t-8 border-t-green-500">
-                <h2 class="text-2xl font-bold text-green-800 mb-2">Keputusan Kuiz</h2>
-                <div id="resultText" class="text-lg text-green-900"></div>
-            </div>
-
-            <form id="quizForm">
-                <!-- 考生个人信息 -->
-                <div class="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200 border-t-8 border-t-blue-600">
-                    <h2 class="text-xl font-semibold mb-4 text-blue-800">Maklumat Peserta</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">NAMA <span class="required-star">*</span></label>
-                            <input type="text" id="studentName" required placeholder="Contoh: Ali bin Abu" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">MY KID NO. <span class="required-star">*</span></label>
-                            <input type="text" id="myKidNo" required placeholder="Contoh: 120101-01-1234" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">NAMA SEKOLAH <span class="required-star">*</span></label>
-                            <input type="text" id="schoolName" required placeholder="Contoh: SK Taman Tun Dr Ismail" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">KOD SEKOLAH <span class="required-star">*</span></label>
-                            <input type="text" id="schoolCode" required placeholder="Contoh: WBA0001" class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 动态题目容器 -->
-                <div id="questionsContainer"></div>
-
-                <!-- 提交按钮 -->
-                <div class="flex justify-between items-center mt-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200" id="actionButtons">
-                    <button type="submit" id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded shadow transition duration-200 flex items-center">
-                        <span id="submitText">Submit / Hantar</span>
-                        <div id="submitLoader" class="loader ml-2 hidden" style="border-top-color: white;"></div>
-                    </button>
-                    <button type="reset" class="text-blue-600 font-medium py-2 px-4 hover:bg-blue-50 rounded transition duration-200">Clear form</button>
-                </div>
-                
-                <!-- Ralat mesej borang -->
-                <p id="submitError" class="text-red-600 text-sm font-bold mt-4 hidden text-center"></p>
-                
-            </form>
-        </div>
-    </div> 
-
-    <script>
-        // ==========================================
-        // Google Apps Script Web App URL
-        // ==========================================
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwE8YlABxzC9T2DK_57eY0QmyIHvLrUKCdA0fmgQBcAyB13wi2v50pEgcp6FqUAfv5u/exec";
-
-        // 全局变量保存从云端获取的考题数据
-        window.quizData = [];
-        let startTime; // Menyimpan masa mula kuiz
-
-        function handlePasswordKeyPress(event) {
-            if (event.key === "Enter") {
-                document.getElementById('verifyBtn').click();
-            }
-        }
-
-        // 密码验证逻辑，同时获取考题
-        document.getElementById('verifyBtn').addEventListener('click', function() {
-            const password = document.getElementById('quizPassword').value;
-            const msgEl = document.getElementById('loginMsg');
-            const verifyBtn = document.getElementById('verifyBtn');
-            const verifyText = document.getElementById('verifyText');
-            const verifyLoader = document.getElementById('verifyLoader');
-
-            if (!password) {
-                msgEl.textContent = "Sila masukkan kata laluan! (请输入密码)";
-                msgEl.classList.remove('hidden');
-                return;
-            }
-
-            // UI Loading 状态
-            msgEl.classList.add('hidden');
-            verifyBtn.disabled = true;
-            verifyBtn.classList.add('opacity-75', 'cursor-not-allowed');
-            verifyText.textContent = "Memuat turun soalan... (读取题目中...)";
-            verifyLoader.classList.remove('hidden');
-
-            const formData = new URLSearchParams();
-            formData.append('action', 'verifyPassword');
-            formData.append('password', password);
-
-            fetch(GAS_URL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "CORRECT") {
-                    // 密码正确，接收题目数据
-                    window.quizData = data.data;
-                    renderQuestions(window.quizData);
-                    
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('mainQuizSection').classList.remove('hidden');
-                    
-                    // MULA REKOD MASA BILA BERJAYA MASUK
-                    startTime = new Date();
-                } else {
-                    msgEl.textContent = "Kata laluan salah! (密码错误)";
-                    msgEl.classList.remove('hidden');
-                    msgEl.classList.remove('text-green-600');
-                    msgEl.classList.add('text-red-600');
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                msgEl.textContent = "Ralat rangkaian. Sila cuba lagi. (网络错误)";
-                msgEl.classList.remove('hidden');
-            })
-            .finally(() => {
-                verifyBtn.disabled = false;
-                verifyBtn.classList.remove('opacity-75', 'cursor-not-allowed');
-                verifyText.textContent = "Masuk / 进入";
-                verifyLoader.classList.add('hidden');
-            });
+        quizData.push({
+          q: row[0].toString(),
+          img: row[1] ? row[1].toString() : null,
+          options: [row[2].toString(), row[3].toString(), row[4].toString(), row[5].toString()],
+          answer: parseInt(row[6]) || 1
         });
+      }
 
-        // 动态生成题目的函数
-        function renderQuestions(questions) {
-            const container = document.getElementById('questionsContainer');
-            container.innerHTML = ''; // 清空容器
-            
-            questions.forEach((q, index) => {
-                const qNum = index + 1;
-                let optionsHtml = '';
-                
-                // 遍历4个选项
-                q.options.forEach((opt, oIndex) => {
-                    if(opt && opt.trim() !== "") {
-                        let optStr = opt.trim();
-                        let displayContent = '';
-                        
-                        // 匹配 "A. https://..." 这种带有字母前缀的图片链接
-                        let prefixMatch = optStr.match(/^([a-zA-Z][\.\)]?\s*)(http[^\s]+|data:image[^\s]+)/i);
-                        
-                        if (prefixMatch) {
-                            displayContent = `<span class="font-bold mr-2">${prefixMatch[1]}</span><img src="${prefixMatch[2]}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1">`;
-                        } 
-                        // 匹配纯图片链接
-                        else if (optStr.startsWith('http') || optStr.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(optStr)) {
-                            displayContent = `<img src="${optStr}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1">`;
-                        } 
-                        // 普通文字
-                        else {
-                            displayContent = `<span class="text-gray-800 leading-relaxed">${optStr}</span>`;
-                        }
+      return ContentService.createTextOutput(JSON.stringify({ status: "CORRECT", data: quizData }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    } else {
+      // Kata laluan salah
+      return ContentService.createTextOutput(JSON.stringify({ status: "WRONG" }))
+                           .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  
+  // ==========================================
+  // Fungsi 2: Simpan markah dan masa pelajar (Di Sheet pertama)
+  // ==========================================
+  if (e.parameter.action === "submitScore") {
+    var sheet1 = ss.getSheets()[0];
+    
+    // Semak tajuk lajur (termasuk lajur ke-7 untuk masa)
+    var firstRow = sheet1.getRange(1, 1, 1, 7).getValues()[0];
+    if (firstRow[0] === "") {
+      sheet1.getRange(1, 1, 1, 7).setValues([["Tarikh & Masa (Tarikh/Masa)", "Nama Pelajar (Nama)", "MyKid", "Nama Sekolah (Sekolah)", "Kod Sekolah (Kod)", "Markah (Markah)", "Masa Menjawab (Masa)"]]);
+      sheet1.getRange(1, 1, 1, 7).setFontWeight("bold");
+      sheet1.getRange(1, 1, 1, 7).setBackground("#f3f4f6"); 
+    } else if (firstRow[6] === "") {
+      sheet1.getRange(1, 7).setValue("Masa Menjawab (Masa)");
+      sheet1.getRange(1, 7).setFontWeight("bold").setBackground("#f3f4f6");
+    }
+    
+    try {
+      var name = e.parameter.name;
+      var mykid = e.parameter.mykid;
+      var schoolName = e.parameter.schoolName;
+      var schoolCode = e.parameter.schoolCode;
+      var score = e.parameter.score;
+      var timeTaken = e.parameter.timeTaken || "Tiada rekod"; // Terima data masa
+      
+      // Dapatkan masa Malaysia (GMT+8)
+      var timestamp = Utilities.formatDate(new Date(), "GMT+8", "yyyy-MM-dd HH:mm:ss");
+      
+      // Masukkan baris data baharu
+      sheet1.appendRow([timestamp, name, mykid, schoolName, schoolCode, score, timeTaken]);
+      
+      return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+    } catch (error) {
+      return ContentService.createTextOutput("Error: " + error.message).setMimeType(ContentService.MimeType.TEXT);
+    }
+  }
+}
 
-                        optionsHtml += `
-                            <label class="radio-label group">
-                                <input type="radio" name="q${qNum}" value="${oIndex + 1}" required> 
-                                ${displayContent}
-                            </label>
-                        `;
-                    }
-                });
-
-                // 处理题目图片显示逻辑
-                let imageHtml = '';
-                if (q.img && q.img.trim() !== "") {
-                    let imgStr = q.img.trim();
-                    // 判断如果包含 http 或者是图片格式后缀，就用 <img> 标签真实渲染图片
-                    if (imgStr.startsWith('http') || imgStr.startsWith('data:image') || /\.(jpg|jpeg|png|gif|webp)/i.test(imgStr)) {
-                        imageHtml = `<img src="${imgStr}" alt="Gambar Soalan" class="max-w-full h-auto mx-auto my-4 rounded shadow-sm max-h-64 object-contain border border-gray-200 p-1">`;
-                    } else {
-                        // 否则当做文字占位符
-                        imageHtml = `<div class="image-placeholder w-full text-center">${imgStr}</div>`;
-                    }
-                }
-
-                // 处理题目中的换行符
-                let questionText = q.q.replace(/\n/g, '<br>');
-
-                container.innerHTML += `
-                    <div class="question-card" id="card-q${qNum}">
-                        <p class="text-base mb-4 font-semibold text-gray-900 leading-relaxed">${qNum}. ${questionText}<span class="required-star">*</span></p>
-                        ${imageHtml}
-                        <div class="space-y-1">
-                            ${optionsHtml}
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // 提交表单时的逻辑 (批改并上传成绩)
-        document.getElementById('quizForm').addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            
-            let score = 0;
-            let totalQuestions = window.quizData.length;
-            let answeredAll = true;
-
-            const submitError = document.getElementById('submitError');
-            submitError.classList.add('hidden');
-
-            // Semak jika semua soalan dijawab (meskipun guna 'required', fallback check)
-            window.quizData.forEach((q, index) => {
-                const qNum = index + 1;
-                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
-                const card = document.getElementById(`card-q${qNum}`);
-                
-                if (!selectedOption) {
-                    answeredAll = false;
-                    card.classList.add('border-red-500', 'border-2');
-                } else {
-                    card.classList.remove('border-red-500', 'border-2');
-                }
-            });
-
-            if (!answeredAll) {
-                submitError.textContent = "⚠️ Sila jawab semua soalan yang ditandakan merah sebelum menghantar.";
-                submitError.classList.remove('hidden');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submitBtn');
-            const submitText = document.getElementById('submitText');
-            const submitLoader = document.getElementById('submitLoader');
-            
-            submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
-            submitText.textContent = "Menghantar...";
-            submitLoader.classList.remove('hidden');
-
-            // 批改每道题
-            window.quizData.forEach((q, index) => {
-                const qNum = index + 1;
-                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
-                const allOptions = document.querySelectorAll(`input[name="q${qNum}"]`);
-                const correctValue = q.answer.toString();
-
-                allOptions.forEach(opt => opt.disabled = true);
-
-                if (selectedOption) {
-                    if (selectedOption.value === correctValue) {
-                        score++;
-                        selectedOption.parentElement.classList.add('correct-ans');
-                        selectedOption.parentElement.innerHTML += ' <span class="ml-2">✅</span>';
-                    } else {
-                        selectedOption.parentElement.classList.add('wrong-ans');
-                        selectedOption.parentElement.innerHTML += ' <span class="ml-2">❌</span>';
-                        
-                        const correctLabel = document.querySelector(`input[name="q${qNum}"][value="${correctValue}"]`);
-                        if(correctLabel) {
-                            correctLabel.parentElement.classList.add('correct-ans');
-                            correctLabel.parentElement.innerHTML += ' <span class="ml-2 text-sm text-green-800 font-bold">(Jawapan Betul)</span>';
-                        }
-                    }
-                }
-            });
-
-            const name = document.getElementById('studentName').value;
-            const myKid = document.getElementById('myKidNo').value;
-            const school = document.getElementById('schoolName').value;
-            const code = document.getElementById('schoolCode').value;
-
-            // KIRA MASA MENGAMBIL KUIZ 
-            const endTime = new Date();
-            const timeDiffSecs = Math.floor((endTime - startTime) / 1000); // dalam saat
-            const minutes = Math.floor(timeDiffSecs / 60);
-            const seconds = timeDiffSecs % 60;
-            const timeTakenStr = `${minutes} minit ${seconds} saat`;
-
-            // 提交分数和作答时间到 Google Sheet
-            const formData = new URLSearchParams();
-            formData.append('action', 'submitScore');
-            formData.append('name', name);
-            formData.append('mykid', myKid);
-            formData.append('schoolName', school);
-            formData.append('schoolCode', code);
-            formData.append('score', score + " / " + totalQuestions);
-            formData.append('timeTaken', timeTakenStr); // Data masa dihantar
-
-            fetch(GAS_URL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.text())
-            .then(result => {
-                console.log("Save Result:", result);
-                showResults(name, myKid, school, code, score, totalQuestions, timeTakenStr);
-            })
-            .catch(error => {
-                console.error("Save Error:", error);
-                showResults(name, myKid, school, code, score, totalQuestions, timeTakenStr);
-            });
-        });
-
-        function showResults(name, myKid, school, code, score, totalQuestions, timeTakenStr) {
-            const resultSection = document.getElementById('resultSection');
-            const resultText = document.getElementById('resultText');
-            
-            let percentage = (score / totalQuestions) * 100;
-            let grade = "";
-            if(percentage >= 80) grade = "Cemerlang! 🎉";
-            else if(percentage >= 50) grade = "Baik, teruskan usaha! 👍";
-            else grade = "Jangan putus asa, cuba lagi! 💪";
-
-            resultText.innerHTML = `
-                <p class="mb-2">Tahniah, <strong>${name}</strong> (No. MyKid: ${myKid})!</p>
-                <p class="mb-2">Sekolah: ${school} (${code})</p>
-                <p class="text-3xl mt-4 font-black">Markah anda: <span class="text-blue-700">${score}</span> / ${totalQuestions}</p>
-                <p class="text-lg font-semibold text-green-700 mt-2">${grade}</p>
-                <p class="mt-4 text-sm font-medium text-gray-600 bg-white p-2 rounded border border-gray-200 inline-block">Masa yang diambil: ⏱️ ${timeTakenStr}</p>
-            `;
-            
-            resultSection.classList.remove('hidden');
-            document.getElementById('actionButtons').classList.add('hidden'); 
-            
-            // 滚动到顶部
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    </script>
-</body>
-</html>
+// ==========================================
+// Fungsi mengisi soalan secara automatik (40 Soalan dengan jawapan 1-4)
+// ==========================================
+function initializeSheet3(sheet) {
+  var headers = ["Soalan (Soalan)", "Gambar (Pautan Gambar/Kosong)", "Pilihan 1 (Pilihan 1)", "Pilihan 2 (Pilihan 2)", "Pilihan 3 (Pilihan 3)", "Pilihan 4 (Pilihan 4)", "Jawapan (Jawapan betul, taip 1 hingga 4)"];
+  sheet.getRange(1, 1, 1, 7).setValues([headers]);
+  sheet.getRange(1, 1, 1, 7).setFontWeight("bold").setBackground("#dbeafe"); 
+  
+  // Data soalan (Telah diselaraskan supaya jawapan menggunakan sistem 1 hingga 4)
+  var defaultQuestions = [
+    ["Berikut merupakan punca-punca terhenti pernafasan, KECUALI", "", "Batuk kering", "Lemas dalam asap, gas beracun atau asap", "Terkena kejutan elektrik atau panahan petir", "Termakan atau terminum bahan-bahan beracun", 1],
+    ["Berikut merupakan cara menjaga penampilan diri, KECUALI", "images/3 orang berpakaian formal.png", "Sentiasa senyum", "Menjaga kebersihan diri", "Memilih pakaian yang sesuai", "Berdandan secara berlebihan", 4],
+    ["Bahagian atau komponen manakah yang mengawal pergerakan basikal ke kiri dan ke kanan?", "images/bahagian basikal.png", "rim", "brek", "pedal", "hendal", 4],
+    ["Setelah mangsa beransur pulih dan mula bernafas serta nadi dapat dirasai, letakkan mangsa dalam kedudukan seperti gambar berikut. Apakah nama kedudukan tersebut?", "images/Posisi pemulihan.png", "Posisi Tidur", "Posisi Baring", "Posisi Tiarap", "Posisi Pemulihan", 4],
+    ["Apakah lencana yang ditunjukkan di bawah?", "images/Lencana St. John (Bintang).png", "Lencana Kemahiran Kadet", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda", 4],
+    ["Apakah yang harus anda lakukan sekiranya anda terjumpa seorang pengsan?", "images/Kanak-kanak pengsan.png", "melarikan diri", "memulakan CPR", "meminta pertolongan", "longgarkan pakaian yang ketat", 3],
+    ["Sila lengkapkan lagu St. John Ambulans Malaysia?<br><br>Anggota ............... Bersiap Sedia<br>Untuk Berkhidmat Bagi Manusia<br>Tanpa Mengira ............... Bangsa<br>Agama dan Budaya", "", "St. John, Pelbagai", "St. John, Banyak", "Kita, Pelbagai", "Kita, Banyak", 3],
+    ["Berikut adalah langkah-langkah untuk menjadikan dapur selamat KECUALI", "", "Simpan peralatan tajam supaya tidak boleh diambil oleh anak.", "Pasangkan kunci atau penghalang pada laci, kabinet dan pintu.", "Jauhkan makanan dan minuman panas dari hujung meja.", "Guna alas meja yang berjuntai supaya nampak cantik.", 4],
+    ["Apakah tanda trafik lalu lintas yang ditunjukkan dalam gambarajah di bawah?", "images/Bulatan biru dengan basikal.png", "Laluan Motosikal", "Laluan Basikal", "Dilarang memandu motosikal", "Dilarang memandu basikal", 2],
+    ["Nyatakan bahasa hukuman \"belakang pusing semasa berjalan\".", "", "\"Tukar langkah cepat, cepat jalan\".", "\"Bergerak ke kiri, belakang....pusing\".", "\"Menghadap ke belakang, kiri......pusing\".", "\"Menghadap ke belakang, kanan....pusing\"", 2],
+    ["Apakah kaedah pembalutan yang ditunjukkan dalam gambarajah di bawah?", "images/Anduh Lengan.png", "Anduh Lengan (Arm Sling)", "Anduh Pengangkat (Elevation Sling)", "Penutup Lengan (Arm Wrap)", "Pembalut Lengan (Arm Bandage)", 1],
+    ["Apabila berlaku sebarang kecemasan, apakah nombor yang perlu anda hubungi?", "images/Panggilan kecemasan 999.png", "911", "991", "994", "999", 4],
+    ["Apakah bahasa hukuman bagi pergerakan kawad berikut?", "images/Skuad kawad memandang ke kanan.png", "\"Ke kanan....Lurus\"", "\"Menghadap ke belakang, Kanan....Pusing\"", "\"Hormat ke kanan....Hormat\"", "\"Hormat ke hadapan....Hormat\"", 3],
+    ["C.P.R. adalah singkatan untuk", "images/Ikon CPR.png", "Cardio Pulmonary Resuscitation", "Carry Pulmonary Resuscitation", "Cardio Pushing Resuscitation", "Cardio Pulmonary Rescue", 1],
+    ["Apakah Ibu Negeri bagi Negeri Pahang?", "images/Peta Malaysia.png", "Kampar", "Kuantan", "Kuala Lumpur", "Klang", 2],
+    ["Merujuk kepada gambar di bawah, apakah situasi kecemasan yang dialami mangsa?", "images/Mangsa tercekik (bayi dan dewasa).png", "batuk", "tercekik", "terseliuh", "serangan jantung", 2],
+    ["Apakah maksud warna biru pada bendera Jalur Gemilang?", "images/Bendera Malaysia.png", "menunjukkan keberanian dan kesediaan dalam mengharungi segala jenis cabaran", "Menggambarkan perpaduan rakyat yang terdiri daripada berbilang kaum", "Melambangkan kesucian dan keluhuran hati rakyat", "melambangkan warna Diraja", 2],
+    ["Nyatakan tanda isyarat lalu lintas yang melarang penunggang basikal memasuki kawasan tersebut.", "", "images/opt_Tanda Dilarang Berhenti.png", "images/opt_Tanda Dilarang Masuk.png", "images/opt_Tanda Dilarang Membunyikan Hon.png", "images/opt_Tanda Dilarang Pusingan U.png", 2],
+    ["Amalan mencuci tangan dengan sabun perlu dijadikan amalan seharian untuk mencegah penularan COVID-19. Nyatakan langkah KELIMA.", "images/7 Langkah membasuh tangan.png", "Keringkan tangan dengan tisu", "Gosok dengan kuku di tapak tangan", "Basahkan tangan dan ratakan sabun", "Gosok belakang tangan dan celah jari", 4],
+    ["Anda berbasikal ke sekolah, dan anda sampai ke simpang lampu isyarat, apa yang harus anda lakukan sekiranya lampu kuning menyala?", "images/Lampu isyarat kuning.png", "turun dari basikal", "terus berbasikal", "patah balik", "perlahankan basikal dan bersedia untuk berhenti", 4],
+    ["Berikut tip penjagaan gigi yang tepat untuk diamalkan, KECUALI", "images/Senyuman dan penjagaan gigi.png", "Berus gigi setiap kali bangun tidur dan sebelum tidur.", "Pilih berus yang lembut dan berus dengan gerakan menegak.", "Kurangkan makanan manis yang sering melekat pada gigi apabila dikunyah.", "Kerap minum air berkarbonat kerana kandungan asidnya boleh membunuh kuman.", 4],
+    ["Apakah kegunaan kain anduh?", "images/Kain Anduh.png", "membersihkan meja", "mengelap tingkap", "mengikat rambut", "membalut luka", 4],
+    ["Berikut merupakan protokol melakukan Pemulihan Kardio Pulmonari (CPR). Yang manakah urutan yang betul?", "", "\"Danger, Shout, Response, Airway, Breathing, Compression\"", "\"Danger, Response, Shout, Airway, Breathing, Compression\"", "\"Shout, Response, Danger, Airway, Breathing, Compression\"", "\"Shout, Danger, Response, Airway, Compression, Breathing\"", 2],
+    ["Apakah Ibu Negara bagi Malaysia?", "images/Pemandangan KLCC.png", "Ipoh", "Klang", "Putrajaya", "Kuala Lumpur", 4],
+    ["Apakah peralatan yang ditunjukkan di dalam gambar di bawah?", "images/Pengusung (Stretcher).png", "Katil", "Usungan", "Pembebat", "Peti Pertolongan Cemas", 2],
+    ["Berikut merupakan risiko-risiko mandi di sungai, KECUALI", "images/Kanak-kanak mandi sungai.png", "Arus deras", "Ombak besar", "Haiwan berbahaya", "Penyakit bawaan air", 2],
+    ["Apabila anda terhidu bau gas di dalam dapur rumah, apakah tindakan awal yang perlu anda lakukan?", "images/Kebocoran gas.png", "Lari keluar dari rumah", "Jerit dan minta bantuan", "Buka tingkap untuk peredaran udara", "Pastikan gas dapur memasak ditutupkan", 3],
+    ["Semua yang berikut boleh mendatangkan bahaya kepada kanak-kanak di dapur, KECUALI", "", "Wayar yang tergantung disorok dengan penutup wayar", "Minyak masak yang panas", "Air mendidih", "Kuali panas", 1],
+    ["Merujuk kepada gambar di bawah, namakan nadi yang diperiksa.", "images/Pemeriksaan nadi leher.png", "Nadi Radial", "Nadi Brachial", "Nadi Karotid", "Nadi Femoral", 3],
+    ["Jika pakaian yang anda pakai terbakar, apa yang anda harus lakukan?", "images/Kartun pakaian terbakar.png", "mengguling di atas lantai", "menelefon bomba", "menjerit", "berlari", 1],
+    ["Berapakah kelajuan tekanan yang diberi untuk memulihkan mangsa serangan jantung?", "", "Kadar tekanan adalah 100 hingga 110 setiap minit", "Kadar tekanan adalah 100 hingga 120 setiap minit", "Kadar tekanan adalah 100 hingga 130 setiap minit", "Kadar tekanan adalah 100 hingga 140 setiap minit", 2],
+    ["Apakah lencana yang ditunjukkan di bawah?", "images/Lencana St. John Muda.png", "Lencana Kemahiran St. John Muda", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda", 2],
+    ["Apakah nama ikatan berikut?", "images/Cara ikatan.png", "Buku Sila", "Simpul Mati", "Simpul Manuk", "Tindih Kasih", 1],
+    ["Namakan kaedah yang digunakan untuk membantu mangsa berikut :", "images/Kaedah Heimlich.png", "CPR", "Mulut ke Mulut", "Heimlich Manoeuvre", "Tekanan Jantung dari Luar", 3],
+    ["Berikut merupakan tanda-tanda dan gejala tercekik, KECUALI", "images/Gejala tercekik.png", "Batuk", "Muka menjadi pucat", "Menjerit dengan kuat", "Kedua-dua tangan mangsa memegang lehernya", 3],
+    ["Berikut merupakan perkara-perkara yang patut dielakkan ketika mandi di sungai, KECUALI", "", "Jangan melakukan aktiviti di air ketika air mulai pasang, mulai surut dan cuaca buruk.", "Jangan menggunakan peralatan keselamatan di air walaupun tidak tahu berenang.", "Jangan berenang ketika terlalu kenyang atau terlalu lapar.", "Jangan bergurau secara kasar semasa berhampitan di air.", 2],
+    ["Berapakah tekanan dan hembusan yang harus dilakukan semasa melakukan Pemulihan Kardio Pulmonari?", "images/Tekanan CPR.png", "15 kali tekanan, 1 kali hembusan", "15 kali tekanan, 2 kali hembusan", "30 kali tekanan, 1 kali hembusan", "30 kali tekanan, 2 kali hembusan", 4],
+    ["Apakah yang perlu kita lakukan apabila seseorang pesakit tidak sedarkan diri?", "images/Pesakit pengsan.png", "meletakkan pesakit dalam posisi pemulihan", "menyimbah air ke atas pesakit", "memberi pesakit minuman", "menampar muka pesakit", 1],
+    ["Kaedah yang betul untuk melintas jalan ialah", "images/Melintas jalan.png", "menggunakan jejantas", "menggunakan jambatan", "menggunakan simpang empat", "menunggu sehingga tiada kenderaan", 1],
+    ["Apakah nama lagu St. John Ambulans Malaysia?", "", "Perkhidmatan Bagi Manusia", "Berkhidmat Bagi Manusia", "Bertugas untuk Manusia", "Tolong untuk Manusia", 2]
+  ];
+  
+  // Masukkan data sekaligus
+  sheet.getRange(2, 1, defaultQuestions.length, 7).setValues(defaultQuestions);
+  
+  // Besarkan kelebaran lajur agar jadual nampak kemas
+  sheet.setColumnWidth(1, 400); 
+}
