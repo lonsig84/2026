@@ -184,7 +184,50 @@
         // MASUKKAN URL GOOGLE APPS SCRIPT (WEB APP) ANDA DI SINI
         // =========================================================================
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwqIX9HHs0Cd8UmJ7timbXQM3fVbzlsakLV-hicoIcTvoM-1YkmtMsDcMomZojGvQZm/exec";
-      
+
+        // Fallback data (Untuk membolehkan ujian tanpa URL GAS)
+        const fallbackQuizData = [
+            ["Sila lengkapkan lagu St. John Ambulans Malaysia?\nAnggota .......... Bersiap Sedia\nUntuk Berkhidmat Bagi Manusia\nTanpa Mengira .......... Bangsa\nAgama dan Budaya", "", "St. John, Pelbagai", "St. John, Banyak", "Kita, Pelbagai", "Kita, Banyak", 1],
+            ["Mandi di sungai aktiviti yang menyeronokan. Berikut langkah-langkah keselamatan mandi di sungai, KECUALI", "[Gambar Kanak-Kanak Mandi Sungai]", "Jangan mandi terlalu dekat dengan bendungan atau saluran air", "Jangan mandi seorangan", "Jangan mandi bila cuaca berubah secara mendadak terutamanya setelah hujan", "Jangan gunakan alas kaki anti-slip", 4],
+            ["Apakah nama lambang ini?", "[Gambar Jata Negara]", "Jata Malaysia", "Jata Negara", "Lambang Malaysia", "Lambang Negara", 2],
+            ["Nyatakan tanda isyarat lalu lintas yang melarang penunggang basikal memasuki kawasan tersebut.", "[Gambar Papan Tanda]", "A (Berhenti)", "B (Dilarang Masuk)", "C (Dilarang Meletak Kenderaan)", "D (Dilarang Kenderaan Bermotor)", 2],
+            ["Berikut merupakan protokol melakukan Pemulihan Kardio Pulmonari (CPR). Yang manakah urutan yang betul?", "", "\"Danger, Shout for help, Response, Airway, Breathing, Compression\"", "\"Danger, Response, Shout for help, Airway, Breathing, Compression\"", "\"Shout for help, Response, Danger, Airway, Breathing, Compression\"", "\"Shout for help, Danger, Response, Airway, Compression, Breathing\"", 2],
+            ["Apakah lencana yang ditunjukkan di bawah?", "[Gambar Lencana Bulat Biru Merah]", "Lencana Kemahiran Kadet", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda", 2],
+            ["Merujuk kepada gambar di bawah, apakah situasi kecemasan yang dialami mangsa?", "[Gambar Mangsa Tercekik]", "batuk", "tercekik", "terseliuh", "serangan jantung", 2],
+            ["Apakah maksud warna biru pada bendera Jalur Gemilang?", "[Gambar Bendera Malaysia]", "menunjukkan keberanian dan kesediaan dalam mengharungi segala jenis cabaran", "Menggambarkan perpaduan rakyat yang terdiri daripada berbilang kaum", "Melambangkan kesucian dan keluhuran hati rakyat", "melambangkan warna Diraja", 2],
+            ["Anda berbasikal ke sekolah, dan anda sampai ke simpang lampu isyarat, apa yang harus anda lakukan sekiranya lampu kuning menyala?", "[Gambar Lampu Isyarat Kuning]", "turun dari basikal", "terus berbasikal", "patah balik", "perlahankan basikal dan bersedia untuk berhenti", 4],
+            ["Apakah bahasa hukuman bagi pergerakan kawad berikut?", "[Gambar Kawad Hormat Kanan]", "\"Ke kanan....Lurus\"", "\"Menghadap ke belakang, Kanan....Pusing\"", "\"Hormat ke kanan....Hormat\"", "\"Hormat ke hadapan....Hormat\"", 3],
+            ["Nyatakan bahasa hukuman \"belakang pusing semasa berjalan\".", "", "\"Tukar langkah cepat, cepat jalan\".", "\"Bergerak ke kiri, belakang....pusing\".", "\"Menghadap ke belakang, kiri......pusing\".", "\"Menghadap ke belakang, kanan....pusing\"", 2],
+            ["Apakah yang perlu kita lakukan apabila seseorang pesakit yang bernafas tidak sedarkan diri?", "[Gambar Posisi Pemulihan]", "meletakkan pesakit dalam posisi pemulihan", "menyimbah air ke atas pesakit", "memberi pesakit minuman", "menampar muka pesakit", 1],
+            ["Berapakah tekanan dan hembusan yang harus dilakukan semasa melakukan Pemulihan Kardio Pulmonari (CPR) ?", "[Gambar Teknik CPR]", "15 kali tekanan, 1 kali hembusan", "15 kali tekanan, 2 kali hembusan", "30 kali tekanan, 1 kali hembusan", "30 kali tekanan, 2 kali hembusan", 4],
+            ["Bilakah peralatan berikut digunakan?", "[Gambar Pengusung/Stretcher Lipat]", "Bila hendak memindahkan mangsa yang pengsan", "Bila hendak memindahkan mangsa yang tercedera di tangan", "Bila hendak memindahkan mangsa yang tercekik", "Bila hendak memindahkan mangsa yang demam", 1],
+            ["Jika pakaian yang anda pakai terbakar, apa yang anda harus lakukan?", "[Gambar Pakaian Terbakar]", "mengguling di atas lantai", "menelefon bomba", "menjerit", "berlari", 1],
+            ["Apakah lencana yang ditunjukkan di bawah?", "[Gambar Lencana Poket Bulat SJAM]", "Lencana Kemahiran Kadet", "Lencana Poket St. John Muda", "Lencana Forage Cap St. John Muda", "Anugerah Bintang St. John Muda", 2],
+            ["Berikut tip penjagaan gigi yang tepat untuk diamalkan, KECUALI", "[Gambar Penjagaan Gigi]", "Berus gigi setiap kali bangun tidur dan sebelum tidur.", "Pilih berus yang lembut dan berus dengan gerakan menegak.", "Kurangkan makanan manis yang sering melekat pada gigi apabila dikunyah.", "Kerap minum air berkarbonat kerana kandungan asidnya boleh membunuh kuman.", 4],
+            ["Bilakah peralatan berikut digunakan?", "[Gambar Mesin AED]", "Bila mangsa tidak sedarkan diri", "Bila mangsa pengsan", "Selepas CPR dimulakan", "Sebelum CPR dimulakan", 3],
+            ["Anduh Lengan (Arm Sling) sesuai digunakan untuk kecederaan berikut, KECUALI", "[Gambar Anduh Lengan Wanita Tua]", "Menopang kepatahan kaki", "Menopang dislokasi lengan sendi", "Mengurangkan rasa sakit pergelangan tangan yang cedera", "Membatasi gerakan lengan yang patah", 1],
+            ["Apakah Ibu Negeri bagi Negeri Kelantan?", "[Gambar Peta Malaysia]", "Kuantan", "Kota Tinggi", "Kota Bharu", "Kota Kinabalu", 3],
+            ["Apakah nama ikatan berikut?", "[Gambar Ikatan Buku Sila]", "Buku Sila", "Simpul Mati", "Simpul Manuk", "Tindih Kasih", 1],
+            ["Apakah tanda trafik lalu lintas yang ditunjukkan dalam gambarajah di bawah?", "[Gambar Papan Tanda Basikal Bulat Biru]", "Laluan Motosikal", "Laluan Basikal", "Dilarang memandu motosikal", "Dilarang memandu basikal", 2],
+            ["Semua yang berikut boleh mendatangkan bahaya kepada kanak-kanak di dapur, KECUALI", "", "Wayar yang tergantung disorok dengan penutup wayar", "Minyak masak yang panas", "Air mendidih", "Kuali panas", 1],
+            ["Merujuk kepada gambar di bawah, namakan nadi yang diperiksa.", "[Gambar Periksa Nadi Leher]", "Nadi Radial", "Nadi Brachial", "Nadi Karotid", "Nadi Femoral", 3],
+            ["Berapakah kelajuan tekanan yang diberi untuk memulihkan mangsa yang jantung terhenti?", "[Gambar Latihan Tekanan Dada Atas Patung]", "Kadar tekanan adalah 100 hingga 110 setiap minit", "Kadar tekanan adalah 100 hingga 120 setiap minit", "Kadar tekanan adalah 100 hingga 130 setiap minit", "Kadar tekanan adalah 100 hingga 140 setiap minit", 2],
+            ["Apakah yang harus anda lakukan sekiranya anda terjumpa seorang pengsan?", "[Gambar Kanak-kanak Baring Di Rumput]", "melarikan diri", "memulakan CPR", "meminta pertolongan", "longgarkan pakaian yang ketat", 3],
+            ["Apabila anda terhidu bau gas di dalam dapur rumah, lakukan tindakan berikut, KECUALI", "[Gambar Lelaki Terhidu Gas]", "Lari keluar dari rumah", "Jerit dan minta bantuan", "Buka tingkap untuk peredaran udara", "Menyalakan lampu untuk menarik perhatian penyelamat", 4],
+            ["Berikut adalah langkah-langkah untuk menjadikan dapur selamat KECUALI", "[Gambar Tip Keselamatan Dapur]", "Simpan peralatan tajam supaya tidak boleh diambil oleh anak.", "Pasangkan kunci atau penghalang pada laci, kabinet dan pintu.", "Jauhkan makanan dan minuman panas dari hujung meja.", "Guna alas meja yang berjuntai supaya nampak cantik.", 4],
+            ["Namakan kaedah yang digunakan untuk membantu mangsa berikut :", "[Gambar Teknik Heimlich Manoeuvre]", "CPR", "Mulut ke Mulut", "Heimlich Manoeuvre", "Tekanan Jantung dari Luar", 3],
+            ["Setelah mangsa beransur pulih dan mula bernafas serta nadi dapat dirasai, letakkan mangsa dalam kedudukan seperti gambar berikut. Apakah nama kedudukan tersebut?", "[Gambar Posisi Pemulihan Baring Sisi]", "Posisi Tidur", "Posisi Baring", "Posisi Tiarap", "Posisi Pemulihan", 4],
+            ["Berikut merupakan perkara-perkara yang patut dielakkan ketika mandi di sungai, KECUALI", "", "Jangan melakukan aktiviti di air ketika air mulai pasang, mulai surut dan cuaca buruk.", "Jangan menggunakan peralatan keselamatan di air walaupun tidak tahu berenang.", "Jangan berenang ketika terlalu kenyang atau terlalu lapar.", "Jangan bergurau secara kasar semasa mandi di sungai.", 2],
+            ["Apabila berlaku sebarang kecemasan, apakah nombor yang perlu anda hubungi?", "[Gambar Panggilan Kecemasan Telefon Pintar]", "991", "911", "999", "994", 3],
+            ["Apakah nama lagu St. John Ambulans Malaysia?", "", "Perkhidmatan Bagi Manusia", "Berkhidmat Bagi Manusia", "Bertugas untuk Manusia", "Tolong untuk Manusia", 2],
+            ["Berikut merupakan punca-punca terhenti pernafasan, KECUALI", "", "Batuk kering", "Lemas dalam asap, gas beracun atau asap", "Terkena kejutan elektrik atau panahan petir", "Termakan atau terminum bahan-bahan beracun", 1],
+            ["Apakah Ibu Negara bagi Malaysia?", "[Gambar Pemandangan Kuala Lumpur KLCC]", "Ipoh", "Klang", "Putrajaya", "Kuala Lumpur", 4],
+            ["Berikut merupakan kaedah yang betul untuk melintas jalan KECUALI", "[Gambar Kanak-kanak Melintas Jalan]", "menggunakan jejantas", "menggunakan jambatan", "menggunakan lintasan kuda belang", "menunggu sehingga tiada kenderaan", 2],
+            ["Berikut merupakan tanda-tanda dan gejala tercekik, KECUALI", "[Gambar Wanita Pegang Leher Tercekik]", "Batuk", "Muka menjadi pucat", "Menjerit dengan kuat", "Kedua-dua tangan mangsa memegang lehernya", 3],
+            ["Merujuk situasi berikut, keadaan manakah yang harus diberikan keutamaan rawatan?", "[Gambar Kemalangan Basikal Terbaring]", "pendarahan ringan", "patah tulang tertutup", "pengsan", "pernafasan terhenti", 4],
+            ["Berikut merupakan kegunaan kain pembalut segi tiga, KECUALI", "[Gambar Kain Anduh Tiga Segi]", "Mengampu bahagian yang cedera atau patah", "mengelap tingkap atau jadikan hiasan", "Menghenti atau menahan pendarahan", "Menutup tempat yang luka atau cedera", 2]
+        ];
+
         window.quizData = [];
         let startTime = 0;
 
@@ -279,15 +322,22 @@
                         let optStr = opt.trim();
                         let displayContent = '';
                         
-                        // Check if it has a prefix like "A. " or "A) " followed by a URL/Path
-                        let prefixMatch = optStr.match(/^([a-zA-Z][\.\)]?\s*)(.*?\.(?:jpg|jpeg|png|gif|webp)|http[^\s]+|data:image[^\s]+)$/i);
-                        // Check if the whole string is an image path/url
-                        let isImage = /^(http[^\s]+|data:image[^\s]+|.*?\.(?:jpg|jpeg|png|gif|webp))$/i.test(optStr);
-
+                        // Perbaiki logik semakan prefix dan imej (修复了前缀和图片路径识别)
+                        let prefix = "";
+                        let contentPath = optStr;
+                        
+                        // Cari prefix seperti "A. ", "B) ", "C " (Mesti ada ruang kosong/space selepas huruf)
+                        let prefixMatch = optStr.match(/^([A-Za-z][\.\)]?\s+)(.*)$/);
                         if (prefixMatch) {
-                            displayContent = `<span class="font-medium mr-2 text-gray-700 ml-2">${prefixMatch[1]}</span><img src="${prefixMatch[2]}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1">`;
-                        } else if (isImage) {
-                            displayContent = `<img src="${optStr}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1 ml-2">`;
+                            prefix = prefixMatch[1];
+                            contentPath = prefixMatch[2].trim();
+                        }
+                        
+                        // Semak adakah contentPath adalah fail imej (.png, .jpg dll)
+                        let isImage = /^(https?:\/\/|data:image\/)/i.test(contentPath) || /\.(jpg|jpeg|png|gif|webp)$/i.test(contentPath);
+
+                        if (isImage) {
+                            displayContent = `<span class="font-medium mr-2 text-gray-700 ml-2">${prefix}</span><img src="${contentPath}" alt="Pilihan" class="max-h-32 object-contain rounded border border-gray-200 bg-white p-1">`;
                         } else {
                             displayContent = `<span class="text-gray-700 leading-relaxed ml-2">${optStr}</span>`;
                         }
