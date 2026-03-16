@@ -23,18 +23,19 @@
             margin: 10px auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .image-placeholder {
-            border: 2px dashed #ccc;
-            background-color: #fafafa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 10px;
+        .image-container {
+            border: 1px solid #eee;
+            background-color: #fff;
             margin-bottom: 10px;
-            font-size: 0.8rem;
-            color: #666;
-            min-height: 100px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
         }
         .section-header {
             background-color: #f3f4f6;
@@ -80,9 +81,12 @@
 
         <!-- Q1 -->
         <div class="question-box">
-            <div class="image-placeholder">
-                <img scr="question 1.png">
+            <div class="image-container">
+                <!-- 示例图片：摄影社团 -->
+                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=500&auto=format&fit=crop" alt="Photography Club">
             </div>
+            <div class="text-center font-bold mb-2">Photography Club Welcome!</div>
+            <p class="text-xs text-center mb-2">Every Friday, 3:00 PM - 4:00 PM, School Garden.<br>Join us to learn how to take beautiful photos!</p>
             <p>1. The Photography Club meets...</p>
             <p>A. once a week.</p>
             <p>B. every day after school.</p>
@@ -105,9 +109,11 @@
 
         <!-- Q3 -->
         <div class="question-box">
-            <div class="image-placeholder">
-                [图片描述：一个古老的油灯 (Oil Lamp) 的简笔画。下面有一段文字：In the past, people did not have electricity. They used oil lamps or candles to see at night. Houses were darker than today.]
+            <div class="image-container">
+                <!-- 示例图片：古老油灯 -->
+                <img src="https://images.unsplash.com/photo-1533221216134-c834ca2189a9?q=80&w=500&auto=format&fit=crop" alt="Old Lamp">
             </div>
+            <p class="text-sm mb-2 italic">In the past, people did not have electricity. They used oil lamps or candles to see at night. Houses were darker than today.</p>
             <p>3. According to the text, life in the past was...</p>
             <p>A. more exciting because of the lights.</p>
             <p>B. easier because everyone had candles.</p>
@@ -122,7 +128,11 @@
             <div class="border-2 border-dashed p-3 mb-2">
                 <h3 class="font-bold text-center underline">MUSEUM NOTICE</h3>
                 <p class="text-sm mt-2 text-center">Come see our new exhibition:<br><strong>"How We Lived 100 Years Ago"</strong></p>
-                <p class="text-xs mt-2">- See old washing machines<br>- Look at old horse carriages<br>- Free for students this Sunday!</p>
+                <div class="image-container mt-2">
+                    <!-- 示例图片：旧式马车 -->
+                    <img src="https://images.unsplash.com/photo-1599408012628-912f2766863d?q=80&w=500&auto=format&fit=crop" alt="Horse Carriage">
+                </div>
+                <p class="text-xs mt-2 text-center">- See old washing machines<br>- Look at old horse carriages<br>- Free for students this Sunday!</p>
             </div>
             <p>4. What can you see at the museum exhibition?</p>
             <p>A. Modern cars and buses.</p>
@@ -132,9 +142,11 @@
 
         <!-- Q5 -->
         <div class="question-box">
-            <div class="image-placeholder">
-                [图片描述：一张漫画。一个小男孩不小心从自行车上摔下来，腿部擦伤。他的好朋友在旁边说："Don't worry, Leo! I will call for help now!"]
+            <div class="image-container">
+                <!-- 示例图片：自行车意外 -->
+                <img src="https://images.unsplash.com/photo-1565057430174-c0477ddad363?q=80&w=500&auto=format&fit=crop" alt="Bicycle Accident">
             </div>
+            <p class="text-center italic text-sm mb-2">"Don't worry, Leo! I will call for help now!"</p>
             <p>5. What is happening in the picture?</p>
             <p>A. Leo is learning to ride a bike.</p>
             <p>B. Leo's friend is helping him after an accident.</p>
