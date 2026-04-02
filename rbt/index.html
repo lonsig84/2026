@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年级 RBT 交互式分层作业单</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for smooth transitions and inputs */
+        .tab-btn.active {
+            border-bottom: 4px solid #3b82f6;
+            color: #1d4ed8;
+            font-weight: bold;
+            background-color: #eff6ff;
+        }
+        .feedback-msg {
+            display: none;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .feedback-msg.show {
+            display: block;
+        }
+        .correct { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .incorrect { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        input[type="number"], input[type="text"], select {
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            padding: 0.35rem 0.5rem;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800 pb-12">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-8 shadow-lg">
+        <div class="max-w-4xl mx-auto px-4">
+            <h1 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+                <span class="text-4xl">🚀</span> 五年级 设计与工艺 (RBT) 交互式作业单
+            </h1>
+            <p class="mt-2 text-blue-100 opacity-90">请选择对应的单元完成练习。做完后点击“提交”，系统将立即为你批改并给予反馈！</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Student Info -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-wrap gap-6 items-center justify-between">
+            <div class="flex items-center gap-3 w-full md:w-auto flex-1">
+                <label class="font-bold text-gray-700 whitespace-nowrap">姓名:</label>
+                <input type="text" placeholder="输入你的名字" class="max-w-xs bg-gray-50">
+            </div>
+            <div class="flex items-center gap-3 w-full md:w-auto flex-1">
+                <label class="font-bold text-gray-700 whitespace-nowrap">班级:</label>
+                <select class="max-w-[200px] bg-gray-50">
+                    <option>5 创新班 (Inovatif)</option>
+                    <option>5 智慧班 (Pintar)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 mb-6 bg-white rounded-t-xl overflow-hidden shadow-sm">
+            <button onclick="switchTab('unit1')" id="btn-unit1" class="tab-btn flex-1 py-4 px-4 md:px-6 text-center text-gray-600 hover:bg-blue-50 transition-colors text-sm md:text-base">
+                单元一：一针一线的温暖
+            </button>
+            <button onclick="switchTab('unit2')" id="btn-unit2" class="tab-btn active flex-1 py-4 px-4 md:px-6 text-center text-gray-600 hover:bg-blue-50 transition-colors text-sm md:text-base">
+                单元二：无限的可更新能源
+            </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- WORKSHEET 1: COST CALCULATION (Hidden by default) -->
+        <!-- ========================================== -->
+        <div id="unit1" class="worksheet-section bg-white p-6 md:p-8 rounded-b-xl rounded-t-none shadow-sm border border-gray-100 hidden">
+            <div class="mb-6 pb-4 border-b border-gray-100">
+                <h2 class="text-2xl font-bold text-blue-800">单元一：一针一线的温暖</h2>
+                <p class="text-gray-500 text-sm mt-2 bg-gray-50 inline-block px-3 py-1 rounded-full">学习标准: 4.3.5 估算制作缝纫作品的材料费用</p>
+            </div>
+
+            <form id="form-unit1" onsubmit="event.preventDefault(); gradeUnit1();">
+                <!-- Part A -->
+                <section class="mb-10">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm shadow-sm">A 项</span> 基础计算</h3>
+                    <p class="mb-4 text-gray-600">明理想要制作一个简单的爱心钥匙扣。请根据下方的价目表，帮他算出两种基础材料的相加成本。</p>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-4 text-sm inline-block shadow-sm">
+                        <ul class="list-disc pl-5 text-yellow-800 font-medium">
+                            <li>不织布 (1块)：<strong>RM 2.00</strong></li>
+                            <li>钥匙圈 (1个)：<strong>RM 1.50</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-lg border">
+                        <span class="text-gray-700">不织布 RM 2.00 + 钥匙圈 RM 1.50 = <strong>RM</strong></span>
+                        <input type="number" id="u1-a1" step="0.10" class="w-24 text-center font-bold text-blue-700 bg-white" placeholder="0.00" required>
+                    </div>
+                    <div id="fb-u1-a1" class="feedback-msg"></div>
+                </section>
+
+                <!-- Part B -->
+                <section class="mb-10">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm shadow-sm">B 项</span> 填写成本估算表</h3>
+                    <p class="mb-4 text-gray-600">请你帮缝纫小组完成这份制作“手机套”的材料成本估算表。（提示：总价 = 数量 × 单价）</p>
+                    
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700">
+                                    <th class="border-b border-r p-3">材料</th>
+                                    <th class="border-b border-r p-3 text-center">数量</th>
+                                    <th class="border-b border-r p-3 text-center">单价 (RM)</th>
+                                    <th class="border-b p-3 bg-blue-50">总价 (RM)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border-b border-r p-3 font-medium">棉麻布</td>
+                                    <td class="border-b border-r p-3 text-center text-gray-600">2</td>
+                                    <td class="border-b border-r p-3 text-center text-gray-600">3.00</td>
+                                    <td class="border-b p-3 bg-blue-50/30"><input type="number" id="u1-b1" step="0.10" placeholder="?" required></td>
+                                </tr>
+                                <tr>
+                                    <td class="border-b border-r p-3 font-medium">缝纫线</td>
+                                    <td class="border-b border-r p-3 text-center text-gray-600">1</td>
+                                    <td class="border-b border-r p-3 text-center text-gray-600">1.20</td>
+                                    <td class="border-b p-3 bg-blue-50/30"><input type="number" id="u1-b2" step="0.10" placeholder="?" required></td>
+                                </tr>
+                                <tr>
+                                    <td class="border-b border-r p-3 font-medium">纽扣</td>
+                                    <td class="border-b border-r p-3 text-center text-gray-600">3</td>
+                                    <td class="border-b border-r p-3 text-center text-gray-600">0.50</td>
+                                    <td class="border-b p-3 bg-blue-50/30"><input type="number" id="u1-b3" step="0.10" placeholder="?" required></td>
+                                </tr>
+                                <tr class="bg-gray-800 text-white font-bold">
+                                    <td colspan="3" class="p-3 text-right">项目总额 (RM):</td>
+                                    <td class="p-3"><input type="number" id="u1-b4" step="0.10" class="text-black" placeholder="全部相加" required></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="fb-u1-b" class="feedback-msg mt-3"></div>
+                </section>
+
+                <!-- Part C -->
+                <section class="mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm shadow-sm">C 项</span> 降低成本的策略 (KBAT)</h3>
+                    <p class="mb-4 text-gray-600">小华觉得制作手机套的成本太高了。在不影响手机套保护功能的情况下，以下哪种做法是最<strong>合理且环保</strong>的降低成本策略？</p>
+                    
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer hover:bg-purple-50 transition border-gray-200 shadow-sm">
+                            <input type="radio" name="u1-c" value="A" class="mt-1 w-4 h-4 text-purple-600">
+                            <span class="text-gray-700">A. 不使用缝纫线，直接用普通胶水把布料随便粘起来。（不牢固）</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer hover:bg-purple-50 transition border-gray-200 shadow-sm">
+                            <input type="radio" name="u1-c" value="B" class="mt-1 w-4 h-4 text-purple-600" required>
+                            <span class="text-gray-700 font-medium">B. 利用家里不再穿的旧牛仔裤或旧衣物来代替购买全新的棉麻布。</span>
+                        </label>
+                        <label class="flex items-start gap-3 p-4 border rounded-xl cursor-pointer hover:bg-purple-50 transition border-gray-200 shadow-sm">
+                            <input type="radio" name="u1-c" value="C" class="mt-1 w-4 h-4 text-purple-600">
+                            <span class="text-gray-700">C. 放弃制作手机套，直接去商店买一个。</span>
+                        </label>
+                    </div>
+                    <div id="fb-u1-c" class="feedback-msg"></div>
+                </section>
+
+                <div class="text-center mt-10 pt-8 border-t border-gray-200">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full shadow-lg transform transition hover:-translate-y-1 hover:shadow-xl text-lg flex items-center gap-2 mx-auto">
+                        <span>📝</span> 提交并批改单元一
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- WORKSHEET 2: RENEWABLE ENERGY (Active by default based on prompt context) -->
+        <!-- ========================================== -->
+        <div id="unit2" class="worksheet-section bg-white p-6 md:p-8 rounded-b-xl rounded-t-none shadow-sm border border-gray-100">
+            <div class="mb-6 pb-4 border-b border-gray-100">
+                <h2 class="text-2xl font-bold text-blue-800">单元二：无限的可更新能源</h2>
+                <div class="flex flex-wrap gap-2 mt-2">
+                    <span class="bg-gray-50 text-gray-500 text-xs px-3 py-1 rounded-full border">SP 5.1.1 说明定义</span>
+                    <span class="bg-gray-50 text-gray-500 text-xs px-3 py-1 rounded-full border">SP 5.1.2 讲解重要性</span>
+                </div>
+            </div>
+
+            <form id="form-unit2" onsubmit="event.preventDefault(); gradeUnit2();">
+                
+                <!-- Part A (辅导组：定义与 6 种能源配对) -->
+                <section class="mb-10">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm shadow-sm">A 项</span> 认识可更新能源</h3>
+                    
+                    <div class="bg-blue-50/50 p-5 rounded-xl border border-blue-100 mb-6 shadow-sm">
+                        <p class="mb-3 text-blue-900 font-bold">1. 完成可更新能源的定义：</p>
+                        <p class="leading-loose text-gray-700">
+                            可更新能源又称为可再生能源，是指可以在短时间内
+                            <select id="u2-a1-1" class="w-32 inline-block mx-1 font-bold text-blue-700 bg-white shadow-sm" required>
+                                <option value="">--选择--</option>
+                                <option value="再生">再生</option>
+                                <option value="消失">消失</option>
+                            </select>
+                            和不断得到
+                            <select id="u2-a1-2" class="w-32 inline-block mx-1 font-bold text-blue-700 bg-white shadow-sm" required>
+                                <option value="">--选择--</option>
+                                <option value="污染">污染</option>
+                                <option value="补充">补充</option>
+                            </select>
+                            的能源。这些来自大自然的能源，取之不尽，用之不竭。
+                        </p>
+                        <div id="fb-u2-a1" class="feedback-msg mt-3"></div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="mb-4 text-gray-800 font-bold">2. 图文配对：请根据描述，为以下的图片选择正确的“可更新能源”名称（共6种）。</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Energy 1 -->
+                            <div class="border p-3 rounded-lg flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition">
+                                <span class="flex items-center gap-2"><span class="text-2xl">☀️</span> 利用阳光发电</span>
+                                <select id="u2-a2-1" class="w-28 text-sm" required>
+                                    <option value="">请选择</option>
+                                    <option value="太阳能">太阳能</option> <option value="水力能">水力能</option> <option value="风能">风能</option> <option value="海浪能">海浪能</option> <option value="生物质能">生物质能</option> <option value="地热能">地热能</option>
+                                </select>
+                            </div>
+                            <!-- Energy 2 -->
+                            <div class="border p-3 rounded-lg flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition">
+                                <span class="flex items-center gap-2"><span class="text-2xl">💧</span> 利用水流冲力</span>
+                                <select id="u2-a2-2" class="w-28 text-sm" required>
+                                    <option value="">请选择</option>
+                                    <option value="太阳能">太阳能</option> <option value="水力能">水力能</option> <option value="风能">风能</option> <option value="海浪能">海浪能</option> <option value="生物质能">生物质能</option> <option value="地热能">地热能</option>
+                                </select>
+                            </div>
+                            <!-- Energy 3 -->
+                            <div class="border p-3 rounded-lg flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition">
+                                <span class="flex items-center gap-2"><span class="text-2xl">💨</span> 推动风车发电</span>
+                                <select id="u2-a2-3" class="w-28 text-sm" required>
+                                    <option value="">请选择</option>
+                                    <option value="太阳能">太阳能</option> <option value="水力能">水力能</option> <option value="风能">风能</option> <option value="海浪能">海浪能</option> <option value="生物质能">生物质能</option> <option value="地热能">地热能</option>
+                                </select>
+                            </div>
+                            <!-- Energy 4 -->
+                            <div class="border p-3 rounded-lg flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition">
+                                <span class="flex items-center gap-2"><span class="text-2xl">🌊</span> 海水起伏运动</span>
+                                <select id="u2-a2-4" class="w-28 text-sm" required>
+                                    <option value="">请选择</option>
+                                    <option value="太阳能">太阳能</option> <option value="水力能">水力能</option> <option value="风能">风能</option> <option value="海浪能">海浪能</option> <option value="生物质能">生物质能</option> <option value="地热能">地热能</option>
+                                </select>
+                            </div>
+                            <!-- Energy 5 -->
+                            <div class="border p-3 rounded-lg flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition">
+                                <span class="flex items-center gap-2"><span class="text-2xl">🍂</span> 动植物废弃物</span>
+                                <select id="u2-a2-5" class="w-28 text-sm" required>
+                                    <option value="">请选择</option>
+                                    <option value="太阳能">太阳能</option> <option value="水力能">水力能</option> <option value="风能">风能</option> <option value="海浪能">海浪能</option> <option value="生物质能">生物质能</option> <option value="地热能">地热能</option>
+                                </select>
+                            </div>
+                            <!-- Energy 6 -->
+                            <div class="border p-3 rounded-lg flex justify-between items-center bg-gray-50 hover:bg-blue-50 transition">
+                                <span class="flex items-center gap-2"><span class="text-2xl">🌋</span> 地球内部热能</span>
+                                <select id="u2-a2-6" class="w-28 text-sm" required>
+                                    <option value="">请选择</option>
+                                    <option value="太阳能">太阳能</option> <option value="水力能">水力能</option> <option value="风能">风能</option> <option value="海浪能">海浪能</option> <option value="生物质能">生物质能</option> <option value="地热能">地热能</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="fb-u2-a2" class="feedback-msg mt-3"></div>
+                    </div>
+                </section>
+
+                <!-- Part B (巩固组：重要性梳理) -->
+                <section class="mb-10">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm shadow-sm">B 项</span> 可更新能源的重要性</h3>
+                    <p class="mb-4 text-gray-600">在你的“起泡图 (Peta Buih)”中，为什么我们需要使用可更新能源？请勾选出<strong>所有正确</strong>的选项。（提示：共有 3 个正确答案）</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-green-50 transition shadow-sm">
+                            <input type="checkbox" id="u2-b-1" value="correct" class="w-5 h-5 text-green-600 rounded">
+                            <span class="text-gray-700">可以减低碳排放量，降低空气污染</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-green-50 transition shadow-sm">
+                            <input type="checkbox" id="u2-b-2" value="wrong" class="w-5 h-5 text-green-600 rounded">
+                            <span class="text-gray-700">会让地球变得越来越热 (温室效应)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-green-50 transition shadow-sm">
+                            <input type="checkbox" id="u2-b-3" value="correct" class="w-5 h-5 text-green-600 rounded">
+                            <span class="text-gray-700">无限期供应干净能源</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-green-50 transition shadow-sm">
+                            <input type="checkbox" id="u2-b-4" value="correct" class="w-5 h-5 text-green-600 rounded">
+                            <span class="text-gray-700">能减少化石燃料的消耗</span>
+                        </label>
+                    </div>
+                    <div id="fb-u2-b" class="feedback-msg mt-3"></div>
+                </section>
+
+                <!-- Part C (增广组：情境与脑力激荡) -->
+                <section class="mb-8">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm shadow-sm">C 项</span> 情境应用与脑力激荡 (KBAT)</h3>
+                    
+                    <!-- Question 1: Camping Scenario -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm mb-6">
+                        <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 mb-4 flex gap-3">
+                            <span class="text-2xl">🏕️</span>
+                            <p class="text-indigo-900"><strong>情境导入：</strong> 周末，小明一家人在森林里露营。到了晚上，小明发现他的手机没电了，而森林里根本找不到任何电源插座。</p>
+                        </div>
+                        <p class="mb-3 font-semibold text-gray-800">1. 结合大自然的力量，小明最好使用以下哪种物品来给手机充电？</p>
+                        <div class="space-y-3 mb-2">
+                            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 transition">
+                                <input type="radio" name="u2-c1" value="A" required>
+                                <span>A. 汽油发电机 (吵杂且污染环境)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 transition border-indigo-200 bg-indigo-50/30">
+                                <input type="radio" name="u2-c1" value="B">
+                                <span class="font-medium">B. 太阳能移动电源 (白天已吸收太阳光储电)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-indigo-50 transition">
+                                <input type="radio" name="u2-c1" value="C">
+                                <span>C. 一次性干电池</span>
+                            </label>
+                        </div>
+                        <div id="fb-u2-c1" class="feedback-msg"></div>
+                    </div>
+
+                    <!-- Question 2: Brainstorming wisely use energy -->
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="mb-3 font-semibold text-gray-800 flex items-center gap-2">
+                            <span class="text-xl">💡</span> 2. 小组脑力激荡：为了保护地球，请选出 2 个在日常生活中<strong>“明智使用能源”</strong>的具体做法。
+                        </p>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50 transition">
+                                <input type="checkbox" id="u2-c2-1" class="w-5 h-5 text-purple-600 rounded">
+                                <span>A. 养成随手关灯、关风扇的习惯，节约用电。</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50 transition">
+                                <input type="checkbox" id="u2-c2-2" class="w-5 h-5 text-purple-600 rounded">
+                                <span>B. 距离很近也坚持让父母开车接送，不走路。</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50 transition">
+                                <input type="checkbox" id="u2-c2-3" class="w-5 h-5 text-purple-600 rounded">
+                                <span>C. 多搭乘公共交通工具（如巴士、轻快铁），或与邻居共车。</span>
+                            </label>
+                        </div>
+                        <div id="fb-u2-c2" class="feedback-msg mt-3"></div>
+                    </div>
+                </section>
+
+                <div class="text-center mt-10 pt-8 border-t border-gray-200">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-full shadow-lg transform transition hover:-translate-y-1 hover:shadow-xl text-lg flex items-center gap-2 mx-auto">
+                        <span>📝</span> 提交并批改单元二
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <!-- Modal Box for final score -->
+    <div id="result-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center transform transition-all scale-105">
+            <div id="modal-icon" class="text-6xl mb-4 animate-bounce">🎉</div>
+            <h2 id="modal-title" class="text-2xl font-bold mb-2 text-gray-800">批改完成！</h2>
+            <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-100">
+                <p id="modal-score" class="text-3xl font-black text-blue-600 mb-1">5/5</p>
+                <p id="modal-desc" class="text-gray-500 text-sm">往下查看红色或绿色的评语来纠正错误吧。</p>
+            </div>
+            <button onclick="closeModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:shadow-lg transform transition hover:-translate-y-0.5 w-full">
+                好的，我去检查
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.worksheet-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+                el.classList.remove('bg-eff6ff'); // Remove active bg
+            });
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('active');
+        }
+
+        // Initialize Unit 2 as active based on recent request
+        switchTab('unit2');
+
+        // Helper to show feedback with animation
+        function showFeedback(elementId, isCorrect, correctMsg, incorrectMsg) {
+            const el = document.getElementById(elementId);
+            // Reset animation
+            el.classList.remove('show');
+            void el.offsetWidth; // trigger reflow
+            
+            el.className = `feedback-msg show ${isCorrect ? 'correct' : 'incorrect'}`;
+            el.innerHTML = isCorrect ? `✔️ <strong>太棒了！</strong> ${correctMsg}` : `❌ <strong>再想一想。</strong> ${incorrectMsg}`;
+        }
+
+        // Helper for Modal
+        function showModal(scoreText, isPerfect) {
+            document.getElementById('result-modal').classList.remove('hidden');
+            document.getElementById('modal-icon').innerHTML = isPerfect ? '🏆' : '💪';
+            document.getElementById('modal-title').innerText = isPerfect ? '全对！表现优异！' : '批改完成！';
+            document.getElementById('modal-score').innerText = scoreText;
+        }
+        function closeModal() {
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        // Grade Unit 1 (Cost Calculation)
+        function gradeUnit1() {
+            let correctCount = 0;
+            let totalQuestions = 3;
+
+            // Part A
+            const a1 = parseFloat(document.getElementById('u1-a1').value);
+            if (a1 === 3.5 || a1 === 3.50) {
+                showFeedback('fb-u1-a1', true, '算得很准！2.00 + 1.50 就是 3.50。', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u1-a1', false, '', '正确答案应该是 3.50。(RM 2.00 + RM 1.50 = RM 3.50)');
+            }
+
+            // Part B
+            const b1 = parseFloat(document.getElementById('u1-b1').value);
+            const b2 = parseFloat(document.getElementById('u1-b2').value);
+            const b3 = parseFloat(document.getElementById('u1-b3').value);
+            const b4 = parseFloat(document.getElementById('u1-b4').value);
+            
+            if (b1 === 6.00 && b2 === 1.20 && b3 === 1.50 && (b4 === 8.70 || b4 === 8.7)) {
+                showFeedback('fb-u1-b', true, '你的乘法和加法完全正确，总计 RM 8.70。', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u1-b', false, '', '请再检查一遍。棉麻布 2x3=6.00，线 1x1.2=1.20，纽扣 3x0.5=1.50。总额应该是 8.70。');
+            }
+
+            // Part C
+            const cAns = document.querySelector('input[name="u1-c"]:checked')?.value;
+            if (cAns === 'B') {
+                showFeedback('fb-u1-c', true, '非常有环保意识！旧物利用是降低成本最好的方法。', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u1-c', false, '', '最合理的应该是选项 B（利用旧衣物），这样既能实现功能又能零成本获取布料。');
+            }
+
+            showModal(`${correctCount} / ${totalQuestions}`, correctCount === totalQuestions);
+        }
+
+        // Grade Unit 2 (Renewable Energy)
+        function gradeUnit2() {
+            let correctCount = 0;
+            let totalQuestions = 5; // A1, A2, B, C1, C2
+
+            // Part A - 1 (Definition)
+            const a1_1 = document.getElementById('u2-a1-1').value;
+            const a1_2 = document.getElementById('u2-a1-2').value;
+            if (a1_1 === '再生' && a1_2 === '补充') {
+                showFeedback('fb-u2-a1', true, '概念掌握得很清晰！', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u2-a1', false, '', '正确答案是“再生”和“补充”。');
+            }
+
+            // Part A - 2 (6 Types Matching)
+            const ansArr = [
+                document.getElementById('u2-a2-1').value, // 阳光 -> 太阳能
+                document.getElementById('u2-a2-2').value, // 水流 -> 水力能
+                document.getElementById('u2-a2-3').value, // 风车 -> 风能
+                document.getElementById('u2-a2-4').value, // 海水 -> 海浪能
+                document.getElementById('u2-a2-5').value, // 废弃物 -> 生物质能
+                document.getElementById('u2-a2-6').value  // 内部热 -> 地热能
+            ];
+            const correctArr = ['太阳能', '水力能', '风能', '海浪能', '生物质能', '地热能'];
+            let matchCorrect = true;
+            for(let i=0; i<6; i++) {
+                if(ansArr[i] !== correctArr[i]) matchCorrect = false;
+            }
+
+            if (matchCorrect) {
+                showFeedback('fb-u2-a2', true, '6 种可更新能源全部配对正确！', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u2-a2', false, '', '部分选项配对错误了，请根据图片提示和常识再仔细检查哦。');
+            }
+
+            // Part B (Importance Checkboxes)
+            const b1 = document.getElementById('u2-b-1').checked;
+            const b2 = document.getElementById('u2-b-2').checked;
+            const b3 = document.getElementById('u2-b-3').checked;
+            const b4 = document.getElementById('u2-b-4').checked;
+            
+            if (b1 && !b2 && b3 && b4) {
+                showFeedback('fb-u2-b', true, '找得很齐全！这三项都是可更新能源的好处。', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u2-b', false, '', '你选错或漏选了。正确的三个是：降低污染、无限期供应、减少化石燃料消耗。');
+            }
+
+            // Part C - 1 (Camping Radio)
+            const c1Ans = document.querySelector('input[name="u2-c1"]:checked')?.value;
+            if (c1Ans === 'B') {
+                showFeedback('fb-u2-c1', true, '选择正确！太阳能移动电源非常适合户外使用且环保。', '');
+                correctCount++;
+            } else {
+                showFeedback('fb-u2-c1', false, '', '最佳选择是 B。太阳能移动电源能将阳光转换为电能，环保又实用。');
+            }
+
+            // Part C - 2 (Wise Energy Use Checkboxes)
+            const c2_1 = document.getElementById('u2-c2-1').checked; // True
+            const c2_2 = document.getElementById('u2-c2-2').checked; // False
+            const c2_3 = document.getElementById('u2-c2-3').checked; // True
+
+            // Check if exactly the 2 correct ones are checked
+            const checkedCount = [c2_1, c2_2, c2_3].filter(Boolean).length;
+
+            if (c2_1 && !c2_2 && c2_3) {
+                showFeedback('fb-u2-c2', true, '你提出了很好的生活实践做法！节约用电和乘搭公交都是明智的。', '');
+                correctCount++;
+            } else {
+                if (checkedCount !== 2) {
+                    showFeedback('fb-u2-c2', false, '', '请选出刚好 2 个正确的做法。');
+                } else {
+                    showFeedback('fb-u2-c2', false, '', 'B 是错误的做法哦，我们应该鼓励多走路或搭乘公交来减少碳排放。正确答案是 A 和 C。');
+                }
+            }
+
+            showModal(`${correctCount} / ${totalQuestions}`, correctCount === totalQuestions);
+        }
+    </script>
+</body>
+</html>
