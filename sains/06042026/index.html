@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>一年级科学：生物的基本需求</title>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f9ff; }
+  .sticky-header {
+    background: white; border-bottom: 4px solid #60a5fa;
+    padding: 14px 20px; position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .header-inner { max-width: 780px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .header-title { font-size: 20px; font-weight: 700; color: #1e40af; }
+  .header-sub { font-size: 13px; color: #6b7280; margin-top: 2px; }
+  .plant-bar-box { display: flex; align-items: center; gap: 10px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 8px 14px; }
+  .bar-label { font-size: 11px; color: #15803d; font-weight: 700; margin-bottom: 4px; }
+  .bar-track { width: 110px; height: 10px; background: #d1fae5; border-radius: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #22c55e; transition: width 1s ease; border-radius: 5px; }
+  .plant-icon { font-size: 30px; transition: transform 0.4s; }
+  .main { max-width: 780px; margin: 24px auto; padding: 0 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+  .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; }
+  .card-a { border-left: 7px solid #facc15; }
+  .card-b { border-left: 7px solid #4ade80; }
+  .card-c { border-left: 7px solid #a78bfa; }
+  .sec-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .sec-title { font-size: 17px; font-weight: 700; color: #1f2937; }
+  .sec-desc { font-size: 13px; color: #6b7280; margin-top: 4px; }
+  .hint-btn { font-size: 12px; border: 1px solid #d1d5db; border-radius: 20px; padding: 5px 12px; cursor: pointer; background: transparent; color: #6b7280; white-space: nowrap; }
+  .hint-btn:hover { background: #f9fafb; }
+  .hint-box { font-size: 13px; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; line-height: 1.7; }
+  .hint-a { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+  .hint-b { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+  .hint-c { background: #faf5ff; border: 1px solid #ddd6fe; color: #4c1d95; }
+  .cb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .cb-card { border: 2px solid #e5e7eb; border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .cb-card:hover { border-color: #93c5fd; background: #eff6ff; }
+  .cb-card.checked { border-color: #3b82f6; background: #eff6ff; transform: scale(1.04); }
+  .cb-card.correct-yes { border-color: #22c55e !important; background: #f0fdf4 !important; }
+  .cb-card.correct-no { border-color: #ef4444 !important; background: #fef2f2 !important; }
+  .cb-card.missed { border-color: #22c55e !important; border-style: dashed !important; }
+  .cb-icon { font-size: 32px; display: block; margin-bottom: 6px; }
+  .cb-label { font-size: 13px; font-weight: 600; color: #374151; }
+  .cb-mark { font-size: 14px; margin-top: 4px; display: block; min-height: 18px; }
+  .q-box { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; margin-bottom: 10px; transition: background 0.3s, border-color 0.3s; }
+  .q-box.ok { background: #f0fdf4; border-color: #86efac; }
+  .q-box.bad { background: #fef2f2; border-color: #fca5a5; }
+  .q-text { font-size: 15px; color: #1f2937; margin-bottom: 10px; }
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #374151; cursor: pointer; }
+  .radio-label input { width: 16px; height: 16px; cursor: pointer; }
+  .fb-text { font-size: 12px; color: #7c3aed; margin-top: 6px; font-weight: 600; }
+  .scenario-box { background: #faf5ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 14px; display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; }
+  .scenario-img { width: 200px; min-width: 160px; border-radius: 10px; overflow: hidden; border: 1px solid #ddd6fe; flex-shrink: 0; }
+  .scenario-img img { width: 100%; display: block; }
+  .scenario-text { font-size: 14px; color: #4c1d95; line-height: 1.7; align-self: center; }
+  .textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; background: white; color: #1f2937; transition: box-shadow 0.2s; }
+  .textarea:focus { box-shadow: 0 0 0 3px #ddd6fe; border-color: #a78bfa; }
+  .textarea:disabled { background: #f9fafb; }
+  .q-label { display: block; font-size: 14px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+  .student-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .field-wrap { flex: 1; min-width: 160px; }
+  .field-label { font-size: 12px; font-weight: 700; color: #6b7280; margin-bottom: 4px; }
+  .field-input { width: 100%; border: none; border-bottom: 2px solid #d1d5db; padding: 8px 4px; font-size: 16px; background: transparent; color: #1f2937; outline: none; transition: border-color 0.2s; }
+  .field-input:focus { border-bottom-color: #3b82f6; }
+  .submit-btn { display: block; margin: 0 auto; background: #2563eb; color: white; border: none; border-radius: 30px; padding: 12px 44px; font-size: 18px; font-weight: 700; cursor: pointer; transition: background 0.15s, transform 0.1s; box-shadow: 0 4px 14px rgba(37,99,235,0.3); }
+  .submit-btn:hover { background: #1d4ed8; transform: scale(1.03); }
+  .submit-btn:active { transform: scale(0.97); }
+  .result-card { background: white; border-radius: 24px; padding: 32px 24px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border-top: 8px solid #3b82f6; }
+  .result-score { font-size: 48px; font-weight: 900; color: #2563eb; }
+  .result-plant { display: inline-block; background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 10px 20px; font-size: 15px; font-weight: 700; color: #15803d; margin: 12px 0; }
+  .reset-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; border: 1px solid #d1d5db; border-radius: 20px; padding: 8px 20px; font-size: 14px; cursor: pointer; background: #f3f4f6; color: #374151; transition: background 0.15s; }
+  .reset-btn:hover { background: #e5e7eb; }
+  @media (max-width: 500px) {
+    .cb-grid { grid-template-columns: repeat(2, 1fr); }
+    .scenario-img { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+function App() {
+  const [name, setName] = useState('');
+  const [kelas, setKelas] = useState('');
+  const [secA, setSecA] = useState({ water:false, food:false, air:false, shelter:false, toys:false, clothes:false });
+  const [secB, setSecB] = useState({ plantWater:'', plantFood:'' });
+  const [secC, setSecC] = useState({ consequence:'', reason:'' });
+  const [hints, setHints] = useState({ a:false, b:false, c:false });
+  const [score, setScore] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+
+  const plantStage = () => {
+    if (score === 0) return { emoji:'🌱', text:'小种子' };
+    if (score <= 30) return { emoji:'🌿', text:'发芽了' };
+    if (score <= 70) return { emoji:'🪴', text:'茁壮成长' };
+    return { emoji:'🌸', text:'开花结果！' };
+  };
+
+  useEffect(() => {
+    let s = 0;
+    if (secA.water) s += 10;
+    if (secA.food) s += 10;
+    if (secA.air) s += 10;
+    if (secA.shelter) s += 10;
+    if (secA.toys) s -= 10;
+    if (secA.clothes) s -= 10;
+    if (secB.plantWater === 'roots') s += 15;
+    if (secB.plantFood === 'make') s += 15;
+    if (secC.consequence.includes('死') || secC.consequence.includes('枯') || secC.consequence.includes('不能')) s += 10;
+    if (secC.reason.includes('水') || secC.reason.includes('阳光') || secC.reason.includes('基本')) s += 10;
+    setScore(Math.max(0, s));
+  }, [secA, secB, secC]);
+
+  const toggleA = (id) => {
+    if (submitted) return;
+    setSecA(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleHint = (k) => setHints(prev => ({ ...prev, [k]: !prev[k] }));
+
+  const handleSubmit = () => {
+    setSubmitted(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const reset = () => {
+    setSubmitted(false);
+    setName(''); setKelas('');
+    setSecA({ water:false, food:false, air:false, shelter:false, toys:false, clothes:false });
+    setSecB({ plantWater:'', plantFood:'' });
+    setSecC({ consequence:'', reason:'' });
+    setHints({ a:false, b:false, c:false });
+  };
+
+  const items = [
+    { id:'water',   label:'水',       icon:'💧', correct:true  },
+    { id:'food',    label:'食物',     icon:'🍎', correct:true  },
+    { id:'toys',    label:'玩具',     icon:'🧸', correct:false },
+    { id:'air',     label:'空气',     icon:'💨', correct:true  },
+    { id:'clothes', label:'漂亮衣服', icon:'👗', correct:false },
+    { id:'shelter', label:'庇护所',   icon:'🏠', correct:true  },
+  ];
+
+  const ps = plantStage();
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="sticky-header">
+        <div className="header-inner">
+          <div>
+            <div className="header-title">一年级科学：生物的基本需求</div>
+            <div className="header-sub">单元3：生物和非生物</div>
+          </div>
+          <div className="plant-bar-box">
+            <div>
+              <div className="bar-label">学习能量</div>
+              <div className="bar-track">
+                <div className="bar-fill" style={{ width: Math.min(100, score) + '%' }}></div>
+              </div>
+            </div>
+            <div className="plant-icon">{ps.emoji}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="main">
+
+        {/* Student Info */}
+        <div className="card">
+          <div className="student-row">
+            <div className="field-wrap">
+              <div className="field-label">姓名 Nama:</div>
+              <input className="field-input" placeholder="输入你的名字..." value={name} onChange={e => setName(e.target.value)} disabled={submitted} />
+            </div>
+            <div className="field-wrap">
+              <div className="field-label">班级 Kelas:</div>
+              <input className="field-input" placeholder="例如: 1M" value={kelas} onChange={e => setKelas(e.target.value)} disabled={submitted} />
+            </div>
+          </div>
+        </div>
+
+        {/* Section A */}
+        <div className="card card-a">
+          <div className="sec-head">
+            <div>
+              <div className="sec-title">A项：选一选 <span style={{fontSize:13, fontWeight:400, color:'#6b7280'}}>(基础挑战)</span></div>
+              <div className="sec-desc">动物、植物和人类都需要什么才能生存？（可多选）</div>
+            </div>
+            <button className="hint-btn" onClick={() => toggleHint('a')}>💡 提示</button>
+          </div>
+          {hints.a && (
+            <div className="hint-box hint-a">
+              <strong>小提示：</strong> 想象一下，如果你被关在一个房间里，你需要什么才不会饿死、渴死或憋死？另外，下雨时你需要躲在哪里？
+            </div>
+          )}
+          <div className="cb-grid">
+            {items.map(item => {
+              let cls = 'cb-card';
+              if (!submitted && secA[item.id]) cls += ' checked';
+              if (submitted) {
+                if (item.correct && secA[item.id]) cls += ' correct-yes';
+                else if (!item.correct && secA[item.id]) cls += ' correct-no';
+                else if (item.correct && !secA[item.id]) cls += ' missed';
+              }
+              return (
+                <div key={item.id} className={cls} onClick={() => toggleA(item.id)}>
+                  <span className="cb-icon">{item.icon}</span>
+                  <span className="cb-label">{item.label}</span>
+                  <span className="cb-mark">
+                    {submitted && item.correct && secA[item.id] && '✅'}
+                    {submitted && !item.correct && secA[item.id] && '❌'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Section B */}
+        <div className="card card-b">
+          <div className="sec-head">
+            <div>
+              <div className="sec-title">B项：获取方式 <span style={{fontSize:13, fontWeight:400, color:'#6b7280'}}>(应用挑战)</span></div>
+              <div className="sec-desc">植物和动物是以不同的方式获取基本需求的。请选择正确的答案。</div>
+            </div>
+            <button className="hint-btn" onClick={() => toggleHint('b')}>💡 提示</button>
+          </div>
+          {hints.b && (
+            <div className="hint-box hint-b">
+              <strong>小提示：</strong> 植物没有嘴巴，它们怎么喝水呢？植物需要阳光来做什么？
+            </div>
+          )}
+          <div className={`q-box ${submitted ? (secB.plantWater === 'roots' ? 'ok' : 'bad') : ''}`}>
+            <div className="q-text">1. 🌳 大树的 <strong>水分</strong> 是从哪里来的？</div>
+            <div className="radio-group">
+              <label className="radio-label">
+                <input type="radio" name="pwater" value="roots" checked={secB.plantWater === 'roots'} onChange={e => setSecB({...secB, plantWater: e.target.value})} disabled={submitted} />
+                根部从土壤里吸收水分
+              </label>
+              <label className="radio-label">
+                <input type="radio" name="pwater" value="leaves" checked={secB.plantWater === 'leaves'} onChange={e => setSecB({...secB, plantWater: e.target.value})} disabled={submitted} />
+                叶子张开嘴巴喝水
+              </label>
+            </div>
+            {submitted && <div className="fb-text">{secB.plantWater === 'roots' ? '✅ 正确！' : '👉 参考答案：根部从土壤里吸收水分。'}</div>}
+          </div>
+          <div className={`q-box ${submitted ? (secB.plantFood === 'make' ? 'ok' : 'bad') : ''}`}>
+            <div className="q-text">2. 🌻 植物需要 <strong>食物</strong>，它们是怎么获取的？</div>
+            <div className="radio-group">
+              <label className="radio-label">
+                <input type="radio" name="pfood" value="eat" checked={secB.plantFood === 'eat'} onChange={e => setSecB({...secB, plantFood: e.target.value})} disabled={submitted} />
+                像动物一样到处找虫子吃
+              </label>
+              <label className="radio-label">
+                <input type="radio" name="pfood" value="make" checked={secB.plantFood === 'make'} onChange={e => setSecB({...secB, plantFood: e.target.value})} disabled={submitted} />
+                在阳光下，自己制造食物
+              </label>
+            </div>
+            {submitted && <div className="fb-text">{secB.plantFood === 'make' ? '✅ 正确！' : '👉 参考答案：在阳光下，自己制造食物。'}</div>}
+          </div>
+        </div>
+
+        {/* Section C */}
+        <div className="card card-c">
+          <div className="sec-head">
+            <div>
+              <div className="sec-title">C项：我是小侦探 <span style={{fontSize:13, fontWeight:400, color:'#6b7280'}}>(KBAT 情境分析)</span></div>
+              <div className="sec-desc">阅读情境，写出你的观察和原因。</div>
+            </div>
+            <button className="hint-btn" onClick={() => toggleHint('c')}>💡 提示</button>
+          </div>
+
+          {/* Scenario with image */}
+          <div className="scenario-box">
+            <div className="scenario-img">
+              <img src="Gemini_Generated_Image_npeconpeconpecon.png" alt="伟明的实验" />
+            </div>
+            <div className="scenario-text">
+              <strong>情境：</strong><br /><br />
+              "伟明把一盆健康的绿豆植物放在一个<strong>完全密封的黑色箱子</strong>里，并且<strong>一个星期没有给它浇水</strong>。"
+            </div>
+          </div>
+
+          {hints.c && (
+            <div className="hint-box hint-c">
+              <strong>小提示：</strong><br />
+              - 密封的黑箱子里面有什么是没有的？（空气？阳光？）<br />
+              - 没有浇水，植物缺少了什么？<br />
+              - 缺少了这些，植物还会绿油油的吗？（词语：枯萎、死亡、缺少水、缺少阳光）
+            </div>
+          )}
+
+          <div style={{marginBottom:14}}>
+            <label className="q-label">1. 一个星期后，这盆植物会发生什么变化？</label>
+            <textarea className="textarea" rows="2" placeholder="植物会..." value={secC.consequence} onChange={e => setSecC({...secC, consequence: e.target.value})} disabled={submitted}></textarea>
+            {submitted && <div className="fb-text">{(secC.consequence.includes('死') || secC.consequence.includes('枯') || secC.consequence.includes('不能')) ? '✅ 很好，推断正确！' : '👉 参考答案：植物会枯萎/死亡。'}</div>}
+          </div>
+          <div>
+            <label className="q-label">2. 为什么会这样？它缺少了哪些基本需求？</label>
+            <textarea className="textarea" rows="2" placeholder="因为植物缺少了..." value={secC.reason} onChange={e => setSecC({...secC, reason: e.target.value})} disabled={submitted}></textarea>
+            {submitted && <div className="fb-text">{(secC.reason.includes('水') || secC.reason.includes('阳光') || secC.reason.includes('基本')) ? '✅ 分析得很有道理！' : '👉 参考答案：因为它缺少了水和阳光（无法制造食物），也可能缺少新鲜空气。'}</div>}
+          </div>
+        </div>
+
+        {/* Submit / Result */}
+        {!submitted ? (
+          <div style={{textAlign:'center'}}>
+            <button className="submit-btn" onClick={handleSubmit}>提交答案 ✔️</button>
+          </div>
+        ) : (
+          <div className="result-card">
+            <div style={{fontSize:56, marginBottom:8}}>{ps.emoji}</div>
+            <div style={{fontSize:22, fontWeight:700, color:'#1f2937', marginBottom:6}}>批改完成！</div>
+            {name && <div style={{fontSize:14, color:'#6b7280', marginBottom:8}}>{name} 同学，加油！</div>}
+            <div style={{fontSize:16, color:'#6b7280'}}>
+              你的学习能量分数：<span className="result-score">{score}</span> <span style={{fontSize:18}}> / 100</span>
+            </div>
+            <div className="result-plant">你的植物状态：{ps.emoji} {ps.text}</div>
+            <br />
+            <button className="reset-btn" onClick={reset}>↺ 再试一次</button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
