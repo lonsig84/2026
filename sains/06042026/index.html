@@ -112,8 +112,8 @@ function App() {
     if (secA.shelter) s += 10;
     if (secA.toys) s -= 10;
     if (secA.clothes) s -= 10;
-    if (secB.plantWater === 'roots') s += 15;
-    if (secB.plantFood === 'make') s += 15;
+    if (secB.plantWater === 'roots') s += 20;
+    if (secB.plantFood === 'make') s += 20;
     if (secC.consequence === 'wilt') s += 10;
     if (secC.needs.includes('water') && secC.needs.includes('sunlight')) s += 10;
     setScore(Math.max(0, s));
