@@ -92,7 +92,7 @@ function App() {
   const [kelas, setKelas] = useState('');
   const [secA, setSecA] = useState({ water:false, food:false, air:false, shelter:false, toys:false, clothes:false });
   const [secB, setSecB] = useState({ plantWater:'', plantFood:'' });
-  const [secC, setSecC] = useState({ consequence:'', reason:'' });
+  const [secC, setSecC] = useState({ consequence:'', reason:'' , needs:[] });
   const [hints, setHints] = useState({ a:false, b:false, c:false });
   const [score, setScore] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -114,8 +114,8 @@ function App() {
     if (secA.clothes) s -= 10;
     if (secB.plantWater === 'roots') s += 15;
     if (secB.plantFood === 'make') s += 15;
-    if (secC.consequence.includes('死') || secC.consequence.includes('枯') || secC.consequence.includes('不能')) s += 10;
-    if (secC.reason.includes('水') || secC.reason.includes('阳光') || secC.reason.includes('基本')) s += 10;
+    if (secC.consequence === 'wilt') s += 10;
+    if (secC.needs.includes('water') && secC.needs.includes('sunlight')) s += 10;
     setScore(Math.max(0, s));
   }, [secA, secB, secC]);
 
@@ -136,7 +136,7 @@ function App() {
     setName(''); setKelas('');
     setSecA({ water:false, food:false, air:false, shelter:false, toys:false, clothes:false });
     setSecB({ plantWater:'', plantFood:'' });
-    setSecC({ consequence:'', reason:'' });
+    setSecC({ consequence:'', reason:'', needs:[] });
     setHints({ a:false, b:false, c:false });
   };
 
@@ -274,9 +274,8 @@ function App() {
           <div className="sec-head">
             <div>
               <div className="sec-title">C项：我是小侦探 <span style={{fontSize:13, fontWeight:400, color:'#6b7280'}}>(KBAT 情境分析)</span></div>
-              <div className="sec-desc">阅读情境，写出你的观察和原因。</div>
+              <div className="sec-desc">看图，选出正确的答案。</div>
             </div>
-            <button className="hint-btn" onClick={() => toggleHint('c')}>💡 提示</button>
           </div>
 
           {/* Scenario with image */}
@@ -286,28 +285,81 @@ function App() {
             </div>
             <div className="scenario-text">
               <strong>情境：</strong><br /><br />
-              "伟明把一盆健康的绿豆植物放在一个<strong>完全密封的黑色箱子</strong>里，并且<strong>一个星期没有给它浇水</strong>。"
+              伟明把一盆健康的绿豆植物放在一个<strong>完全密封的黑色箱子</strong>里，并且<strong>一个星期没有给它浇水</strong>。
             </div>
           </div>
 
-          {hints.c && (
-            <div className="hint-box hint-c">
-              <strong>小提示：</strong><br />
-              - 密封的黑箱子里面有什么是没有的？（空气？阳光？）<br />
-              - 没有浇水，植物缺少了什么？<br />
-              - 缺少了这些，植物还会绿油油的吗？（词语：枯萎、死亡、缺少水、缺少阳光）
+          {/* Q1: consequence */}
+          <div style={{marginBottom:18}}>
+            <div className="q-label" style={{fontSize:15, marginBottom:10}}>1. 一个星期后，这盆植物会变成怎样？</div>
+            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10}}>
+              {[
+                { val:'grow',  icon:'🌸', label:'长得更好' },
+                { val:'wilt',  icon:'🥀', label:'枯萎死亡' },
+                { val:'same',  icon:'🌿', label:'完全没变化' },
+              ].map(opt => {
+                const sel = secC.consequence === opt.val;
+                const isCorrect = opt.val === 'wilt';
+                let cls = 'cb-card';
+                if (!submitted && sel) cls += ' checked';
+                if (submitted && sel && isCorrect) cls += ' correct-yes';
+                if (submitted && sel && !isCorrect) cls += ' correct-no';
+                if (submitted && !sel && isCorrect) cls += ' missed';
+                return (
+                  <div key={opt.val} className={cls} onClick={() => !submitted && setSecC({...secC, consequence: opt.val})}>
+                    <span className="cb-icon">{opt.icon}</span>
+                    <span className="cb-label">{opt.label}</span>
+                    <span className="cb-mark">
+                      {submitted && sel && isCorrect && '✅'}
+                      {submitted && sel && !isCorrect && '❌'}
+                      {submitted && !sel && isCorrect && '👈'}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          )}
-
-          <div style={{marginBottom:14}}>
-            <label className="q-label">1. 一个星期后，这盆植物会发生什么变化？</label>
-            <textarea className="textarea" rows="2" placeholder="植物会..." value={secC.consequence} onChange={e => setSecC({...secC, consequence: e.target.value})} disabled={submitted}></textarea>
-            {submitted && <div className="fb-text">{(secC.consequence.includes('死') || secC.consequence.includes('枯') || secC.consequence.includes('不能')) ? '✅ 很好，推断正确！' : '👉 参考答案：植物会枯萎/死亡。'}</div>}
+            {submitted && <div className="fb-text">{secC.consequence === 'wilt' ? '✅ 答对了！植物会枯萎死亡。' : '👉 正确答案：枯萎死亡 🥀'}</div>}
           </div>
+
+          {/* Q2: needs - multi select picture cards */}
           <div>
-            <label className="q-label">2. 为什么会这样？它缺少了哪些基本需求？</label>
-            <textarea className="textarea" rows="2" placeholder="因为植物缺少了..." value={secC.reason} onChange={e => setSecC({...secC, reason: e.target.value})} disabled={submitted}></textarea>
-            {submitted && <div className="fb-text">{(secC.reason.includes('水') || secC.reason.includes('阳光') || secC.reason.includes('基本')) ? '✅ 分析得很有道理！' : '👉 参考答案：因为它缺少了水和阳光（无法制造食物），也可能缺少新鲜空气。'}</div>}
+            <div className="q-label" style={{fontSize:15, marginBottom:4}}>2. 植物缺少了什么？（可选多个）</div>
+            <div style={{fontSize:13, color:'#7c3aed', marginBottom:10}}>点击选出所有缺少的基本需求 👇</div>
+            <div style={{display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:10}}>
+              {[
+                { val:'water',    icon:'💧', label:'水' },
+                { val:'sunlight', icon:'☀️', label:'阳光' },
+                { val:'air',      icon:'💨', label:'新鲜空气' },
+                { val:'toys',     icon:'🧸', label:'玩具' },
+              ].map(opt => {
+                const isNeeded = opt.val !== 'toys';
+                const sel = secC.needs.includes(opt.val);
+                const toggleNeed = () => {
+                  if (submitted) return;
+                  setSecC(prev => ({
+                    ...prev,
+                    needs: sel ? prev.needs.filter(n => n !== opt.val) : [...prev.needs, opt.val]
+                  }));
+                };
+                let cls = 'cb-card';
+                if (!submitted && sel) cls += ' checked';
+                if (submitted && sel && isNeeded) cls += ' correct-yes';
+                if (submitted && sel && !isNeeded) cls += ' correct-no';
+                if (submitted && !sel && isNeeded) cls += ' missed';
+                return (
+                  <div key={opt.val} className={cls} onClick={toggleNeed}>
+                    <span className="cb-icon">{opt.icon}</span>
+                    <span className="cb-label">{opt.label}</span>
+                    <span className="cb-mark">
+                      {submitted && sel && isNeeded && '✅'}
+                      {submitted && sel && !isNeeded && '❌'}
+                      {submitted && !sel && isNeeded && '👈'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {submitted && <div className="fb-text">{(secC.needs.includes('water') && secC.needs.includes('sunlight')) ? '✅ 答对了！植物缺少水和阳光（还有新鲜空气）。' : '👉 正确答案：水 💧、阳光 ☀️、新鲜空气 💨'}</div>}
           </div>
         </div>
 
