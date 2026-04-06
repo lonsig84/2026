@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>互动作业单：多音多义字</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0fdf4;padding:1rem}
+.sheet{max-width:820px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);overflow:hidden}
+.header{background:#059669;color:#fff;padding:1.5rem 2rem;text-align:center}
+.header h1{font-size:26px;font-weight:700;margin-bottom:4px}
+.header p{font-size:15px;opacity:.85}
+.name-row{margin-top:1rem;display:flex;justify-content:center;gap:8px;align-items:center;font-size:14px;flex-wrap:wrap}
+.name-row input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.6);color:#fff;font-size:14px;width:140px;outline:none;padding:2px 4px}
+.name-row input::placeholder{color:rgba(255,255,255,.5)}
+.body{padding:1.5rem 2rem;display:flex;flex-direction:column;gap:2rem}
+.section{background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;padding:1.5rem;position:relative}
+.sec-badge{position:absolute;top:-14px;left:1rem;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+.sec-badge.a{background:#3b82f6}
+.sec-badge.b{background:#f97316}
+.sec-badge.c{background:#a855f7}
+.sec-title{font-size:18px;font-weight:700;color:#1e293b;margin-bottom:4px;margin-top:4px}
+.sec-desc{font-size:13px;color:#64748b;margin-bottom:1.25rem;line-height:1.6}
+
+/* MATCH */
+.match-wrap{display:flex;justify-content:space-between;position:relative;margin:1rem 0}
+.match-col{display:flex;flex-direction:column;gap:14px;z-index:10;width:42%}
+.match-item{padding:.65rem 1rem;background:#fff;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .2s;text-align:center;font-weight:700;font-size:15px;user-select:none}
+.match-item .sub{font-size:11px;color:#94a3b8;font-weight:400;margin-top:2px}
+.match-item:hover{border-color:#3b82f6}
+.match-item.selected{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8}
+.match-item.pending{background:#fefce8;border-color:#eab308;color:#854d0e}
+.match-item.result-correct{background:#f0fdf4;border-color:#22c55e;color:#15803d;cursor:default}
+.match-item.result-wrong{background:#fef2f2;border-color:#ef4444;color:#b91c1c;cursor:default}
+svg.lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+/* BLANK */
+.blank-q{display:flex;align-items:flex-start;gap:10px;padding:.85rem 1rem;background:#fff;border-radius:10px;border-left:3px solid #f97316;margin-bottom:.75rem;font-size:15px;line-height:1.8;flex-wrap:wrap}
+.blank-q .qnum{color:#f97316;font-weight:700;min-width:20px}
+.blank-q .qtext{flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+select.blank{appearance:none;border:2px solid #cbd5e1;border-radius:8px;padding:4px 28px 4px 10px;font-size:14px;font-weight:700;color:#334155;background:#f8fafc;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:1em;transition:border-color .2s}
+select.blank:focus{outline:none;border-color:#f97316}
+select.blank.result-correct{border-color:#22c55e;background-color:#f0fdf4;color:#15803d}
+select.blank.result-wrong{border-color:#ef4444;background-color:#fef2f2;color:#b91c1c}
+.fi{display:inline-block;width:20px;text-align:center;font-size:16px;font-weight:700}
+
+/* WRITE */
+.write-area{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:1rem;margin-bottom:1rem}
+.write-label{font-size:13px;color:#a855f7;font-weight:700;margin-bottom:8px}
+textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:.6rem;font-size:14px;color:#334155;background:#f8fafc;resize:none;height:80px;line-height:1.6;font-family:inherit}
+textarea:focus{outline:none;border-color:#a855f7}
+
+/* RESULT BANNER */
+.result-banner{background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:1.25rem;text-align:center;display:none;margin-top:.5rem}
+.result-banner.show{display:block}
+.score-big{font-size:28px;font-weight:700;color:#059669}
+.score-sub{font-size:13px;color:#64748b;margin-top:6px}
+.score-breakdown{margin-top:12px;font-size:13px;color:#475569;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.score-breakdown span{background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:4px 14px}
+
+/* SUBMIT */
+.submit-row{text-align:center;padding:.5rem 0 1rem}
+button.submit-btn{background:#059669;color:#fff;border:none;border-radius:24px;padding:.75rem 2.5rem;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(5,150,105,.3)}
+button.submit-btn:hover{background:#047857;transform:scale(1.03)}
+button.submit-btn:active{transform:scale(.98)}
+button.submit-btn:disabled{background:#9ca3af;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border-radius:20px;padding:2rem;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-stars{font-size:32px;letter-spacing:4px;margin-bottom:8px}
+.modal-score{font-size:40px;font-weight:700;color:#059669;margin:8px 0 4px}
+.modal-label{font-size:13px;color:#64748b;margin-bottom:4px}
+.modal-msg{font-size:14px;color:#475569;margin-bottom:1.5rem;line-height:1.7}
+button.close-btn{background:#059669;color:#fff;border:none;border-radius:20px;padding:.6rem 2rem;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
+button.close-btn:hover{background:#047857}
+
+.match-status{font-size:13px;color:#64748b;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="header">
+    <h1>互动学习：多音多义字</h1>
+    <p>《小老鼠与乌鸦》—— 挑战你的汉字超能力！</p>
+    <div class="name-row">
+      <span>学生：</span>
+      <input type="text" placeholder="输入姓名..." id="studentName">
+      <span style="margin-left:16px;opacity:.75">学习标准：5.1.1, 5.3.1</span>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- SECTION A -->
+    <div class="section">
+      <div class="sec-badge a">A</div>
+      <div class="sec-title">热身站：听音辨字</div>
+      <div class="sec-desc">点击左侧的读音，再点击右侧对应的词语进行连线。完成后请点击"完成并提交"按钮查看结果。</div>
+      <div class="match-wrap" id="matchGame">
+        <svg class="lines" id="matchSvg"></svg>
+        <div class="match-col" id="leftCol">
+          <div class="match-item" data-id="p1" data-match="c1">huǎng<div class="sub">（表示耀眼）</div></div>
+          <div class="match-item" data-id="p2" data-match="c2">huàng<div class="sub">（表示摇动）</div></div>
+          <div class="match-item" data-id="p3" data-match="c3">sāng<div class="sub">（跟死人有关的事）</div></div>
+          <div class="match-item" data-id="p4" data-match="c4">sàng<div class="sub">（失去、情绪低落）</div></div>
+        </div>
+        <div class="match-col" id="rightCol">
+          <div class="match-item" data-id="c3" data-match="p3">丧事</div>
+          <div class="match-item" data-id="c2" data-match="p2">摇晃</div>
+          <div class="match-item" data-id="c4" data-match="p4">沮丧</div>
+          <div class="match-item" data-id="c1" data-match="p1">明晃晃</div>
+        </div>
+      </div>
+      <div class="match-status">已连线：<span id="matchCount">0</span> / 4 对</div>
+    </div>
+
+    <!-- SECTION B -->
+    <div class="section">
+      <div class="sec-badge b">B</div>
+      <div class="sec-title">挑战站：语境侦探</div>
+      <div class="sec-desc">阅读句子，根据上下文意思从下拉菜单选择正确的拼音。提交后才会显示对错。</div>
+
+      <div class="blank-q">
+        <span class="qnum">1.</span>
+        <span class="qtext">刺眼的阳光照在玻璃窗上，显得明
+          <select class="blank" id="b1" data-answer="huang3">
+            <option value="">（请选择）</option>
+            <option value="huang3">huǎng</option>
+            <option value="huang4">huàng</option>
+          </select>
+          的，让人睁不开眼睛。<span class="fi" id="fi1"></span>
+        </span>
+      </div>
+      <div class="blank-q">
+        <span class="qnum">2.</span>
+        <span class="qtext">一阵大风吹过，路旁的小树苗在风中剧烈地摇
+          <select class="blank" id="b2" data-answer="huang4">
+            <option value="">（请选择）</option>
+            <option value="huang3">huǎng</option>
+            <option value="huang4">huàng</option>
+          </select>
+          。<span class="fi" id="fi2"></span>
+        </span>
+      </div>
+      <div class="blank-q">
+        <span class="qnum">3.</span>
+        <span class="qtext">比赛输了，弟弟垂头
+          <select class="blank" id="b3" data-answer="sang4">
+            <option value="">（请选择）</option>
+            <option value="sang1">sāng</option>
+            <option value="sang4">sàng</option>
+          </select>
+          地坐在沙发上一言不发。<span class="fi" id="fi3"></span>
+        </span>
+      </div>
+      <div class="blank-q">
+        <span class="qnum">4.</span>
+        <span class="qtext">前方路段正在为逝世的死者办理
+          <select class="blank" id="b4" data-answer="sang1">
+            <option value="">（请选择）</option>
+            <option value="sang1">sāng</option>
+            <option value="sang4">sàng</option>
+          </select>
+          事，车辆请绕道而行。<span class="fi" id="fi4"></span>
+        </span>
+      </div>
+    </div>
+
+    <!-- SECTION C -->
+    <div class="section">
+      <div class="sec-badge c">C</div>
+      <div class="sec-title">创作站：小小作家</div>
+      <div class="sec-desc">利用"晃"和"丧"的其中一个读音，自己造句。完成后点击提交按钮。</div>
+      <div class="write-area">
+        <div class="write-label">1. 选择 晃 (huàng) 或 (huǎng) 造句：</div>
+        <textarea id="c1" placeholder="例如：树叶在风中摇晃……"></textarea>
+      </div>
+      <div class="write-area">
+        <div class="write-label">2. 选择 丧 (sàng) 或 (sāng) 造句：</div>
+        <textarea id="c2" placeholder="例如：他看起来很沮丧……"></textarea>
+      </div>
+    </div>
+
+    <div class="result-banner" id="resultBanner">
+      <div class="score-big" id="scoreDisplay"></div>
+      <div class="score-breakdown" id="scoreBreakdown"></div>
+      <div class="score-sub">C 项造句将由老师批改。</div>
+    </div>
+
+    <div class="submit-row">
+      <button class="submit-btn" id="submitBtn" onclick="submitAll()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        完成并提交
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-stars" id="modalStars">★★★</div>
+    <div class="modal-label">A + B 得分</div>
+    <div class="modal-score" id="modalScore"></div>
+    <div class="modal-msg" id="modalMsg"></div>
+    <button class="close-btn" onclick="document.getElementById('modal').classList.remove('show')">继续学习</button>
+  </div>
+</div>
+
+<script>
+let selectedItem=null,pairs={},matchCount=0,submitted=false;
+
+document.querySelectorAll('.match-item').forEach(function(item){
+  item.addEventListener('click',function(){
+    if(submitted)return;
+    if(!selectedItem){
+      this.classList.add('selected');
+      selectedItem=this;
+      return;
+    }
+    if(selectedItem===this){
+      this.classList.remove('selected');
+      selectedItem=null;
+      return;
+    }
+    if(selectedItem.parentElement===this.parentElement){
+      selectedItem.classList.remove('selected');
+      this.classList.add('selected');
+      selectedItem=this;
+      return;
+    }
+    var leftEl=selectedItem.parentElement.id==='leftCol'?selectedItem:this;
+    var rightEl=selectedItem.parentElement.id==='leftCol'?this:selectedItem;
+    var lid=leftEl.dataset.id, rid=rightEl.dataset.id;
+    var exLeft=Object.keys(pairs).find(function(k){return pairs[k].left===lid;});
+    var exRight=Object.keys(pairs).find(function(k){return pairs[k].right===rid;});
+    if(exLeft)deletePair(exLeft);
+    if(exRight)deletePair(exRight);
+    var pid=lid+'_'+rid;
+    pairs[pid]={left:lid,right:rid};
+    selectedItem.classList.remove('selected');
+    this.classList.remove('selected');
+    leftEl.classList.add('pending');
+    rightEl.classList.add('pending');
+    selectedItem=null;
+    matchCount=Object.keys(pairs).length;
+    document.getElementById('matchCount').textContent=matchCount;
+    redrawLines();
+  });
+});
+
+function deletePair(pid){
+  var p=pairs[pid];
+  if(!p)return;
+  var lEl=document.querySelector('[data-id="'+p.left+'"]');
+  var rEl=document.querySelector('[data-id="'+p.right+'"]');
+  if(lEl)lEl.classList.remove('pending','result-correct','result-wrong');
+  if(rEl)rEl.classList.remove('pending','result-correct','result-wrong');
+  delete pairs[pid];
+  matchCount=Object.keys(pairs).length;
+  document.getElementById('matchCount').textContent=matchCount;
+}
+
+function redrawLines(){
+  var svg=document.getElementById('matchSvg');
+  svg.innerHTML='';
+  var containerRect=document.getElementById('matchGame').getBoundingClientRect();
+  Object.keys(pairs).forEach(function(pid){
+    var p=pairs[pid];
+    var lEl=document.querySelector('[data-id="'+p.left+'"]');
+    var rEl=document.querySelector('[data-id="'+p.right+'"]');
+    if(!lEl||!rEl)return;
+    var lr=lEl.getBoundingClientRect();
+    var rr=rEl.getBoundingClientRect();
+    var line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',lr.right-containerRect.left);
+    line.setAttribute('y1',lr.top+lr.height/2-containerRect.top);
+    line.setAttribute('x2',rr.left-containerRect.left);
+    line.setAttribute('y2',rr.top+rr.height/2-containerRect.top);
+    var stroke='#eab308', dash='5,4', width='2.5';
+    if(p.correct===true){stroke='#22c55e';dash='none';}
+    else if(p.correct===false){stroke='#ef4444';dash='4,3';}
+    line.setAttribute('stroke',stroke);
+    line.setAttribute('stroke-width',width);
+    if(dash!=='none')line.setAttribute('stroke-dasharray',dash);
+    svg.appendChild(line);
+  });
+}
+
+window.addEventListener('resize',redrawLines);
+
+function submitAll(){
+  if(submitted)return;
+  submitted=true;
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('submitBtn').innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 已提交';
+
+  var aCorrect=0, aTotal=4;
+  // Grade A
+  Object.keys(pairs).forEach(function(pid){
+    var p=pairs[pid];
+    var lEl=document.querySelector('[data-id="'+p.left+'"]');
+    var rEl=document.querySelector('[data-id="'+p.right+'"]');
+    var correct=(lEl.dataset.match===p.right);
+    p.correct=correct;
+    if(correct){
+      aCorrect++;
+      lEl.classList.remove('pending');rEl.classList.remove('pending');
+      lEl.classList.add('result-correct');rEl.classList.add('result-correct');
+    } else {
+      lEl.classList.remove('pending');rEl.classList.remove('pending');
+      lEl.classList.add('result-wrong');rEl.classList.add('result-wrong');
+    }
+  });
+  redrawLines();
+
+  // Grade B
+  var bCorrect=0, bTotal=4;
+  ['b1','b2','b3','b4'].forEach(function(id,i){
+    var sel=document.getElementById(id);
+    var fi=document.getElementById('fi'+(i+1));
+    if(sel.value===sel.dataset.answer){
+      bCorrect++;
+      sel.classList.add('result-correct');
+      fi.textContent='✓';fi.style.color='#22c55e';
+    } else {
+      sel.classList.add('result-wrong');
+      fi.textContent='✗';fi.style.color='#ef4444';
+    }
+    sel.disabled=true;
+  });
+
+  var total=aCorrect+bCorrect;
+  var max=aTotal+bTotal;
+  var pct=Math.round((total/max)*100);
+
+  document.getElementById('resultBanner').classList.add('show');
+  document.getElementById('scoreDisplay').textContent='A + B 得分：'+total+' / '+max+'（'+pct+'%）';
+  document.getElementById('scoreBreakdown').innerHTML=
+    '<span>A 连线：'+aCorrect+' / '+aTotal+'</span>'+
+    '<span>B 填空：'+bCorrect+' / '+bTotal+'</span>';
+
+  var stars, msg;
+  if(pct>=90){stars='★★★';msg='非常出色！你完全掌握了多音多义字的用法！老师会批改你的造句。';}
+  else if(pct>=60){stars='★★';msg='做得不错！再复习一下错的题目，你一定能全对！老师会批改你的造句。';}
+  else{stars='★';msg='继续加油！多音字需要在语境中多练习，相信你下次会做得更好！';}
+
+  document.getElementById('modalStars').textContent=stars;
+  document.getElementById('modalScore').textContent=total+' / '+max;
+  document.getElementById('modalMsg').textContent=msg;
+  document.getElementById('modal').classList.add('show');
+}
+</script>
+</body>
+</html>
