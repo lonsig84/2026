@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 6 English Exam — Part 1–4</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap');
+
+  :root {
+    --navy: #1a2744;
+    --gold: #c8961e;
+    --cream: #fdf8f0;
+    --red: #b5272b;
+    --border: #d6c9a8;
+    --light: #f5f0e8;
+    --text: #2c2c2c;
+    --success: #2d7a4f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--cream);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ─── COVER PAGE ─── */
+  .cover {
+    max-width: 720px;
+    margin: 40px auto;
+    border: 3px double var(--navy);
+    padding: 40px 48px;
+    background: #fff;
+    box-shadow: 0 6px 30px rgba(0,0,0,.12);
+    text-align: center;
+  }
+  .cover-code {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--navy);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--navy);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .cover h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .cover h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 0;
+    margin: 12px 0 24px;
+  }
+  .cover-fields {
+    display: flex; gap: 16px; justify-content: center; margin-bottom: 28px;
+  }
+  .cover-field {
+    border: 1px solid var(--navy);
+    padding: 8px 16px;
+    display: flex; align-items: center; gap: 12px; flex: 1;
+    font-weight: 600;
+  }
+  .cover-field input {
+    border: none; border-bottom: 1px solid #999; background: transparent;
+    font-family: inherit; font-size: 14px; width: 100%; outline: none;
+    padding: 2px 0;
+  }
+  .instructions {
+    text-align: left;
+    margin-bottom: 24px;
+  }
+  .instructions p {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--navy);
+  }
+  .instructions ol {
+    font-style: italic;
+    padding-left: 20px;
+    font-size: 14px;
+  }
+  .instructions li { margin-bottom: 4px; }
+  .marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .marks-table th, .marks-table td {
+    border: 1px solid var(--navy);
+    padding: 6px 12px;
+    text-align: center;
+  }
+  .marks-table th {
+    background: var(--navy);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+  .marks-table td:first-child { text-align: left; font-weight: 600; }
+
+  /* ─── EXAM BODY ─── */
+  .exam-body {
+    max-width: 720px;
+    margin: 0 auto 40px;
+    background: #fff;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+  }
+
+  .part-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .part-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+  .part-header .marks {
+    font-size: 13px;
+    background: var(--gold);
+    color: var(--navy);
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+  }
+  .part-instruction {
+    background: var(--light);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    font-style: italic;
+    font-size: 14px;
+    color: #444;
+  }
+  .part-body { padding: 24px 32px 32px; }
+
+  /* ─── STIMULUS BOX ─── */
+  .stimulus {
+    border: 1px solid #c0b090;
+    background: #fffdf5;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    border-radius: 2px;
+    position: relative;
+  }
+  .stimulus-label {
+    position: absolute; top: -10px; left: 12px;
+    background: var(--gold); color: #fff;
+    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 2px;
+    font-family: 'Source Serif 4', serif;
+  }
+  .stimulus p { margin-bottom: 6px; }
+  .stimulus p:last-child { margin-bottom: 0; }
+  .stimulus.dialogue { font-family: 'Source Serif 4', serif; }
+  .stimulus.dialogue .speaker { font-weight: 600; }
+  .stimulus ul { padding-left: 20px; }
+
+  /* ─── QUESTION ─── */
+  .question {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .q-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .q-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--navy);
+    min-width: 28px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .q-text { font-size: 15px; }
+  .q-text .blank {
+    display: inline-block;
+    border-bottom: 1.5px solid var(--text);
+    min-width: 120px;
+    margin: 0 4px;
+    vertical-align: bottom;
+  }
+
+  .options { padding-left: 40px; display: flex; flex-direction: column; gap: 6px; }
+  .option-label {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    transition: background .15s, border-color .15s;
+    font-size: 14px;
+    user-select: none;
+  }
+  .option-label:hover { background: #f0ebe0; border-color: var(--border); }
+  .option-label input[type="radio"] { accent-color: var(--navy); width: 15px; height: 15px; }
+  .option-label.selected { background: #e8f0e0; border-color: #8aad6c; }
+  .letter { font-weight: 700; color: var(--navy); min-width: 18px; }
+
+  /* ─── PART 4 MATCH TABLE ─── */
+  .profiles { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .profile-card {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .profile-card .pc-header {
+    background: var(--navy); color: #fff;
+    font-weight: 700; font-size: 13px;
+    padding: 6px 12px; letter-spacing: .5px;
+  }
+  .profile-card p { font-size: 13px; padding: 10px 12px; line-height: 1.55; }
+
+  .match-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .match-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; color: var(--navy);
+    min-width: 24px; text-align: right;
+  }
+  .match-desc { flex: 1; }
+  .match-sel select {
+    border: 1px solid var(--border);
+    background: #fff;
+    font-family: inherit; font-size: 14px;
+    padding: 5px 10px; border-radius: 2px;
+    cursor: pointer; min-width: 80px;
+    color: var(--navy); font-weight: 600;
+    outline: none;
+  }
+  .match-sel select:focus { border-color: var(--navy); }
+  .example-row { opacity: .65; }
+
+  /* ─── SUBMIT / RESULT ─── */
+  .submit-zone {
+    max-width: 720px; margin: 0 auto 60px;
+    text-align: center; padding: 32px;
+  }
+  #submitBtn {
+    background: var(--navy); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; letter-spacing: 1px;
+    padding: 14px 48px; border-radius: 2px;
+    transition: background .2s;
+  }
+  #submitBtn:hover { background: #2a3d6a; }
+  #submitBtn:disabled { background: #888; cursor: not-allowed; }
+
+  .result-banner {
+    display: none;
+    margin-top: 24px;
+    padding: 20px 28px;
+    border: 2px solid var(--gold);
+    background: #fffdf0;
+    border-radius: 4px;
+  }
+  .result-banner h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--navy); margin-bottom: 8px; }
+  .result-banner p { font-size: 15px; }
+  .score-big { font-size: 36px; font-weight: 700; color: var(--navy); font-family: 'Playfair Display', serif; }
+  #downloadBtn {
+    display: none;
+    margin-top: 18px;
+    background: var(--success); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'Source Serif 4', serif;
+    font-size: 15px; padding: 12px 36px;
+    border-radius: 2px; transition: background .2s;
+  }
+  #downloadBtn:hover { background: #1f5c38; }
+
+  /* ─── ANSWER KEY INDICATOR (post-submit) ─── */
+  .option-label.correct { background: #d4edda !important; border-color: #28a745 !important; }
+  .option-label.wrong   { background: #f8d7da !important; border-color: #dc3545 !important; }
+  .match-sel select.correct { border-color: #28a745; background: #d4edda; }
+  .match-sel select.wrong   { border-color: #dc3545; background: #f8d7da; }
+
+  @media (max-width: 600px) {
+    .cover, .exam-body, .submit-zone { margin: 12px; padding: 20px; }
+    .part-body { padding: 16px 18px 24px; }
+    .profiles { grid-template-columns: 1fr; }
+    .options { padding-left: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<div class="cover">
+  <div class="cover-code">013</div>
+  <h1>UJIAN AKHIR SESI AKADEMIK</h1>
+  <h2>TAHUN 6 SESI 2024/2025</h2>
+  <h3>Bahasa Inggeris (013) &nbsp;|&nbsp; 45 minit</h3>
+  <div class="cover-fields">
+    <div class="cover-field"><span>Nama</span><input type="text" id="studentName" placeholder="Tulis nama di sini"></div>
+    <div class="cover-field"><span>Kelas</span><input type="text" id="studentClass" placeholder="Contoh: 6 Bestari"></div>
+  </div>
+  <div class="instructions">
+    <p>Arahan / Instructions</p>
+    <ol>
+      <li>Buka kertas ujian ini apabila diberitahu.</li>
+      <li>Tulis nama dan nama kelas kamu pada ruang yang disediakan.</li>
+      <li>Pilih jawapan yang betul bagi Part 1, Part 2, Part 3 dan Part 4.</li>
+      <li>Klik <strong>Submit</strong> untuk menyerahkan jawapan kamu.</li>
+      <li>Muat turun fail Excel untuk diserahkan kepada guru.</li>
+    </ol>
+  </div>
+  <table class="marks-table">
+    <tr><th>Bahagian</th><th>Markah Penuh</th><th>Markah Diperoleh</th></tr>
+    <tr><td>Part 1</td><td>5</td><td id="s1">—</td></tr>
+    <tr><td>Part 2</td><td>4</td><td id="s2">—</td></tr>
+    <tr><td>Part 3</td><td>5</td><td id="s3">—</td></tr>
+    <tr><td>Part 4</td><td>6</td><td id="s4">—</td></tr>
+    <tr><td><strong>Jumlah</strong></td><td><strong>20</strong></td><td id="sTotal"><strong>—</strong></td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════ PART 1 ═══════════════ -->
+<div class="exam-body">
+  <div class="part-header">
+    <h2>PART 1</h2>
+    <span class="marks">5 marks</span>
+  </div>
+  <div class="part-instruction">
+    Questions 1 to 5. Read the text carefully in each question. For each question, choose the correct answer <strong>A, B or C</strong>.
+  </div>
+  <div class="part-body">
+
+    <!-- Q1 -->
+    <div class="question" id="q1">
+      <div class="stimulus">
+        <span class="stimulus-label">Text</span>
+        <p>Emma lives in Vancouver, Canada. She loves adventure and sports. She has tried skiing, kayaking, and even walked around the top of a tall tower. She writes about all her adventures on her blog.</p>
+      </div>
+      <div class="q-row">
+        <span class="q-num">1</span>
+        <span class="q-text">Emma writes about her <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> on her blog.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q1" value="A"><span class="letter">A.</span> daily school lessons</label>
+        <label class="option-label"><input type="radio" name="q1" value="B"><span class="letter">B.</span> adventure activities</label>
+        <label class="option-label"><input type="radio" name="q1" value="C"><span class="letter">C.</span> weather in Canada</label>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question" id="q2">
+      <div class="stimulus">
+        <span class="stimulus-label">Notice</span>
+        <p><strong>Woodlands Camp — New Arrivals</strong></p>
+        <ul>
+          <li>Bring a rucksack, sleeping bag and compass.</li>
+          <li>Wear comfortable shoes for hiking.</li>
+          <li>All activities begin at 8:00 a.m. sharp.</li>
+        </ul>
+      </div>
+      <div class="q-row">
+        <span class="q-num">2</span>
+        <span class="q-text">According to the notice, campers must bring a <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q2" value="A"><span class="letter">A.</span> torch and fire kit</label>
+        <label class="option-label"><input type="radio" name="q2" value="B"><span class="letter">B.</span> rucksack, sleeping bag and compass</label>
+        <label class="option-label"><input type="radio" name="q2" value="C"><span class="letter">C.</span> food and cooking equipment</label>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question" id="q3">
+      <div class="stimulus dialogue">
+        <span class="stimulus-label">Dialogue</span>
+        <p><span class="speaker">Alice :</span> Have you ever been kayaking?</p>
+        <p><span class="speaker">Marco :</span> No, I haven't. But I've tried skiing.</p>
+        <p><span class="speaker">Alice :</span> Great! Have you ever walked in the mountains?</p>
+        <p><span class="speaker">Marco :</span> Yes, I have. It was really exciting!</p>
+      </div>
+      <div class="q-row">
+        <span class="q-num">3</span>
+        <span class="q-text">Marco has never <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> before.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q3" value="A"><span class="letter">A.</span> tried skiing</label>
+        <label class="option-label"><input type="radio" name="q3" value="B"><span class="letter">B.</span> been kayaking</label>
+        <label class="option-label"><input type="radio" name="q3" value="C"><span class="letter">C.</span> walked in the mountains</label>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question" id="q4">
+      <div class="stimulus">
+        <span class="stimulus-label">Text</span>
+        <p>In 1666, Samuel Pepys wrote a famous diary. One day, a great fire started in the City of London. Samuel rode his horse to speak to the King. Soldiers tried to stop the fire by pulling down houses.</p>
+      </div>
+      <div class="q-row">
+        <span class="q-num">4</span>
+        <span class="q-text">Soldiers tried to stop the fire by <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q4" value="A"><span class="letter">A.</span> pouring water on it</label>
+        <label class="option-label"><input type="radio" name="q4" value="B"><span class="letter">B.</span> pulling down houses</label>
+        <label class="option-label"><input type="radio" name="q4" value="C"><span class="letter">C.</span> digging holes in the ground</label>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question" id="q5">
+      <div class="stimulus dialogue">
+        <span class="stimulus-label">Note</span>
+        <p>Kit,</p>
+        <p>The fire alarm rang while I was doing a science experiment. We all went outside. The firefighters came. Everything is fine now.</p>
+        <p style="text-align:right">— Oliver</p>
+      </div>
+      <div class="q-row">
+        <span class="q-num">5</span>
+        <span class="q-text">The fire alarm rang while Oliver was <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q5" value="A"><span class="letter">A.</span> eating lunch</label>
+        <label class="option-label"><input type="radio" name="q5" value="B"><span class="letter">B.</span> having a music lesson</label>
+        <label class="option-label"><input type="radio" name="q5" value="C"><span class="letter">C.</span> doing a science experiment</label>
+      </div>
+    </div>
+
+  </div><!-- /part-body -->
+</div><!-- /exam-body -->
+
+
+<!-- ═══════════════ PART 2 ═══════════════ -->
+<div class="exam-body" style="margin-top:20px">
+  <div class="part-header">
+    <h2>PART 2</h2>
+    <span class="marks">4 marks</span>
+  </div>
+  <div class="part-instruction">
+    Questions 6 to 9. Read the text below and choose the correct word for each blank. For each blank, choose the correct answer <strong>A, B or C</strong>.
+  </div>
+  <div class="part-body">
+
+    <div class="stimulus" style="margin-bottom:24px">
+      <span class="stimulus-label">Passage</span>
+      <p><strong>My First Camping Trip</strong></p>
+      <p style="margin-top:8px">
+        Last summer, my family went on our very first camping trip. I was excited (6) <span style="font-weight:700;color:var(--navy)">[6]</span> nervous at the same time. We put up a tent and I had (7) <span style="font-weight:700;color:var(--navy)">[7]</span> carried a heavy rucksack all the way from the car park. At night, we made a fire and cooked our dinner. The (8) <span style="font-weight:700;color:var(--navy)">[8]</span> was amazing — I had never seen so many stars before! I think camping is a (9) <span style="font-weight:700;color:var(--navy)">[9]</span> way to spend time with family.
+      </p>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question" id="q6">
+      <div class="q-row">
+        <span class="q-num">6</span>
+        <span class="q-text">Blank (6)</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q6" value="A"><span class="letter">A.</span> but</label>
+        <label class="option-label"><input type="radio" name="q6" value="B"><span class="letter">B.</span> so</label>
+        <label class="option-label"><input type="radio" name="q6" value="C"><span class="letter">C.</span> because</label>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question" id="q7">
+      <div class="q-row">
+        <span class="q-num">7</span>
+        <span class="q-text">Blank (7)</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q7" value="A"><span class="letter">A.</span> never</label>
+        <label class="option-label"><input type="radio" name="q7" value="B"><span class="letter">B.</span> to</label>
+        <label class="option-label"><input type="radio" name="q7" value="C"><span class="letter">C.</span> already</label>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question" id="q8">
+      <div class="q-row">
+        <span class="q-num">8</span>
+        <span class="q-text">Blank (8)</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q8" value="A"><span class="letter">A.</span> scenery</label>
+        <label class="option-label"><input type="radio" name="q8" value="B"><span class="letter">B.</span> accident</label>
+        <label class="option-label"><input type="radio" name="q8" value="C"><span class="letter">C.</span> electricity</label>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="question" id="q9">
+      <div class="q-row">
+        <span class="q-num">9</span>
+        <span class="q-text">Blank (9)</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q9" value="A"><span class="letter">A.</span> terrible</label>
+        <label class="option-label"><input type="radio" name="q9" value="B"><span class="letter">B.</span> wonderful</label>
+        <label class="option-label"><input type="radio" name="q9" value="C"><span class="letter">C.</span> embarrassing</label>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════ PART 3 ═══════════════ -->
+<div class="exam-body" style="margin-top:20px">
+  <div class="part-header">
+    <h2>PART 3</h2>
+    <span class="marks">5 marks</span>
+  </div>
+  <div class="part-instruction">
+    Questions 10 to 14. Read the text carefully. For each question, choose the correct answer <strong>A, B or C</strong>.
+  </div>
+  <div class="part-body">
+
+    <div class="stimulus" style="margin-bottom:24px">
+      <span class="stimulus-label">Article</span>
+      <p style="font-size:13px;color:#666;margin-bottom:6px"><em>Adapted from a school magazine</em></p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp;Samuel Pepys was a writer who lived more than 350 years ago in England. He kept a famous diary about his everyday life. His diary is very interesting because it tells us what life was like in the past.</p>
+      <p style="margin-top:8px">&nbsp;&nbsp;&nbsp;&nbsp;In those days, life was very different. People did not use to have electricity, so they used candles and oil lamps for light. They did not use to have computers or mobile phones. When they needed information, they had to go to the library or ask someone who knew.</p>
+      <p style="margin-top:8px">&nbsp;&nbsp;&nbsp;&nbsp;In 1666, a terrible fire destroyed much of the City of London. Samuel wrote about how soldiers tried to stop the fire and how frightened people were. He also wrote about burying his most valuable possessions in the garden so they would not be destroyed.</p>
+      <p style="margin-top:8px">&nbsp;&nbsp;&nbsp;&nbsp;Reading Samuel's diary helps us understand history. It shows us that life in the past was harder in many ways, but people were still creative and caring, just like us today.</p>
+    </div>
+
+    <!-- Q10 -->
+    <div class="question" id="q10">
+      <div class="q-row">
+        <span class="q-num">10</span>
+        <span class="q-text">Samuel Pepys wrote about his <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> life in his diary.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q10" value="A"><span class="letter">A.</span> imaginary</label>
+        <label class="option-label"><input type="radio" name="q10" value="B"><span class="letter">B.</span> everyday</label>
+        <label class="option-label"><input type="radio" name="q10" value="C"><span class="letter">C.</span> future</label>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="question" id="q11">
+      <div class="q-row">
+        <span class="q-num">11</span>
+        <span class="q-text">In the past, people used <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> for light.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q11" value="A"><span class="letter">A.</span> electricity and generators</label>
+        <label class="option-label"><input type="radio" name="q11" value="B"><span class="letter">B.</span> mobile phones and computers</label>
+        <label class="option-label"><input type="radio" name="q11" value="C"><span class="letter">C.</span> candles and oil lamps</label>
+      </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="question" id="q12">
+      <div class="q-row">
+        <span class="q-num">12</span>
+        <span class="q-text">Why did Samuel bury his possessions in the garden?</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q12" value="A"><span class="letter">A.</span> He wanted to hide them from his servants.</label>
+        <label class="option-label"><input type="radio" name="q12" value="B"><span class="letter">B.</span> He wanted to keep them safe from the fire.</label>
+        <label class="option-label"><input type="radio" name="q12" value="C"><span class="letter">C.</span> He wanted to sell them later.</label>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="question" id="q13">
+      <div class="q-row">
+        <span class="q-num">13</span>
+        <span class="q-text">According to the text, when people needed information in the past, they <span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>.</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q13" value="A"><span class="letter">A.</span> searched the Internet</label>
+        <label class="option-label"><input type="radio" name="q13" value="B"><span class="letter">B.</span> sent emails to experts</label>
+        <label class="option-label"><input type="radio" name="q13" value="C"><span class="letter">C.</span> went to the library or asked someone</label>
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="question" id="q14">
+      <div class="q-row">
+        <span class="q-num">14</span>
+        <span class="q-text">A good title for this text is</span>
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q14" value="A"><span class="letter">A.</span> 'How to Write a Diary'</label>
+        <label class="option-label"><input type="radio" name="q14" value="B"><span class="letter">B.</span> 'A Window into the Past: Samuel Pepys's Diary'</label>
+        <label class="option-label"><input type="radio" name="q14" value="C"><span class="letter">C.</span> 'The Great Fire of London Today'</label>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════ PART 4 ═══════════════ -->
+<div class="exam-body" style="margin-top:20px">
+  <div class="part-header">
+    <h2>PART 4</h2>
+    <span class="marks">6 marks</span>
+  </div>
+  <div class="part-instruction">
+    Questions 15 to 20. Read the texts about three students (A, B and C) below. Choose the student (A, B or C) which fits each description.
+  </div>
+  <div class="part-body">
+
+    <div class="profiles">
+      <div class="profile-card">
+        <div class="pc-header">A — Aisha</div>
+        <p>I love the outdoors. I have been kayaking twice and I have climbed a small mountain. Last year, I went on a camping trip and I put up a tent by myself. I have never tried skiing because there is no snow where I live, but I would love to try it one day!</p>
+      </div>
+      <div class="profile-card">
+        <div class="pc-header">B — Ben</div>
+        <p>I am an adventurous person. I have been skiing many times at a resort. I have never been kayaking before. My most exciting experience was when I walked around the outside of a very tall building — I was really frightened, but I loved it!</p>
+      </div>
+      <div class="profile-card">
+        <div class="pc-header">C — Chloe</div>
+        <p>I enjoy reading and writing. I keep a diary about my everyday life, just like Samuel Pepys. I write about events, my feelings, and what I think about different things. I have never done any adventure sports. I prefer indoor hobbies like drawing and playing the piano.</p>
+      </div>
+    </div>
+
+    <!-- Example -->
+    <div class="match-row example-row">
+      <span class="match-num">0</span>
+      <span class="match-desc">This student keeps a diary about everyday life.</span>
+      <span class="match-sel"><select disabled><option>C</option></select></span>
+    </div>
+
+    <!-- Q15 -->
+    <div class="match-row" id="q15">
+      <span class="match-num">15</span>
+      <span class="match-desc">This student has been kayaking before.</span>
+      <span class="match-sel">
+        <select name="q15" id="sel15">
+          <option value="">—</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </span>
+    </div>
+
+    <!-- Q16 -->
+    <div class="match-row" id="q16">
+      <span class="match-num">16</span>
+      <span class="match-desc">This student has never tried skiing.</span>
+      <span class="match-sel">
+        <select name="q16" id="sel16">
+          <option value="">—</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </span>
+    </div>
+
+    <!-- Q17 -->
+    <div class="match-row" id="q17">
+      <span class="match-num">17</span>
+      <span class="match-desc">This student walked around the outside of a tall building.</span>
+      <span class="match-sel">
+        <select name="q17" id="sel17">
+          <option value="">—</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </span>
+    </div>
+
+    <!-- Q18 -->
+    <div class="match-row" id="q18">
+      <span class="match-num">18</span>
+      <span class="match-desc">This student prefers indoor hobbies like drawing and playing the piano.</span>
+      <span class="match-sel">
+        <select name="q18" id="sel18">
+          <option value="">—</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </span>
+    </div>
+
+    <!-- Q19 -->
+    <div class="match-row" id="q19">
+      <span class="match-num">19</span>
+      <span class="match-desc">This student put up a tent by herself during a camping trip.</span>
+      <span class="match-sel">
+        <select name="q19" id="sel19">
+          <option value="">—</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </span>
+    </div>
+
+    <!-- Q20 -->
+    <div class="match-row" id="q20">
+      <span class="match-num">20</span>
+      <span class="match-desc">This student has been skiing many times.</span>
+      <span class="match-sel">
+        <select name="q20" id="sel20">
+          <option value="">—</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════ SUBMIT ═══════════════ -->
+<div class="submit-zone">
+  <button id="submitBtn" onclick="submitExam()">Serah Jawapan / Submit</button>
+  <div class="result-banner" id="resultBanner">
+    <h3>Keputusan / Result</h3>
+    <p id="studentLabel"></p>
+    <p style="margin-top:8px">Jumlah Markah: <span class="score-big" id="scoreDisplay">—</span> / 20</p>
+    <p style="margin-top:4px;font-size:13px;color:#666" id="breakdown"></p>
+    <p style="margin-top:12px;font-size:13px;color:#555">Jawapan yang salah ditandakan dengan <span style="color:#dc3545">merah</span>. Jawapan betul ditandakan dengan <span style="color:#28a745">hijau</span>.</p>
+  </div>
+  <button id="downloadBtn" onclick="downloadExcel()">⬇ Muat Turun Excel / Download Excel</button>
+</div>
+
+<script>
+// ─── Answer Key ───
+const KEYS = {
+  q1:'B', q2:'B', q3:'B', q4:'B', q5:'C',
+  q6:'A', q7:'B', q8:'A', q9:'B',
+  q10:'B', q11:'C', q12:'B', q13:'C', q14:'B',
+  q15:'A', q16:'A', q17:'B', q18:'C', q19:'A', q20:'B'
+};
+
+// Highlight radio options on click
+document.querySelectorAll('.option-label').forEach(label => {
+  label.querySelector('input').addEventListener('change', function(){
+    const name = this.name;
+    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+      r.parentElement.classList.remove('selected');
+    });
+    this.parentElement.classList.add('selected');
+  });
+});
+
+let submitted = false;
+
+function submitExam() {
+  if(submitted) return;
+  const name = document.getElementById('studentName').value.trim() || '(Tiada Nama)';
+  const cls  = document.getElementById('studentClass').value.trim() || '(Tiada Kelas)';
+
+  // Collect answers
+  const answers = {};
+  // Radio (q1-q14)
+  for(let i=1;i<=14;i++){
+    const key = 'q'+i;
+    const sel = document.querySelector(`input[name="${key}"]:checked`);
+    answers[key] = sel ? sel.value : '';
+  }
+  // Select (q15-q20)
+  for(let i=15;i<=20;i++){
+    const key = 'q'+i;
+    answers[key] = document.getElementById('sel'+i).value;
+  }
+
+  // Score
+  let total=0, p1=0, p2=0, p3=0, p4=0;
+  const partRanges = { p1:[1,5], p2:[6,9], p3:[10,14], p4:[15,20] };
+  for(const [k,v] of Object.entries(answers)){
+    const num = parseInt(k.slice(1));
+    const correct = v===KEYS[k];
+    if(correct) {
+      total++;
+      if(num<=5) p1++;
+      else if(num<=9) p2++;
+      else if(num<=14) p3++;
+      else p4++;
+    }
+  }
+
+  // Visual feedback — radios
+  for(let i=1;i<=14;i++){
+    const key='q'+i;
+    document.querySelectorAll(`input[name="${key}"]`).forEach(r=>{
+      const lbl = r.parentElement;
+      if(r.value===KEYS[key]) lbl.classList.add('correct');
+      else if(r.checked && r.value!==KEYS[key]) lbl.classList.add('wrong');
+    });
+    document.querySelectorAll(`input[name="${key}"]`).forEach(r=>r.disabled=true);
+  }
+  // Visual feedback — selects
+  for(let i=15;i<=20;i++){
+    const sel=document.getElementById('sel'+i);
+    sel.classList.add(sel.value===KEYS['q'+i]?'correct':'wrong');
+    sel.disabled=true;
+  }
+
+  // Score display
+  document.getElementById('s1').textContent=p1+'/5';
+  document.getElementById('s2').textContent=p2+'/4';
+  document.getElementById('s3').textContent=p3+'/5';
+  document.getElementById('s4').textContent=p4+'/6';
+  document.getElementById('sTotal').innerHTML='<strong>'+total+'/20</strong>';
+
+  const rb=document.getElementById('resultBanner');
+  rb.style.display='block';
+  document.getElementById('studentLabel').textContent='Nama: '+name+' | Kelas: '+cls;
+  document.getElementById('scoreDisplay').textContent=total;
+  document.getElementById('breakdown').textContent=
+    'Part 1: '+p1+'/5  |  Part 2: '+p2+'/4  |  Part 3: '+p3+'/5  |  Part 4: '+p4+'/6';
+
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('downloadBtn').style.display='inline-block';
+
+  // Store for download
+  window._examResult = { name, cls, answers, p1, p2, p3, p4, total };
+  submitted=true;
+}
+
+function downloadExcel() {
+  const r = window._examResult;
+  if(!r) return;
+
+  // Build CSV (Excel-compatible)
+  const headers = ['Nama','Kelas',
+    'Q1','Q2','Q3','Q4','Q5',
+    'Q6','Q7','Q8','Q9',
+    'Q10','Q11','Q12','Q13','Q14',
+    'Q15','Q16','Q17','Q18','Q19','Q20',
+    'Part1 (/5)','Part2 (/4)','Part3 (/5)','Part4 (/6)','Jumlah (/20)'
+  ];
+
+  const row = [
+    '"'+r.name+'"', '"'+r.cls+'"',
+    r.answers.q1||'-', r.answers.q2||'-', r.answers.q3||'-',
+    r.answers.q4||'-', r.answers.q5||'-',
+    r.answers.q6||'-', r.answers.q7||'-', r.answers.q8||'-', r.answers.q9||'-',
+    r.answers.q10||'-', r.answers.q11||'-', r.answers.q12||'-',
+    r.answers.q13||'-', r.answers.q14||'-',
+    r.answers.q15||'-', r.answers.q16||'-', r.answers.q17||'-',
+    r.answers.q18||'-', r.answers.q19||'-', r.answers.q20||'-',
+    r.p1, r.p2, r.p3, r.p4, r.total
+  ];
+
+  // Second row: answer key
+  const keyRow = ['"ANSWER KEY"','""',
+    KEYS.q1,KEYS.q2,KEYS.q3,KEYS.q4,KEYS.q5,
+    KEYS.q6,KEYS.q7,KEYS.q8,KEYS.q9,
+    KEYS.q10,KEYS.q11,KEYS.q12,KEYS.q13,KEYS.q14,
+    KEYS.q15,KEYS.q16,KEYS.q17,KEYS.q18,KEYS.q19,KEYS.q20,
+    '5','4','5','6','20'
+  ];
+
+  const csv = '\uFEFF' + headers.join(',') + '\n' + row.join(',') + '\n' + keyRow.join(',');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = r.name.replace(/[^a-zA-Z0-9 ]/g,'_');
+  a.href=url; a.download='Exam_'+safeName+'_'+r.cls+'.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
