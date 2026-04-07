@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级道德教育 - 欢喜说谢谢</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Canvas Confetti for final animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+        
+        body {
+            font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* 摇晃动画 (答错时) */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-2deg); }
+            75% { transform: translateX(5px) rotate(2deg); }
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* 弹跳动画 (答对时) */
+        @keyframes bounce-scale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .bounce-scale {
+            animation: bounce-scale 0.5s ease-in-out;
+        }
+
+        /* 数据驱动：成长动画 */
+        .flower-grow {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 题目数据
+        const QUESTIONS = [
+            {
+                id: 1,
+                scene: "同学借给你铅笔，你说：“谢谢你！”",
+                emoji: "✏️ 👧👦",
+                question: "说了谢谢后，你的心里感觉怎样？",
+                options: [
+                    { text: "开心", icon: "😊", isCorrect: true, feel: "开心" },
+                    { text: "伤心", icon: "😢", isCorrect: false, hint: "想一想，同学帮了你，你会伤心吗？再试一次哦！", feel: "伤心" }
+                ]
+            },
+            {
+                id: 2,
+                scene: "妈妈为你准备了美味的午餐，你说：“谢谢妈妈！”",
+                emoji: "🍱 👩‍🍳",
+                question: "对妈妈说谢谢后，你的感觉是？",
+                options: [
+                    { text: "生气", icon: "😠", isCorrect: false, hint: "吃到好吃的午餐，应该不会生气吧？想想温暖的感觉~", feel: "生气" },
+                    { text: "温暖", icon: "🥰", isCorrect: true, feel: "温暖" }
+                ]
+            },
+            {
+                id: 3,
+                scene: "你跌倒了，同学扶你起来，你说了“谢谢”。",
+                emoji: "🤝 🏫",
+                question: "说了谢谢后，你们的感情变得怎样？",
+                options: [
+                    { text: "更好", icon: "💖", isCorrect: true, feel: "感情更好" },
+                    { text: "不好", icon: "💔", isCorrect: false, hint: "互相帮助和说谢谢，会让大家变成好朋友哦！", feel: "感情不好" }
+                ]
+            }
+        ];
+
+        function App() {
+            const [step, setStep] = useState("login"); // login, quiz, result
+            const [studentName, setStudentName] = useState("");
+            const [currentQIndex, setCurrentQIndex] = useState(0);
+            const [answers, setAnswers] = useState([]);
+            const [wrongAttempts, setWrongAttempts] = useState({}); // 记录错题提供脚手架
+            const [feedback, setFeedback] = useState(null); // 当前反馈
+            const [score, setScore] = useState(0);
+
+            const startQuiz = () => {
+                if (studentName.trim() === "") {
+                    alert("请先输入你的名字哦！");
+                    return;
+                }
+                setStep("quiz");
+            };
+
+            const handleOptionClick = (option) => {
+                if (feedback && feedback.type === 'success') return; // 防止重复点击
+
+                if (option.isCorrect) {
+                    // 答对：视觉反馈 + 撒花
+                    setFeedback({ type: 'success', message: "太棒了！答对啦！🎉" });
+                    confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.6 }
+                    });
+                    
+                    setTimeout(() => {
+                        // 记录答案并进入下一题
+                        const newAnswers = [...answers, option.feel];
+                        setAnswers(newAnswers);
+                        setScore(score + (wrongAttempts[currentQIndex] ? 5 : 10)); // 一次答对10分，有错尝试后答对5分
+                        
+                        setFeedback(null);
+                        setWrongAttempts({});
+                        
+                        if (currentQIndex < QUESTIONS.length - 1) {
+                            setCurrentQIndex(currentQIndex + 1);
+                        } else {
+                            setStep("result");
+                            triggerFinalCelebration();
+                        }
+                    }, 1500);
+                } else {
+                    // 答错：动态支架工具 (Dynamic Scaffolding)
+                    setFeedback({ type: 'error', message: option.hint });
+                    setWrongAttempts(prev => ({ ...prev, [option.text]: true }));
+                }
+            };
+
+            const triggerFinalCelebration = () => {
+                var duration = 3 * 1000;
+                var end = Date.now() + duration;
+
+                (function frame() {
+                    confetti({
+                        particleCount: 5,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: ['#ff0000', '#00ff00', '#0000ff']
+                    });
+                    confetti({
+                        particleCount: 5,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: ['#ff0000', '#00ff00', '#0000ff']
+                    });
+
+                    if (Date.now() < end) {
+                        requestAnimationFrame(frame);
+                    }
+                }());
+            };
+
+            const exportToExcel = () => {
+                // 添加 BOM 头 \uFEFF 解决中文乱码
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                
+                // 表头
+                let headers = ["学生姓名", "题目1_同学借铅笔", "题目2_妈妈做午餐", "题目3_跌倒扶起", "总分"];
+                csvContent += headers.join(",") + "\n";
+                
+                // 数据行
+                let row = [studentName, ...answers, score];
+                csvContent += row.join(",") + "\n";
+                
+                // 触发下载
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `${studentName}_道德教育第四课学习记录.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border-4 border-green-200 relative">
+                        
+                        {/* 登录界面 */}
+                        {step === "login" && (
+                            <div className="p-8 text-center bounce-scale">
+                                <h1 className="text-4xl text-green-600 mb-2">第四课</h1>
+                                <h2 className="text-5xl text-yellow-500 mb-8 drop-shadow-md">欢喜说谢谢</h2>
+                                <div className="text-8xl mb-8">🧸</div>
+                                <p className="text-xl text-gray-600 mb-4">小朋友，你叫什么名字？</p>
+                                <input 
+                                    type="text" 
+                                    value={studentName}
+                                    onChange={(e) => setStudentName(e.target.value)}
+                                    placeholder="输入姓名..." 
+                                    className="w-full text-center text-2xl p-4 border-4 border-green-300 rounded-2xl mb-6 focus:outline-none focus:border-yellow-400"
+                                />
+                                <button 
+                                    onClick={startQuiz}
+                                    className="bg-green-500 text-white text-3xl px-8 py-4 rounded-full w-full shadow-lg hover:bg-green-600 transform hover:scale-105 transition active:scale-95"
+                                >
+                                    开始学习！ 🚀
+                                </button>
+                            </div>
+                        )}
+
+                        {/* 答题界面 */}
+                        {step === "quiz" && (
+                            <div className="p-6">
+                                {/* 数据驱动动画与进度条 */}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="w-full bg-gray-200 rounded-full h-6 mr-4 relative overflow-hidden">
+                                        <div 
+                                            className="bg-green-400 h-6 rounded-full transition-all duration-500" 
+                                            style={{ width: `${(currentQIndex / QUESTIONS.length) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="text-3xl flower-grow" style={{ transform: `scale(${1 + currentQIndex * 0.2})` }}>
+                                        🌻
+                                    </div>
+                                </div>
+                                <div className="text-center text-gray-500 mb-6 font-bold">
+                                    第 {currentQIndex + 1} 题 / 共 {QUESTIONS.length} 题
+                                </div>
+
+                                {/* 题目内容 */}
+                                <div className="bg-yellow-50 rounded-2xl p-6 mb-6 shadow-inner text-center border-2 border-yellow-200">
+                                    <div className="text-6xl mb-4">{QUESTIONS[currentQIndex].emoji}</div>
+                                    <p className="text-2xl text-gray-700 mb-4 leading-relaxed">{QUESTIONS[currentQIndex].scene}</p>
+                                    <h3 className="text-3xl text-blue-600 drop-shadow-sm">{QUESTIONS[currentQIndex].question}</h3>
+                                </div>
+
+                                {/* 选项区域 */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    {QUESTIONS[currentQIndex].options.map((option, idx) => {
+                                        const isWrong = wrongAttempts[option.text];
+                                        return (
+                                            <button 
+                                                key={idx}
+                                                onClick={() => handleOptionClick(option)}
+                                                disabled={isWrong || (feedback && feedback.type === 'success')}
+                                                className={`
+                                                    p-6 rounded-2xl text-center border-b-4 transition-all duration-300
+                                                    ${isWrong ? 'bg-gray-200 border-gray-300 opacity-50 shake cursor-not-allowed' : 'bg-blue-100 hover:bg-blue-200 border-blue-300 hover:scale-105'}
+                                                    ${feedback && feedback.type === 'success' && option.isCorrect ? 'bg-green-300 border-green-500 bounce-scale' : ''}
+                                                `}
+                                            >
+                                                <div className="text-6xl mb-2">{option.icon}</div>
+                                                <div className="text-3xl text-gray-800">{option.text}</div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* 动态支架提示区域 (Feedback) */}
+                                <div className="h-16 flex items-center justify-center">
+                                    {feedback && (
+                                        <div className={`px-6 py-3 rounded-full text-xl font-bold animate-bounce ${feedback.type === 'error' ? 'bg-red-100 text-red-600 border-2 border-red-300' : 'bg-green-100 text-green-600 border-2 border-green-300'}`}>
+                                            {feedback.type === 'error' ? '💡 ' : '✨ '}{feedback.message}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 结果与下载界面 */}
+                        {step === "result" && (
+                            <div className="p-8 text-center animate-fade-in">
+                                <h1 className="text-5xl text-green-600 mb-4">完成啦！🎉</h1>
+                                <p className="text-2xl text-gray-700 mb-6">
+                                    {studentName}，你今天学会了说谢谢！<br/>
+                                    你得到了 <strong className="text-yellow-500 text-4xl">{score}</strong> 分！
+                                </p>
+                                
+                                <div className="bg-green-50 p-6 rounded-2xl mb-8 border-2 border-green-200">
+                                    <h3 className="text-2xl text-green-800 mb-4">你的感受：</h3>
+                                    <div className="flex justify-around items-center text-4xl">
+                                        <div className="flex flex-col items-center">
+                                            <span>😊</span>
+                                            <span className="text-lg mt-2">{answers[0]}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <span>🥰</span>
+                                            <span className="text-lg mt-2">{answers[1]}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <span>💖</span>
+                                            <span className="text-lg mt-2">{answers[2]}</span>
+                                        </div>
+                                    </div>
+                                    <p className="mt-6 text-xl text-blue-600">说谢谢不只让别人高兴，自己也会很快乐！</p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <button 
+                                        onClick={exportToExcel}
+                                        className="bg-blue-500 text-white text-2xl px-8 py-4 rounded-full w-full shadow-lg hover:bg-blue-600 transform transition active:scale-95 flex items-center justify-center"
+                                    >
+                                        📊 下载成绩表 (Excel)
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => {
+                                            setStep("login");
+                                            setAnswers([]);
+                                            setCurrentQIndex(0);
+                                            setScore(0);
+                                            setStudentName("");
+                                        }}
+                                        className="bg-gray-200 text-gray-700 text-xl px-8 py-3 rounded-full w-full shadow hover:bg-gray-300 transition"
+                                    >
+                                        重新开始
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
