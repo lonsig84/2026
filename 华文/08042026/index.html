@@ -3,486 +3,366 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>健康教育练习 — 滥用毒品的原因</title>
+<title>华文综合练习 — 40题</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f0; min-height: 100vh; padding: 1rem; }
-  .app { max-width: 820px; margin: 0 auto; }
-  .header { background: linear-gradient(135deg, #1D9E75 0%, #0F6E56 100%); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
-  .header h1 { color: #fff; font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-  .header p { color: #9FE1CB; font-size: 13px; }
-  .progress-bar-wrap { background: rgba(255,255,255,0.2); border-radius: 99px; height: 6px; margin-top: 10px; }
-  .progress-bar-fill { background: #fff; border-radius: 99px; height: 6px; transition: width 0.5s ease; }
-  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: #888; text-transform: uppercase; margin-bottom: 8px; }
-  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
-  .q-num { display: inline-block; background: #E1F5EE; color: #085041; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 8px; margin-bottom: 8px; }
-  .q-text { font-size: 15px; color: #111; margin-bottom: 12px; line-height: 1.6; }
-  .q-hint { font-size: 12px; color: #888; margin-bottom: 10px; }
-  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .opt-btn { background: #f5f5f0; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #111; cursor: pointer; text-align: left; transition: all 0.18s; }
-  .opt-btn:hover { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
-  .opt-btn.selected { background: #E1F5EE; border: 1.5px solid #1D9E75; color: #085041; font-weight: 500; }
-  .opt-btn.correct { background: #EAF3DE; border: 1.5px solid #639922; color: #27500A; }
-  .opt-btn.wrong { background: #FCEBEB; border: 1.5px solid #E24B4A; color: #501313; }
-  .opt-btn.reveal-correct { background: #EAF3DE; border: 1.5px solid #639922; color: #27500A; }
-  .opt-btn:disabled { cursor: default; }
-  .feedback-box { border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 10px; display: none; }
-  .feedback-box.show { display: block; }
-  .feedback-box.ok { background: #EAF3DE; color: #27500A; border: 0.5px solid #97C459; }
-  .feedback-box.bad { background: #FCEBEB; color: #501313; border: 0.5px solid #F09595; }
-  .drag-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .drag-bank { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f5f5f0; border: 0.5px dashed rgba(0,0,0,0.18); border-radius: 8px; min-height: 48px; }
-  .drag-chip { background: #E1F5EE; color: #085041; border: 0.5px solid #5DCAA5; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: grab; user-select: none; transition: transform 0.1s; }
-  .drag-chip:active { transform: scale(0.97); cursor: grabbing; }
-  .drop-zone { background: #f5f5f0; border: 0.5px dashed rgba(0,0,0,0.18); border-radius: 8px; padding: 10px; min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; transition: background 0.2s, border-color 0.2s; }
-  .drop-zone.over { background: #E1F5EE; border-color: #1D9E75; }
-  .drop-zone-label { font-size: 12px; color: #888; margin-bottom: 4px; }
-  .open-text { width: 100%; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #111; background: #fff; resize: vertical; font-family: inherit; line-height: 1.6; }
-  .open-text:focus { outline: none; border-color: #1D9E75; box-shadow: 0 0 0 2px #E1F5EE; }
-  .char-count { font-size: 11px; color: #888; text-align: right; margin-top: 4px; }
-  .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-  .name-input { width: 100%; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #111; background: #fff; font-family: inherit; }
-  .name-input:focus { outline: none; border-color: #1D9E75; }
-  .name-label { font-size: 12px; color: #888; margin-bottom: 4px; }
-  .submit-btn { width: 100%; background: #1D9E75; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 0.5rem; }
-  .submit-btn:hover { background: #0F6E56; }
-  .submit-btn:active { transform: scale(0.98); }
-  .submit-btn:disabled { background: #888; cursor: not-allowed; }
-  .score-card { text-align: center; padding: 2rem 1rem; }
-  .score-ring { width: 110px; height: 110px; margin: 0 auto 16px; position: relative; }
-  .score-ring svg { transform: rotate(-90deg); }
-  .score-ring .score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 28px; font-weight: 500; color: #111; }
-  .score-msg { font-size: 16px; font-weight: 500; color: #111; margin-bottom: 6px; }
-  .score-sub { font-size: 13px; color: #888; }
-  .dl-btn { display: inline-block; margin-top: 1rem; background: #1D9E75; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-  .dl-btn:hover { background: #0F6E56; }
-  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 1rem 0; }
-  .stat-box { background: #f5f5f0; border-radius: 8px; padding: 12px 8px; text-align: center; }
-  .stat-num { font-size: 22px; font-weight: 500; color: #111; }
-  .stat-lbl { font-size: 11px; color: #888; margin-top: 2px; }
-  .anim-in { animation: fadeUp 0.35s ease both; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .bar-label { font-size: 12px; color: #888; width: 80px; flex-shrink: 0; text-align: right; }
-  .bar-track { flex: 1; background: #f5f5f0; border-radius: 99px; height: 8px; }
-  .bar-fill { height: 8px; border-radius: 99px; background: #1D9E75; transition: width 0.8s ease; }
-  .bar-pct { font-size: 11px; color: #888; width: 36px; }
-  .step-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 1rem; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,0.15); transition: background 0.3s; }
-  .dot.active { background: #1D9E75; }
-  .dot.done { background: #9FE1CB; }
-  @media (max-width: 480px) {
-    .options-grid { grid-template-columns: 1fr; }
-    .drag-area { grid-template-columns: 1fr; }
-    .name-row { grid-template-columns: 1fr; }
-    .stat-grid { grid-template-columns: repeat(3,1fr); }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f3ff;min-height:100vh;padding:1rem}
+:root{
+  --c1:#6c63ff;--c1l:#ede9ff;--c1d:#4b44cc;
+  --c2:#ff6b6b;--c2l:#fff0f0;
+  --c3:#06c270;--c3l:#e6faf2;
+  --c4:#ffb800;--c4l:#fff8e1;
+  --c5:#3b82f6;--c5l:#eff6ff;
+  --bg:#ffffff;--bg2:#f4f3ff;--bg3:#f9f8ff;
+  --text:#1a1a2e;--text2:#6b6b8a;--text3:#a0a0b8;
+  --border:#e0deff;
+}
+.wrap{max-width:820px;margin:0 auto;padding-bottom:3rem}
+.hero{text-align:center;padding:2.5rem 1.5rem 2rem;background:linear-gradient(135deg,#ede9ff 0%,#fce4ff 50%,#dff4ff 100%);border-radius:20px;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.hero h1{font-size:24px;font-weight:700;color:#3b2d8f;margin-bottom:6px}
+.hero p{font-size:14px;color:#6b5fb0;margin-bottom:16px}
+.badge-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.badge{font-size:12px;padding:5px 14px;border-radius:99px;font-weight:600}
+.b1{background:#ede9ff;color:#4b44cc}
+.b2{background:#fce4ff;color:#a020a0}
+.b3{background:#dff4ff;color:#0c6fa0}
+.b4{background:#e6faf2;color:#0a7a44}
+.b5{background:#fff8e1;color:#8a6000}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.stat-box{background:#fff;border-radius:14px;border:1.5px solid var(--border);padding:14px 8px;text-align:center}
+.stat-val{font-size:22px;font-weight:700}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px}
+.prog-wrap{margin-bottom:1.5rem;background:#fff;border-radius:14px;border:1.5px solid var(--border);padding:14px 18px}
+.prog-head{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600}
+.prog-track{background:#f0eeff;border-radius:99px;height:12px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#6c63ff,#a855f7);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin:1.8rem 0 .8rem}
+.sec-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sec-title{font-size:15px;font-weight:700;color:var(--text)}
+.sec-count{font-size:11px;color:var(--text2);background:#f0eeff;padding:3px 10px;border-radius:99px;margin-left:auto;font-weight:600}
+.q-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:10px;transition:border-color .2s,transform .15s,box-shadow .2s;position:relative}
+.q-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(108,99,255,.1)}
+.q-card.correct{border-color:#06c270;background:#f0fdf7}
+.q-card.wrong{border-color:#ff6b6b;background:#fff5f5}
+.q-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.q-num-badge{width:28px;height:28px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.q-text{font-size:13.5px;color:var(--text);line-height:1.65;flex:1}
+.q-text em{font-style:normal;background:#ede9ff;color:#4b44cc;padding:1px 5px;border-radius:4px;font-weight:600}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-left:38px}
+.opt{background:#f9f8ff;border:1.5px solid var(--border);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--text);cursor:pointer;text-align:left;transition:all .15s;line-height:1.4;display:flex;align-items:center;gap:8px;font-family:inherit}
+.opt:hover:not(:disabled){background:#ede9ff;border-color:#a89fff;color:#3b2d8f}
+.opt-key{font-size:11px;font-weight:700;width:20px;height:20px;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid var(--border);transition:all .15s}
+.opt.sel{background:#ede9ff;border-color:#6c63ff;color:#3b2d8f}
+.opt.sel .opt-key{background:#6c63ff;color:#fff;border-color:#6c63ff}
+.opt.correct-ans{background:#e6faf2;border-color:#06c270;color:#064f2a}
+.opt.correct-ans .opt-key{background:#06c270;color:#fff;border-color:#06c270}
+.opt.wrong-ans{background:#fff0f0;border-color:#ff6b6b;color:#7a1a1a}
+.opt.wrong-ans .opt-key{background:#ff6b6b;color:#fff;border-color:#ff6b6b}
+.opt:disabled{cursor:default}
+.fb{font-size:12.5px;margin-top:10px;padding:9px 13px;border-radius:10px;margin-left:38px;line-height:1.6}
+.fb.correct{background:#e6faf2;color:#064f2a}
+.fb.wrong{background:#fff0f0;color:#7a1a1a}
+.result-panel{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:1.8rem;margin:1.5rem 0;display:none}
+.result-title{text-align:center;font-size:20px;font-weight:700;color:var(--text);margin-bottom:1.2rem}
+.grade-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:1.2rem}
+.grade-circle{width:96px;height:96px;border-radius:50%;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:4px solid #6c63ff}
+.grade-score{font-size:26px;font-weight:700;color:#6c63ff}
+.grade-lbl{font-size:12px;color:var(--text2)}
+.grade-msg{font-size:15px;font-weight:600;color:var(--text)}
+.chart-wrap{position:relative;height:200px;margin-top:1.2rem}
+.btn-row{display:flex;gap:10px;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.btn-main{padding:12px 30px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:opacity .2s,transform .1s;font-family:inherit}
+.btn-main:active{transform:scale(.97)}
+.btn-submit{background:linear-gradient(135deg,#6c63ff,#a855f7);color:#fff}
+.btn-submit:disabled{opacity:.4;cursor:default}
+.btn-dl{background:#06c270;color:#fff}
+.btn-dl:hover{opacity:.88}
+.btn-reset{background:#f4f3ff;color:var(--text2);border:1.5px solid var(--border)}
+.btn-reset:hover{background:#ede9ff;color:#4b44cc}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}70%{transform:translateY(-2px)}}
+.anim-bounce{animation:bounce .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.anim-shake{animation:shake .3s ease}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <h1>健康教育练习 — 滥用毒品的原因</h1>
-    <p>六年级 · 学习标准 2.1.2 · 请完成所有题目后提交</p>
-    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog" style="width:0%"></div></div>
+<div class="wrap">
+
+<div class="hero">
+  <div style="font-size:44px;margin-bottom:10px">📚</div>
+  <h1>华文综合练习</h1>
+  <p>挑战40道题，考考你的华文功力！</p>
+  <div class="badge-row">
+    <span class="badge b1">同义词·反义词</span>
+    <span class="badge b2">句子成分</span>
+    <span class="badge b3">标点符号</span>
+    <span class="badge b4">字音·字义</span>
+    <span class="badge b5">成语·病句</span>
   </div>
-
-  <div id="step-info" class="card" style="margin-bottom:1rem;">
-    <div class="name-label">姓名</div>
-    <div class="name-row">
-      <div><input class="name-input" id="inp-name" placeholder="请输入姓名"></div>
-      <div><input class="name-input" id="inp-class" placeholder="班级（如：6 Amanah）"></div>
-    </div>
-    <div class="step-dots" id="dots"></div>
-  </div>
-
-  <div id="questions-wrap"></div>
-
-  <div class="card" style="margin-top:1rem;" id="submit-card">
-    <button class="submit-btn" id="submit-btn" onclick="submitAll()">提交答案并查看成绩</button>
-  </div>
-
-  <div id="result-wrap" style="display:none;"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-const CAUSES = ['缺乏关爱','社交障碍','好奇尝试','交友不慎','逃避问题','错误观念'];
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-val" id="s-done" style="color:#6c63ff">0</div><div class="stat-lbl">已作答</div></div>
+  <div class="stat-box"><div class="stat-val" id="s-left" style="color:#ffb800">40</div><div class="stat-lbl">剩余</div></div>
+  <div class="stat-box"><div class="stat-val" id="s-streak" style="color:#06c270">0</div><div class="stat-lbl">连对</div></div>
+  <div class="stat-box"><div class="stat-val" id="s-acc" style="color:#ff6b6b">—</div><div class="stat-lbl">正确率</div></div>
+</div>
 
-const MCQ = [
-  {
-    id:'q1', type:'mcq',
-    q:'小明的父母经常吵架，很少关心他。他开始和一群朋友来往，朋友给他毒品说可以"忘记烦恼"。小明滥用毒品的主要原因是什么？',
-    hint:'提示：想想小明的家庭情况。',
-    opts:['好奇尝试','缺乏关爱','错误观念','社交障碍'],
-    ans:'缺乏关爱',
-    explain:'小明因为得不到家人的关爱，情感上感到空虚，容易被毒品诱惑。缺乏关爱是青少年滥用毒品的常见原因之一。'
-  },
-  {
-    id:'q2', type:'mcq',
-    q:'阿华听朋友说吃一颗药可以提神，让他考试更好。他心想："就试一次应该没关系。" 这属于哪种原因？',
-    hint:'提示：阿华对毒品有什么想法？',
-    opts:['逃避问题','缺乏关爱','错误观念','交友不慎'],
-    ans:'错误观念',
-    explain:'阿华以为毒品可以帮助提神和考好试，这是一种对毒品的错误观念。事实上毒品会损害健康，根本无法帮助学习。'
-  },
-  {
-    id:'q3', type:'mcq',
-    q:'小芳在学校没有朋友，她觉得很孤单。有一群同学说只要她吸烟就可以加入他们的圈子。这属于哪种原因？',
-    hint:'提示：小芳为什么会答应？',
-    opts:['社交障碍','逃避问题','好奇尝试','缺乏关爱'],
-    ans:'社交障碍',
-    explain:'小芳因为社交障碍，渴望被接受和融入群体，才会被朋辈压力所影响而接触毒品。'
-  },
-  {
-    id:'q4', type:'mcq',
-    q:'大伟在学校遇到了很多麻烦——考试不及格、被老师批评。他开始用毒品来"暂时忘记"这些问题。这是哪种原因？',
-    hint:'提示：大伟用毒品来做什么？',
-    opts:['缺乏关爱','交友不慎','逃避问题','好奇尝试'],
-    ans:'逃避问题',
-    explain:'大伟利用毒品来逃避现实中的问题。这是非常危险的行为——毒品无法解决问题，只会让问题更加严重。'
-  },
+<div class="prog-wrap">
+  <div class="prog-head"><span>答题进度</span><span id="prog-pct">0 / 40</span></div>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div id="quiz-body"></div>
+
+<div class="result-panel" id="result-panel">
+  <div class="result-title">🎉 挑战完成！</div>
+  <div class="grade-wrap">
+    <div class="grade-circle" id="grade-circle">
+      <div class="grade-score" id="grade-score">—</div>
+      <div class="grade-lbl">/ 40 分</div>
+    </div>
+    <div class="grade-msg" id="grade-msg"></div>
+  </div>
+  <div class="stats-row" style="margin-bottom:0">
+    <div class="stat-box"><div class="stat-val" id="r-correct" style="color:#06c270">—</div><div class="stat-lbl">答对</div></div>
+    <div class="stat-box"><div class="stat-val" id="r-wrong" style="color:#ff6b6b">—</div><div class="stat-lbl">答错</div></div>
+    <div class="stat-box"><div class="stat-val" id="r-pct" style="color:#6c63ff">—</div><div class="stat-lbl">正确率</div></div>
+    <div class="stat-box"><div class="stat-val" id="r-streak" style="color:#ffb800">—</div><div class="stat-lbl">最长连对</div></div>
+  </div>
+  <div class="chart-wrap"><canvas id="result-chart" role="img" aria-label="各部分得分柱状图"></canvas></div>
+</div>
+
+<div class="btn-row">
+  <button class="btn-main btn-submit" id="btn-submit" disabled onclick="submitQuiz()">提交作答</button>
+  <button class="btn-main btn-dl" id="btn-dl" onclick="downloadExcel()" style="display:none">📥 下载成绩单 Excel</button>
+  <button class="btn-main btn-reset" id="btn-reset" onclick="resetQuiz()" style="display:none">🔄 重新挑战</button>
+</div>
+
+</div>
+
+<script>
+const SECTIONS=[
+  {label:'同义·反义词',icon:'📖',color:'#6c63ff',bg:'#ede9ff'},
+  {label:'句子成分',icon:'✏️',color:'#3b82f6',bg:'#eff6ff'},
+  {label:'标点符号',icon:'🔤',color:'#a855f7',bg:'#f5f0ff'},
+  {label:'字音·字义',icon:'🔊',color:'#06c270',bg:'#e6faf2'},
+  {label:'成语·病句',icon:'🏆',color:'#ffb800',bg:'#fff8e1'}
+];
+const QS=[
+  {sec:0,q:'1. "知识给人力量，让我们无惧前方的荆棘，犹如拓荒者<em>开垦</em>荒地，深耕属于自己的沃土。"哪项和"开垦"的意思相近？',opts:['A. 开通','B. 开展','C. 开设','D. 开辟'],ans:'D',exp:'"开辟"含有开创、开拓新天地的意思，与"开垦"相近，均指开拓未开发之地。'},
+  {sec:0,q:'2. "宏伟壮观的双塔楼……犹如两位巨人携手共同攀登云霄。"哪项和<em>宏伟</em>的意思相近？',opts:['A. 伟大','B. 雄伟','C. 宏观','D. 宽宏'],ans:'B',exp:'"雄伟"与"宏伟"均形容建筑或景物气势磅礴、壮观，意思最接近。'},
+  {sec:0,q:'3. "承诺别人的事，一定要竭尽全力完成，不可失信于人。"哪项与"<em>承诺</em>"的意思最接近？',opts:['A. 诺言','B. 允诺','C. 承认','D. 赞成'],ans:'B',exp:'"允诺"是动词，与"承诺"同义，均指答应、许诺他人。"诺言"是名词，词性不同。'},
+  {sec:0,q:'4. "那荒芜的庭院阴森森的，已成了土匪藏身的巢穴。"哪项与"<em>荒芜</em>"的意思最接近？',opts:['A. 偏僻','B. 残破','C. 落后','D. 荒废'],ans:'D',exp:'"荒废"指土地因无人耕种或管理而荒芜，与"荒芜"意思最接近。'},
+  {sec:0,q:'5. "宏文过马路时，<em>漫不经心</em>地张望四周，差点儿被迎面而来的轿车撞倒。"哪项和"漫不经心"的意思相近？',opts:['A. 小心翼翼','B. 专心致志','C. 走马看花','D. 心不在焉'],ans:'D',exp:'"心不在焉"指心思不集中，注意力分散，与"漫不经心"同义。'},
+  {sec:0,q:'6. "为了一家人的生计，爸爸每天默默在烈日下拼搏，从不<em>埋怨</em>。"哪项和"埋怨"的意思相反？',opts:['A. 谅解','B. 抱怨','C. 怨恨','D. 怨言'],ans:'A',exp:'"埋怨"是抱怨、责怪；其反义词是"谅解"，即理解并原谅。'},
+  {sec:0,q:'7. "母亲<em>粗糙</em>的手是如此能干……"哪项和"粗糙"的意思相反？',opts:['A. 光亮','B. 纤细','C. 润泽','D. 光滑'],ans:'D',exp:'"光滑"与"粗糙"意思相反，形容表面平滑细腻。'},
+  {sec:0,q:'8. "豪雨倾盆落下，<em>陡峭</em>的阶梯湿淋淋……"哪项和"陡峭"的意思相反？',opts:['A. 平淡','B. 平坦','C. 平行','D. 平稳'],ans:'B',exp:'"平坦"形容地面平整，与"陡峭"（坡度大、险峻）意思相反。'},
+  {sec:1,q:'9. "黄琬淇连书本都弄脏了。"以上哪个词语是主语？',opts:['A. 黄琬淇','B. 连','C. 脏','D. 书本'],ans:'A',exp:'主语是句子的动作执行者。"黄琬淇"是谓语"弄脏"的主体，是主语。'},
+  {sec:1,q:'10. "「我思故我在」是谁提出的呢？"以上哪个词语是主语？',opts:['A. 谁','B. 是','C. 我思故我在','D. 提出'],ans:'C',exp:'"「我思故我在」"是被讨论的对象，是谓语"是"的主语。'},
+  {sec:1,q:'11. "一个陌生人把我紧紧地抱在怀中。"以上哪个词语是宾语？',opts:['A. 陌生人','B. 紧紧地','C. 抱','D. 怀中'],ans:'D',exp:'结合语义，"抱在怀中"的终点是"怀中"，是宾语。'},
+  {sec:1,q:'12. "紧张"在下列哪个句子中是状语？',opts:['A. 比赛正在紧张地进行。','B. 紧张的妈妈又忘记载弟弟去学校了。','C. 紧张的情绪揪住了我的心。','D. 小东不停地吸吮着自己的手指以克服紧张的情绪。'],ans:'A',exp:'A中"紧张地"修饰谓语"进行"，是状语。B、C中"紧张的"修饰名词是定语。'},
+  {sec:1,q:'13. "身为富二代的黄琳峰在世界各地游览了许多的名胜古迹。"以上哪个词语是宾语？',opts:['A. 身为富二代','B. 黄琳峰','C. 游览','D. 名胜古迹'],ans:'D',exp:'"游览"是谓语，其对象是"名胜古迹"，是宾语。'},
+  {sec:1,q:'14. "家里来了一位朋友。"以上哪个词语是谓语？',opts:['A. 家里','B. 来','C. 一位','D. 朋友'],ans:'B',exp:'"来"是动词谓语，表示动作行为。"家里"是状语。'},
+  {sec:1,q:'15. "我们正在做……极其光荣的伟大事业。"句子中"我们的前人从来没有做过的极其光荣的伟大"属于什么成分？',opts:['A. 宾语','B. 状语','C. 定语','D. 补语'],ans:'C',exp:'该短语修饰名词"事业"，是定语。'},
+  {sec:1,q:'16. "每天放学后，老师总要站在校门口看一会儿。"找出句子中的谓语。',opts:['A. 站','B. 看','C. 站，看','D. 放学'],ans:'C',exp:'"站"和"看"都是谓语动词，老师进行了两个动作：站和看。'},
+  {sec:1,q:'17. "这几位歌手，你最喜欢哪一位？"哪一个词是宾语？',opts:['A. 歌手','B. 你','C. 哪一位','D. 几位'],ans:'C',exp:'"喜欢"的对象是"哪一位"，因此"哪一位"是宾语。'},
+  {sec:1,q:'18. "今天，在车间里，厂长对新工人的产品检查得十分仔细。"哪个是补语？',opts:['A. 十分','B. 十分仔细','C. 在车间里','D. 今天'],ans:'B',exp:'"检查得十分仔细"中，"十分仔细"补充说明"检查"的程度，是补语。'},
+  {sec:2,q:'19. 妈妈说（ ）你要记得带雨伞。',opts:['A. 。','B. ，','C. ：','D. ！'],ans:'C',exp:'"说"字后引出直接引语，应用冒号。'},
+  {sec:2,q:'20. 今天的天气真好（ ）我们去公园玩吧！',opts:['A. 。','B. ，','C. ！','D. ：'],ans:'B',exp:'两个分句之间用逗号分隔，表示停顿。'},
+  {sec:2,q:'21. 你知道小猫去哪里了吗（ ）',opts:['A. 。','B. ，','C. ！','D. ？'],ans:'D',exp:'疑问句末尾用问号。'},
+  {sec:2,q:'22. 奶奶买了很多水果（ ）有苹果、香蕉、葡萄和橙子。',opts:['A. ，','B. 。','C. ：','D. ；'],ans:'C',exp:'冒号用于总说后分说，引出具体内容。'},
+  {sec:2,q:'23. 小丽一边唱歌（ ）一边跳舞。',opts:['A. 。','B. ，','C. ：','D. ；'],ans:'B',exp:'"一边……一边……"结构中间用逗号。'},
+  {sec:2,q:'24. 小明说（ ）我明天要去旅行。',opts:['A. ，','B. 。','C. ：','D. ！'],ans:'C',exp:'引导直接引语前用冒号。'},
+  {sec:2,q:'25. 他高兴地喊（ ）太棒了！',opts:['A. ，','B. 。','C. ：','D. ？'],ans:'C',exp:'"喊"字后引出直接引语，应用冒号。'},
+  {sec:2,q:'26. 请问（ ）你有看到我的笔吗？',opts:['A. 。','B. ，','C. ：','D. ？'],ans:'B',exp:'"请问"后是询问的内容，用逗号隔开。'},
+  {sec:2,q:'27. 我的书包里有这些东西（ ）课本、练习本和文具盒。',opts:['A. ，','B. 。','C. ：','D. ！'],ans:'C',exp:'总说后分列具体内容，应用冒号。'},
+  {sec:3,q:'28. "他如此执迷不悟，你应该把其中的厉害关系给他挑（ ）明。"',opts:['A. tiǎo','B. tiāo','C. tiáo','D. tiào'],ans:'A',exp:'"挑明"意为挑破、说清楚，读 tiǎo（第三声）。'},
+  {sec:3,q:'29. "每天到古井边挑（ ）水的村民络绎不绝。"',opts:['A. tiǎo','B. tiāo','C. tiáo','D. tiào'],ans:'B',exp:'用扁担挑水的"挑"读 tiāo（第一声）。'},
+  {sec:3,q:'30. "爷爷行动不太便（ ）利……"',opts:['A. biàn','B. pián','C. biān','D. piàn'],ans:'A',exp:'"便利"中"便"读 biàn（第四声），意为方便。'},
+  {sec:3,q:'31. "三元钱就能买一支漂亮的钢笔，太便（ ）宜了！"',opts:['A. biàn','B. pián','C. biān','D. piàn'],ans:'B',exp:'"便宜"（价格低）中"便"读 pián（第二声）。'},
+  {sec:3,q:'32. "我精心照顾这盆海棠花。"句子中"花"的正确解释是？',opts:['A. 花费','B. 模糊不清','C. 能开花供观赏的植物','D. 虚伪的'],ans:'C',exp:'这里的"花"指植物，即海棠花。'},
+  {sec:3,q:'33. "父亲为了我们的成长花费了许多心血。"句子中"花"的正确解释是？',opts:['A. 花费','B. 模糊不清','C. 能开花供观赏的植物','D. 虚伪的'],ans:'A',exp:'"花费心血"中的"花"是动词，意为花费、消耗。'},
+  {sec:3,q:'34. "爷爷今年70多岁了，眼睛有些花了。"句子中"花"的正确解释是？',opts:['A. 花费','B. 模糊不清','C. 能开花供观赏的植物','D. 虚伪的'],ans:'B',exp:'"眼花"指眼睛视力模糊、看不清楚。'},
+  {sec:4,q:'35. "10月2日，北京故宫接待量达到11.48万人次，游人（ ），难以感受紫禁城的庄严气氛。"',opts:['A. 摩肩接踵','B. 尸位素餐','C. 别无长物','D. 无所不至'],ans:'A',exp:'"摩肩接踵"形容人多拥挤，符合故宫游客众多的语境。'},
+  {sec:4,q:'36. "最近出现超级病菌，人类在疾病防控上一定要做到（ ），未雨绸缪。"',opts:['A. 见微知著','B. 含英咀华','C. 高抬贵手','D. 声情并茂'],ans:'A',exp:'"见微知著"指从细小迹象发现问题，与"未雨绸缪"语义相配。'},
+  {sec:4,q:'37. "参加保险，虽不能使人（ ），但却能在灾祸不期而至时……"哪项成语使用完全正确？',opts:['A. 化险为夷','B. 灯火阑珊','C. 良莠不齐','D. 倾巢而出'],ans:'A',exp:'"化险为夷"指将危险变为平安，符合保险减少损失的语境。'},
+  {sec:4,q:'38. "实验已进入最后冲刺阶段，但由于技术员的疏忽，最终还是（ ）。"',opts:['A. 功败垂成','B. 不堪回首','C. 首鼠两端','D. 俯拾即是'],ans:'A',exp:'"功败垂成"指事情将要成功时却遭到失败，符合情境。'},
+  {sec:4,q:'39. 下列各句中，没有语病的一句是：',opts:['A. 现在市场假冒伪劣产品屡禁不止，广大消费者要多加注意，不要给唯利是图者以可乘之机。','B. 现在科学发达，移植记忆也许不是完全不可能的事。','C. 广东、福建等沿海人民以顽强的斗志解决了强大台风所造成的灾害。','D. 他的文章对社会问题的揭露既全面又尖锐。'],ans:'A',exp:'A句表达清楚，逻辑通顺，没有语病。C句"解决了灾害"搭配不当。'},
+  {sec:4,q:'40. 下列各句中，没有语病的一句是：',opts:['A. 人们一走进教学楼，就会看到所有关于澳门历史的图片都被挂在走廊西边的墙壁上。','B. 为了防止这类交通事故不再发生，我们加强了交通安全的教育和管理。','C. 昨天是转会截止日期的最后一天，中国足协又接到25名球员递交的转会申请。','D. 我哪里会想到，出版一本译作需要那么多人的努力才能面世。'],ans:'C',exp:'C句表达正确，没有语病。B句"防止……不再发生"双重否定意思相反。'}
 ];
 
-const MATCH = {
-  id:'q5', type:'match',
-  q:'配对题：将左边的情境描述与右边的原因连线。',
-  hint:'把情境卡片拖入正确的原因格子里。',
-  pairs:[
-    {sit:'看到同学玩，想了解是什么感觉', cause:'好奇尝试'},
-    {sit:'结交了爱吸毒的朋友圈', cause:'交友不慎'},
-    {sit:'父母忙碌，从不关心孩子', cause:'缺乏关爱'},
-    {sit:'觉得吃了药就能解决一切烦恼', cause:'错误观念'},
-  ]
-};
+const answers={};
+let submitted=false,maxStreak=0;
+window._rd={};
 
-const OPEN = {
-  id:'q6', type:'open',
-  q:'思考题：如果朋友邀请你"尝试"某种药片，你会怎么拒绝？请写出至少两种拒绝方法，并说明原因。',
-  hint:'参考课本第99页的拒绝技巧，写出你的方法。'
-};
-
-const allQs = [...MCQ, MATCH, OPEN];
-let answers = {};
-let submitted = false;
-
-function buildDots() {
-  const d = document.getElementById('dots');
-  d.innerHTML = allQs.map((q,i)=>`<div class="dot" id="dot-${i}"></div>`).join('');
-}
-
-function updateDots() {
-  allQs.forEach((q,i)=>{
-    const el = document.getElementById('dot-'+i);
-    if(!el) return;
-    if(submitted) { el.className='dot done'; return; }
-    if(answers[q.id]!==undefined && answers[q.id]!=='') el.className='dot active';
-    else el.className='dot';
-  });
-}
-
-function updateProgress() {
-  const filled = allQs.filter(q=>answers[q.id]!==undefined && answers[q.id]!=='').length;
-  document.getElementById('prog').style.width = Math.round(filled/allQs.length*100)+'%';
-  updateDots();
-}
-
-function buildMCQ(q, idx) {
-  return `<div class="card anim-in" id="card-${q.id}" style="animation-delay:${idx*0.07}s">
-    <span class="q-num">题目 ${idx+1}</span>
-    <div class="q-text">${q.q}</div>
-    <div class="q-hint">${q.hint}</div>
-    <div class="options-grid">
-      ${q.opts.map(o=>`<button class="opt-btn" id="opt-${q.id}-${o}" onclick="pickMCQ('${q.id}','${o}','${q.ans}','${q.explain.replace(/'/g,"\\'")}')">
-        ${o}
-      </button>`).join('')}
-    </div>
-    <div class="feedback-box" id="fb-${q.id}"></div>
-  </div>`;
-}
-
-function pickMCQ(qid, chosen, ans, explain) {
-  if(submitted) return;
-  answers[qid] = chosen;
-  const opts = document.querySelectorAll(`[id^="opt-${qid}-"]`);
-  opts.forEach(b=>{ b.className='opt-btn'; b.disabled=false; });
-  document.getElementById(`opt-${qid}-${chosen}`).classList.add('selected');
-  updateProgress();
-}
-
-let dragItem = null;
-let dragFrom = null;
-
-function buildMatch(q, idx) {
-  const shuffled = [...q.pairs].sort(()=>Math.random()-0.5);
-  const slots = q.pairs.map(p=>p.cause);
-  return `<div class="card anim-in" id="card-${q.id}" style="animation-delay:${idx*0.07}s">
-    <span class="q-num">题目 ${idx+1}</span>
-    <div class="q-text">${q.q}</div>
-    <div class="q-hint">${q.hint}</div>
-    <div class="section-label" style="margin-top:8px;">情境卡片（拖动到右边）</div>
-    <div class="drag-bank" id="bank-${q.id}">
-      ${shuffled.map(p=>`<div class="drag-chip" draggable="true" data-sit="${p.sit}" data-qid="${q.id}" ondragstart="onDragStart(event)" ontouchstart="onTouchStart(event)" ontouchmove="onTouchMove(event)" ontouchend="onTouchEnd(event)">${p.sit}</div>`).join('')}
-    </div>
-    <div class="drag-area" style="margin-top:10px;">
-      ${slots.map(cause=>`
-        <div>
-          <div class="drop-zone-label">${cause}</div>
-          <div class="drop-zone" id="drop-${q.id}-${cause}" data-cause="${cause}" data-qid="${q.id}"
-            ondragover="event.preventDefault();this.classList.add('over')"
-            ondragleave="this.classList.remove('over')"
-            ondrop="onDrop(event,'${q.id}','${cause}')">
-          </div>
-        </div>`).join('')}
-    </div>
-    <div class="feedback-box" id="fb-${q.id}"></div>
-  </div>`;
-}
-
-function onDragStart(e) {
-  dragItem = e.target;
-  dragFrom = e.target.parentElement;
-  e.dataTransfer.effectAllowed='move';
-}
-function onDrop(e,qid,cause) {
-  e.preventDefault();
-  const zone = document.getElementById(`drop-${qid}-${cause}`);
-  zone.classList.remove('over');
-  if(!dragItem) return;
-  if(zone.querySelector('.drag-chip')) {
-    dragFrom.appendChild(zone.querySelector('.drag-chip'));
-  }
-  zone.appendChild(dragItem);
-  dragItem = null; dragFrom = null;
-  updateMatchAnswer(qid);
-}
-
-let touchChip = null, touchClone = null;
-function onTouchStart(e) {
-  touchChip = e.target;
-  touchClone = touchChip.cloneNode(true);
-  touchClone.style.position='fixed'; touchClone.style.opacity='0.8'; touchClone.style.pointerEvents='none'; touchClone.style.zIndex='1000';
-  document.body.appendChild(touchClone);
-}
-function onTouchMove(e) {
-  if(!touchClone) return;
-  const t = e.touches[0];
-  touchClone.style.left=(t.clientX-40)+'px'; touchClone.style.top=(t.clientY-20)+'px';
-  e.preventDefault();
-}
-function onTouchEnd(e) {
-  if(!touchClone) return;
-  document.body.removeChild(touchClone);
-  const t = e.changedTouches[0];
-  const el = document.elementFromPoint(t.clientX, t.clientY);
-  const zone = el && (el.classList.contains('drop-zone') ? el : el.closest('.drop-zone'));
-  if(zone) {
-    const qid = zone.dataset.qid, cause = zone.dataset.cause;
-    if(zone.querySelector('.drag-chip')) touchChip.parentElement.appendChild(zone.querySelector('.drag-chip'));
-    zone.appendChild(touchChip);
-    updateMatchAnswer(qid);
-  }
-  touchChip=null; touchClone=null;
-}
-
-function updateMatchAnswer(qid) {
-  const q = MATCH;
-  const ans = {};
-  q.pairs.forEach(p=>{
-    const zone = document.getElementById(`drop-${qid}-${p.cause}`);
-    const chip = zone && zone.querySelector('.drag-chip');
-    if(chip) ans[p.cause] = chip.dataset.sit;
-  });
-  answers[qid] = ans;
-  updateProgress();
-}
-
-function buildOpen(q, idx) {
-  return `<div class="card anim-in" id="card-${q.id}" style="animation-delay:${idx*0.07}s">
-    <span class="q-num">题目 ${idx+1}</span>
-    <div class="q-text">${q.q}</div>
-    <div class="q-hint">${q.hint}</div>
-    <textarea class="open-text" id="ta-${q.id}" rows="5" placeholder="在这里写下你的回答……" oninput="updateOpen('${q.id}',this.value)"></textarea>
-    <div class="char-count"><span id="cc-${q.id}">0</span> 字</div>
-  </div>`;
-}
-
-function updateOpen(qid, val) {
-  answers[qid] = val;
-  document.getElementById('cc-'+qid).textContent = val.replace(/\s/g,'').length;
-  updateProgress();
-}
-
-function buildAll() {
-  buildDots();
-  let html = '';
-  allQs.forEach((q,i)=>{
-    if(q.type==='mcq') html += buildMCQ(q,i);
-    else if(q.type==='match') html += buildMatch(q,i);
-    else html += buildOpen(q,i);
-  });
-  document.getElementById('questions-wrap').innerHTML = html;
-}
-
-function revealMCQFeedback() {
-  MCQ.forEach(q=>{
-    const chosen = answers[q.id];
-    if(!chosen) return;
-    const opts = document.querySelectorAll(`[id^="opt-${q.id}-"]`);
-    opts.forEach(b=>{ b.disabled=true; b.className='opt-btn'; });
-    if(chosen===q.ans) {
-      document.getElementById(`opt-${q.id}-${chosen}`).classList.add('correct');
-    } else {
-      document.getElementById(`opt-${q.id}-${chosen}`).classList.add('wrong');
-      document.getElementById(`opt-${q.id}-${q.ans}`).classList.add('reveal-correct');
+function renderQuiz(){
+  const body=document.getElementById('quiz-body');
+  body.innerHTML='';
+  let lastSec=-1;
+  QS.forEach((q,i)=>{
+    if(q.sec!==lastSec){
+      lastSec=q.sec;
+      const s=SECTIONS[q.sec];
+      const cnt=QS.filter(x=>x.sec===q.sec).length;
+      const hdr=document.createElement('div');
+      hdr.className='sec-hdr';
+      hdr.innerHTML=`<div class="sec-icon" style="background:${s.bg};color:${s.color}">${s.icon}</div><div class="sec-title">${s.label}</div><div class="sec-count">${cnt} 题</div>`;
+      body.appendChild(hdr);
     }
-    const fb = document.getElementById('fb-'+q.id);
-    if(chosen===q.ans) {
-      fb.className='feedback-box show ok'; fb.textContent='✓ 正确！'+q.explain;
-    } else {
-      fb.className='feedback-box show bad'; fb.textContent='× 正确答案：'+q.ans+'。'+q.explain;
+    const s=SECTIONS[q.sec];
+    const card=document.createElement('div');
+    card.className='q-card';
+    card.id='qc'+i;
+    card.innerHTML=`
+      <div class="q-head">
+        <div class="q-num-badge" style="background:${s.bg};color:${s.color}">${i+1}</div>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="opts" id="opts${i}"></div>
+      <div class="fb" id="fb${i}" style="display:none"></div>`;
+    body.appendChild(card);
+    const od=card.querySelector('#opts'+i);
+    q.opts.forEach((o,j)=>{
+      const key='ABCD'[j];
+      const btn=document.createElement('button');
+      btn.className='opt';
+      btn.innerHTML=`<span class="opt-key">${key}</span><span>${o.substring(3)}</span>`;
+      btn.onclick=()=>selectOpt(i,j,btn);
+      od.appendChild(btn);
+    });
+  });
+}
+
+function selectOpt(qi,oi,btn){
+  if(submitted)return;
+  answers[qi]=oi;
+  const od=document.getElementById('opts'+qi);
+  [...od.querySelectorAll('.opt')].forEach(b=>{
+    b.classList.remove('sel');
+    b.querySelector('.opt-key').removeAttribute('style');
+  });
+  btn.classList.add('sel');
+  const card=document.getElementById('qc'+qi);
+  card.classList.add('anim-bounce');
+  setTimeout(()=>card.classList.remove('anim-bounce'),400);
+  updateProgress();
+  document.getElementById('btn-submit').disabled=(Object.keys(answers).length<QS.length);
+}
+
+function updateProgress(){
+  const done=Object.keys(answers).length;
+  const pct=Math.round(done/QS.length*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=done+' / '+QS.length;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-left').textContent=QS.length-done;
+}
+
+function submitQuiz(){
+  if(submitted)return;
+  submitted=true;
+  document.getElementById('btn-submit').disabled=true;
+  let correct=0,cur=0,mx=0;
+  const secCorrect=[0,0,0,0,0],secTotal=[0,0,0,0,0];
+  QS.forEach((q,i)=>{
+    secTotal[q.sec]++;
+    const card=document.getElementById('qc'+i);
+    const od=document.getElementById('opts'+i);
+    const btns=[...od.querySelectorAll('.opt')];
+    const userIdx=answers[i];
+    const corrIdx='ABCD'.indexOf(q.ans);
+    btns.forEach(b=>{b.disabled=true;b.classList.remove('sel');});
+    btns[corrIdx].classList.add('correct-ans');
+    const isRight=(userIdx===corrIdx);
+    if(isRight){correct++;secCorrect[q.sec]++;cur++;if(cur>mx)mx=cur;card.classList.add('correct');}
+    else{cur=0;card.classList.add('wrong');card.classList.add('anim-shake');if(userIdx!==undefined)btns[userIdx].classList.add('wrong-ans');}
+    const fb=document.getElementById('fb'+i);
+    fb.style.display='block';
+    fb.className='fb '+(isRight?'correct':'wrong');
+    fb.innerHTML=(isRight?'✓ 正确！':'✗ 正确答案：'+q.ans+'。')+' '+q.exp;
+  });
+  maxStreak=mx;
+  const pct=Math.round(correct/QS.length*100);
+  document.getElementById('s-acc').textContent=pct+'%';
+  document.getElementById('r-correct').textContent=correct;
+  document.getElementById('r-wrong').textContent=QS.length-correct;
+  document.getElementById('r-pct').textContent=pct+'%';
+  document.getElementById('r-streak').textContent=mx;
+  document.getElementById('grade-score').textContent=correct;
+  const msg=pct>=90?'🏆 优秀！太棒了！':pct>=75?'🎉 良好，再接再厉！':pct>=60?'😊 及格，继续加油！':'💪 继续努力，下次更好！';
+  const gcol=pct>=90?'#06c270':pct>=75?'#6c63ff':pct>=60?'#ffb800':'#ff6b6b';
+  document.getElementById('grade-msg').textContent=msg;
+  document.getElementById('grade-circle').style.borderColor=gcol;
+  document.getElementById('grade-score').style.color=gcol;
+  const rp=document.getElementById('result-panel');
+  rp.style.display='block';
+  drawChart(secCorrect,secTotal);
+  setTimeout(()=>rp.scrollIntoView({behavior:'smooth',block:'start'}),100);
+  document.getElementById('btn-dl').style.display='inline-block';
+  document.getElementById('btn-reset').style.display='inline-block';
+  window._rd={secCorrect,secTotal,correct,pct,mx};
+}
+
+function drawChart(sc,st){
+  const pcts=sc.map((v,i)=>Math.round(v/st[i]*100));
+  new Chart(document.getElementById('result-chart'),{
+    type:'bar',
+    data:{
+      labels:SECTIONS.map(s=>s.icon+' '+s.label),
+      datasets:[{label:'正确率%',data:pcts,backgroundColor:SECTIONS.map(s=>s.color),borderRadius:8}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',font:{size:11}}},
+        x:{ticks:{font:{size:11}}}
+      }
     }
   });
 }
 
-function revealMatchFeedback() {
-  const q = MATCH;
-  const ans = answers[q.id]||{};
-  let correct=0;
-  q.pairs.forEach(p=>{
-    const zone = document.getElementById(`drop-${q.id}-${p.cause}`);
-    const chip = zone && zone.querySelector('.drag-chip');
-    if(chip) {
-      if(chip.dataset.sit===p.sit) { chip.style.background='#C0DD97'; chip.style.color='#173404'; correct++; }
-      else { chip.style.background='#F7C1C1'; chip.style.color='#501313'; }
-    }
+function downloadExcel(){
+  const now=new Date();
+  const ds=now.toLocaleDateString('zh-CN');
+  const rows=[['题号','部分','题目','学生答案','正确答案','结果','解析']];
+  QS.forEach((q,i)=>{
+    const ui=answers[i];
+    const ua=(ui!==undefined)?'ABCD'[ui]:'未作答';
+    const res=ua===q.ans?'✓ 正确':'✗ 错误';
+    rows.push([i+1,SECTIONS[q.sec].label,q.q.replace(/<[^>]+>/g,''),ua,q.ans,res,q.exp]);
   });
-  const fb = document.getElementById('fb-'+q.id);
-  fb.className='feedback-box show '+(correct===q.pairs.length?'ok':'bad');
-  fb.textContent=`配对结果：${correct}/${q.pairs.length} 正确。${correct===q.pairs.length?'全对！做得很好！':'请检查红色的项目——答案已高亮显示。'}`;
+  rows.push([]);
+  const d=window._rd;
+  rows.push(['总分',(d.correct||0)+'/40','正确率',(d.pct||0)+'%','最长连对',(d.mx||0),'日期',ds]);
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:6},{wch:14},{wch:52},{wch:10},{wch:10},{wch:10},{wch:48}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,'华文练习成绩',ws);
+  XLSX.writeFile(wb,'华文综合练习_'+ds.replace(/\//g,'-')+'.xlsx');
 }
 
-function calcScore() {
-  let score=0, total=MCQ.length;
-  MCQ.forEach(q=>{ if(answers[q.id]===q.ans) score++; });
-  const matchAns = answers[MATCH.id]||{};
-  let matchScore=0;
-  MATCH.pairs.forEach(p=>{ if(matchAns[p.cause]===p.sit) matchScore++; });
-  const matchPct = matchScore/MATCH.pairs.length;
-  score += matchPct;
-  total += 1;
-  return { score: Math.round(score), total, matchScore, matchTotal:MATCH.pairs.length };
+function resetQuiz(){
+  Object.keys(answers).forEach(k=>delete answers[k]);
+  submitted=false;maxStreak=0;
+  document.getElementById('result-panel').style.display='none';
+  document.getElementById('btn-dl').style.display='none';
+  document.getElementById('btn-reset').style.display='none';
+  document.getElementById('btn-submit').disabled=true;
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('prog-pct').textContent='0 / 40';
+  document.getElementById('s-done').textContent='0';
+  document.getElementById('s-left').textContent='40';
+  document.getElementById('s-streak').textContent='0';
+  document.getElementById('s-acc').textContent='—';
+  renderQuiz();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function submitAll() {
-  const name = document.getElementById('inp-name').value.trim();
-  const cls = document.getElementById('inp-class').value.trim();
-  if(!name) { alert('请输入姓名！'); return; }
-  let unanswered=[];
-  MCQ.forEach(q=>{ if(!answers[q.id]) unanswered.push('题目'+(MCQ.indexOf(q)+1)); });
-  if(!answers[MATCH.id]||Object.keys(answers[MATCH.id]).length<MATCH.pairs.length) unanswered.push('配对题');
-  if(unanswered.length>0 && !confirm(`以下题目未完成：${unanswered.join('、')}。确定要提交吗？`)) return;
-  submitted = true;
-  revealMCQFeedback();
-  revealMatchFeedback();
-  updateDots();
-  const {score,total,matchScore,matchTotal} = calcScore();
-  const pct = Math.round(score/total*100);
-  let msg='', msgcls='';
-  if(pct>=80){ msg='表现优秀！继续保持！'; msgcls='#27500A'; }
-  else if(pct>=60){ msg='不错！再复习一下吧。'; msgcls='#3B6D11'; }
-  else { msg='需要加油！多看看课本。'; msgcls='#993C1D'; }
-
-  const openVal = (answers[OPEN.id]||'').trim();
-  document.getElementById('submit-card').style.display='none';
-  const rw = document.getElementById('result-wrap');
-  rw.style.display='block';
-  rw.innerHTML=`<div class="card score-card anim-in">
-    <div class="score-ring">
-      <svg width="110" height="110" viewBox="0 0 110 110">
-        <circle cx="55" cy="55" r="48" fill="none" stroke="#f5f5f0" stroke-width="8"/>
-        <circle cx="55" cy="55" r="48" fill="none" stroke="#1D9E75" stroke-width="8"
-          stroke-dasharray="${Math.round(2*3.14159*48)}" stroke-dashoffset="${Math.round(2*3.14159*48*(1-pct/100))}" stroke-linecap="round"/>
-      </svg>
-      <div class="score-num">${pct}%</div>
-    </div>
-    <div class="score-msg" style="color:${msgcls}">${msg}</div>
-    <div class="score-sub">${name} · ${cls||'—'}</div>
-    <div class="stat-grid">
-      <div class="stat-box"><div class="stat-num">${MCQ.filter(q=>answers[q.id]===q.ans).length}/${MCQ.length}</div><div class="stat-lbl">选择题</div></div>
-      <div class="stat-box"><div class="stat-num">${matchScore}/${matchTotal}</div><div class="stat-lbl">配对题</div></div>
-      <div class="stat-box"><div class="stat-num">${Math.min(openVal.replace(/\s/g,'').length,999)}</div><div class="stat-lbl">思考题字数</div></div>
-    </div>
-    <div style="margin:0.5rem 0 0;">
-      <div class="section-label" style="margin-bottom:6px;">各原因掌握情况</div>
-      ${buildCauseBar()}
-    </div>
-    <button class="dl-btn" onclick="downloadExcel('${encodeURIComponent(name)}','${encodeURIComponent(cls||'')}',${pct},${score},${total})">下载成绩记录 (Excel)</button>
-  </div>`;
-  rw.scrollIntoView({behavior:'smooth', block:'center'});
-}
-
-function buildCauseBar() {
-  const causeResult = {};
-  CAUSES.forEach(c=>causeResult[c]=null);
-  MCQ.forEach(q=>{
-    if(causeResult.hasOwnProperty(q.ans)) causeResult[q.ans] = answers[q.id]===q.ans ? 1 : 0;
-  });
-  const matchAns = answers[MATCH.id]||{};
-  MATCH.pairs.forEach(p=>{ if(causeResult.hasOwnProperty(p.cause)) causeResult[p.cause] = matchAns[p.cause]===p.sit ? 1 : 0; });
-  return CAUSES.map(c=>{
-    const v = causeResult[c];
-    const pct = v===null ? null : v*100;
-    const color = v===null?'#B4B2A9':v===1?'#639922':'#E24B4A';
-    const label = v===null?'未测':'';
-    return `<div class="bar-row">
-      <div class="bar-label">${c}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct===null?0:pct}%;background:${color};"></div></div>
-      <div class="bar-pct" style="color:${color}">${pct===null?label:(pct===100?'✓':'×')}</div>
-    </div>`;
-  }).join('');
-}
-
-function downloadExcel(nameEnc, clsEnc, pct, score, total) {
-  const name = decodeURIComponent(nameEnc);
-  const cls = decodeURIComponent(clsEnc);
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('zh-MY')+ ' ' + now.toLocaleTimeString('zh-MY',{hour:'2-digit',minute:'2-digit'});
-  const matchAns = answers[MATCH.id]||{};
-  const data = [
-    ['六年级健康教育练习成绩记录'],
-    ['学习标准：2.1.2 — 滥用毒品的原因'],
-    [],
-    ['姓名', name, '班级', cls, '提交时间', dateStr],
-    [],
-    ['题目', '内容', '学生答案', '正确答案', '结果'],
-    ...MCQ.map((q,i)=>[
-      `题目${i+1}（选择题）`, q.q.substring(0,40)+'…',
-      answers[q.id]||'未作答', q.ans,
-      answers[q.id]===q.ans?'✓':'×'
-    ]),
-    [],
-    ['配对题', '情境', '学生配对', '正确答案', '结果'],
-    ...MATCH.pairs.map(p=>[
-      '配对题', p.sit,
-      matchAns[p.cause]||'未作答', p.cause,
-      matchAns[p.cause]===p.sit?'✓':'×'
-    ]),
-    [],
-    ['思考题（开放题）', answers[OPEN.id]||'未作答'],
-    [],
-    ['总成绩', `${score}/${total}`, `${pct}%`],
-    ['备注', pct>=80?'优秀':pct>=60?'良好':'需要加强']
-  ];
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  ws['!cols'] = [{wch:22},{wch:42},{wch:18},{wch:12},{wch:8}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '练习成绩');
-  XLSX.writeFile(wb, `健康练习_${name}_${dateStr.replace(/[:/]/g,'-')}.xlsx`);
-}
-
-buildAll();
-updateProgress();
+renderQuiz();
 </script>
 </body>
 </html>
