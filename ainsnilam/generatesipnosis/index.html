@@ -296,6 +296,52 @@
     font-family: 'Nunito', sans-serif;
   }
 
+  .section-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 12px 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .label-sinopsis { color: #7c3aed; }
+  .label-pengajaran { color: #0d9488; }
+
+  .pengajaran-block {
+    background: #f0fdf9;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #134e4a;
+    line-height: 1.85;
+    border: 1.5px solid #99f6e4;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .copy-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+  }
+  .btn-copy-sm {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid #e5e0f8;
+    background: #f5f3ff;
+    color: #6d28d9;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-copy-sm:hover { background: #ede9fe; border-color: #c4b5fd; }
+  .btn-copy-sm.copied { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+
   /* ── Counter ── */
   .counter {
     text-align: center;
@@ -498,6 +544,112 @@ function smartFallback(title, lang) {
   return pick(templates);
 }
 
+const pengajaranDb = {
+  'hujan':                 { ms:'Setiap perpisahan mengajar kita erti kehilangan dan kekuatan untuk terus hidup.' },
+  'rindu':                 { ms:'Rindu mengajar kita menghargai orang yang kita sayangi sebelum terlambat.' },
+  'ayah':                  { ms:'Kasih bapa tidak selalu diucapkan, tetapi sentiasa dirasai melalui pengorbanannya.' },
+  'perahu kertas':         { ms:'Impian harus dikejar walaupun terpaksa melepaskan sesuatu yang pernah kita cintai.' },
+  '活着':                   { zh:'无论多苦，活着本身就是一种勇气，珍惜当下才是人生真谛。' },
+  '围城':                   { zh:'人生的困境往往是自己造成的，放开执念才能找到真正的自由。' },
+  '红楼梦':                 { zh:'荣华富贵终是过眼云烟，真情与善良才是人生最宝贵的财富。' },
+  '平凡的世界':             { zh:'平凡的人生同样可以活得精彩，努力与坚持是改变命运的力量。' },
+  '骆驼祥子':               { zh:'环境可以压垮人，但不屈的精神才是抵抗命运最后的武器。' },
+  'the alchemist':         { en:'Follow your heart and trust the journey; the universe conspires to help those who pursue their dreams.' },
+  'to kill a mockingbird': { en:'True courage means standing up for justice even when the world stands against you.' },
+  'harry potter':          { en:'Love and friendship are the most powerful magic of all, stronger than any spell.' },
+  '1984':                  { en:'Truth and freedom must be defended; silence in the face of oppression is a form of surrender.' },
+  'the great gatsby':      { en:'Wealth and status cannot replace genuine love; chasing illusions leads only to emptiness.' },
+  'animal farm':           { en:'Power corrupts — even those who start with good intentions can become what they once fought against.' },
+};
+
+const pengajaranKw = {
+  zh: {
+    爱: ['珍惜身边的人，因为爱是这世界上最不应被辜负的礼物。','学会表达爱，别让思念成为无法弥补的遗憾。','爱一个人要勇敢，因为真正的感情值得一切付出。'],
+    情: ['情感需要用心经营，真诚与理解是维系关系的根本。','学会放手，有时候是对彼此最深的爱与尊重。'],
+    战: ['战争没有真正的赢家，和平才是人类最珍贵的追求。','逆境中的人性光辉，提醒我们善良是最强大的武器。'],
+    死: ['珍惜生命中的每一刻，因为失去后才知其可贵。','死亡让我们明白，活着本身就是一种恩赐。'],
+    家: ['家人之间的爱需要珍惜，宽恕与理解是家庭和睦的基础。','无论走多远，家永远是心灵最温暖的港湾。'],
+    孩: ['童年的经历塑造一生，用爱与耐心陪伴孩子成长最重要。','每个孩子都有无限潜能，鼓励与信任是最好的礼物。'],
+    梦: ['追求梦想的路上，坚持比天赋更重要。','梦想再遥远，只要不放弃，终有实现的一天。'],
+    皮: ['好奇心和勇气是探索世界最好的钥匙。','用善良和创意解决问题，比蛮力更有效。'],
+    小: ['小小的善举可以带来大大的改变，勇气不分大小。','每个人都有属于自己的闪光点，相信自己的力量。'],
+    侦: ['做事要细心，真相往往藏在最不起眼的细节里。','诚实和正义是破解一切谎言的最终力量。'],
+    猫: ['以不同的眼光看世界，你会发现生活处处都是惊喜。'],
+    狗: ['忠诚与陪伴是友谊最珍贵的礼物，珍惜每一段真诚的情谊。'],
+    魔: ['真正的力量来自内心，而非外在的魔法或能力。'],
+    龙: ['勇气不是没有恐惧，而是在恐惧中仍然选择前行。'],
+  },
+  ms: {
+    cinta: ['Cintailah dengan tulus; kasih yang ikhlas mampu melampaui segala rintangan dan jarak.','Jangan takut mencintai — keberanian untuk membuka hati adalah kekuatan terbesar manusia.','Hargai mereka yang mencintai kamu hari ini, sebelum rindu menjadi satu-satunya yang tinggal.'],
+    kasih: ['Kasih sayang perlu dizahirkan sebelum terlambat — jangan simpan cinta dalam hati sahaja.','Berbuat baik kepada orang tersayang adalah tanda kasih yang paling bermakna.'],
+    mati: ['Hargai setiap saat bersama orang tersayang kerana waktu tidak pernah menunggu sesiapa.','Kematian mengingatkan kita bahawa hidup ini terlalu singkat untuk diisi dengan kebencian.'],
+    perang: ['Damai lebih berharga dari kemenangan — perang hanya meninggalkan luka yang tak sembuh.','Keberanian sejati bukan dalam berperang, tetapi dalam memilih jalan perdamaian.'],
+    sekolah: ['Ilmu yang dituntut dengan bersungguh-sungguh akan menjadi bekal sepanjang hayat.','Persahabatan yang dibina semasa sekolah adalah antara ikatan paling tulen dalam hidup.'],
+    remaja: ['Jati diri yang kukuh dibina melalui pilihan yang dibuat dengan bijak dan berani.','Masa remaja adalah peluang terbaik untuk mengenal diri sendiri yang sebenar.'],
+    ibu: ['Pengorbanan ibu tidak ternilai — tunjukkan kasih sayang sebelum terlambat.','Doakan ibu bapa setiap hari; restu mereka adalah kunci kejayaan yang hakiki.'],
+    ayah: ['Cinta seorang ayah sering tersembunyi dalam tindakannya — belajar membaca kasih yang diam.'],
+    misteri: ['Siasat sebelum membuat kesimpulan; kebenaran tidak selalu kelihatan di permukaan.','Jangan menghakimi orang lain tanpa mengetahui keseluruhan kisah mereka.'],
+    hutan: ['Alam perlu dijaga dan dihormati kerana ia adalah sumber kehidupan kita semua.'],
+    laut: ['Hadapi cabaran hidup seperti ombak laut — bangkit setiap kali dipukul gelombang.'],
+    pahlawan: ['Keberanian membela kebenaran adalah sifat mulia yang perlu diteladani.'],
+  },
+  en: {
+    love: ['Love bravely and honestly — true connection is worth every risk and vulnerability.','Never take love for granted; cherish those who matter before absence becomes your only teacher.','Love is not just a feeling but a daily choice to show up for those who matter most.'],
+    war: ['Peace is the greatest victory; no war is worth the lives and futures it destroys.','In conflict, choose understanding over hatred — empathy is the only path to lasting peace.'],
+    death: ['Live fully today; the awareness of death reminds us what truly matters in life.','Cherish every moment with loved ones — time is the only gift we cannot get back.'],
+    mystery: ['Look beyond the obvious; truth is often hidden beneath layers of assumption and habit.','Never judge too quickly — every person carries a story deeper than what is visible.'],
+    school: ['Education opens doors, but curiosity and kindness are the keys that truly unlock them.','The most valuable lessons in life are learned through experience, not just from books.'],
+    family: ['Family bonds, though imperfect, are among the most enduring gifts in a person\'s life.','Forgiveness within family is not weakness — it is the highest form of love.'],
+    magic: ['Real magic lies in hard work, belief, and the courage to keep going when it gets hard.','The greatest power we possess is the choice to use our gifts for good.'],
+    ghost: ['Face your past rather than run from it — unresolved pain only grows stronger in silence.'],
+    cat: ['Slow down and notice the small wonders around you — joy is often found in quiet moments.'],
+    girl: ['Every voice deserves to be heard; speak your truth with courage and conviction.'],
+    boy: ['Growing up means making hard choices — let your values, not fear, guide your decisions.'],
+    island: ['True character is revealed not in comfort, but in how we treat others under pressure.'],
+  }
+};
+
+function smartPengajaran(title, lang) {
+  const t = title.toLowerCase();
+  const matched = Object.keys(pengajaranDb).find(k => t.includes(k));
+  if (matched && pengajaranDb[matched][lang]) return pengajaranDb[matched][lang];
+
+  if (lang === 'zh') {
+    for (const [char, lines] of Object.entries(pengajaranKw.zh)) {
+      if (title.includes(char)) return pick(lines);
+    }
+    return pick([
+      `无论身处何种困境，善良与坚持都是照亮前路的力量。`,
+      `人生最重要的功课，是学会爱自己，也爱身边的人。`,
+      `每一段经历都是成长的礼物，即使是痛苦也能让我们变得更强。`,
+      `真正的勇气不是没有恐惧，而是在恐惧中仍然选择做对的事。`,
+      `对人真诚，对事尽力，是人生最不后悔的活法。`,
+    ]);
+  }
+  if (lang === 'ms') {
+    for (const [word, lines] of Object.entries(pengajaranKw.ms)) {
+      if (t.includes(word)) return pick(lines);
+    }
+    return pick([
+      `Bersyukur dengan apa yang ada dan terus berusaha untuk menjadi lebih baik setiap hari.`,
+      `Keikhlasan dan kesabaran adalah kunci mengharungi setiap dugaan dalam kehidupan.`,
+      `Jangan berputus asa — setiap kesulitan menyimpan hikmah yang hanya dapat dilihat selepas melaluinya.`,
+      `Berbuat baik tanpa mengharapkan balasan adalah amalan yang paling mulia dalam hidup.`,
+      `Ilmu dan adab perlu seiring; tanpa akhlak yang baik, kepintaran tidak membawa makna.`,
+    ]);
+  }
+  for (const [word, lines] of Object.entries(pengajaranKw.en)) {
+    if (t.includes(word)) return pick(lines);
+  }
+  return pick([
+    `Kindness and perseverance are the two greatest tools for building a meaningful life.`,
+    `Every challenge carries a lesson — the wisdom is in recognising it and growing from it.`,
+    `Be honest, be kind, and keep going; these three things will carry you further than talent alone.`,
+    `The choices we make, not the circumstances we face, define who we truly are.`,
+    `Never stop learning — curiosity is the engine of growth and the antidote to stagnation.`,
+  ]);
+}
+
 const langLabel = { zh:'中文', ms:'Bahasa Melayu', en:'English' };
 
 function generate() {
@@ -509,10 +661,12 @@ function generate() {
   const lang  = match ? db[match].lang : detectLang(raw);
   const syn   = match ? db[match].s    : smartFallback(raw, lang);
   const title = match ? db[match].t    : raw;
+  const peng  = smartPengajaran(raw, lang);
 
   document.querySelector('.empty-state')?.remove();
 
-  const id = 'c' + Date.now();
+  const id  = 'c' + Date.now();
+  const id2 = id + 'p';
   const html = `<div class="card" id="${id}">
     <div class="card-accent accent-${lang}"></div>
     <div class="card-body">
@@ -521,9 +675,13 @@ function generate() {
           <span class="lang-badge badge-${lang}">${langLabel[lang]}</span>
           <span class="book-title-text">${esc(title)}</span>
         </div>
-        <button class="btn-copy" onclick="doCopy('${id}')">Salin</button>
       </div>
+      <div class="section-label label-sinopsis">📖 Sinopsis</div>
       <div class="synopsis-block" data-raw="${escAttr(syn)}">${esc(syn)}</div>
+      <div class="copy-row"><button class="btn-copy-sm" onclick="doCopySm('${id}','synopsis-block')">Salin Sinopsis</button></div>
+      <div class="section-label label-pengajaran">💡 Pengajaran</div>
+      <div class="pengajaran-block" id="${id2}" data-raw="${escAttr(peng)}">${esc(peng)}</div>
+      <div class="copy-row"><button class="btn-copy-sm" onclick="doCopySm('${id}','pengajaran-block')">Salin Pengajaran</button></div>
     </div>
   </div>`;
 
@@ -534,14 +692,17 @@ function generate() {
   counterEl.style.display = 'block';
 }
 
-function doCopy(id) {
-  const card = document.getElementById(id);
-  const text = card.querySelector('.synopsis-block').dataset.raw;
-  const btn  = card.querySelector('.btn-copy');
+function doCopySm(cardId, blockClass) {
+  const card = document.getElementById(cardId);
+  const block = card.querySelector('.' + blockClass);
+  const text  = block.dataset.raw;
+  const btns  = card.querySelectorAll('.btn-copy-sm');
+  const btn   = blockClass === 'synopsis-block' ? btns[0] : btns[1];
   navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
     btn.textContent = '✓ Disalin!';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Salin'; btn.classList.remove('copied'); }, 2000);
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
   });
 }
 
