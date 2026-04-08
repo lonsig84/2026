@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康教育练习 — 滥用毒品的原因</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f0; min-height: 100vh; padding: 1rem; }
+  .app { max-width: 820px; margin: 0 auto; }
+  .header { background: linear-gradient(135deg, #1D9E75 0%, #0F6E56 100%); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+  .header h1 { color: #fff; font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .header p { color: #9FE1CB; font-size: 13px; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.2); border-radius: 99px; height: 6px; margin-top: 10px; }
+  .progress-bar-fill { background: #fff; border-radius: 99px; height: 6px; transition: width 0.5s ease; }
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .q-num { display: inline-block; background: #E1F5EE; color: #085041; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 8px; margin-bottom: 8px; }
+  .q-text { font-size: 15px; color: #111; margin-bottom: 12px; line-height: 1.6; }
+  .q-hint { font-size: 12px; color: #888; margin-bottom: 10px; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opt-btn { background: #f5f5f0; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #111; cursor: pointer; text-align: left; transition: all 0.18s; }
+  .opt-btn:hover { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .opt-btn.selected { background: #E1F5EE; border: 1.5px solid #1D9E75; color: #085041; font-weight: 500; }
+  .opt-btn.correct { background: #EAF3DE; border: 1.5px solid #639922; color: #27500A; }
+  .opt-btn.wrong { background: #FCEBEB; border: 1.5px solid #E24B4A; color: #501313; }
+  .opt-btn.reveal-correct { background: #EAF3DE; border: 1.5px solid #639922; color: #27500A; }
+  .opt-btn:disabled { cursor: default; }
+  .feedback-box { border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 10px; display: none; }
+  .feedback-box.show { display: block; }
+  .feedback-box.ok { background: #EAF3DE; color: #27500A; border: 0.5px solid #97C459; }
+  .feedback-box.bad { background: #FCEBEB; color: #501313; border: 0.5px solid #F09595; }
+  .drag-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .drag-bank { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f5f5f0; border: 0.5px dashed rgba(0,0,0,0.18); border-radius: 8px; min-height: 48px; }
+  .drag-chip { background: #E1F5EE; color: #085041; border: 0.5px solid #5DCAA5; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: grab; user-select: none; transition: transform 0.1s; }
+  .drag-chip:active { transform: scale(0.97); cursor: grabbing; }
+  .drop-zone { background: #f5f5f0; border: 0.5px dashed rgba(0,0,0,0.18); border-radius: 8px; padding: 10px; min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; transition: background 0.2s, border-color 0.2s; }
+  .drop-zone.over { background: #E1F5EE; border-color: #1D9E75; }
+  .drop-zone-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .open-text { width: 100%; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; padding: 10px 12px; font-size: 14px; color: #111; background: #fff; resize: vertical; font-family: inherit; line-height: 1.6; }
+  .open-text:focus { outline: none; border-color: #1D9E75; box-shadow: 0 0 0 2px #E1F5EE; }
+  .char-count { font-size: 11px; color: #888; text-align: right; margin-top: 4px; }
+  .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .name-input { width: 100%; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #111; background: #fff; font-family: inherit; }
+  .name-input:focus { outline: none; border-color: #1D9E75; }
+  .name-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .submit-btn { width: 100%; background: #1D9E75; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.1s; margin-top: 0.5rem; }
+  .submit-btn:hover { background: #0F6E56; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: #888; cursor: not-allowed; }
+  .score-card { text-align: center; padding: 2rem 1rem; }
+  .score-ring { width: 110px; height: 110px; margin: 0 auto 16px; position: relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .score-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 28px; font-weight: 500; color: #111; }
+  .score-msg { font-size: 16px; font-weight: 500; color: #111; margin-bottom: 6px; }
+  .score-sub { font-size: 13px; color: #888; }
+  .dl-btn { display: inline-block; margin-top: 1rem; background: #1D9E75; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+  .dl-btn:hover { background: #0F6E56; }
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 1rem 0; }
+  .stat-box { background: #f5f5f0; border-radius: 8px; padding: 12px 8px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 500; color: #111; }
+  .stat-lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  .anim-in { animation: fadeUp 0.35s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .bar-label { font-size: 12px; color: #888; width: 80px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; background: #f5f5f0; border-radius: 99px; height: 8px; }
+  .bar-fill { height: 8px; border-radius: 99px; background: #1D9E75; transition: width 0.8s ease; }
+  .bar-pct { font-size: 11px; color: #888; width: 36px; }
+  .step-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 1rem; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(0,0,0,0.15); transition: background 0.3s; }
+  .dot.active { background: #1D9E75; }
+  .dot.done { background: #9FE1CB; }
+  @media (max-width: 480px) {
+    .options-grid { grid-template-columns: 1fr; }
+    .drag-area { grid-template-columns: 1fr; }
+    .name-row { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(3,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>健康教育练习 — 滥用毒品的原因</h1>
+    <p>六年级 · 学习标准 2.1.2 · 请完成所有题目后提交</p>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog" style="width:0%"></div></div>
+  </div>
+
+  <div id="step-info" class="card" style="margin-bottom:1rem;">
+    <div class="name-label">姓名</div>
+    <div class="name-row">
+      <div><input class="name-input" id="inp-name" placeholder="请输入姓名"></div>
+      <div><input class="name-input" id="inp-class" placeholder="班级（如：6 Amanah）"></div>
+    </div>
+    <div class="step-dots" id="dots"></div>
+  </div>
+
+  <div id="questions-wrap"></div>
+
+  <div class="card" style="margin-top:1rem;" id="submit-card">
+    <button class="submit-btn" id="submit-btn" onclick="submitAll()">提交答案并查看成绩</button>
+  </div>
+
+  <div id="result-wrap" style="display:none;"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const CAUSES = ['缺乏关爱','社交障碍','好奇尝试','交友不慎','逃避问题','错误观念'];
+
+const MCQ = [
+  {
+    id:'q1', type:'mcq',
+    q:'小明的父母经常吵架，很少关心他。他开始和一群朋友来往，朋友给他毒品说可以"忘记烦恼"。小明滥用毒品的主要原因是什么？',
+    hint:'提示：想想小明的家庭情况。',
+    opts:['好奇尝试','缺乏关爱','错误观念','社交障碍'],
+    ans:'缺乏关爱',
+    explain:'小明因为得不到家人的关爱，情感上感到空虚，容易被毒品诱惑。缺乏关爱是青少年滥用毒品的常见原因之一。'
+  },
+  {
+    id:'q2', type:'mcq',
+    q:'阿华听朋友说吃一颗药可以提神，让他考试更好。他心想："就试一次应该没关系。" 这属于哪种原因？',
+    hint:'提示：阿华对毒品有什么想法？',
+    opts:['逃避问题','缺乏关爱','错误观念','交友不慎'],
+    ans:'错误观念',
+    explain:'阿华以为毒品可以帮助提神和考好试，这是一种对毒品的错误观念。事实上毒品会损害健康，根本无法帮助学习。'
+  },
+  {
+    id:'q3', type:'mcq',
+    q:'小芳在学校没有朋友，她觉得很孤单。有一群同学说只要她吸烟就可以加入他们的圈子。这属于哪种原因？',
+    hint:'提示：小芳为什么会答应？',
+    opts:['社交障碍','逃避问题','好奇尝试','缺乏关爱'],
+    ans:'社交障碍',
+    explain:'小芳因为社交障碍，渴望被接受和融入群体，才会被朋辈压力所影响而接触毒品。'
+  },
+  {
+    id:'q4', type:'mcq',
+    q:'大伟在学校遇到了很多麻烦——考试不及格、被老师批评。他开始用毒品来"暂时忘记"这些问题。这是哪种原因？',
+    hint:'提示：大伟用毒品来做什么？',
+    opts:['缺乏关爱','交友不慎','逃避问题','好奇尝试'],
+    ans:'逃避问题',
+    explain:'大伟利用毒品来逃避现实中的问题。这是非常危险的行为——毒品无法解决问题，只会让问题更加严重。'
+  },
+];
+
+const MATCH = {
+  id:'q5', type:'match',
+  q:'配对题：将左边的情境描述与右边的原因连线。',
+  hint:'把情境卡片拖入正确的原因格子里。',
+  pairs:[
+    {sit:'看到同学玩，想了解是什么感觉', cause:'好奇尝试'},
+    {sit:'结交了爱吸毒的朋友圈', cause:'交友不慎'},
+    {sit:'父母忙碌，从不关心孩子', cause:'缺乏关爱'},
+    {sit:'觉得吃了药就能解决一切烦恼', cause:'错误观念'},
+  ]
+};
+
+const OPEN = {
+  id:'q6', type:'open',
+  q:'思考题：如果朋友邀请你"尝试"某种药片，你会怎么拒绝？请写出至少两种拒绝方法，并说明原因。',
+  hint:'参考课本第99页的拒绝技巧，写出你的方法。'
+};
+
+const allQs = [...MCQ, MATCH, OPEN];
+let answers = {};
+let submitted = false;
+
+function buildDots() {
+  const d = document.getElementById('dots');
+  d.innerHTML = allQs.map((q,i)=>`<div class="dot" id="dot-${i}"></div>`).join('');
+}
+
+function updateDots() {
+  allQs.forEach((q,i)=>{
+    const el = document.getElementById('dot-'+i);
+    if(!el) return;
+    if(submitted) { el.className='dot done'; return; }
+    if(answers[q.id]!==undefined && answers[q.id]!=='') el.className='dot active';
+    else el.className='dot';
+  });
+}
+
+function updateProgress() {
+  const filled = allQs.filter(q=>answers[q.id]!==undefined && answers[q.id]!=='').length;
+  document.getElementById('prog').style.width = Math.round(filled/allQs.length*100)+'%';
+  updateDots();
+}
+
+function buildMCQ(q, idx) {
+  return `<div class="card anim-in" id="card-${q.id}" style="animation-delay:${idx*0.07}s">
+    <span class="q-num">题目 ${idx+1}</span>
+    <div class="q-text">${q.q}</div>
+    <div class="q-hint">${q.hint}</div>
+    <div class="options-grid">
+      ${q.opts.map(o=>`<button class="opt-btn" id="opt-${q.id}-${o}" onclick="pickMCQ('${q.id}','${o}','${q.ans}','${q.explain.replace(/'/g,"\\'")}')">
+        ${o}
+      </button>`).join('')}
+    </div>
+    <div class="feedback-box" id="fb-${q.id}"></div>
+  </div>`;
+}
+
+function pickMCQ(qid, chosen, ans, explain) {
+  if(submitted) return;
+  answers[qid] = chosen;
+  const opts = document.querySelectorAll(`[id^="opt-${qid}-"]`);
+  opts.forEach(b=>{ b.className='opt-btn'; b.disabled=false; });
+  document.getElementById(`opt-${qid}-${chosen}`).classList.add('selected');
+  updateProgress();
+}
+
+let dragItem = null;
+let dragFrom = null;
+
+function buildMatch(q, idx) {
+  const shuffled = [...q.pairs].sort(()=>Math.random()-0.5);
+  const slots = q.pairs.map(p=>p.cause);
+  return `<div class="card anim-in" id="card-${q.id}" style="animation-delay:${idx*0.07}s">
+    <span class="q-num">题目 ${idx+1}</span>
+    <div class="q-text">${q.q}</div>
+    <div class="q-hint">${q.hint}</div>
+    <div class="section-label" style="margin-top:8px;">情境卡片（拖动到右边）</div>
+    <div class="drag-bank" id="bank-${q.id}">
+      ${shuffled.map(p=>`<div class="drag-chip" draggable="true" data-sit="${p.sit}" data-qid="${q.id}" ondragstart="onDragStart(event)" ontouchstart="onTouchStart(event)" ontouchmove="onTouchMove(event)" ontouchend="onTouchEnd(event)">${p.sit}</div>`).join('')}
+    </div>
+    <div class="drag-area" style="margin-top:10px;">
+      ${slots.map(cause=>`
+        <div>
+          <div class="drop-zone-label">${cause}</div>
+          <div class="drop-zone" id="drop-${q.id}-${cause}" data-cause="${cause}" data-qid="${q.id}"
+            ondragover="event.preventDefault();this.classList.add('over')"
+            ondragleave="this.classList.remove('over')"
+            ondrop="onDrop(event,'${q.id}','${cause}')">
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="feedback-box" id="fb-${q.id}"></div>
+  </div>`;
+}
+
+function onDragStart(e) {
+  dragItem = e.target;
+  dragFrom = e.target.parentElement;
+  e.dataTransfer.effectAllowed='move';
+}
+function onDrop(e,qid,cause) {
+  e.preventDefault();
+  const zone = document.getElementById(`drop-${qid}-${cause}`);
+  zone.classList.remove('over');
+  if(!dragItem) return;
+  if(zone.querySelector('.drag-chip')) {
+    dragFrom.appendChild(zone.querySelector('.drag-chip'));
+  }
+  zone.appendChild(dragItem);
+  dragItem = null; dragFrom = null;
+  updateMatchAnswer(qid);
+}
+
+let touchChip = null, touchClone = null;
+function onTouchStart(e) {
+  touchChip = e.target;
+  touchClone = touchChip.cloneNode(true);
+  touchClone.style.position='fixed'; touchClone.style.opacity='0.8'; touchClone.style.pointerEvents='none'; touchClone.style.zIndex='1000';
+  document.body.appendChild(touchClone);
+}
+function onTouchMove(e) {
+  if(!touchClone) return;
+  const t = e.touches[0];
+  touchClone.style.left=(t.clientX-40)+'px'; touchClone.style.top=(t.clientY-20)+'px';
+  e.preventDefault();
+}
+function onTouchEnd(e) {
+  if(!touchClone) return;
+  document.body.removeChild(touchClone);
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const zone = el && (el.classList.contains('drop-zone') ? el : el.closest('.drop-zone'));
+  if(zone) {
+    const qid = zone.dataset.qid, cause = zone.dataset.cause;
+    if(zone.querySelector('.drag-chip')) touchChip.parentElement.appendChild(zone.querySelector('.drag-chip'));
+    zone.appendChild(touchChip);
+    updateMatchAnswer(qid);
+  }
+  touchChip=null; touchClone=null;
+}
+
+function updateMatchAnswer(qid) {
+  const q = MATCH;
+  const ans = {};
+  q.pairs.forEach(p=>{
+    const zone = document.getElementById(`drop-${qid}-${p.cause}`);
+    const chip = zone && zone.querySelector('.drag-chip');
+    if(chip) ans[p.cause] = chip.dataset.sit;
+  });
+  answers[qid] = ans;
+  updateProgress();
+}
+
+function buildOpen(q, idx) {
+  return `<div class="card anim-in" id="card-${q.id}" style="animation-delay:${idx*0.07}s">
+    <span class="q-num">题目 ${idx+1}</span>
+    <div class="q-text">${q.q}</div>
+    <div class="q-hint">${q.hint}</div>
+    <textarea class="open-text" id="ta-${q.id}" rows="5" placeholder="在这里写下你的回答……" oninput="updateOpen('${q.id}',this.value)"></textarea>
+    <div class="char-count"><span id="cc-${q.id}">0</span> 字</div>
+  </div>`;
+}
+
+function updateOpen(qid, val) {
+  answers[qid] = val;
+  document.getElementById('cc-'+qid).textContent = val.replace(/\s/g,'').length;
+  updateProgress();
+}
+
+function buildAll() {
+  buildDots();
+  let html = '';
+  allQs.forEach((q,i)=>{
+    if(q.type==='mcq') html += buildMCQ(q,i);
+    else if(q.type==='match') html += buildMatch(q,i);
+    else html += buildOpen(q,i);
+  });
+  document.getElementById('questions-wrap').innerHTML = html;
+}
+
+function revealMCQFeedback() {
+  MCQ.forEach(q=>{
+    const chosen = answers[q.id];
+    if(!chosen) return;
+    const opts = document.querySelectorAll(`[id^="opt-${q.id}-"]`);
+    opts.forEach(b=>{ b.disabled=true; b.className='opt-btn'; });
+    if(chosen===q.ans) {
+      document.getElementById(`opt-${q.id}-${chosen}`).classList.add('correct');
+    } else {
+      document.getElementById(`opt-${q.id}-${chosen}`).classList.add('wrong');
+      document.getElementById(`opt-${q.id}-${q.ans}`).classList.add('reveal-correct');
+    }
+    const fb = document.getElementById('fb-'+q.id);
+    if(chosen===q.ans) {
+      fb.className='feedback-box show ok'; fb.textContent='✓ 正确！'+q.explain;
+    } else {
+      fb.className='feedback-box show bad'; fb.textContent='× 正确答案：'+q.ans+'。'+q.explain;
+    }
+  });
+}
+
+function revealMatchFeedback() {
+  const q = MATCH;
+  const ans = answers[q.id]||{};
+  let correct=0;
+  q.pairs.forEach(p=>{
+    const zone = document.getElementById(`drop-${q.id}-${p.cause}`);
+    const chip = zone && zone.querySelector('.drag-chip');
+    if(chip) {
+      if(chip.dataset.sit===p.sit) { chip.style.background='#C0DD97'; chip.style.color='#173404'; correct++; }
+      else { chip.style.background='#F7C1C1'; chip.style.color='#501313'; }
+    }
+  });
+  const fb = document.getElementById('fb-'+q.id);
+  fb.className='feedback-box show '+(correct===q.pairs.length?'ok':'bad');
+  fb.textContent=`配对结果：${correct}/${q.pairs.length} 正确。${correct===q.pairs.length?'全对！做得很好！':'请检查红色的项目——答案已高亮显示。'}`;
+}
+
+function calcScore() {
+  let score=0, total=MCQ.length;
+  MCQ.forEach(q=>{ if(answers[q.id]===q.ans) score++; });
+  const matchAns = answers[MATCH.id]||{};
+  let matchScore=0;
+  MATCH.pairs.forEach(p=>{ if(matchAns[p.cause]===p.sit) matchScore++; });
+  const matchPct = matchScore/MATCH.pairs.length;
+  score += matchPct;
+  total += 1;
+  return { score: Math.round(score), total, matchScore, matchTotal:MATCH.pairs.length };
+}
+
+function submitAll() {
+  const name = document.getElementById('inp-name').value.trim();
+  const cls = document.getElementById('inp-class').value.trim();
+  if(!name) { alert('请输入姓名！'); return; }
+  let unanswered=[];
+  MCQ.forEach(q=>{ if(!answers[q.id]) unanswered.push('题目'+(MCQ.indexOf(q)+1)); });
+  if(!answers[MATCH.id]||Object.keys(answers[MATCH.id]).length<MATCH.pairs.length) unanswered.push('配对题');
+  if(unanswered.length>0 && !confirm(`以下题目未完成：${unanswered.join('、')}。确定要提交吗？`)) return;
+  submitted = true;
+  revealMCQFeedback();
+  revealMatchFeedback();
+  updateDots();
+  const {score,total,matchScore,matchTotal} = calcScore();
+  const pct = Math.round(score/total*100);
+  let msg='', msgcls='';
+  if(pct>=80){ msg='表现优秀！继续保持！'; msgcls='#27500A'; }
+  else if(pct>=60){ msg='不错！再复习一下吧。'; msgcls='#3B6D11'; }
+  else { msg='需要加油！多看看课本。'; msgcls='#993C1D'; }
+
+  const openVal = (answers[OPEN.id]||'').trim();
+  document.getElementById('submit-card').style.display='none';
+  const rw = document.getElementById('result-wrap');
+  rw.style.display='block';
+  rw.innerHTML=`<div class="card score-card anim-in">
+    <div class="score-ring">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="48" fill="none" stroke="#f5f5f0" stroke-width="8"/>
+        <circle cx="55" cy="55" r="48" fill="none" stroke="#1D9E75" stroke-width="8"
+          stroke-dasharray="${Math.round(2*3.14159*48)}" stroke-dashoffset="${Math.round(2*3.14159*48*(1-pct/100))}" stroke-linecap="round"/>
+      </svg>
+      <div class="score-num">${pct}%</div>
+    </div>
+    <div class="score-msg" style="color:${msgcls}">${msg}</div>
+    <div class="score-sub">${name} · ${cls||'—'}</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num">${MCQ.filter(q=>answers[q.id]===q.ans).length}/${MCQ.length}</div><div class="stat-lbl">选择题</div></div>
+      <div class="stat-box"><div class="stat-num">${matchScore}/${matchTotal}</div><div class="stat-lbl">配对题</div></div>
+      <div class="stat-box"><div class="stat-num">${Math.min(openVal.replace(/\s/g,'').length,999)}</div><div class="stat-lbl">思考题字数</div></div>
+    </div>
+    <div style="margin:0.5rem 0 0;">
+      <div class="section-label" style="margin-bottom:6px;">各原因掌握情况</div>
+      ${buildCauseBar()}
+    </div>
+    <button class="dl-btn" onclick="downloadExcel('${encodeURIComponent(name)}','${encodeURIComponent(cls||'')}',${pct},${score},${total})">下载成绩记录 (Excel)</button>
+  </div>`;
+  rw.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function buildCauseBar() {
+  const causeResult = {};
+  CAUSES.forEach(c=>causeResult[c]=null);
+  MCQ.forEach(q=>{
+    if(causeResult.hasOwnProperty(q.ans)) causeResult[q.ans] = answers[q.id]===q.ans ? 1 : 0;
+  });
+  const matchAns = answers[MATCH.id]||{};
+  MATCH.pairs.forEach(p=>{ if(causeResult.hasOwnProperty(p.cause)) causeResult[p.cause] = matchAns[p.cause]===p.sit ? 1 : 0; });
+  return CAUSES.map(c=>{
+    const v = causeResult[c];
+    const pct = v===null ? null : v*100;
+    const color = v===null?'#B4B2A9':v===1?'#639922':'#E24B4A';
+    const label = v===null?'未测':'';
+    return `<div class="bar-row">
+      <div class="bar-label">${c}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct===null?0:pct}%;background:${color};"></div></div>
+      <div class="bar-pct" style="color:${color}">${pct===null?label:(pct===100?'✓':'×')}</div>
+    </div>`;
+  }).join('');
+}
+
+function downloadExcel(nameEnc, clsEnc, pct, score, total) {
+  const name = decodeURIComponent(nameEnc);
+  const cls = decodeURIComponent(clsEnc);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-MY')+ ' ' + now.toLocaleTimeString('zh-MY',{hour:'2-digit',minute:'2-digit'});
+  const matchAns = answers[MATCH.id]||{};
+  const data = [
+    ['六年级健康教育练习成绩记录'],
+    ['学习标准：2.1.2 — 滥用毒品的原因'],
+    [],
+    ['姓名', name, '班级', cls, '提交时间', dateStr],
+    [],
+    ['题目', '内容', '学生答案', '正确答案', '结果'],
+    ...MCQ.map((q,i)=>[
+      `题目${i+1}（选择题）`, q.q.substring(0,40)+'…',
+      answers[q.id]||'未作答', q.ans,
+      answers[q.id]===q.ans?'✓':'×'
+    ]),
+    [],
+    ['配对题', '情境', '学生配对', '正确答案', '结果'],
+    ...MATCH.pairs.map(p=>[
+      '配对题', p.sit,
+      matchAns[p.cause]||'未作答', p.cause,
+      matchAns[p.cause]===p.sit?'✓':'×'
+    ]),
+    [],
+    ['思考题（开放题）', answers[OPEN.id]||'未作答'],
+    [],
+    ['总成绩', `${score}/${total}`, `${pct}%`],
+    ['备注', pct>=80?'优秀':pct>=60?'良好':'需要加强']
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:22},{wch:42},{wch:18},{wch:12},{wch:8}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '练习成绩');
+  XLSX.writeFile(wb, `健康练习_${name}_${dateStr.replace(/[:/]/g,'-')}.xlsx`);
+}
+
+buildAll();
+updateProgress();
+</script>
+</body>
+</html>
