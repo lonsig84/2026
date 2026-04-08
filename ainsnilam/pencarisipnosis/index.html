@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pencari Sinopsis Buku</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FFFFFF;
+    --ink: #1C1917;
+    --ink-2: #57534E;
+    --ink-3: #A8A29E;
+    --accent: #7C3AED;
+    --accent-light: #EDE9FE;
+    --green: #065F46;
+    --green-light: #D1FAE5;
+    --blue: #1E40AF;
+    --blue-light: #DBEAFE;
+    --border: rgba(0,0,0,0.08);
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header { margin-bottom: 40px; }
+  .header-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .header h1 span { font-style: italic; color: var(--accent); }
+  .header p {
+    font-size: 15px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+
+  /* API Key section */
+  .api-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .api-section label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+  }
+  .api-row { display: flex; gap: 10px; align-items: center; }
+  .api-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'DM Sans', monospace;
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .api-row input:focus { border-color: var(--accent); }
+  .api-hint {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 8px;
+  }
+  .api-hint a { color: var(--accent); text-decoration: none; }
+  .api-hint a:hover { text-decoration: underline; }
+
+  /* Search */
+  .search-area { margin-bottom: 24px; }
+  .search-row { display: flex; gap: 10px; }
+  .search-row input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-row input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+  }
+  .search-row input::placeholder { color: var(--ink-3); }
+  .search-btn {
+    padding: 14px 24px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { background: #6D28D9; }
+  .search-btn:active { transform: scale(0.97); }
+  .search-btn:disabled {
+    background: #C4B5FD;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Chips */
+  .chips-label { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; margin-top: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    padding: 5px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  /* Result */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .result-top {
+    padding: 18px 22px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .book-name {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .lang-tag {
+    flex-shrink: 0;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-ms { background: var(--green-light); color: var(--green); }
+  .tag-en { background: var(--blue-light); color: var(--blue); }
+  .tag-zh { background: var(--accent-light); color: var(--accent); }
+
+  .synopsis-section { padding: 14px 22px 0; }
+  .synopsis-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .synopsis-block {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    user-select: all;
+  }
+  .result-footer {
+    padding: 10px 22px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wc { font-size: 12px; color: var(--ink-3); }
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); background: var(--green-light); }
+
+  /* Loading */
+  .loading-state {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: var(--ink-2);
+    margin-bottom: 16px;
+  }
+  .spin {
+    width: 18px; height: 18px;
+    border: 2px solid #DDD6FE;
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-box {
+    padding: 14px 18px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: var(--radius);
+    font-size: 14px;
+    color: #991B1B;
+    margin-bottom: 16px;
+  }
+
+  /* Footer note */
+  .note {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: var(--accent-light);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: #5B21B6;
+    line-height: 1.6;
+  }
+  .note strong { font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-eyebrow">Alat Bantu Pelajar</div>
+    <h1>Pencari<br><span>Sinopsis</span> Buku</h1>
+    <p>Taip tajuk buku dalam Bahasa Melayu, English atau 中文 — sinopsis ditulis dalam bahasa yang sama, kurang daripada 100 patah perkataan.</p>
+  </div>
+
+  <!-- API Key -->
+  <div class="api-section">
+    <label>Kunci API Anthropic</label>
+    <div class="api-row">
+      <input type="password" id="apiKey" placeholder="sk-ant-api03-..." />
+    </div>
+    <p class="api-hint">Dapatkan kunci API percuma di <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</p>
+  </div>
+
+  <!-- Search -->
+  <div class="search-area">
+    <div class="search-row">
+      <input type="text" id="bookInput" placeholder="Contoh: Salina, 骆驼祥子, Harry Potter..." />
+      <button class="search-btn" id="searchBtn" onclick="searchBook()">Cari →</button>
+    </div>
+    <p class="chips-label">Cuba contoh:</p>
+    <div class="chips">
+      <span class="chip" onclick="go('Salina')">Salina</span>
+      <span class="chip" onclick="go('Ranjau Sepanjang Jalan')">Ranjau Sepanjang Jalan</span>
+      <span class="chip" onclick="go('Leftenan Adnan')">Leftenan Adnan</span>
+      <span class="chip" onclick="go('Harry Potter and the Sorcerer\'s Stone')">Harry Potter</span>
+      <span class="chip" onclick="go('To Kill a Mockingbird')">To Kill a Mockingbird</span>
+      <span class="chip" onclick="go('骆驼祥子')">骆驼祥子</span>
+      <span class="chip" onclick="go('红楼梦')">红楼梦</span>
+    </div>
+  </div>
+
+  <div id="output"></div>
+
+  <div class="note">
+    <strong>Cara guna:</strong> Isi Kunci API sekali sahaja — ia disimpan sementara dalam sesi ini. Taip tajuk buku dan tekan Cari. Teks sinopsis boleh diklik terus untuk pilih semua, atau tekan butang <strong>Salin</strong>.
+  </div>
+</div>
+
+<script>
+const input = document.getElementById('bookInput');
+input.addEventListener('keydown', e => { if (e.key === 'Enter') searchBook(); });
+
+function go(title) {
+  input.value = title;
+  searchBook();
+}
+
+function detectLang(text) {
+  if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+  const msWords = ['dan','yang','di','ke','dari','untuk','dengan','ini','itu','pada','oleh','dalam',
+    'jalan','ranjau','salina','kampung','anak','seorang','sebuah','adnan','leftenan','hujan',
+    'bunga','rimba','tanah','air','langit'];
+  const lower = text.toLowerCase();
+  for (const w of msWords) {
+    if (lower.split(/\W+/).includes(w) || lower.startsWith(w) || lower.includes(' '+w+' ')) return 'ms';
+  }
+  if (/[a-zA-Z]/.test(text)) return 'en';
+  return 'ms';
+}
+
+function getLangTag(lang) {
+  if (lang === 'zh') return '<span class="lang-tag tag-zh">中文</span>';
+  if (lang === 'ms') return '<span class="lang-tag tag-ms">Bahasa Melayu</span>';
+  return '<span class="lang-tag tag-en">English</span>';
+}
+
+function countWords(text, lang) {
+  if (lang === 'zh') return text.replace(/\s+/g,'').length + ' 字';
+  return text.trim().split(/\s+/).filter(Boolean).length + ' patah perkataan';
+}
+
+async function searchBook() {
+  const title = input.value.trim();
+  if (!title) { input.focus(); return; }
+
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    document.getElementById('output').innerHTML = '<div class="error-box">Sila masukkan Kunci API Anthropic anda dahulu.</div>';
+    return;
+  }
+
+  const btn = document.getElementById('searchBtn');
+  const out = document.getElementById('output');
+  btn.disabled = true;
+  btn.textContent = 'Mencari...';
+
+  const lang = detectLang(title);
+
+  const promptMap = {
+    zh: `你是一位图书馆员。请用简洁流畅的中文为书籍《${title}》写一段故事简介，字数不超过100字。只写简介内容本身，不需要标题或任何前缀。请根据你对这本书的认识来写；若不确定，也请根据书名写出合理的内容。`,
+    ms: `Anda adalah seorang pustakawan. Sila tulis sinopsis ringkas dalam Bahasa Melayu untuk buku "${title}" dalam tidak lebih daripada 100 patah perkataan. Tulis isi sinopsis sahaja tanpa tajuk atau awalan. Gunakan pengetahuan anda tentang buku ini; jika tidak pasti, tulis sinopsis yang munasabah berdasarkan tajuknya.`,
+    en: `You are a librarian. Write a concise synopsis in English for the book "${title}" in no more than 100 words. Write only the synopsis content itself, without any title or prefix. Use your knowledge of this book; if unsure, write a reasonable synopsis based on the title.`
+  };
+
+  out.innerHTML = `<div class="loading-state"><div class="spin"></div>Sedang mencari sinopsis untuk "<strong>${title}</strong>"…</div>`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: promptMap[lang] }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const synopsis = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    const id = 'c' + Date.now();
+    const wc = countWords(synopsis, lang);
+
+    out.innerHTML = `
+      <div class="result-card">
+        <div class="result-top">
+          <div class="book-name">${title}</div>
+          ${getLangTag(lang)}
+        </div>
+        <div class="synopsis-section">
+          <div class="synopsis-label">Sinopsis</div>
+          <div class="synopsis-block" id="${id}">${synopsis}</div>
+        </div>
+        <div class="result-footer">
+          <span class="wc">${wc}</span>
+          <button class="copy-btn" id="btn_${id}" onclick="copyText('${id}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Salin teks
+          </button>
+        </div>
+      </div>`;
+
+  } catch (err) {
+    out.innerHTML = `<div class="error-box">
+      <strong>Ralat:</strong> ${err.message}<br><br>
+      Semak: (1) Kunci API betul dan aktif, (2) Baki kredit mencukupi di <a href="https://console.anthropic.com" target="_blank" style="color:#991B1B">console.anthropic.com</a>
+    </div>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Cari →';
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  const btn = document.getElementById('btn_' + id);
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Disalin!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Salin teks`;
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
