@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penjana Sinopsis Buku</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Lora:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fef9f0;
+    --surface: #ffffff;
+    --surface2: #fdf4e3;
+    --accent-purple: #7c3aed;
+    --accent-teal: #0d9488;
+    --accent-amber: #d97706;
+    --accent-pink: #db2777;
+    --text-primary: #1e1b2e;
+    --text-secondary: #6b6380;
+    --text-muted: #a89fc0;
+    --border: rgba(124, 58, 237, 0.12);
+    --border-hover: rgba(124, 58, 237, 0.3);
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -120px; left: -100px;
+    width: 420px; height: 420px;
+    background: radial-gradient(circle, rgba(251,191,36,0.22) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -100px; right: -80px;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    max-width: 620px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Hero ── */
+  .hero { text-align: center; padding: 2.5rem 0 2rem; }
+
+  .hero-icon {
+    font-size: 56px;
+    display: block;
+    margin-bottom: 14px;
+    animation: floatBook 3s ease-in-out infinite;
+  }
+  @keyframes floatBook {
+    0%,100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-10px) rotate(2deg); }
+  }
+
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+  }
+  .hero h1 span {
+    color: var(--accent-purple);
+    position: relative;
+  }
+  .hero h1 span::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -3px;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #7c3aed);
+    border-radius: 2px;
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  /* ── Lang pills ── */
+  .lang-pills {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .pill {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    letter-spacing: 0.2px;
+  }
+  .pill-zh  { background: #fef9c3; color: #92400e; border-color: #fcd34d; }
+  .pill-ms  { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+  .pill-en  { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+
+  /* ── Search card ── */
+  .search-card {
+    background: var(--surface);
+    border: 1.5px solid rgba(124,58,237,0.15);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 24px rgba(124,58,237,0.07);
+  }
+
+  .search-row { display: flex; gap: 10px; }
+
+  .search-row input {
+    flex: 1;
+    height: 50px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid #e5e0f8;
+    background: #faf8ff;
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-row input:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 4px rgba(124,58,237,0.1);
+    background: #fff;
+  }
+  .search-row input::placeholder { color: #c4b8e8; font-weight: 400; }
+
+  .btn-generate {
+    height: 50px;
+    padding: 0 24px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .btn-generate:hover  { opacity: 0.9; transform: translateY(-1px); }
+  .btn-generate:active { transform: scale(0.97); }
+
+  .hint-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 14px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .hint-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hint-chip {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 13px;
+    border-radius: 20px;
+    background: #f3f0ff;
+    color: #6d28d9;
+    border: 1.5px solid #ddd6fe;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .hint-chip:hover {
+    background: #ede9fe;
+    transform: translateY(-1px);
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+    font-size: 14px;
+    border: 2px dashed #e9d5ff;
+    border-radius: var(--radius);
+    line-height: 2.2;
+    background: #faf8ff;
+    font-weight: 600;
+  }
+  .empty-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+
+  /* ── Result cards ── */
+  .results { display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1.5px solid rgba(124,58,237,0.12);
+    background: var(--surface);
+    box-shadow: 0 2px 16px rgba(124,58,237,0.06);
+    animation: slideIn 0.35s cubic-bezier(0.34,1.2,0.64,1) both;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card-accent { height: 4px; width: 100%; }
+  .accent-zh  { background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b); }
+  .accent-ms  { background: linear-gradient(90deg, #10b981, #34d399, #10b981); }
+  .accent-en  { background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed); }
+
+  .card-body { padding: 1.1rem 1.25rem; }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .card-meta { display: flex; flex-direction: column; gap: 5px; }
+
+  .lang-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+    width: fit-content;
+  }
+  .badge-zh  { background: #fef9c3; color: #92400e; }
+  .badge-ms  { background: #d1fae5; color: #065f46; }
+  .badge-en  { background: #ede9fe; color: #5b21b6; }
+
+  .book-title-text {
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .btn-copy {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid #e5e0f8;
+    background: #f5f3ff;
+    color: #6d28d9;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: 'Nunito', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-copy:hover { background: #ede9fe; border-color: #c4b5fd; transform: translateY(-1px); }
+  .btn-copy.copied { background: #d1fae5; border-color: #6ee7b7; color: #065f46; }
+
+  .synopsis-block {
+    background: #fdf8ff;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #2d2040;
+    line-height: 1.85;
+    border: 1.5px solid #ede9fe;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ── Counter ── */
+  .counter {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+    font-weight: 600;
+  }
+  .counter b { color: var(--accent-purple); font-weight: 800; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #ddd6fe; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="hero">
+    <span class="hero-icon">📚</span>
+    <h1>Penjana <span>Sinopsis</span> Buku</h1>
+    <p>Taip tajuk buku dalam mana-mana bahasa.<br>Sinopsis ~20 patah perkataan akan dijana secara automatik.</p>
+  </div>
+
+  <div class="lang-pills">
+    <span class="pill pill-zh">中文书名 → 中文简介</span>
+    <span class="pill pill-ms">BM → Bahasa Melayu</span>
+    <span class="pill pill-en">English → English</span>
+  </div>
+
+  <div class="search-card">
+    <div class="search-row">
+      <input type="text" id="bookInput" placeholder="Masukkan tajuk buku di sini…" maxlength="100" />
+      <button class="btn-generate" onclick="generate()">Jana Sinopsis</button>
+    </div>
+    <p class="hint-label">Cuba tajuk ini:</p>
+    <div class="hint-chips">
+      <span class="hint-chip" onclick="tryBook('Hujan')">Hujan</span>
+      <span class="hint-chip" onclick="tryBook('Rindu')">Rindu</span>
+      <span class="hint-chip" onclick="tryBook('Ayah')">Ayah</span>
+      <span class="hint-chip" onclick="tryBook('活着')">活着</span>
+      <span class="hint-chip" onclick="tryBook('红楼梦')">红楼梦</span>
+      <span class="hint-chip" onclick="tryBook('平凡的世界')">平凡的世界</span>
+      <span class="hint-chip" onclick="tryBook('The Alchemist')">The Alchemist</span>
+      <span class="hint-chip" onclick="tryBook('1984')">1984</span>
+      <span class="hint-chip" onclick="tryBook('Harry Potter')">Harry Potter</span>
+    </div>
+  </div>
+
+  <div id="results" class="results">
+    <div class="empty-state">
+      <span class="empty-icon">🔍</span>
+      Belum ada sinopsis dijana.<br>
+      Masukkan tajuk buku untuk mula!
+    </div>
+  </div>
+
+  <div class="counter" id="counter" style="display:none;">
+    Telah dijana: <b id="count">0</b> sinopsis
+  </div>
+
+</div>
+
+<script>
+const inputEl   = document.getElementById('bookInput');
+const resultsEl = document.getElementById('results');
+const counterEl = document.getElementById('counter');
+const countEl   = document.getElementById('count');
+let total = 0;
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+
+function tryBook(title) { inputEl.value = title; generate(); }
+
+function detectLang(title) {
+  if (/[\u4e00-\u9fff]/.test(title)) return 'zh';
+  const mlWords = /\b(si|sang|dan|di|ke|dengan|untuk|adalah|ini|itu|hujan|bumi|langit|rindu|kota|hutan|cinta|dunia|ayah|ibu|kasih|anak|hati|jiwa|perahu|cermin)\b/i;
+  if (mlWords.test(title)) return 'ms';
+  if (/^[a-zA-Z\s\-':.0-9]+$/.test(title)) return 'en';
+  return 'ms';
+}
+
+const db = {
+  'hujan':                 { lang:'ms', t:'Hujan',                s:'Perjalanan cinta Izzah dan Adam yang terhalang takdir, merentasi kenangan dan luka yang tak pernah sembuh.' },
+  'rindu':                 { lang:'ms', t:'Rindu',                s:'Dua jiwa yang terpisah jarak namun diikat rindu melampaui waktu, mencari erti cinta dan kesetiaan sejati.' },
+  'ayah':                  { lang:'ms', t:'Ayah',                 s:'Pengorbanan seorang bapa demi masa depan anaknya, penuh kasih tersembunyi, air mata, dan cinta yang kekal.' },
+  'perahu kertas':         { lang:'ms', t:'Perahu Kertas',        s:'Kugy dan Keenan berjuang antara mimpi dan realiti, mencari erti cinta dan tujuan hidup yang sejati.' },
+  '活着':                   { lang:'zh', t:'活着',                  s:'富贵历经战乱苦难，以坚韧活下去，诠释生命最深沉的悲悯与力量。' },
+  '围城':                   { lang:'zh', t:'围城',                  s:'方鸿渐在爱情与婚姻的围城中进退两难，讽刺人生处处自设的困局。' },
+  '红楼梦':                 { lang:'zh', t:'红楼梦',                s:'贾宝玉与林黛玉爱情悲剧，折射封建大家族盛衰与人性的复杂幽微。' },
+  '平凡的世界':             { lang:'zh', t:'平凡的世界',            s:'孙少平兄弟在时代洪流中奋力挣扎，以普通人的坚持书写动人史诗。' },
+  '骆驼祥子':               { lang:'zh', t:'骆驼祥子',              s:'祥子怀揣买车梦想，却在旧社会重重压迫下一步步走向沉沦与绝望。' },
+  'the alchemist':         { lang:'en', t:'The Alchemist',        s:'Santiago journeys across deserts pursuing his personal legend, discovering that true treasure lies within the soul.' },
+  'to kill a mockingbird': { lang:'en', t:'To Kill a Mockingbird',s:'Scout witnesses her father defend an innocent man, confronting racial injustice with moral courage and grace.' },
+  'harry potter':          { lang:'en', t:'Harry Potter',         s:'An orphaned boy discovers magic at a wizarding school, battling dark forces while learning the power of friendship.' },
+  '1984':                  { lang:'en', t:'1984',                 s:'Winston Smith rebels against a totalitarian regime that controls truth, confronting the terrifying nature of absolute power.' },
+  'the great gatsby':      { lang:'en', t:'The Great Gatsby',     s:'Gatsby obsessively pursues a lost love across glittering wealth, exposing the hollow illusions of the American dream.' },
+  'animal farm':           { lang:'en', t:'Animal Farm',          s:'Farm animals overthrow their human owner, only to find their leaders become as tyrannical as those they replaced.' },
+};
+
+const keywords = {
+  zh: {
+    爱: ['爱情',['爱与离别交织成诗，两颗心在命运的洪流中相遇又相失，留下永恒的遗憾与温柔。','一段跨越时间的爱情，在误解与等待之间，缓缓拼出彼此心底最深的答案。']],
+    情: ['情感',['情感的羁绊如细线，串起两个灵魂的悲喜，在岁月的流逝中愈发珍贵而沉重。','爱与情的边界在此模糊，两个人用一生的时间，才终于读懂彼此。']],
+    战: ['战争',['战火燃烧的年代，普通人以血肉之躯扛起命运，在废墟中寻找活下去的意义。','硝烟之中，人性的光辉与黑暗同时显现，战争留下的伤痕从未真正愈合。']],
+    死: ['生死',['生与死的界限在这里变得模糊，一个关于告别与留存的故事，令人久久无法释怀。','面对死亡，主角选择了最后的尊严，那一刻的抉择，震撼人心。']],
+    家: ['家庭',['家是温暖的港湾，也是最深的伤。这个家族的故事，折射出几代人的悲欢离合。','家人之间的爱与误解，在漫长岁月里沉淀，最终化作无声的和解与宽容。']],
+    孩: ['成长',['一个孩子在懵懂中成长，用纯真的眼光看见了这个世界最真实也最残酷的一面。','童年的记忆如碎片，拼凑出一段关于成长、告别与自我发现的动人旅程。']],
+    梦: ['梦想',['梦想是引路的星光，也是最沉重的枷锁。主角用一生追逐，才明白真正的答案在心中。','怀揣梦想的人，在现实的磨砺下，一次次跌倒又站起，最终活出了自己的样子。']],
+    水: ['自然',['水的流动贯穿全书，象征时间与命运的无常，带领读者进入一个静谧而深沉的世界。']],
+    山: ['自然',['山的沉默与广阔是这个故事的背景，人与自然的对话中，生命的意义渐渐浮现。']],
+    侦: ['推理',['一桩扑朔迷离的案件，层层剥茧，真相却比想象中更令人不寒而栗。','侦探用缜密的逻辑追踪真相，每一步都惊心动魄，结局出人意料。']],
+    探: ['冒险',['主角踏上一段危险的探险之旅，在未知的世界中，发现了关于自己从未了解的秘密。']],
+    皮: ['儿童',['一个活泼可爱的小主角，用童趣的方式解决生活中的小难题，令人忍俊不禁。','充满想象力的故事，带着小读者进入一个欢乐无比的奇妙世界。']],
+    小: ['儿童',['小小的主角有大大的心，一步步克服困难，展现出勇气与善良的力量。','这是一个关于小朋友大冒险的故事，笑声与感动交织，温暖每一颗心。']],
+    猫: ['动物',['一只猫的视角，道出了人类世界的温情与孤独，简单的故事背后藏着深刻的感悟。']],
+    狗: ['动物',['人与狗之间忠诚的羁绊，在这个故事中被细腻呈现，感动每一位爱动物的读者。']],
+    魔: ['奇幻',['魔法与现实交织，主角在两个世界之间穿梭，寻找真正属于自己的身份与归宿。']],
+    龙: ['奇幻',['龙的传说在这片土地上流传，少年的命运与古老的预言紧紧相连，一场史诗般的冒险就此展开。']],
+  },
+  ms: {
+    cinta: [['Dua jiwa yang terikat cinta merentasi dugaan dan jarak, mencari makna kasih yang tulus dan abadi.','Cinta bukan sekadar perasaan — ia adalah pilihan yang dibuat setiap hari, walaupun sakit dan sukar.']],
+    kasih: [['Kasih sayang yang terpendam akhirnya menemukan jalannya, menyatukan dua hati yang lama terpisah oleh takdir.']],
+    mati: [['Menghadapi kehilangan dan kematian, watak utama menemukan kekuatan yang tidak pernah disangka ada dalam dirinya.']],
+    perang: [['Di tengah perang yang memporak-perandakan segalanya, semangat manusia untuk bertahan menjadi cahaya di kegelapan.']],
+    sekolah: [['Dunia sekolah penuh dengan cabaran, persahabatan, dan kenangan manis yang membentuk siapa kita hari ini.','Antara buku dan bangku sekolah, seorang remaja belajar erti persahabatan sejati dan jati diri.']],
+    remaja: [['Perjalanan seorang remaja mencari jati diri, menempuh ranjau kehidupan dengan semangat dan air mata.']],
+    ibu: [['Pengorbanan seorang ibu yang tidak pernah terhenti, menjadi tiang seri keluarga walaupun dalam kesusahan.','Kasih ibu seperti lautan luas — dalam, tenang, dan tidak pernah kering walau dilanda ribut sekalipun.']],
+    ayah: [['Seorang ayah yang pendiam menyimpan cinta yang besar, diceritakan melalui pengorbanan yang tak pernah terucap.']],
+    misteri: [['Misteri yang menyelimuti sebuah kampung kecil akhirnya terbongkar, mendedahkan rahsia yang telah lama terpendam.','Siasatan yang penuh liku membawa kepada kebenaran yang mengejutkan — lebih gelap dari yang dijangkakan.']],
+    hantu: [['Kisah seram yang mendebarkan, menggabungkan unsur budaya tempatan dengan misteri yang mencabar akal.']],
+    pahlawan: [['Seorang pahlawan bangkit dari rakyat biasa, mempertahankan tanah air dengan keberanian yang tidak ternilai.']],
+    hutan: [['Di dalam hutan yang lebat, rahsia alam dan manusia bertemu, membawa pengajaran tentang keseimbangan dan rasa hormat.']],
+    laut: [['Lautan luas menjadi latar kisah yang epik, di mana manusia berhadapan dengan alam dan diri sendiri.']],
+    api: [['Api yang membakar bukan sahaja membinasakkan, tetapi juga memurnikan — sebuah kisah tentang kebangkitan dari abu.']],
+  },
+  en: {
+    love: [['Two souls navigate the beautiful chaos of love, learning that true connection demands courage, vulnerability, and trust.','Love arrives unexpectedly, reshaping everything in its wake — a tender story of hearts finding their way home.']],
+    war: [['Against the brutal backdrop of war, ordinary people discover extraordinary resilience, forging bonds that outlast the fighting.','War strips life to its essentials, and in that rawness, characters discover what — and who — truly matters.']],
+    death: [['Confronting mortality, the protagonist embarks on a profound journey of acceptance, love, and the meaning of a life well-lived.']],
+    mystery: [['A web of clues leads deeper into the shadows, where the truth is more shocking than anyone dared imagine.','Every answer unlocks a new question in this gripping mystery where nothing — and no one — is quite what it seems.']],
+    school: [['Between classrooms and friendships, a young student discovers that the most important lessons are never found in textbooks.','High school hallways hide more secrets than any library — a sharp, funny, heartfelt story of growing up.']],
+    family: [['Family is the first place we learn love — and sometimes the place that wounds us deepest. This story explores both.','Across generations, this family carries secrets, sacrifices, and a fierce love that binds them despite everything.']],
+    magic: [['Magic crackles through every page as a young hero discovers powers beyond imagination — and the responsibility that comes with them.','In a world where magic is real, the greatest challenge is not casting spells but choosing what to fight for.']],
+    dragon: [['An ancient prophecy, a reluctant hero, and a dragon whose loyalty defies legend — an epic adventure begins.']],
+    island: [['Stranded on a remote island, survival forces unexpected bonds and reveals the wild complexity of human nature.']],
+    ghost: [['The ghost of the past refuses to stay buried, drawing the living into a mystery that blurs the line between worlds.']],
+    cat: [['Seen through a cat\'s curious eyes, the everyday world becomes extraordinary — a charming tale of small moments and big feelings.']],
+    girl: [['A young girl\'s voice cuts through the noise of the world, sharp and true, carrying a story that demands to be heard.']],
+    boy: [['A boy stands at the crossroads of childhood and the unknown, and the choice he makes will define everything that follows.']],
+    night: [['Under cover of night, secrets surface and lives intersect in ways that daylight would never allow.']],
+    light: [['Even in the darkest corners of this story, a stubborn light persists — the kind only hope and human kindness can make.']],
+  }
+};
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function smartFallback(title, lang) {
+  const t = title.toLowerCase();
+  if (lang === 'zh') {
+    for (const [char, [theme, lines]] of Object.entries(keywords.zh)) {
+      if (title.includes(char)) return pick(lines);
+    }
+    const templates = [
+      `《${title}》以细腻的笔触勾勒出人物命运，在平凡与不凡之间，探寻生命深处的光与影。`,
+      `《${title}》用独特的视角讲述了一段难以忘怀的故事，每一页都令人心绪难平。`,
+      `在《${title}》中，作者以真实而动人的文字，带领读者走进一个充满温度的世界。`,
+      `《${title}》的故事在现实与情感之间游走，揭示了人性最真实也最复杂的一面。`,
+      `《${title}》记录了一段关于寻找与失去的旅程，平静的文字下涌动着深沉的情感。`,
+    ];
+    return pick(templates);
+  }
+  if (lang === 'ms') {
+    for (const [word, [lines]] of Object.entries(keywords.ms)) {
+      if (t.includes(word)) return pick(lines);
+    }
+    const templates = [
+      `"${title}" membawa pembaca menyelami kisah yang menyentuh hati, penuh dengan pengajaran tentang kehidupan dan kemanusiaan.`,
+      `Sebuah kisah tentang ${title} yang menggetarkan jiwa — menggabungkan emosi, cabaran, dan semangat untuk terus maju.`,
+      `"${title}" menceritakan perjalanan hidup yang penuh liku, di mana setiap dugaan membentuk kekuatan jiwa yang tersembunyi.`,
+      `Melalui watak-watak yang hidup dan plot yang mendebarkan, "${title}" meninggalkan kesan mendalam di hati pembaca.`,
+      `"${title}" adalah sebuah karya yang merayakan semangat manusia — kisah yang akan diingati lama selepas halaman terakhir ditutup.`,
+    ];
+    return pick(templates);
+  }
+  // English
+  for (const [word, [lines]] of Object.entries(keywords.en)) {
+    if (t.includes(word)) return pick(lines);
+  }
+  const templates = [
+    `"${title}" is a vivid, unforgettable story that pulls you in from the first page and refuses to let go until the very last.`,
+    `Layered with emotion and brilliant characters, "${title}" explores the quiet heroism found in ordinary lives.`,
+    `"${title}" weaves a richly imagined world where every character carries secrets — and every secret changes everything.`,
+    `Bold and deeply human, "${title}" asks the questions we are all afraid to answer, and finds unexpected grace in the asking.`,
+    `"${title}" is the kind of story that stays with you — long after the final page, its characters feel like old friends.`,
+  ];
+  return pick(templates);
+}
+
+const langLabel = { zh:'中文', ms:'Bahasa Melayu', en:'English' };
+
+function generate() {
+  const raw = inputEl.value.trim();
+  if (!raw) { inputEl.focus(); return; }
+
+  const key   = raw.toLowerCase().trim();
+  const match = Object.keys(db).find(k => key.includes(k));
+  const lang  = match ? db[match].lang : detectLang(raw);
+  const syn   = match ? db[match].s    : smartFallback(raw, lang);
+  const title = match ? db[match].t    : raw;
+
+  document.querySelector('.empty-state')?.remove();
+
+  const id = 'c' + Date.now();
+  const html = `<div class="card" id="${id}">
+    <div class="card-accent accent-${lang}"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="lang-badge badge-${lang}">${langLabel[lang]}</span>
+          <span class="book-title-text">${esc(title)}</span>
+        </div>
+        <button class="btn-copy" onclick="doCopy('${id}')">Salin</button>
+      </div>
+      <div class="synopsis-block" data-raw="${escAttr(syn)}">${esc(syn)}</div>
+    </div>
+  </div>`;
+
+  resultsEl.insertAdjacentHTML('afterbegin', html);
+  inputEl.value = '';
+  inputEl.focus();
+  countEl.textContent = ++total;
+  counterEl.style.display = 'block';
+}
+
+function doCopy(id) {
+  const card = document.getElementById(id);
+  const text = card.querySelector('.synopsis-block').dataset.raw;
+  const btn  = card.querySelector('.btn-copy');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Disalin!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Salin'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function esc(s)     { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+</script>
+</body>
+</html>
