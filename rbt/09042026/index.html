@@ -27,7 +27,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         // --- Data Definitions ---
         const componentsData = [
@@ -45,6 +45,16 @@
             { id: 'ease', label: '制作简易度' }
         ];
 
+        // 随机打乱数组的工具函数
+        const shuffleArray = (array) => {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        };
+
         function App() {
             // State Management
             const [studentInfo, setStudentInfo] = useState({ name: '', class: '' });
@@ -55,6 +65,10 @@
             const [partC, setPartC] = useState({ practicality: 3, durability: 3, stability: 3, aesthetics: 3, ease: 3, finalDecision: '' });
             const [progress, setProgress] = useState(0);
             const [isSubmitted, setIsSubmitted] = useState(false);
+
+            // 在组件加载时生成随机顺序的问题和选项，保证不按原本规律出现
+            const shuffledQuestions = useMemo(() => shuffleArray(componentsData), []);
+            const shuffledOptions = useMemo(() => shuffleArray(componentsData), []);
 
             // Calculate Progress
             useEffect(() => {
@@ -185,7 +199,7 @@
                         <p className="text-gray-600 mb-4">指令：制作太阳能灯需要不同的电子元件。请阅读功能描述，从下拉菜单中选择正确的元件名称。</p>
                         
                         <div className="grid grid-cols-1 gap-4">
-                            {componentsData.map((item, index) => (
+                            {shuffledQuestions.map((item, index) => (
                                 <div key={item.id} className="p-4 border rounded-xl bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div className="flex-1">
                                         <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded mb-2">功能 {index + 1}</span>
@@ -198,8 +212,8 @@
                                             onChange={(e) => handlePartAChange(item.id, e.target.value)}
                                         >
                                             <option value="">-- 请选择对应的元件 --</option>
-                                            {componentsData.map(opt => (
-                                                <option key={opt.id + "_opt"} value={opt.name}>{opt.name}</option>
+                                            {shuffledOptions.map(opt => (
+                                                <option key={`${item.id}_${opt.id}`} value={opt.name}>{opt.name}</option>
                                             ))}
                                         </select>
                                         
