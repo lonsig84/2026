@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年级 RBT：无限的可更新能源 - 互动分层作业单</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Microsoft YaHei'; background-color: #f0fdf4; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .score-bar { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.8s ease; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Data Definitions ---
+        const componentsData = [
+            { id: 'c1', name: '太阳能电池', function: '吸收太阳的光能并转换为电能', hint: '它通常是黑色的板子，放在最上面吸收阳光哦！' },
+            { id: 'c2', name: '发光二极管', function: '把电能转换为光能 (发光)', hint: '它就是会亮起来的小灯泡。' },
+            { id: 'c3', name: '蓄电池', function: '储存太阳能电池转换的电能', hint: '晚上没有太阳时，就靠它提供电力了。' },
+            { id: 'c4', name: '二极管', function: '防止电流从电池盒倒流', hint: '它像一个单行道标志，只让电流往一个方向走。' }
+        ];
+
+        const evaluationCriteria = [
+            { id: 'practicality', label: '实用性' },
+            { id: 'durability', label: '耐用性' },
+            { id: 'stability', label: '稳固性' },
+            { id: 'aesthetics', label: '美观性' },
+            { id: 'ease', label: '制作简易度' }
+        ];
+
+        function App() {
+            // State Management
+            const [studentInfo, setStudentInfo] = useState({ name: '', class: '' });
+            const [partA, setPartA] = useState({ c1: '', c2: '', c3: '', c4: '' });
+            const [partAFeedback, setPartAFeedback] = useState({});
+            const [partB, setPartB] = useState({ idea: '', materials: '', reason: '' });
+            const [sketchImage, setSketchImage] = useState(null); 
+            const [partC, setPartC] = useState({ practicality: 3, durability: 3, stability: 3, aesthetics: 3, ease: 3, finalDecision: '' });
+            const [progress, setProgress] = useState(0);
+            const [isSubmitted, setIsSubmitted] = useState(false);
+
+            // Calculate Progress
+            useEffect(() => {
+                let p = 0;
+                if (studentInfo.name && studentInfo.class) p += 10;
+                if (Object.values(partA).every(v => v !== '')) p += 30;
+                
+                if (partB.idea && partB.materials && partB.reason && sketchImage) p += 30;
+                else if (partB.idea && partB.materials && partB.reason) p += 20; 
+                
+                if (partC.finalDecision) p += 30;
+                setProgress(p);
+            }, [studentInfo, partA, partB, partC, sketchImage]);
+
+            // Handlers
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setSketchImage(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handlePartAChange = (id, value) => {
+                setPartA(prev => ({ ...prev, [id]: value }));
+                
+                const correctAnswer = componentsData.find(c => c.id === id).name;
+                if (value === correctAnswer) {
+                    setPartAFeedback(prev => ({ ...prev, [id]: { isCorrect: true, msg: '太棒了！完全正确！✅' } }));
+                } else {
+                    const hint = componentsData.find(c => c.id === id).hint;
+                    setPartAFeedback(prev => ({ ...prev, [id]: { isCorrect: false, msg: `再想想哦💡：${hint}` } }));
+                }
+            };
+
+            const calculateTotalScore = () => {
+                return Object.values(partC).filter(val => typeof val === 'number').reduce((a, b) => a + b, 0);
+            };
+
+            const exportToExcel = () => {
+                if (progress < 100) {
+                    alert("请先完成所有部分的作业哦！");
+                    return;
+                }
+
+                const data = [
+                    { "部分": "学生资料", "项目": "姓名", "填写内容": studentInfo.name },
+                    { "部分": "学生资料", "项目": "班级", "填写内容": studentInfo.class },
+                    { "部分": "A项 (认识元件)", "项目": "太阳能电池功能", "填写内容": partA.c1 },
+                    { "部分": "A项 (认识元件)", "项目": "发光二极管功能", "填写内容": partA.c2 },
+                    { "部分": "A项 (认识元件)", "项目": "蓄电池功能", "填写内容": partA.c3 },
+                    { "部分": "A项 (认识元件)", "项目": "二极管功能", "填写内容": partA.c4 },
+                    { "部分": "B项 (构思设计)", "项目": "我的设计概念", "填写内容": partB.idea },
+                    { "部分": "B项 (构思设计)", "项目": "所需材料清单", "填写内容": partB.materials },
+                    { "部分": "B项 (构思设计)", "项目": "选择此设计的原因", "填写内容": partB.reason },
+                    { "部分": "C项 (评估草图)", "项目": "实用性评分 (1-5)", "填写内容": partC.practicality },
+                    { "部分": "C项 (评估草图)", "项目": "耐用性评分 (1-5)", "填写内容": partC.durability },
+                    { "部分": "C项 (评估草图)", "项目": "稳固性评分 (1-5)", "填写内容": partC.stability },
+                    { "部分": "C项 (评估草图)", "项目": "美观性评分 (1-5)", "填写内容": partC.aesthetics },
+                    { "部分": "C项 (评估草图)", "项目": "制作简易度评分 (1-5)", "填写内容": partC.ease },
+                    { "部分": "C项 (评估草图)", "项目": "总分", "填写内容": calculateTotalScore() },
+                    { "部分": "C项 (评估草图)", "项目": "最终选择及改良建议", "填写内容": partC.finalDecision },
+                ];
+
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "作业报告");
+                XLSX.writeFile(wb, `${studentInfo.name}_设计与工艺_作业单.xlsx`);
+                
+                setIsSubmitted(true);
+            };
+
+            const totalScore = calculateTotalScore();
+            const scorePercentage = (totalScore / 25) * 100;
+            let scoreColor = 'bg-red-500';
+            if (scorePercentage > 40) scoreColor = 'bg-yellow-400';
+            if (scorePercentage > 75) scoreColor = 'bg-green-500';
+
+            return (
+                <div className="max-w-4xl mx-auto p-4 md:p-8">
+                    {/* Header */}
+                    <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border-t-8 border-green-500 fade-in">
+                        <div className="flex items-center justify-between border-b pb-4 mb-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+                                    <svg className="w-8 h-8 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    无限的可更新能源
+                                </h1>
+                                <p className="text-gray-500 mt-1">课题 2.2：策划和制作绿色产品 | 互动学习单</p>
+                            </div>
+                            <div className="text-right hidden md:block">
+                                <p className="text-sm text-gray-400">学习标准：5.1.3</p>
+                            </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-6">
+                            <div className="flex justify-between text-sm font-medium text-gray-600 mb-1">
+                                <span>学习进度</span>
+                                <span>{progress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <div className="bg-green-500 h-2.5 rounded-full transition-all duration-700 ease-out" style={{ width: `${progress}%` }}></div>
+                            </div>
+                        </div>
+
+                        {/* Student Info */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-green-50 p-4 rounded-xl">
+                            <div>
+                                <label className="block text-sm font-bold text-green-800 mb-1">姓名 (Nama)</label>
+                                <input type="text" className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none" 
+                                    placeholder="请输入你的姓名" value={studentInfo.name} onChange={e => setStudentInfo({...studentInfo, name: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-green-800 mb-1">班级 (Kelas)</label>
+                                <input type="text" className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none" 
+                                    placeholder="例如：5 蓝班" value={studentInfo.class} onChange={e => setStudentInfo({...studentInfo, class: e.target.value})} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part A: Remedial / Identification */}
+                    <div className="bg-white rounded-2xl shadow-md p-6 mb-8 fade-in" style={{ animationDelay: '0.1s' }}>
+                        <h2 className="text-xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3 mb-4">A项：认识太阳能灯的“心脏”（辅导与巩固）</h2>
+                        <p className="text-gray-600 mb-4">指令：制作太阳能灯需要不同的电子元件。请阅读功能描述，从下拉菜单中选择正确的元件名称。</p>
+                        
+                        <div className="grid grid-cols-1 gap-4">
+                            {componentsData.map((item, index) => (
+                                <div key={item.id} className="p-4 border rounded-xl bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="flex-1">
+                                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded mb-2">功能 {index + 1}</span>
+                                        <p className="text-gray-700 font-medium">{item.function}</p>
+                                    </div>
+                                    <div className="flex-1 max-w-xs w-full">
+                                        <select 
+                                            className={`w-full p-2 border rounded-lg focus:outline-none ${partAFeedback[item.id]?.isCorrect ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
+                                            value={partA[item.id]}
+                                            onChange={(e) => handlePartAChange(item.id, e.target.value)}
+                                        >
+                                            <option value="">-- 请选择对应的元件 --</option>
+                                            {componentsData.map(opt => (
+                                                <option key={opt.id + "_opt"} value={opt.name}>{opt.name}</option>
+                                            ))}
+                                        </select>
+                                        
+                                        {partAFeedback[item.id] && (
+                                            <p className={`text-sm mt-2 font-medium ${partAFeedback[item.id].isCorrect ? 'text-green-600' : 'text-amber-600'}`}>
+                                                {partAFeedback[item.id].msg}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Part B: Consolidation / Sketching Context */}
+                    <div className="bg-white rounded-2xl shadow-md p-6 mb-8 fade-in" style={{ animationDelay: '0.2s' }}>
+                        <h2 className="text-xl font-bold text-gray-800 border-l-4 border-purple-500 pl-3 mb-4">B项：描绘与构思草图（巩固）</h2>
+                        <p className="text-gray-600 mb-4">指令：请在你的画纸上画出太阳能灯的草图（标记材料和元件位置）。画完后，在这里记录你的设计理念。</p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block font-bold text-gray-700 mb-1">1. 我的太阳能灯外观概念是：</label>
+                                <input type="text" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" 
+                                    placeholder="例如：我把它设计成一间会发光的环保小木屋..." 
+                                    value={partB.idea} onChange={e => setPartB({...partB, idea: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block font-bold text-gray-700 mb-1">2. 我预计需要用到以下环保材料和工具：</label>
+                                <textarea className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" rows="2"
+                                    placeholder="例如：塑料瓶盖（做底座）、旧纸盒、剪刀、热熔胶枪..." 
+                                    value={partB.materials} onChange={e => setPartB({...partB, materials: e.target.value})}></textarea>
+                            </div>
+                            <div>
+                                <label className="block font-bold text-gray-700 mb-1">3. 我决定采用这个草图设计的主要原因是：</label>
+                                <textarea className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:outline-none" rows="2"
+                                    placeholder="例如：因为材料容易取得，而且制作步骤比较简单稳固..." 
+                                    value={partB.reason} onChange={e => setPartB({...partB, reason: e.target.value})}></textarea>
+                            </div>
+
+                            {/* 图片上传与显示区 */}
+                            <div className="mt-4">
+                                <label className="block font-bold text-gray-700 mb-2">4. 拍下并上传我的草图设计：</label>
+                                <div className="flex items-center justify-center w-full">
+                                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-purple-300 border-dashed rounded-lg cursor-pointer bg-purple-50 hover:bg-purple-100 overflow-hidden relative">
+                                        {sketchImage ? (
+                                            <div className="w-full h-full relative group">
+                                                <img src={sketchImage} alt="草图预览" className="w-full h-full object-contain p-2" />
+                                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <p className="text-white font-bold">点击重新上传</p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <svg className="w-10 h-10 mb-4 text-purple-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                                </svg>
+                                                <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">点击拍照 / 上传图片</span></p>
+                                                <p className="text-xs text-gray-500">支持 PNG, JPG 格式 (可用手机直接拍照)</p>
+                                            </div>
+                                        )}
+                                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Part C: Enrichment / Evaluation with Data Driven Animation */}
+                    <div className="bg-white rounded-2xl shadow-md p-6 mb-8 fade-in" style={{ animationDelay: '0.3s' }}>
+                        <h2 className="text-xl font-bold text-gray-800 border-l-4 border-orange-500 pl-3 mb-4">C项：评估与优化设计（增广）</h2>
+                        <p className="text-gray-600 mb-4">指令：作为小小工程师，我们需要对设计进行评估。请移动下方的滑块，为你的草图设计打分（1分最低，5分最高）。</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                                {evaluationCriteria.map(criteria => (
+                                    <div key={criteria.id}>
+                                        <div className="flex justify-between mb-1">
+                                            <label className="text-sm font-bold text-gray-700">{criteria.label}</label>
+                                            <span className="text-orange-600 font-bold">{partC[criteria.id]} 分</span>
+                                        </div>
+                                        <input type="range" min="1" max="5" value={partC[criteria.id]} 
+                                            onChange={(e) => setPartC({...partC, [criteria.id]: parseInt(e.target.value)})}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-gray-800 rounded-xl p-6 flex flex-col justify-center text-center">
+                                <h3 className="text-gray-300 font-medium mb-2">设计综合评估总分</h3>
+                                <div className="text-5xl font-black text-white mb-4">{totalScore} <span className="text-2xl text-gray-500">/ 25</span></div>
+                                
+                                <div className="w-full bg-gray-700 rounded-full h-4 mb-2 p-1">
+                                    <div className={`h-full rounded-full score-bar ${scoreColor}`} style={{ width: `${scorePercentage}%` }}></div>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-2">
+                                    {totalScore < 15 ? '还需要多加修改优化哦！👷' : totalScore < 20 ? '设计很不错，继续保持！👍' : '完美的设计概念，你是个天才小发明家！🌟'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 pt-6 border-t">
+                            <label className="block font-bold text-gray-700 mb-2">总结：如果有机会改进，你想怎样优化这个设计？</label>
+                            <textarea className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none" rows="3"
+                                placeholder="例如：我想在瓶盖外加一层黑纸，或者换一个更亮的二极管..." 
+                                value={partC.finalDecision} onChange={e => setPartC({...partC, finalDecision: e.target.value})}></textarea>
+                        </div>
+                    </div>
+
+                    {/* Submit Area & Google Classroom Guide */}
+                    <div className="text-center pb-12 fade-in" style={{ animationDelay: '0.4s' }}>
+                        {!isSubmitted ? (
+                            <div>
+                                <button 
+                                    onClick={exportToExcel}
+                                    className={`px-8 py-4 rounded-full font-bold text-lg shadow-lg transform transition hover:scale-105 ${progress === 100 ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                                >
+                                    {progress === 100 ? '💾 下载 Excel 作业报告' : `✍️ 请先完成所有题目 (当前 ${progress}%)`}
+                                </button>
+                                <p className="text-sm text-gray-500 mt-4">老师提示：完成所有题目后，点击按钮下载报告文件。</p>
+                            </div>
+                        ) : (
+                            <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-6 max-w-2xl mx-auto shadow-lg fade-in">
+                                <h3 className="text-2xl font-bold text-green-700 flex items-center justify-center mb-4">
+                                    <svg className="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    下载成功！接下来请提交到 Google Classroom
+                                </h3>
+                                <div className="text-left text-gray-700 space-y-3 bg-white p-4 rounded-xl">
+                                    <p className="font-bold border-b pb-2">📤 提交流程：</p>
+                                    <p>1. 回到老师在 <b>Google Classroom</b> 发布置的这项作业 (Assignment)。</p>
+                                    <p>2. 在右侧找到 <b>"您的课业" (Your work)</b> 区域。</p>
+                                    <p>3. 点击 <b>"+ 新增或建立" (+ Add or create)</b>，然后选择 <b>"文件" (File)</b>。</p>
+                                    <p>4. 找到你刚刚下载的 Excel 文件 <span className="text-green-600 font-bold bg-green-100 px-1 rounded">{studentInfo.name}_设计与工艺_作业单.xlsx</span> 并上传。</p>
+                                    <p>5. 上传完成后，记得点击黑色的 <b>"缴交" (Turn in)</b> 按钮哦！</p>
+                                </div>
+                                <button 
+                                    onClick={() => window.print()} 
+                                    className="mt-6 px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition flex items-center justify-center mx-auto"
+                                >
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                    附带要求：将此网页另存为 PDF（包含你的草图）
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
