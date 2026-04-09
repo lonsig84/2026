@@ -32,15 +32,10 @@
     padding: 40px 20px 80px;
   }
 
-  .page {
-    max-width: 640px;
-    margin: 0 auto;
-  }
+  .page { max-width: 640px; margin: 0 auto; }
 
-  /* Header */
   .header { margin-bottom: 40px; }
   .header-eyebrow {
-    font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.12em;
@@ -57,52 +52,8 @@
     margin-bottom: 10px;
   }
   .header h1 span { font-style: italic; color: var(--accent); }
-  .header p {
-    font-size: 15px;
-    color: var(--ink-2);
-    line-height: 1.6;
-  }
+  .header p { font-size: 15px; color: var(--ink-2); line-height: 1.6; }
 
-  /* API Key section */
-  .api-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-bottom: 28px;
-  }
-  .api-section label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--ink-2);
-    margin-bottom: 8px;
-  }
-  .api-row { display: flex; gap: 10px; align-items: center; }
-  .api-row input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: 'DM Sans', monospace;
-    background: var(--bg);
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .api-row input:focus { border-color: var(--accent); }
-  .api-hint {
-    font-size: 12px;
-    color: var(--ink-3);
-    margin-top: 8px;
-  }
-  .api-hint a { color: var(--accent); text-decoration: none; }
-  .api-hint a:hover { text-decoration: underline; }
-
-  /* Search */
   .search-area { margin-bottom: 24px; }
   .search-row { display: flex; gap: 10px; }
   .search-row input {
@@ -137,13 +88,8 @@
   }
   .search-btn:hover { background: #6D28D9; }
   .search-btn:active { transform: scale(0.97); }
-  .search-btn:disabled {
-    background: #C4B5FD;
-    cursor: not-allowed;
-    transform: none;
-  }
+  .search-btn:disabled { background: #C4B5FD; cursor: not-allowed; transform: none; }
 
-  /* Chips */
   .chips-label { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; margin-top: 14px; }
   .chips { display: flex; flex-wrap: wrap; gap: 7px; }
   .chip {
@@ -157,13 +103,8 @@
     transition: all 0.15s;
     font-family: 'DM Sans', sans-serif;
   }
-  .chip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-light);
-  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
-  /* Result */
   .result-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -219,6 +160,7 @@
     color: var(--ink);
     border: 1px solid var(--border);
     user-select: all;
+    cursor: text;
   }
   .result-footer {
     padding: 10px 22px 18px;
@@ -245,7 +187,6 @@
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
   .copy-btn.copied { border-color: var(--green); color: var(--green); background: var(--green-light); }
 
-  /* Loading */
   .loading-state {
     display: flex;
     align-items: center;
@@ -268,7 +209,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Error */
   .error-box {
     padding: 14px 18px;
     background: #FEF2F2;
@@ -277,9 +217,9 @@
     font-size: 14px;
     color: #991B1B;
     margin-bottom: 16px;
+    line-height: 1.6;
   }
 
-  /* Footer note */
   .note {
     margin-top: 32px;
     padding: 16px 20px;
@@ -301,16 +241,6 @@
     <p>Taip tajuk buku dalam Bahasa Melayu, English atau 中文 — sinopsis ditulis dalam bahasa yang sama, kurang daripada 100 patah perkataan.</p>
   </div>
 
-  <!-- API Key -->
-  <div class="api-section">
-    <label>Kunci API Anthropic</label>
-    <div class="api-row">
-      <input type="password" id="apiKey" placeholder="sk-ant-api03-..." />
-    </div>
-    <p class="api-hint">Dapatkan kunci API percuma di <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</p>
-  </div>
-
-  <!-- Search -->
   <div class="search-area">
     <div class="search-row">
       <input type="text" id="bookInput" placeholder="Contoh: Salina, 骆驼祥子, Harry Potter..." />
@@ -331,11 +261,13 @@
   <div id="output"></div>
 
   <div class="note">
-    <strong>Cara guna:</strong> Isi Kunci API sekali sahaja — ia disimpan sementara dalam sesi ini. Taip tajuk buku dan tekan Cari. Teks sinopsis boleh diklik terus untuk pilih semua, atau tekan butang <strong>Salin</strong>.
+    <strong>Cara guna:</strong> Taip tajuk buku dan tekan Cari. Klik pada blok sinopsis untuk pilih semua teks, atau tekan butang <strong>Salin teks</strong>.
   </div>
 </div>
 
 <script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyNN_yO_CYY1wOWQfjBDRecexgU9B9izLdwbkUkbQkxjPRjwTysmK5V54tRmJ3g4Z6L/exec';
+
 const input = document.getElementById('bookInput');
 input.addEventListener('keydown', e => { if (e.key === 'Enter') searchBook(); });
 
@@ -372,50 +304,27 @@ async function searchBook() {
   const title = input.value.trim();
   if (!title) { input.focus(); return; }
 
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey) {
-    document.getElementById('output').innerHTML = '<div class="error-box">Sila masukkan Kunci API Anthropic anda dahulu.</div>';
-    return;
-  }
-
   const btn = document.getElementById('searchBtn');
   const out = document.getElementById('output');
   btn.disabled = true;
   btn.textContent = 'Mencari...';
 
   const lang = detectLang(title);
-
-  const promptMap = {
-    zh: `你是一位图书馆员。请用简洁流畅的中文为书籍《${title}》写一段故事简介，字数不超过100字。只写简介内容本身，不需要标题或任何前缀。请根据你对这本书的认识来写；若不确定，也请根据书名写出合理的内容。`,
-    ms: `Anda adalah seorang pustakawan. Sila tulis sinopsis ringkas dalam Bahasa Melayu untuk buku "${title}" dalam tidak lebih daripada 100 patah perkataan. Tulis isi sinopsis sahaja tanpa tajuk atau awalan. Gunakan pengetahuan anda tentang buku ini; jika tidak pasti, tulis sinopsis yang munasabah berdasarkan tajuknya.`,
-    en: `You are a librarian. Write a concise synopsis in English for the book "${title}" in no more than 100 words. Write only the synopsis content itself, without any title or prefix. Use your knowledge of this book; if unsure, write a reasonable synopsis based on the title.`
-  };
-
   out.innerHTML = `<div class="loading-state"><div class="spin"></div>Sedang mencari sinopsis untuk "<strong>${title}</strong>"…</div>`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        messages: [{ role: 'user', content: promptMap[lang] }]
-      })
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ title: title, lang: lang })
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const data = await res.json();
-    const synopsis = data.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+    if (!data.synopsis) throw new Error('Tiada sinopsis dikembalikan.');
+
+    const synopsis = data.synopsis.trim();
     const id = 'c' + Date.now();
     const wc = countWords(synopsis, lang);
 
@@ -440,8 +349,8 @@ async function searchBook() {
 
   } catch (err) {
     out.innerHTML = `<div class="error-box">
-      <strong>Ralat:</strong> ${err.message}<br><br>
-      Semak: (1) Kunci API betul dan aktif, (2) Baki kredit mencukupi di <a href="https://console.anthropic.com" target="_blank" style="color:#991B1B">console.anthropic.com</a>
+      <strong>Ralat:</strong> ${err.message}<br>
+      Pastikan Google Apps Script sudah di-deploy dengan betul dan cuba semula.
     </div>`;
   }
 
@@ -452,6 +361,7 @@ async function searchBook() {
 function copyText(id) {
   const el = document.getElementById(id);
   const btn = document.getElementById('btn_' + id);
+  if (!el || !btn) return;
   navigator.clipboard.writeText(el.innerText).then(() => {
     btn.classList.add('copied');
     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Disalin!`;
