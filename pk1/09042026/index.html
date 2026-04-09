@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>药，怎样用？- 一年级健康教育</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#FFF0F5;font-family:'Segoe UI',Arial,sans-serif;padding:16px}
+.app{padding:16px 14px 24px;max-width:680px;margin:0 auto}
+.hero{background:#FBEAF0;border-radius:24px;padding:20px 16px 16px;text-align:center;margin-bottom:16px;border:2px solid #F4C0D1}
+.hero-icon{font-size:48px;line-height:1}
+.hero h1{font-size:22px;font-weight:600;color:#72243E;margin:8px 0 4px}
+.hero p{font-size:13px;color:#993556}
+.hero-badge{display:inline-block;background:#F4C0D1;color:#72243E;font-size:12px;font-weight:500;padding:3px 12px;border-radius:20px;margin-top:6px}
+.name-box{background:#EEEDFE;border-radius:16px;padding:12px 14px;margin-bottom:12px;border:1.5px solid #CECBF6;display:flex;align-items:center;gap:10px}
+.name-box span{font-size:20px}
+.name-box input{flex:1;border:none;background:transparent;font-size:15px;color:#3C3489;outline:none;font-family:inherit}
+.name-box input::placeholder{color:#AFA9EC}
+.prog-wrap{margin-bottom:8px}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:4px}
+.prog-track{height:10px;background:#F1EFE8;border-radius:10px;overflow:hidden;border:1px solid #D3D1C7}
+.prog-fill{height:100%;background:linear-gradient(90deg,#D4537E,#7F77DD);border-radius:10px;transition:width 0.4s}
+.star-row{text-align:center;font-size:18px;letter-spacing:3px;margin:6px 0 14px;color:#EF9F27}
+.q-card{border-radius:20px;padding:16px;margin-bottom:14px;border:2px solid #F4C0D1;background:#fff;transition:all 0.25s}
+.q-card.state-correct{border-color:#5DCAA5;background:#E1F5EE}
+.q-card.state-wrong{border-color:#F0997B;background:#FAECE7}
+.q-badge{display:inline-flex;align-items:center;gap:4px;background:#FBEAF0;color:#993556;font-size:11px;font-weight:500;padding:2px 10px;border-radius:20px;margin-bottom:8px;border:1px solid #F4C0D1}
+.q-badge span{font-size:14px}
+.q-text{font-size:15px;font-weight:600;color:#2C2C2A;margin-bottom:8px;line-height:1.5}
+.scenario{font-size:13px;color:#534AB7;background:#EEEDFE;border-radius:12px;padding:8px 12px;margin-bottom:10px;line-height:1.5;border:1px solid #CECBF6}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{background:#F1EFE8;border:1.5px solid #D3D1C7;border-radius:14px;padding:10px;font-size:13px;cursor:pointer;text-align:left;color:#2C2C2A;transition:all 0.15s;line-height:1.4;display:flex;align-items:flex-start;gap:6px;font-family:inherit}
+.opt:hover:not(:disabled){background:#EEEDFE;border-color:#AFA9EC;transform:scale(1.01)}
+.opt .badge{display:inline-block;min-width:20px;height:20px;border-radius:50%;background:#D3D1C7;color:#444;font-size:11px;font-weight:600;text-align:center;line-height:20px;flex-shrink:0}
+.opt.picked-right{background:#E1F5EE;border-color:#5DCAA5}
+.opt.picked-right .badge{background:#1D9E75;color:#fff}
+.opt.picked-wrong{background:#FAECE7;border-color:#F0997B}
+.opt.picked-wrong .badge{background:#D85A30;color:#fff}
+.opt.show-ans{background:#E1F5EE;border-color:#5DCAA5}
+.opt.show-ans .badge{background:#1D9E75;color:#fff}
+.feedback{font-size:13px;margin-top:10px;padding:9px 12px;border-radius:12px;line-height:1.5;display:flex;align-items:flex-start;gap:6px}
+.feedback span{font-size:15px;flex-shrink:0}
+.fb-ok{background:#9FE1CB;color:#04342C}
+.fb-no{background:#F5C4B3;color:#4A1B0C}
+.hidden{display:none}
+.submit-btn{width:100%;padding:14px;background:#D4537E;color:white;border:none;border-radius:20px;font-size:16px;font-weight:600;cursor:pointer;margin-top:4px;transition:all 0.2s;letter-spacing:0.3px}
+.submit-btn:hover:not(:disabled){background:#993556;transform:scale(1.01)}
+.submit-btn:disabled{background:#D3D1C7;color:#888;cursor:not-allowed}
+.result{background:#FBEAF0;border-radius:24px;border:2px solid #F4C0D1;padding:24px 16px;text-align:center;margin-top:16px}
+.result-trophy{font-size:56px;margin-bottom:4px}
+.result-score{font-size:44px;font-weight:700;color:#72243E}
+.result-label{font-size:13px;color:#993556;margin-bottom:8px}
+.result-msg{font-size:19px;font-weight:600;color:#3C3489}
+.result-sub{font-size:14px;color:#666;margin-top:4px}
+.sticker-row{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:12px 0}
+.sticker{font-size:28px;display:inline-block;animation:pop 0.3s ease both}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.btn-r{padding:12px;border-radius:16px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;font-family:inherit}
+.btn-reset{background:#EEEDFE;color:#3C3489}
+.btn-reset:hover{background:#CECBF6}
+.btn-dl{background:#1D9E75;color:white}
+.btn-dl:hover{background:#0F6E56}
+.bounce{animation:bounce 0.35s ease}
+@keyframes bounce{0%{transform:scale(1)}45%{transform:scale(1.04)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div class="hero-icon">💊</div>
+    <h1>药，怎样用？</h1>
+    <p>健康教育 第13课 · 一年级</p>
+    <div class="hero-badge">小朋友，我们一起来学安全用药吧！</div>
+  </div>
+  <div class="name-box">
+    <span>🌟</span>
+    <input id="sName" placeholder="写上你的名字..." maxlength="20"/>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label">
+      <span id="progText">还没开始哦，加油！</span>
+      <span id="progCount">0 / 10</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+  <div class="star-row" id="starRow">☆☆☆☆☆☆☆☆☆☆</div>
+  <div id="quizArea"></div>
+  <button class="submit-btn" id="subBtn" disabled onclick="submitAll()">交作业啦！ ✓</button>
+  <div class="result hidden" id="resultBox">
+    <div class="result-trophy" id="rTrophy">🏆</div>
+    <div class="result-score" id="rScore">0/10</div>
+    <div class="result-label">答对了这么多题！</div>
+    <div class="sticker-row" id="stickerRow"></div>
+    <div class="result-msg" id="rMsg">很棒！</div>
+    <div class="result-sub" id="rSub"></div>
+    <div class="action-row">
+      <button class="btn-r btn-reset" onclick="resetAll()">再做一次 ↺</button>
+      <button class="btn-r btn-dl" onclick="dlExcel()">下载成绩表 ↓</button>
+    </div>
+  </div>
+</div>
+<script>
+const QS=[
+  {q:"生病时，应该怎么做？",sc:"小明发烧了，妈妈要给他吃药。",icon:"🤒",
+   opts:["吃爸爸的药","吃过期的药","看医生，吃医生开的药","自己去药店买药"],ans:2,
+   fb:["爸爸的药是为大人开的，小朋友不能吃！","过期的药会变质，吃了会生病！","要根据医生的处方吃药，才安全。","小朋友要告诉大人，由大人决定。"]},
+  {q:"药膏过期了，该怎么办？",sc:"妈妈发现药箱里的药膏已经过了有效期。",icon:"🧴",
+   opts:["继续用，不浪费","加热后才用","不用了，要丢掉","分给邻居用"],ans:2,
+   fb:["过期药膏会导致皮肤红痒，不能用！","加热不能让过期的药变安全。","过期药物必须丢弃，不能再用。","给别人用也是不对的！"]},
+  {q:"药的分量应该怎么决定？",sc:"药袋上写着：饭后服一匙。",icon:"🥄",
+   opts:["多喝两匙快点好","刚好喝一匙","随便喝多少都行","喝整瓶才会好快"],ans:1,
+   fb:["多喝药不会好得更快，反而危险！","要按照医生或药袋指示，定量服药。","随便喝药非常危险！","喝整瓶药会中毒！"]},
+  {q:"什么时候喝药？",sc:"医生叮嘱：每天饭后服药一次。",icon:"⏰",
+   opts:["肚子饿的时候喝","睡觉前才喝","每餐饭后喝","想起来才喝"],ans:2,
+   fb:["要按照医生指示的时间，不能随意。","医生没有说睡前喝，要遵照指示。","饭后服药，定时定量才有效。","忘记喝药会影响治疗效果！"]},
+  {q:"哪种药物不能再使用？",sc:"小华发现一瓶药水颜色变深了，还有奇怪的味道。",icon:"⚠️",
+   opts:["可以喝，没关系","变质的药，不能用","加水稀释后喝","先喝一点试试看"],ans:1,
+   fb:["颜色和味道改变是变质的信号，不能用！","变色、变味的药是不安全的药，必须丢弃。","稀释也没用，变质的药不能救！","变质的药可能造成中毒，不能试！"]},
+  {q:"药物应该存放在哪里？",sc:"家里有小弟弟，妈妈要把药收好。",icon:"🏠",
+   opts:["放在餐桌上，好拿","高处锁好的柜子里","放在地板上","放在浴室里"],ans:1,
+   fb:["放餐桌上，小孩子很容易拿到！","药物要放在高处、远离小孩的地方。","放地上更危险，小孩会拿到！","浴室潮湿，会让药物变质！"]},
+  {q:"为什么不能服用别人的药？",sc:"小美头痛，看到哥哥有一瓶头痛药。",icon:"🙅",
+   opts:["别人的药味道不好","不同的人用不同的药，可能危害健康","别人的药太贵","药会过期"],ans:1,
+   fb:["这不是主要原因。","每个人的药由医生针对自己开的，吃别人的药可能危害健康！","这不是原因。","这不是不能吃别人药的原因。"]},
+  {q:"用完药之后，应该怎么做？",sc:"小云刚喝完药。",icon:"✅",
+   opts:["随手放在桌上","收回安全的地方","把剩余药丢在地上","把药给弟弟玩"],ans:1,
+   fb:["随手放药，小孩子可能误食！","用药后要将药物收回安全的地方，远离小孩。","乱丢药物很不安全！","药物不是玩具，非常危险！"]},
+  {q:"药物标签上，哪个信息最重要？",sc:"妈妈拿出一盒药，教小云看标签。",icon:"🏷️",
+   opts:["药盒的颜色","有效日期和用法","药盒有没有图案","药的品牌名字"],ans:1,
+   fb:["颜色不是重要信息。","要检查有效日期，并按照用法服用，才安全。","图案不是重要信息。","品牌不是最重要的，有效期和用法才是！"]},
+  {q:"小孩生病了，大人不在家时该怎么做？",sc:"爸爸妈妈都不在家，小明肚子痛。",icon:"📱",
+   opts:["自己拿药吃","打电话告诉爸爸或妈妈","什么都不做","只喝很多水"],ans:1,
+   fb:["小孩子不能自己拿药吃，这很危险！","要马上告诉大人，让大人帮忙处理。","生病了不能什么都不做！","只喝水不一定有效，要告诉大人！"]}
+];
+
+let sel=new Array(QS.length).fill(null);
+let done=false;
+let res=[];
+
+function render(){
+  const area=document.getElementById('quizArea');
+  area.innerHTML='';
+  QS.forEach((q,i)=>{
+    const card=document.createElement('div');
+    card.className='q-card';
+    card.id='card'+i;
+    const optsHtml=q.opts.map((o,j)=>`<button class="opt" id="o${i}_${j}" onclick="pick(${i},${j})"><span class="badge">${['A','B','C','D'][j]}</span>${o}</button>`).join('');
+    card.innerHTML=`<div class="q-badge"><span>${q.icon}</span>题目 ${i+1} / ${QS.length}</div>
+<div class="q-text">${q.q}</div>
+<div class="scenario">💬 ${q.sc}</div>
+<div class="opts">${optsHtml}</div>
+<div class="feedback hidden" id="fb${i}"></div>`;
+    area.appendChild(card);
+  });
+  updateProg();
+}
+
+function pick(qi,oi){
+  if(done) return;
+  sel[qi]=oi;
+  for(let j=0;j<4;j++){
+    const b=document.getElementById('o'+qi+'_'+j);
+    b.className='opt'+(j===oi?' picked-right':'');
+    b.querySelector('.badge').style.background=j===oi?'#D4537E':'';
+    b.querySelector('.badge').style.color=j===oi?'#fff':'';
+  }
+  updateProg();
+  document.getElementById('subBtn').disabled=sel.some(function(s){return s===null;});
+}
+
+function updateProg(){
+  const n=sel.filter(function(s){return s!==null;}).length;
+  document.getElementById('progFill').style.width=(n/QS.length*100)+'%';
+  document.getElementById('progCount').textContent=n+' / '+QS.length;
+  document.getElementById('progText').textContent=n===0?'还没开始哦，加油！':n<QS.length?'已完成 '+n+' 题，继续！':'全部完成，可以交啦！';
+  var stars='⭐'.repeat(n)+'☆'.repeat(QS.length-n);
+  document.getElementById('starRow').textContent=stars;
+}
+
+function submitAll(){
+  done=true;
+  var score=0;
+  res=[];
+  QS.forEach(function(q,i){
+    var u=sel[i];
+    var ok=u===q.ans;
+    if(ok) score++;
+    res.push({q:q.q,userAns:q.opts[u],correctAns:q.opts[q.ans],ok:ok});
+    var card=document.getElementById('card'+i);
+    card.className='q-card bounce '+(ok?'state-correct':'state-wrong');
+    for(var j=0;j<4;j++){
+      var b=document.getElementById('o'+i+'_'+j);
+      b.disabled=true;
+      b.className='opt';
+      b.querySelector('.badge').style.background='';
+      b.querySelector('.badge').style.color='';
+      if(j===q.ans){b.className+=' show-ans';b.querySelector('.badge').style.background='#1D9E75';b.querySelector('.badge').style.color='#fff';}
+      else if(j===u&&!ok){b.className+=' picked-wrong';b.querySelector('.badge').style.background='#D85A30';b.querySelector('.badge').style.color='#fff';}
+    }
+    var fb=document.getElementById('fb'+i);
+    fb.className='feedback '+(ok?'fb-ok':'fb-no');
+    fb.innerHTML='<span>'+(ok?'🌟':'💡')+'</span>'+q.fb[u];
+  });
+  document.getElementById('subBtn').style.display='none';
+  showResult(score);
+}
+
+function showResult(s){
+  var trophy,msg,sub,stickers;
+  if(s===10){trophy='🥇';msg='太棒了！全部答对！';sub='你是安全用药小专家！';stickers='🌟🌟🌟🌟🌟';}
+  else if(s>=8){trophy='🏆';msg='非常好！';sub='你对安全用药了解得很好！';stickers='⭐⭐⭐⭐';}
+  else if(s>=6){trophy='🎉';msg='做得不错！';sub='继续努力，你会更好的！';stickers='👍👍👍';}
+  else if(s>=4){trophy='💪';msg='加油！';sub='再复习一下课本第68-70页吧！';stickers='💪💪';}
+  else{trophy='📚';msg='需要多练习';sub='请老师帮你再讲解一次吧！';stickers='📚';}
+  document.getElementById('rTrophy').textContent=trophy;
+  document.getElementById('rScore').textContent=s+'/10';
+  document.getElementById('rMsg').textContent=msg;
+  document.getElementById('rSub').textContent=sub;
+  var sr=document.getElementById('stickerRow');
+  sr.innerHTML='';
+  Array.from(stickers).forEach(function(c,i){
+    var d=document.createElement('span');
+    d.textContent=c;
+    d.className='sticker';
+    d.style.animationDelay=(i*0.1)+'s';
+    sr.appendChild(d);
+  });
+  document.getElementById('resultBox').classList.remove('hidden');
+  document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function resetAll(){
+  done=false;sel=new Array(QS.length).fill(null);res=[];
+  document.getElementById('subBtn').style.display='';
+  document.getElementById('subBtn').disabled=true;
+  document.getElementById('resultBox').classList.add('hidden');
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function dlExcel(){
+  var name=document.getElementById('sName').value.trim()||'未填名字';
+  var now=new Date();
+  var ds=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  var score=res.filter(function(r){return r.ok;}).length;
+  var rows=[['名字','日期','总分','题目','你的答案','正确答案','对/错']];
+  res.forEach(function(r,i){rows.push([name,ds,score+'/10',(i+1)+'. '+r.q,r.userAns,r.correctAns,r.ok?'✓':'✗']);});
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='药怎样用_'+name+'_'+ds+'.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+
+render();
+</script>
+</body>
+</html>
