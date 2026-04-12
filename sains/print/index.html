@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生物的基本需求 - 纸质练习</title>
+    <!-- 引入 Tailwind CSS 进行排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A4 纸张的基础设置 */
+        body {
+            background-color: #f3f4f6;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            padding: 20mm;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        
+        /* 避免题目被切断断页 */
+        .question-block {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* 打印专用样式 */
+        @media print {
+            body {
+                background-color: white;
+            }
+            .a4-page {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 10mm; /* 打印时稍微调整内边距 */
+                box-shadow: none;
+                border-radius: 0;
+            }
+            /* 隐藏不需要打印的元素（如打印按钮） */
+            .no-print {
+                display: none !important;
+            }
+            /* 确保背景颜色能打印出来（某些浏览器需要） */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        /* 选项前面的圆形单选框样式 */
+        .option-circle {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #4b5563;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部操作栏（打印时不显示） -->
+    <div class="text-center py-4 no-print bg-blue-100 mb-4 sticky top-0 shadow-md z-50">
+        <h2 class="text-xl font-bold text-blue-800 mb-2">老师，您的 A4 练习卷已经准备好了！</h2>
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full shadow-lg text-lg transition transform hover:scale-105">
+            🖨️ 点击这里直接打印 / 保存为 PDF
+        </button>
+    </div>
+
+    <!-- A4 页面容器 -->
+    <div class="a4-page">
+        <!-- 试卷标头 -->
+        <div class="text-center mb-8 border-b-2 border-gray-800 pb-6">
+            <div class="text-5xl mb-2">🦆</div>
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-wider">科学练习：生物的基本需求</h1>
+            <p class="text-lg text-gray-600 mt-2">一年级科学第三单元</p>
+            
+            <div class="flex justify-between items-center mt-8 px-4 text-lg font-bold text-gray-800 flex-wrap">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="whitespace-nowrap">姓名：</span>
+                    <div class="border-b-2 border-gray-800 w-32 md:w-40"></div>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="whitespace-nowrap">班级：</span>
+                    <div class="border-b-2 border-gray-800 w-20 md:w-24"></div>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="whitespace-nowrap">日期：</span>
+                    <div class="border-b-2 border-gray-800 w-24 md:w-32"></div>
+                </div>
+                <div class="flex items-center gap-2 mb-2 text-red-600">
+                    <span class="whitespace-nowrap">分数：</span>
+                    <div class="border-b-2 border-red-600 w-20 md:w-24 text-center">/ 100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 答题指示 -->
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6">
+            <p class="text-lg font-bold text-blue-800">
+                ✏️ 指示：请仔细阅读题目，并在正确的答案前面的圆圈里打勾 (✓) 或涂黑。
+            </p>
+        </div>
+
+        <!-- 题目列表 -->
+        <div class="space-y-8">
+            
+            <!-- 第 1 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    1. 小鸭子肚子咕咕叫了，它需要寻找什么基本需求？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 水 💧</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 食物 🍔</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 玩具 🧸</div>
+                </div>
+            </div>
+
+            <!-- 第 2 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    2. 小鸭子跑得很累，口非常渴，它需要什么？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 空气 💨</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 电视 📺</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 水 💧</div>
+                </div>
+            </div>
+
+            <!-- 第 3 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    3. 如果把小动物关在一个完全没有缝隙的盒子里，它会缺乏什么而无法呼吸？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 食物 🌽</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 空气 💨</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 阳光 ☀️</div>
+                </div>
+            </div>
+
+            <!-- 第 4 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    4. 刮大风下大雨了！小鸭子需要躲在哪里才安全？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 庇护所 (屋子) 🏠</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 大马路 🛣️</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 游乐场 🎢</div>
+                </div>
+            </div>
+
+            <!-- 第 5 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    5. 如果人类和动物没有了食物、水、空气和庇护所，会发生什么事？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 会变得更强壮 💪</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 会无法生存 (死亡) 🥀</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 会长出翅膀 🕊️</div>
+                </div>
+            </div>
+
+            <!-- 第 6 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    6. 小猫越来越瘦，走起路来一点力气都没有。它需要什么才能快高长大、变得强壮呢？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 新玩具 🧸</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 食物 🐟</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 漂亮的衣服 👕</div>
+                </div>
+            </div>
+
+            <!-- 第 7 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    7. 天气非常热，太阳像火炉一样！草地上的小羊热得受不了，它需要寻找什么来遮挡猛烈的阳光？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 庇护所 (大树下) 🌳</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 更多的阳光 ☀️</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 干枯的泥土 🪨</div>
+                </div>
+            </div>
+
+            <!-- 第 8 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    8. 如果不小心把小鱼捞出来放在干干的桌子上，小鱼会不停地张大嘴巴，因为它缺乏了什么？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 水里溶解的空气 🫧</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 好朋友 🐠</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 庇护所 🏠</div>
+                </div>
+            </div>
+
+            <!-- 第 9 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    9. 如果森林里连续几个月都没有下雨，小河里的水都干了，小动物们会怎样？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 它们会非常开心 🥳</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 会因为缺水而渴死 🥀</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 它们会直接去睡觉 😴</div>
+                </div>
+            </div>
+
+            <!-- 第 10 题 -->
+            <div class="question-block bg-white">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 leading-relaxed">
+                    10. 为什么所有的动物每天都要吃东西、喝水、呼吸，还要找地方睡觉？
+                </h3>
+                <div class="flex flex-col space-y-3 pl-6 text-lg text-gray-800">
+                    <div class="flex items-center"><span class="option-circle"></span> A. 因为它们觉得很好玩 🎮</div>
+                    <div class="flex items-center"><span class="option-circle"></span> B. 因为它们想变得漂亮 ✨</div>
+                    <div class="flex items-center"><span class="option-circle"></span> C. 因为为了维持生命 (生存) ❤️</div>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- 底部标语 -->
+        <div class="mt-12 text-center text-gray-400 font-bold text-sm border-t border-gray-200 pt-4">
+            恭喜你完成练习！大自然里的小动物都需要我们的爱护哦 🦉🌳
+        </div>
+    </div>
+
+</body>
+</html>
