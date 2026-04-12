@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生物的基本需求 - 科学互动练习</title>
+    <!-- 引入 Tailwind CSS 进行美化 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 React 核心库 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Babel 以便在浏览器中直接编译 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ==========================================
+        // 题目数据配置 (共10题)
+        // ==========================================
+        const questions = [
+            {
+                id: 1,
+                question: "小鸭子肚子咕咕叫了，它需要寻找什么基本需求？",
+                options: [
+                    { id: 'A', text: '水', icon: '💧' },
+                    { id: 'B', text: '食物', icon: '🍔' },
+                    { id: 'C', text: '玩具', icon: '🧸' },
+                ],
+                correctAnswer: 'B',
+                hint: "提示：肚子饿的时候，我们需要吃东西哦！",
+            },
+            {
+                id: 2,
+                question: "小鸭子跑得很累，口非常渴，它需要什么？",
+                options: [
+                    { id: 'A', text: '空气', icon: '💨' },
+                    { id: 'B', text: '电视', icon: '📺' },
+                    { id: 'C', text: '水', icon: '💧' },
+                ],
+                correctAnswer: 'C',
+                hint: "提示：口渴的时候，我们需要喝什么来解渴呢？",
+            },
+            {
+                id: 3,
+                question: "如果把小动物关在一个完全没有缝隙的盒子里，它会缺乏什么而无法呼吸？",
+                options: [
+                    { id: 'A', text: '食物', icon: '🌽' },
+                    { id: 'B', text: '空气', icon: '💨' },
+                    { id: 'C', text: '阳光', icon: '☀️' },
+                ],
+                correctAnswer: 'B',
+                hint: "提示：我们每时每刻都在用鼻子吸入什么呢？",
+            },
+            {
+                id: 4,
+                question: "刮大风下大雨了！小鸭子需要躲在哪里才安全？",
+                options: [
+                    { id: 'A', text: '庇护所 (屋子)', icon: '🏠' },
+                    { id: 'B', text: '大马路', icon: '🛣️' },
+                    { id: 'C', text: '游乐场', icon: '🎢' },
+                ],
+                correctAnswer: 'A',
+                hint: "提示：下雨时，我们需要一个可以遮风挡雨的安全地方。",
+            },
+            {
+                id: 5,
+                question: "如果人类和动物没有了食物、水、空气和庇护所，会发生什么事？",
+                options: [
+                    { id: 'A', text: '会变得更强壮', icon: '💪' },
+                    { id: 'B', text: '会无法生存 (死亡)', icon: '🥀' },
+                    { id: 'C', text: '会长出翅膀', icon: '🕊️' },
+                ],
+                correctAnswer: 'B',
+                hint: "提示：基本需求是维持生命非常重要的东西，如果没有了它们，生命就无法继续。",
+            },
+            {
+                id: 6,
+                question: "小猫越来越瘦，走起路来一点力气都没有。它需要什么才能快高长大、变得强壮呢？",
+                options: [
+                    { id: 'A', text: '新玩具', icon: '🧸' },
+                    { id: 'B', text: '食物', icon: '🐟' },
+                    { id: 'C', text: '漂亮的衣服', icon: '👕' },
+                ],
+                correctAnswer: 'B',
+                hint: "提示：就像小朋友一样，小动物也需要吃东西才能获取营养和能量哦！",
+            },
+            {
+                id: 7,
+                question: "天气非常热，太阳像火炉一样！草地上的小羊热得受不了，它需要寻找什么来遮挡猛烈的阳光？",
+                options: [
+                    { id: 'A', text: '庇护所 (大树下)', icon: '🌳' },
+                    { id: 'B', text: '更多的阳光', icon: '☀️' },
+                    { id: 'C', text: '干枯的泥土', icon: '🪨' },
+                ],
+                correctAnswer: 'A',
+                hint: "提示：庇护所不仅能挡风遮雨，还能帮动物们躲避猛烈的阳光和危险。",
+            },
+            {
+                id: 8,
+                question: "如果不小心把小鱼捞出来放在干干的桌子上，小鱼会不停地张大嘴巴，因为它缺乏了什么？",
+                options: [
+                    { id: 'A', text: '水里溶解的空气', icon: '🫧' },
+                    { id: 'B', text: '好朋友', icon: '🐠' },
+                    { id: 'C', text: '庇护所', icon: '🏠' },
+                ],
+                correctAnswer: 'A',
+                hint: "提示：小鱼也需要呼吸，它们是用鳃在水里呼吸空气的。离开水它们就无法呼吸了。",
+            },
+            {
+                id: 9,
+                question: "如果森林里连续几个月都没有下雨，小河里的水都干了，小动物们会怎样？",
+                options: [
+                    { id: 'A', text: '它们会非常开心', icon: '🥳' },
+                    { id: 'B', text: '会因为缺水而渴死', icon: '🥀' },
+                    { id: 'C', text: '它们会直接去睡觉', icon: '😴' },
+                ],
+                correctAnswer: 'B',
+                hint: "提示：水是所有生物生存不可缺少的基本需求。没有水，生命就无法维持。",
+            },
+            {
+                id: 10,
+                question: "为什么所有的动物每天都要吃东西、喝水、呼吸，还要找地方睡觉？",
+                options: [
+                    { id: 'A', text: '因为它们觉得很好玩', icon: '🎮' },
+                    { id: 'B', text: '因为它们想变得漂亮', icon: '✨' },
+                    { id: 'C', text: '因为为了维持生命 (生存)', icon: '❤️' },
+                ],
+                correctAnswer: 'C',
+                hint: "提示：食物、水、空气和庇护所是让生物活下去的“法宝”，是生存必须的！",
+            }
+        ];
+
+        function BasicNeedsApp() {
+            // ==========================================
+            // 状态管理 (State Management)
+            // ==========================================
+            const [studentName, setStudentName] = useState('');
+            const [hasStarted, setHasStarted] = useState(false);
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [score, setScore] = useState(0);
+            const [showHint, setShowHint] = useState(false);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [feedbackStatus, setFeedbackStatus] = useState(null); // 'correct', 'incorrect', null
+            const [isCompleted, setIsCompleted] = useState(false);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [submitSuccess, setSubmitSuccess] = useState(false);
+            const [record, setRecord] = useState([]); // 记录每一题的作答情况
+
+            // 动画状态
+            const [duckPosition, setDuckPosition] = useState(0);
+
+            const currentQ = questions[currentQuestionIndex];
+
+            // ==========================================
+            // 交互逻辑
+            // ==========================================
+            const handleStart = () => {
+                if (studentName.trim() === '') {
+                    alert('请先输入你的名字哦！');
+                    return;
+                }
+                setHasStarted(true);
+            };
+
+            const handleOptionClick = (optionId) => {
+                if (feedbackStatus !== null) return; // 防止重复点击
+
+                setSelectedAnswer(optionId);
+                
+                const isCorrect = optionId === currentQ.correctAnswer;
+                
+                // 记录作答
+                const newRecord = [...record];
+                newRecord[currentQuestionIndex] = {
+                    question: currentQ.question,
+                    selected: optionId,
+                    isCorrect: isCorrect
+                };
+                setRecord(newRecord);
+
+                if (isCorrect) {
+                    setFeedbackStatus('correct');
+                    setScore(score + 1);
+                    setShowHint(false);
+                    // 数据驱动动画：答对一题，鸭子前进
+                    setDuckPosition((prev) => prev + (100 / questions.length));
+                    
+                    // 延迟后进入下一题
+                    setTimeout(() => {
+                        nextQuestion();
+                    }, 1500);
+                } else {
+                    setFeedbackStatus('incorrect');
+                    // 动态脚手架：答错时显示提示
+                    setTimeout(() => {
+                        setShowHint(true);
+                        setFeedbackStatus(null);
+                        setSelectedAnswer(null);
+                    }, 1200);
+                }
+            };
+
+            const nextQuestion = () => {
+                setFeedbackStatus(null);
+                setSelectedAnswer(null);
+                setShowHint(false);
+                
+                if (currentQuestionIndex < questions.length - 1) {
+                    setCurrentQuestionIndex(currentQuestionIndex + 1);
+                } else {
+                    setIsCompleted(true);
+                }
+            };
+
+            const handleRestart = () => {
+                setHasStarted(false);
+                setCurrentQuestionIndex(0);
+                setScore(0);
+                setDuckPosition(0);
+                setIsCompleted(false);
+                setSubmitSuccess(false);
+                setRecord([]);
+            };
+
+            // ==========================================
+            // App Script 提交逻辑
+            // ==========================================
+            const submitToGoogleSheet = async () => {
+                // ⚠️ 老师：请在这里替换成您的 Google App Script 部署 URL
+                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUBhrV29fl5Q_YD6tWbJSrddCtvzpKiP2k292ylH7s-hFVFQlE86HZYqCZeG2EQ8U5vw/exec';
+                
+                setIsSubmitting(true);
+                
+                const payload = {
+                    studentName: studentName,
+                    score: score,
+                    totalQuestions: questions.length,
+                    details: record,
+                    timestamp: new Date().toISOString()
+                };
+
+                try {
+                    if (SCRIPT_URL === 'YOUR_GOOGLE_APP_SCRIPT_WEB_APP_URL_HERE') {
+                        console.log("Mock submission:", payload);
+                        setTimeout(() => {
+                            setIsSubmitting(false);
+                            setSubmitSuccess(true);
+                        }, 1500);
+                        return;
+                    }
+
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    setIsSubmitting(false);
+                    setSubmitSuccess(true);
+                    
+                } catch (error) {
+                    console.error('Error submitting data:', error);
+                    setIsSubmitting(false);
+                    alert('提交失败，请告诉老师！');
+                }
+            };
+
+            // ==========================================
+            // UI 渲染
+            // ==========================================
+
+            // 1. 欢迎/登录页面
+            if (!hasStarted) {
+                return (
+                    <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-4 font-sans">
+                        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center border-4 border-blue-200">
+                            <div className="text-6xl mb-4 animate-bounce">🦆</div>
+                            <h1 className="text-3xl font-bold text-blue-600 mb-2">生物的基本需求</h1>
+                            <p className="text-gray-500 mb-8 text-lg">一年级科学第三单元</p>
+                            
+                            <div className="mb-6">
+                                <label className="block text-gray-700 font-bold mb-2 text-xl" htmlFor="studentName">
+                                    小朋友，你叫什么名字？
+                                </label>
+                                <input
+                                    id="studentName"
+                                    type="text"
+                                    value={studentName}
+                                    onChange={(e) => setStudentName(e.target.value)}
+                                    className="shadow appearance-none border-2 border-blue-300 rounded-2xl w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:border-blue-500 text-xl text-center"
+                                    placeholder="输入你的名字..."
+                                />
+                            </div>
+                            
+                            <button
+                                onClick={handleStart}
+                                className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition hover:scale-105 w-full text-2xl flex items-center justify-center gap-2"
+                            >
+                                开始游戏 ⭐
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 2. 完成页面
+            if (isCompleted) {
+                return (
+                    <div className="min-h-screen bg-green-50 flex flex-col items-center justify-center p-4 font-sans">
+                        <style>{`
+                            @keyframes confetti {
+                                0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+                                100% { transform: translateY(1000px) rotate(720deg); opacity: 0; }
+                            }
+                            .confetti-piece { position: absolute; animation: confetti 3s ease-in forwards; }
+                        `}</style>
+                        
+                        {/* 简单的彩带特效 */}
+                        {score === questions.length && [...Array(20)].map((_, i) => (
+                            <div key={i} className="confetti-piece text-4xl" style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `-50px`,
+                                animationDelay: `${Math.random() * 2}s`
+                            }}>
+                                {['🎉', '✨', '⭐', '🎈'][Math.floor(Math.random() * 4)]}
+                            </div>
+                        ))}
+
+                        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-lg w-full text-center border-4 border-green-300 z-10 relative">
+                            <div className="text-6xl mb-4">🏆</div>
+                            <h1 className="text-4xl font-bold text-green-600 mb-4">太棒了，{studentName}！</h1>
+                            <p className="text-2xl text-gray-700 mb-6">
+                                你答对了 <span className="text-4xl font-extrabold text-blue-500">{score}</span> / {questions.length} 题！
+                            </p>
+                            
+                            <div className="bg-blue-50 rounded-2xl p-6 mb-8 text-left">
+                                <h3 className="font-bold text-xl mb-2 text-blue-800">科学小总结：</h3>
+                                <p className="text-lg text-gray-700">
+                                    所有的生物（人类和动物）都需要 <strong>食物🍔</strong>、<strong>水💧</strong>、<strong>空气💨</strong> 和 <strong>庇护所🏠</strong> 才能生存哦！我们要爱护环境，保护小动物的家。
+                                </p>
+                            </div>
+
+                            {!submitSuccess ? (
+                                <button
+                                    onClick={submitToGoogleSheet}
+                                    disabled={isSubmitting}
+                                    className={`w-full text-white font-bold py-4 px-8 rounded-full shadow-lg transform transition text-2xl flex items-center justify-center gap-2 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 hover:scale-105'}`}
+                                >
+                                    {isSubmitting ? '发送中...' : '交作业给老师 📤'}
+                                </button>
+                            ) : (
+                                <div className="bg-green-100 border-2 border-green-400 text-green-700 px-4 py-4 rounded-2xl flex items-center justify-center gap-2 mb-4 text-xl font-bold">
+                                    ✅ 作业已成功交给老师！
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handleRestart}
+                                className="mt-6 text-gray-500 hover:text-gray-800 font-bold py-2 px-4 flex items-center justify-center gap-2 w-full text-lg"
+                            >
+                                🔄 再玩一次
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // 3. 答题页面
+            return (
+                <div className="min-h-screen bg-sky-50 flex flex-col items-center py-8 px-4 font-sans overflow-hidden">
+                    
+                    {/* 自定义动画样式 */}
+                    <style>{`
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            25% { transform: translateX(-10px); }
+                            75% { transform: translateX(10px); }
+                        }
+                        .shake-animation { animation: shake 0.4s ease-in-out; }
+                    `}</style>
+
+                    {/* 数据驱动动画：鸭子寻找庇护所进度条 */}
+                    <div className="w-full max-w-2xl bg-white rounded-full h-16 p-2 shadow-inner mb-8 relative flex items-center">
+                        <div className="absolute right-4 text-4xl z-10">🏠🍞</div>
+                        <div 
+                            className="absolute text-5xl z-20 transition-all duration-1000 ease-out"
+                            style={{ left: `calc(${duckPosition}% - 24px)` }}
+                        >
+                            🦆
+                        </div>
+                        <div 
+                            className="bg-blue-400 h-full rounded-full transition-all duration-1000 ease-out opacity-20"
+                            style={{ width: `${duckPosition}%` }}
+                        ></div>
+                    </div>
+
+                    <div className="max-w-2xl w-full">
+                        {/* 题号与分数 */}
+                        <div className="flex justify-between items-center mb-4 px-4">
+                            <span className="bg-blue-100 text-blue-800 text-lg font-bold px-4 py-2 rounded-full border-2 border-blue-200">
+                                第 {currentQuestionIndex + 1} / {questions.length} 题
+                            </span>
+                            <span className="bg-yellow-100 text-yellow-800 text-lg font-bold px-4 py-2 rounded-full flex items-center gap-1 border-2 border-yellow-200">
+                                ⭐ {score} 分
+                            </span>
+                        </div>
+
+                        {/* 题目卡片 */}
+                        <div className={`bg-white rounded-3xl shadow-xl p-8 mb-6 border-4 border-white ${feedbackStatus === 'incorrect' ? 'shake-animation border-red-300' : ''} ${feedbackStatus === 'correct' ? 'border-green-400 scale-105 transition-transform' : ''}`}>
+                            
+                            <h2 className="text-3xl font-bold text-gray-800 mb-8 leading-relaxed text-center">
+                                {currentQ.question}
+                            </h2>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {currentQ.options.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => handleOptionClick(option.id)}
+                                        disabled={feedbackStatus !== null}
+                                        className={`
+                                            relative flex flex-col items-center justify-center p-6 rounded-2xl border-4 transition-all
+                                            ${selectedAnswer === option.id 
+                                                    ? (feedbackStatus === 'correct' ? 'bg-green-100 border-green-500' : 'bg-red-100 border-red-500')
+                                                    : 'bg-gray-50 border-gray-200 hover:bg-blue-50 hover:border-blue-300'
+                                            }
+                                            ${feedbackStatus !== null ? 'cursor-default' : 'cursor-pointer hover:-translate-y-1 hover:shadow-lg'}
+                                        `}
+                                    >
+                                        <span className="text-6xl mb-4">{option.icon}</span>
+                                        <span className="text-xl font-bold text-gray-700 text-center">{option.text}</span>
+                                        
+                                        {/* 选项结果图标反馈 */}
+                                        {selectedAnswer === option.id && feedbackStatus === 'correct' && (
+                                            <div className="absolute -top-4 -right-4 bg-green-500 rounded-full w-10 h-10 flex items-center justify-center text-white shadow-lg animate-bounce text-2xl">
+                                                ✅
+                                            </div>
+                                        )}
+                                        {selectedAnswer === option.id && feedbackStatus === 'incorrect' && (
+                                            <div className="absolute -top-4 -right-4 bg-red-500 rounded-full w-10 h-10 flex items-center justify-center text-white shadow-lg text-2xl">
+                                                ❌
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* 正确/错误 大字反馈 */}
+                            {feedbackStatus === 'correct' && (
+                                <div className="mt-6 text-center text-3xl font-bold text-green-500 animate-pulse">
+                                    🎉 答对啦！太棒了！ 🎉
+                                </div>
+                            )}
+                            {feedbackStatus === 'incorrect' && (
+                                <div className="mt-6 text-center text-2xl font-bold text-red-500">
+                                    哎呀，再想想看！
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 动态脚手架 (Dynamic Scaffolding) - 答错后显示的猫头鹰提示 */}
+                        {showHint && (
+                            <div className="bg-yellow-50 border-4 border-yellow-300 rounded-3xl p-6 flex items-start gap-4 shadow-lg animate-fade-in-up">
+                                <div className="text-5xl animate-bounce">🦉</div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-yellow-800 mb-2 flex items-center gap-2">
+                                        💡 猫头鹰老师的提示
+                                    </h3>
+                                    <p className="text-lg text-gray-700 font-medium leading-relaxed">
+                                        {currentQ.hint}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            );
+        }
+
+        // 渲染 React 应用
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BasicNeedsApp />);
+    </script>
+</body>
+</html>
