@@ -390,7 +390,7 @@
 
         <!-- Feedback & Results Modal (Hidden by default) -->
         <div id="resultSection" class="hidden mt-10 p-8 bg-green-50 border-4 border-green-400 rounded-3xl text-center shadow-inner relative">
-            <h2 class="text-3xl font-bold text-green-700 mb-4 font-['ZCOOL_KuaiLe']">🎉 太棒了，完成挑战！ 🎉</h2>
+            <h2 class="text-3xl font-bold text-green-700 mb-4 font-['ZCOOL_KuaiLe']">🎉 数据上传成功！ 🎉</h2>
             
             <!-- Data Driven Animation for Score -->
             <div class="relative w-40 h-40 mx-auto mb-4">
@@ -404,16 +404,22 @@
                 </div>
             </div>
 
-            <p class="text-lg text-gray-700 mb-6" id="feedbackMessage">C项的思维题已记录，老师会给你手写点评哦！✍️</p>
+            <p class="text-lg text-gray-700 mb-6" id="feedbackMessage">你的成绩已经记录在老师的表格里了哦！<br>C项的思维题老师会给你点评！✍️</p>
             
-            <button onclick="downloadExcel()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow transition flex items-center justify-center mx-auto gap-2">
-                📊 下载成绩记录 (Excel/CSV)
+            <button onclick="downloadExcel()" class="bg-white text-blue-500 border-2 border-blue-500 hover:bg-blue-50 font-bold py-2 px-6 rounded-full shadow transition flex items-center justify-center mx-auto gap-2">
+                ⬇️ 下载备份成绩 (CSV)
             </button>
         </div>
 
     </div>
 
     <script>
+        // ==========================================
+        //  老师设置区：请在这里粘贴你的 Web App URL
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEbCwFRh762J7f1ILU9VtaiaQxF2OP0fz1OObg_atw9nMNs0Sf5rk5wdgYM4WBTld-/exec"; 
+        // 例如: "https://script.google.com/macros/s/AKfycb.../exec"
+        
         // Set today's date automatically
         document.getElementById('studentDate').valueAsDate = new Date();
 
@@ -432,65 +438,50 @@
             sparkle.innerHTML = randomEmoji;
             sparkle.className = 'sparkle-effect';
             
-            // 随机偏移一点位置，让星光更自然
             const offsetX = (Math.random() - 0.5) * 20;
             sparkle.style.left = (x + offsetX - 15) + 'px';
             sparkle.style.top = (y - 15) + 'px';
             
             document.body.appendChild(sparkle);
             
-            // 动画结束后移除元素
-            setTimeout(() => {
-                sparkle.remove();
-            }, 800);
+            setTimeout(() => { sparkle.remove(); }, 800);
         }
 
-        // 监听 Radio 按钮点击
         document.querySelectorAll('.interactive-radio').forEach(radio => {
-            radio.addEventListener('click', (e) => {
-                // 在鼠标点击位置生成星光
-                createSparkle(e.pageX, e.pageY);
-            });
+            radio.addEventListener('click', (e) => { createSparkle(e.pageX, e.pageY); });
         });
 
-        // 监听下拉菜单改变
         document.querySelectorAll('.interactive-select').forEach(select => {
             select.addEventListener('change', (e) => {
-                // 获取下拉菜单的位置并在附近生成星光
                 const rect = e.target.getBoundingClientRect();
                 const x = rect.left + rect.width / 2 + window.scrollX;
                 const y = rect.top + window.scrollY;
                 createSparkle(x, y);
             });
         });
-        // ------------------------------------------------
 
         // Grading Logic and Visual Feedback
         const answers = {
-            qA1: '泄气',
-            qA2: '蓬勃',
-            qA3: '心力交瘁',
-            qB1: '循声望去',
-            qB2: '愈愈',
-            qB3: '虽然但是',
-            qB4: '蓬勃',
-            qB5: '寻声觅迹',
-            qB6: '心力交瘁',
-            qB7: '脱俗',
-            qB8: '泄气',
-            qB9: '既又',
-            qB10: '互惠互利'
+            qA1: '泄气', qA2: '蓬勃', qA3: '心力交瘁',
+            qB1: '循声望去', qB2: '愈愈', qB3: '虽然但是', qB4: '蓬勃', qB5: '寻声觅迹',
+            qB6: '心力交瘁', qB7: '脱俗', qB8: '泄气', qB9: '既又', qB10: '互惠互利'
         };
 
-        let studentData = {}; // To store data for excel export
+        let studentData = {};
 
         function submitForm(event) {
-            event.preventDefault(); // Prevent page reload
+            event.preventDefault(); 
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // UI 状态变为正在加载
+            submitBtn.innerHTML = "⏳ 正在提交成绩到云端...";
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            submitBtn.classList.remove('hover:scale-105');
+            submitBtn.disabled = true;
 
             let correctCount = 0;
-            const totalQuestions = 13; // 3 in Part A + 10 in Part B
+            const totalQuestions = 13;
 
-            // Helper to check answer and show visual feedback
             const checkAnswer = (inputId, iconId, isRadio = false) => {
                 let userVal;
                 if(isRadio) {
@@ -513,51 +504,72 @@
                 }
             };
 
-            // Grade Part A (3 questions)
-            checkAnswer('qA1', 'iconA1');
-            checkAnswer('qA2', 'iconA2');
-            checkAnswer('qA3', 'iconA3');
-
-            // Grade Part B (10 questions)
-            for (let i = 1; i <= 10; i++) {
-                checkAnswer(`qB${i}`, `iconB${i}`, true);
-            }
+            // Grade Part A & B
+            checkAnswer('qA1', 'iconA1'); checkAnswer('qA2', 'iconA2'); checkAnswer('qA3', 'iconA3');
+            for (let i = 1; i <= 10; i++) { checkAnswer(`qB${i}`, `iconB${i}`, true); }
 
             // Collect student details
             studentData.name = document.getElementById('studentName').value;
             studentData.class = document.getElementById('studentClass').value;
             studentData.date = document.getElementById('studentDate').value;
-            studentData.c1 = document.getElementById('qC1').value.replace(/\n/g, " "); // remove newlines for csv
-            studentData.c2 = document.getElementById('qC2').value.replace(/\n/g, " ");
+            studentData.c1 = document.getElementById('qC1').value; 
+            studentData.c2 = document.getElementById('qC2').value;
             
-            // Calculate Score
             const percentage = Math.round((correctCount / totalQuestions) * 100);
             studentData.score = percentage + "%";
 
-            // Show Results Section
-            document.getElementById('resultSection').classList.remove('hidden');
-            document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('submitBtn').innerText = "已提交 ✓";
-            document.getElementById('submitBtn').disabled = true;
+            // ----------------------------------------------------
+            // 构建发送到 Google Apps Script 的数据表单
+            // ----------------------------------------------------
+            const formData = new FormData();
+            formData.append("姓名", studentData.name);
+            formData.append("班级", studentData.class);
+            formData.append("客观题得分", studentData.score);
+            formData.append("A1", studentData.qA1);
+            formData.append("A2", studentData.qA2);
+            formData.append("A3", studentData.qA3);
+            for (let i = 1; i <= 10; i++) { formData.append(`B${i}`, studentData[`qB${i}`]); }
+            formData.append("C1造句", studentData.c1);
+            formData.append("C2思维题", studentData.c2);
 
-            // --- 提交后的反馈语调整 & 撒花特效 ---
+            // 发送网络请求
+            fetch(GOOGLE_SCRIPT_URL, { 
+                method: 'POST', 
+                body: formData,
+                mode: 'no-cors' // 必须使用 no-cors 避免跨域拦截
+            })
+            .then(() => {
+                // 成功反馈
+                submitBtn.innerHTML = "已提交 ✓";
+                showSuccessUI(percentage);
+            })
+            .catch(error => {
+                alert("提交失败，请检查网络连接或老师的URL设置是否正确。");
+                submitBtn.innerHTML = "🚀 重新提交";
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                submitBtn.classList.add('hover:scale-105');
+                submitBtn.disabled = false;
+            });
+        }
+
+        function showSuccessUI(percentage) {
+            document.getElementById('resultSection').classList.remove('hidden');
+
             const feedbackMsg = document.getElementById('feedbackMessage');
             if(percentage >= 80) {
-                feedbackMsg.innerHTML = "太棒了！你像牵牛花一样充满朝气！⭐<br>C项的思维题老师会给你手写点评哦！✍️";
-                // 触发撒花特效！
+                feedbackMsg.innerHTML = "太棒了！你像牵牛花一样充满朝气！⭐<br>成绩已记录，C项思维题老师会点评哦！";
                 fireConfetti();
             } else if (percentage >= 50) {
-                feedbackMsg.innerHTML = "不错哦！继续向牵牛花学习攀爬精神吧！🌱<br>C项的思维题老师会给你手写点评哦！✍️";
+                feedbackMsg.innerHTML = "不错哦！继续向牵牛花学习攀爬精神吧！🌱<br>成绩已记录，C项思维题老师会点评哦！";
             } else {
-                feedbackMsg.innerHTML = "别泄气！再接再厉，你会越来越棒的！💪<br>C项的思维题老师会给你手写点评哦！✍️";
+                feedbackMsg.innerHTML = "别泄气！再接再厉，你会越来越棒的！💪<br>成绩已记录，C项思维题老师会点评哦！";
             }
 
-            // Animate Score Circle (Data-driven animation)
+            // Animate Score Circle
             setTimeout(() => {
                 const scoreCircle = document.getElementById('scoreCircle');
                 scoreCircle.setAttribute('stroke-dasharray', `${percentage}, 100`);
                 
-                // Count up animation for text
                 let current = 0;
                 const interval = setInterval(() => {
                     if (current >= percentage) {
@@ -570,40 +582,26 @@
                 }, 15);
             }, 300);
             
-            // Scroll to results
             document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 特别效果：全屏撒花函数 (Confetti) ---
         function fireConfetti() {
             var duration = 3 * 1000;
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-            function randomInRange(min, max) {
-              return Math.random() * (max - min) + min;
-            }
-
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
             var interval = setInterval(function() {
               var timeLeft = animationEnd - Date.now();
-
-              if (timeLeft <= 0) {
-                return clearInterval(interval);
-              }
-
+              if (timeLeft <= 0) { return clearInterval(interval); }
               var particleCount = 50 * (timeLeft / duration);
-              // 从两个源头喷射五彩纸屑
               confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
               confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
         }
 
-        // Export to Excel (CSV)
+        // 保留原有的本地下载作为备用方案
         function downloadExcel() {
-            // Include BOM for UTF-8 Chinese characters support in Excel
             const bom = "\uFEFF"; 
-            
-            // Define Headers (Updated for 10 B-section questions)
             const headers = [
                 "姓名", "班级", "日期", "客观题总得分", 
                 "A1", "A2", "A3", 
@@ -611,40 +609,22 @@
                 "C1造句", "C2思维题解答"
             ];
             
-            // Map data to row
             const row = [
-                studentData.name,
-                studentData.class,
-                studentData.date,
-                studentData.score,
-                studentData.qA1,
-                studentData.qA2,
-                studentData.qA3,
-                studentData.qB1,
-                studentData.qB2,
-                studentData.qB3,
-                studentData.qB4,
-                studentData.qB5,
-                studentData.qB6,
-                studentData.qB7,
-                studentData.qB8,
-                studentData.qB9,
-                studentData.qB10,
-                `"${studentData.c1}"`, // Wrap in quotes to handle commas in text
-                `"${studentData.c2}"`
+                studentData.name, studentData.class, studentData.date, studentData.score,
+                studentData.qA1, studentData.qA2, studentData.qA3,
+                studentData.qB1, studentData.qB2, studentData.qB3, studentData.qB4, studentData.qB5, 
+                studentData.qB6, studentData.qB7, studentData.qB8, studentData.qB9, studentData.qB10,
+                `"${studentData.c1.replace(/\n/g, " ")}"`, 
+                `"${studentData.c2.replace(/\n/g, " ")}"`
             ];
 
             const csvContent = bom + headers.join(",") + "\n" + row.join(",");
-
-            // Create Blob and Download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            
             const link = document.createElement("a");
             link.setAttribute("href", url);
             link.setAttribute("download", `华文作业成绩_${studentData.class}_${studentData.name}.csv`);
             document.body.appendChild(link);
-            
             link.click();
             document.body.removeChild(link);
         }
