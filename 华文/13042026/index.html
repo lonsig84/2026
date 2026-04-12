@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互动式作业单：向牵牛花学习</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Confetti 撒花特效库 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        /* 放大全局的基础字体大小，让所有元素和文字等比例变大 */
+        html {
+            font-size: 18px; /* 手机端基础字体变大 */
+        }
+        @media (min-width: 768px) {
+            html {
+                font-size: 22px; /* 平板和电脑端基础字体进一步放大 */
+            }
+        }
+
+        body {
+            font-family: 'Nunito', 'ZCOOL KuaiLe', sans-serif;
+            background-color: #f0fdf4; /* Light green pastel background */
+            background-image: radial-gradient(#bbf7d0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 2px solid #bbf7d0;
+        }
+        .cute-input {
+            border: 2px solid #d8b4fe;
+            border-radius: 1rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .cute-input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+            transform: scale(1.02);
+        }
+        /* Dynamic Scaffolding Hint Style */
+        .hint-box {
+            display: none;
+            background-color: #fef08a;
+            color: #854d0e;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 1rem; /* 提示框字体变大 */
+            margin-top: 0.5rem;
+            animation: fadeIn 0.5s;
+            line-height: 1.6;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .feedback-icon {
+            display: none;
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+            animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        /* 作答时的魔法星光上浮特效 */
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            50% { transform: translateY(-25px) scale(1.5); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1); opacity: 0; }
+        }
+        .sparkle-effect {
+            position: absolute;
+            font-size: 2rem; /* 星光特效也等比例放大 */
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        /* 选项点击时的 Q弹特效 */
+        .option-label {
+            transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .option-label:active {
+            transform: scale(0.95);
+        }
+        /* Score Animation */
+        .score-display {
+            transition: all 1.5s ease-out;
+        }
+    </style>
+</head>
+<body class="text-gray-700 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto glass-panel p-6 md:p-10 relative overflow-hidden">
+        <!-- Decorative Elements -->
+        <div class="absolute top-[-20px] right-[-20px] text-6xl opacity-20">🌸</div>
+        <div class="absolute bottom-[100px] left-[-20px] text-6xl opacity-20">🌱</div>
+        
+        <!-- Header Section -->
+        <div class="text-center mb-8 border-b-4 border-green-200 pb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-green-600 mb-2 font-['ZCOOL_KuaiLe']">
+                🌸 语文游乐园：向牵牛花学习 🌸
+            </h1>
+            <p class="text-gray-500 font-bold mb-4">[作业单开始]</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left bg-purple-50 p-4 rounded-xl border-2 border-purple-100">
+                <div>
+                    <label class="block text-sm font-bold text-purple-600">姓名 (Nama):</label>
+                    <input type="text" id="studentName" class="cute-input w-full mt-1" placeholder="输入你的名字..." required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-purple-600">班级 (Kelas):</label>
+                    <select id="studentClass" class="cute-input w-full mt-1">
+                        <option value="5A">5A</option>
+                        <option value="5B">5B</option>
+                        <option value="5C">5C</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-purple-600">日期 (Tarikh):</label>
+                    <input type="date" id="studentDate" class="cute-input w-full mt-1">
+                </div>
+            </div>
+            
+            <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+                <span class="bg-green-100 px-3 py-1 rounded-full border border-green-300"><b>科目:</b> 华文</span>
+                <span class="bg-blue-100 px-3 py-1 rounded-full border border-blue-300"><b>课题:</b> 单元二 (7.1 向牵牛花学习)</span>
+                <span class="bg-yellow-100 px-3 py-1 rounded-full border border-yellow-300"><b>学习标准:</b> 5.3.1</span>
+            </div>
+        </div>
+
+        <form id="worksheetForm" onsubmit="submitForm(event)">
+            
+            <!-- PART A -->
+            <div class="mb-10 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="absolute top-[-15px] left-5 bg-blue-500 text-white px-4 py-1 rounded-full font-bold shadow-md">
+                    A 项：魔法词语填空 (基础题) 🌟
+                </div>
+                <p class="text-gray-600 font-semibold mb-4 mt-2">指示：请从选项中选择最适合的词语，填入句子中。</p>
+                
+                <!-- Dynamic Scaffolding Toggle -->
+                <button type="button" onclick="toggleHint('hintA')" class="mb-4 text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-800 py-1 px-3 rounded-full transition cursor-pointer">
+                    💡 需要小提示吗？点击这里！
+                </button>
+                <div id="hintA" class="hint-box mb-4">
+                    <b>词语小锦囊：</b><br>
+                    • 心力交瘁：精神和体力都极度疲劳。<br>
+                    • 蓬勃：繁荣，旺盛。<br>
+                    • 泄气：失去信心和勇气。<br>
+                    • 脱俗：不沾染俗气，清雅。
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex items-center flex-wrap gap-2">
+                        <span class="font-bold text-lg text-blue-500">1.</span>
+                        <span>遇到困难时，牵牛花从不轻易</span>
+                        <select id="qA1" class="cute-input w-32 bg-gray-50 interactive-select" required>
+                            <option value="">- 请选择 -</option>
+                            <option value="心力交瘁">心力交瘁</option>
+                            <option value="蓬勃">蓬勃</option>
+                            <option value="泄气">泄气</option>
+                            <option value="脱俗">脱俗</option>
+                        </select>
+                        <span>，而是努力向上攀爬。</span>
+                        <span id="iconA1" class="feedback-icon"></span>
+                    </div>
+
+                    <div class="flex items-center flex-wrap gap-2">
+                        <span class="font-bold text-lg text-blue-500">2.</span>
+                        <span>春天到了，公园里的花草树木都显得生机</span>
+                        <select id="qA2" class="cute-input w-32 bg-gray-50 interactive-select" required>
+                            <option value="">- 请选择 -</option>
+                            <option value="心力交瘁">心力交瘁</option>
+                            <option value="蓬勃">蓬勃</option>
+                            <option value="泄气">泄气</option>
+                            <option value="脱俗">脱俗</option>
+                        </select>
+                        <span>，非常漂亮。</span>
+                        <span id="iconA2" class="feedback-icon"></span>
+                    </div>
+
+                    <div class="flex items-center flex-wrap gap-2">
+                        <span class="font-bold text-lg text-blue-500">3.</span>
+                        <span>经过几天几夜不眠不休的抢险救援，消防员们已经</span>
+                        <select id="qA3" class="cute-input w-32 bg-gray-50 interactive-select" required>
+                            <option value="">- 请选择 -</option>
+                            <option value="心力交瘁">心力交瘁</option>
+                            <option value="蓬勃">蓬勃</option>
+                            <option value="泄气">泄气</option>
+                            <option value="脱俗">脱俗</option>
+                        </select>
+                        <span>了。</span>
+                        <span id="iconA3" class="feedback-icon"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PART B -->
+            <div class="mb-10 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="absolute top-[-15px] left-5 bg-orange-500 text-white px-4 py-1 rounded-full font-bold shadow-md">
+                    B 项：火眼金睛辨词语 (应用题 - 10题) 🔍
+                </div>
+                <p class="text-gray-600 font-semibold mb-4 mt-2">指示：根据句子的情况，选择最准确的词语或关联词。</p>
+
+                <div class="space-y-4">
+                    <!-- Q1 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">1. 听到草丛里传来奇怪的求救声，小明赶紧（&nbsp;&nbsp;&nbsp;&nbsp;），想看看到底是谁在求救。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB1" value="寻声觅迹" class="w-4 h-4 text-orange-500 interactive-radio" required> 寻声觅迹
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB1" value="循声望去" class="w-4 h-4 text-orange-500 interactive-radio"> 循声望去
+                            </label>
+                            <span id="iconB1" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">2. 牵牛花攀爬的藤蔓（&nbsp;&nbsp;&nbsp;&nbsp;）抓（&nbsp;&nbsp;&nbsp;&nbsp;）紧，一点也不怕风吹雨打。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB2" value="既又" class="w-4 h-4 text-orange-500 interactive-radio" required> 既……又……
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB2" value="愈愈" class="w-4 h-4 text-orange-500 interactive-radio"> 愈……愈……
+                            </label>
+                            <span id="iconB2" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">3. （&nbsp;&nbsp;&nbsp;&nbsp;）这片土地很贫瘠，牵牛花（&nbsp;&nbsp;&nbsp;&nbsp;）能开出美丽的花朵。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB3" value="既然就" class="w-4 h-4 text-orange-500 interactive-radio" required> 既然……就……
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB3" value="虽然但是" class="w-4 h-4 text-orange-500 interactive-radio"> 虽然……但是……
+                            </label>
+                            <span id="iconB3" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">4. 弟弟的听写拿了满分，他显得朝气（&nbsp;&nbsp;&nbsp;&nbsp;），开心极了。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB4" value="沉闷" class="w-4 h-4 text-orange-500 interactive-radio" required> 沉闷
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB4" value="蓬勃" class="w-4 h-4 text-orange-500 interactive-radio"> 蓬勃
+                            </label>
+                            <span id="iconB4" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q5 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">5. 警方在案发现场（&nbsp;&nbsp;&nbsp;&nbsp;），不放过任何蛛丝马迹，希望能尽快破案。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB5" value="寻声觅迹" class="w-4 h-4 text-orange-500 interactive-radio" required> 寻声觅迹
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB5" value="循声望去" class="w-4 h-4 text-orange-500 interactive-radio"> 循声望去
+                            </label>
+                            <span id="iconB5" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q6 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">6. 经过一天一夜的搜救工作，搜救犬已经（&nbsp;&nbsp;&nbsp;&nbsp;）了，趴在地上起不来。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB6" value="精神抖擞" class="w-4 h-4 text-orange-500 interactive-radio" required> 精神抖擞
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB6" value="心力交瘁" class="w-4 h-4 text-orange-500 interactive-radio"> 心力交瘁
+                            </label>
+                            <span id="iconB6" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q7 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">7. 姐姐穿上这件白色的连衣裙，显得清新（&nbsp;&nbsp;&nbsp;&nbsp;），非常有气质。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB7" value="脱俗" class="w-4 h-4 text-orange-500 interactive-radio" required> 脱俗
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB7" value="凡俗" class="w-4 h-4 text-orange-500 interactive-radio"> 凡俗
+                            </label>
+                            <span id="iconB7" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q8 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">8. 比赛输了没关系，千万不要（&nbsp;&nbsp;&nbsp;&nbsp;），下次再接再厉。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB8" value="淘气" class="w-4 h-4 text-orange-500 interactive-radio" required> 淘气
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB8" value="泄气" class="w-4 h-4 text-orange-500 interactive-radio"> 泄气
+                            </label>
+                            <span id="iconB8" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q9 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">9. 小明（&nbsp;&nbsp;&nbsp;&nbsp;）是班长，（&nbsp;&nbsp;&nbsp;&nbsp;）是学校的巡察员，做事非常负责任。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB9" value="既又" class="w-4 h-4 text-orange-500 interactive-radio" required> 既……又……
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB9" value="愈愈" class="w-4 h-4 text-orange-500 interactive-radio"> 愈……愈……
+                            </label>
+                            <span id="iconB9" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                    <!-- Q10 -->
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hover:shadow-md transition">
+                        <p class="font-bold mb-2">10. 老师常教导我们，同学之间要（&nbsp;&nbsp;&nbsp;&nbsp;）、合作共赢，才能共同进步。</p>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB10" value="自私自利" class="w-4 h-4 text-orange-500 interactive-radio" required> 自私自利
+                            </label>
+                            <label class="option-label cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-transparent hover:border-orange-300 transition">
+                                <input type="radio" name="qB10" value="互惠互利" class="w-4 h-4 text-orange-500 interactive-radio"> 互惠互利
+                            </label>
+                            <span id="iconB10" class="feedback-icon flex items-center"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- PART C -->
+            <div class="mb-10 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative">
+                <div class="absolute top-[-15px] left-5 bg-purple-500 text-white px-4 py-1 rounded-full font-bold shadow-md">
+                    C 项：思维小达人 (挑战题/KBAT) 🧠
+                </div>
+                <p class="text-gray-600 font-semibold mb-4 mt-2">指示：发挥你的创意与思考能力，完成以下题目。（此项由老师亲自批改哦！）</p>
+
+                <div class="space-y-6">
+                    <div>
+                        <p class="font-bold text-purple-700 mb-2">1. 请使用关联词“既……又……”造一个完整的句子。</p>
+                        <textarea id="qC1" rows="2" class="cute-input w-full" placeholder="在这里写下你的句子..." required></textarea>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-purple-700 mb-2">
+                            2. 【生活情境题】在课文《向牵牛花学习》中，小牵牛花努力向上生长，还和朋友们合作共赢。
+                            <br>你认为牵牛花有什么精神值得我们学习？在班级里，你会如何向牵牛花学习，与同学相处？（写出至少两点）
+                        </p>
+                        <textarea id="qC2" rows="4" class="cute-input w-full" placeholder="1. 我认为牵牛花值得学习的精神是... &#10;2. 在班级里，我会..." required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-gray-400 font-bold mb-8">[作业单结束]</p>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" id="submitBtn" class="bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold text-xl py-3 px-10 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition transform duration-300">
+                    🚀 提交我的答案！
+                </button>
+            </div>
+        </form>
+
+        <!-- Feedback & Results Modal (Hidden by default) -->
+        <div id="resultSection" class="hidden mt-10 p-8 bg-green-50 border-4 border-green-400 rounded-3xl text-center shadow-inner relative">
+            <h2 class="text-3xl font-bold text-green-700 mb-4 font-['ZCOOL_KuaiLe']">🎉 太棒了，完成挑战！ 🎉</h2>
+            
+            <!-- Data Driven Animation for Score -->
+            <div class="relative w-40 h-40 mx-auto mb-4">
+                <svg class="w-full h-full" viewBox="0 0 36 36">
+                    <path class="text-green-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                    <path id="scoreCircle" class="text-green-500 score-display" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                    <span id="scoreText" class="text-4xl font-bold text-green-700">0%</span>
+                    <span class="text-xs text-green-600">A/B项得分</span>
+                </div>
+            </div>
+
+            <p class="text-lg text-gray-700 mb-6" id="feedbackMessage">C项的思维题已记录，老师会给你手写点评哦！✍️</p>
+            
+            <button onclick="downloadExcel()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full shadow transition flex items-center justify-center mx-auto gap-2">
+                📊 下载成绩记录 (Excel/CSV)
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Set today's date automatically
+        document.getElementById('studentDate').valueAsDate = new Date();
+
+        // Toggle Hint Scaffolding
+        function toggleHint(id) {
+            const hint = document.getElementById(id);
+            hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // --- 特别效果：作答时的魔法星光 (Sparkle Effect) ---
+        function createSparkle(x, y) {
+            const emojis = ['✨', '🌟', '💫', '🌸'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            const sparkle = document.createElement('div');
+            sparkle.innerHTML = randomEmoji;
+            sparkle.className = 'sparkle-effect';
+            
+            // 随机偏移一点位置，让星光更自然
+            const offsetX = (Math.random() - 0.5) * 20;
+            sparkle.style.left = (x + offsetX - 15) + 'px';
+            sparkle.style.top = (y - 15) + 'px';
+            
+            document.body.appendChild(sparkle);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                sparkle.remove();
+            }, 800);
+        }
+
+        // 监听 Radio 按钮点击
+        document.querySelectorAll('.interactive-radio').forEach(radio => {
+            radio.addEventListener('click', (e) => {
+                // 在鼠标点击位置生成星光
+                createSparkle(e.pageX, e.pageY);
+            });
+        });
+
+        // 监听下拉菜单改变
+        document.querySelectorAll('.interactive-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                // 获取下拉菜单的位置并在附近生成星光
+                const rect = e.target.getBoundingClientRect();
+                const x = rect.left + rect.width / 2 + window.scrollX;
+                const y = rect.top + window.scrollY;
+                createSparkle(x, y);
+            });
+        });
+        // ------------------------------------------------
+
+        // Grading Logic and Visual Feedback
+        const answers = {
+            qA1: '泄气',
+            qA2: '蓬勃',
+            qA3: '心力交瘁',
+            qB1: '循声望去',
+            qB2: '愈愈',
+            qB3: '虽然但是',
+            qB4: '蓬勃',
+            qB5: '寻声觅迹',
+            qB6: '心力交瘁',
+            qB7: '脱俗',
+            qB8: '泄气',
+            qB9: '既又',
+            qB10: '互惠互利'
+        };
+
+        let studentData = {}; // To store data for excel export
+
+        function submitForm(event) {
+            event.preventDefault(); // Prevent page reload
+
+            let correctCount = 0;
+            const totalQuestions = 13; // 3 in Part A + 10 in Part B
+
+            // Helper to check answer and show visual feedback
+            const checkAnswer = (inputId, iconId, isRadio = false) => {
+                let userVal;
+                if(isRadio) {
+                    const selected = document.querySelector(`input[name="${inputId}"]:checked`);
+                    userVal = selected ? selected.value : '';
+                } else {
+                    userVal = document.getElementById(inputId).value;
+                }
+
+                const icon = document.getElementById(iconId);
+                icon.style.display = 'inline-block';
+                
+                if (userVal === answers[inputId]) {
+                    icon.innerHTML = '✅';
+                    correctCount++;
+                    studentData[inputId] = "正确";
+                } else {
+                    icon.innerHTML = '❌';
+                    studentData[inputId] = "错误 (答:" + userVal + ")";
+                }
+            };
+
+            // Grade Part A (3 questions)
+            checkAnswer('qA1', 'iconA1');
+            checkAnswer('qA2', 'iconA2');
+            checkAnswer('qA3', 'iconA3');
+
+            // Grade Part B (10 questions)
+            for (let i = 1; i <= 10; i++) {
+                checkAnswer(`qB${i}`, `iconB${i}`, true);
+            }
+
+            // Collect student details
+            studentData.name = document.getElementById('studentName').value;
+            studentData.class = document.getElementById('studentClass').value;
+            studentData.date = document.getElementById('studentDate').value;
+            studentData.c1 = document.getElementById('qC1').value.replace(/\n/g, " "); // remove newlines for csv
+            studentData.c2 = document.getElementById('qC2').value.replace(/\n/g, " ");
+            
+            // Calculate Score
+            const percentage = Math.round((correctCount / totalQuestions) * 100);
+            studentData.score = percentage + "%";
+
+            // Show Results Section
+            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('submitBtn').innerText = "已提交 ✓";
+            document.getElementById('submitBtn').disabled = true;
+
+            // --- 提交后的反馈语调整 & 撒花特效 ---
+            const feedbackMsg = document.getElementById('feedbackMessage');
+            if(percentage >= 80) {
+                feedbackMsg.innerHTML = "太棒了！你像牵牛花一样充满朝气！⭐<br>C项的思维题老师会给你手写点评哦！✍️";
+                // 触发撒花特效！
+                fireConfetti();
+            } else if (percentage >= 50) {
+                feedbackMsg.innerHTML = "不错哦！继续向牵牛花学习攀爬精神吧！🌱<br>C项的思维题老师会给你手写点评哦！✍️";
+            } else {
+                feedbackMsg.innerHTML = "别泄气！再接再厉，你会越来越棒的！💪<br>C项的思维题老师会给你手写点评哦！✍️";
+            }
+
+            // Animate Score Circle (Data-driven animation)
+            setTimeout(() => {
+                const scoreCircle = document.getElementById('scoreCircle');
+                scoreCircle.setAttribute('stroke-dasharray', `${percentage}, 100`);
+                
+                // Count up animation for text
+                let current = 0;
+                const interval = setInterval(() => {
+                    if (current >= percentage) {
+                        clearInterval(interval);
+                        document.getElementById('scoreText').innerText = percentage + '%';
+                    } else {
+                        current++;
+                        document.getElementById('scoreText').innerText = current + '%';
+                    }
+                }, 15);
+            }, 300);
+            
+            // Scroll to results
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- 特别效果：全屏撒花函数 (Confetti) ---
+        function fireConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              // 从两个源头喷射五彩纸屑
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // Export to Excel (CSV)
+        function downloadExcel() {
+            // Include BOM for UTF-8 Chinese characters support in Excel
+            const bom = "\uFEFF"; 
+            
+            // Define Headers (Updated for 10 B-section questions)
+            const headers = [
+                "姓名", "班级", "日期", "客观题总得分", 
+                "A1", "A2", "A3", 
+                "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10", 
+                "C1造句", "C2思维题解答"
+            ];
+            
+            // Map data to row
+            const row = [
+                studentData.name,
+                studentData.class,
+                studentData.date,
+                studentData.score,
+                studentData.qA1,
+                studentData.qA2,
+                studentData.qA3,
+                studentData.qB1,
+                studentData.qB2,
+                studentData.qB3,
+                studentData.qB4,
+                studentData.qB5,
+                studentData.qB6,
+                studentData.qB7,
+                studentData.qB8,
+                studentData.qB9,
+                studentData.qB10,
+                `"${studentData.c1}"`, // Wrap in quotes to handle commas in text
+                `"${studentData.c2}"`
+            ];
+
+            const csvContent = bom + headers.join(",") + "\n" + row.join(",");
+
+            // Create Blob and Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `华文作业成绩_${studentData.class}_${studentData.name}.csv`);
+            document.body.appendChild(link);
+            
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
