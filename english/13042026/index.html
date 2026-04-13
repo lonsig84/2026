@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Vocabulary Practice - Part 5</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti for celebration effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        
+        /* 字母输入框的基础样式 */
+        .letter-box { width: 32px; height: 38px; text-align: center; text-transform: lowercase; font-size: 1.25rem; font-weight: 600; border: none; border-bottom: 3px solid #374151; margin: 0 3px; outline: none; background-color: transparent; transition: all 0.2s; }
+        .letter-box:focus { border-bottom: 3px solid #2563eb; background-color: #eff6ff; transform: translateY(-2px); }
+        .letter-box:disabled { border: none; font-weight: bold; color: #111827; background-color: transparent; }
+        
+        .table-borders th, .table-borders td { border: 1px solid #d1d5db; padding: 14px; }
+        
+        /* 输入时的Q弹动画 */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25) translateY(-2px); color: #2563eb; }
+            100% { transform: scale(1); }
+        }
+        .pop-anim { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        /* 成绩环形图的动画 */
+        @keyframes dash {
+            0% { stroke-dasharray: 0, 100; }
+            100% { stroke-dasharray: var(--target-dash), 100; }
+        }
+        .circular-chart-path {
+            animation: dash 1.5s ease-out forwards;
+            stroke-linecap: round;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex justify-center items-start">
+
+<script>
+    // ==========================================
+    // 配置区域
+    // ==========================================
+    // 在这里填入你的 Google Apps Script Web App URL
+    const GAS_URL = "替换成你的_WEB_APP_URL"; 
+    // ==========================================
+
+    // 5套试卷的数据库
+    const quizzes = [
+        {
+            id: 1,
+            title: "Set 1: Emergencies & Accidents",
+            example: { no: 0, desc: "A form of transport that takes people to a hospital.", word: "ambulance" },
+            questions: [
+                { no: 21, desc: "You use this in the kitchen to heat food and make meals.", word: "cooker" },
+                { no: 22, desc: "A sudden dangerous situation that needs immediate action.", word: "emergency" },
+                { no: 23, desc: "This stops working during a power cut, making the room dark.", word: "electricity" },
+                { no: 24, desc: "You put this on to stay warm or heat a room in winter.", word: "heating" },
+                { no: 25, desc: "A sudden bad event that can hurt people or damage things.", word: "accident" }
+            ]
+        },
+        {
+            id: 2,
+            title: "Set 2: Life in the Past",
+            example: { no: 0, desc: "A book where you write down what you do every day.", word: "diary" },
+            questions: [
+                { no: 21, desc: "A small, traditional house, usually in the countryside.", word: "cottage" },
+                { no: 22, desc: "Someone whose job is to clean another person's house and help them.", word: "servant" },
+                { no: 23, desc: "You wear this on your wrist to know what time it is.", word: "watch" },
+                { no: 24, desc: "A painting, drawing or photograph of a person's face.", word: "portrait" },
+                { no: 25, desc: "Something that belongs to you and you own it.", word: "possession" }
+            ]
+        },
+        {
+            id: 3,
+            title: "Set 3: Adventure & Camping",
+            example: { no: 0, desc: "An instrument used for showing direction.", word: "compass" },
+            questions: [
+                { no: 21, desc: "A large area of land covered with trees and plants growing closely together.", word: "forest" },
+                { no: 22, desc: "A small, narrow boat that you move using a paddle with two blades.", word: "kayak" },
+                { no: 23, desc: "An animal that carries its house on its back and lays eggs on the beach.", word: "turtle" },
+                { no: 24, desc: "A large bag you carry on your back when you go walking or camping.", word: "rucksack" },
+                { no: 25, desc: "A person whose job is to teach you a new sport or skill.", word: "instructor" }
+            ]
+        },
+        {
+            id: 4,
+            title: "Set 4: Places & Environment",
+            example: { no: 0, desc: "A place with fields for keeping animals such as cows and sheep.", word: "farm" },
+            questions: [
+                { no: 21, desc: "The natural features of an area, like mountains and rivers, that you can see.", word: "landscape" },
+                { no: 22, desc: "A place where you can go to see many different kinds of wild animals.", word: "zoo" },
+                { no: 23, desc: "Animals, birds, and plants that live in their natural environment.", word: "wildlife" },
+                { no: 24, desc: "A very high piece of land, often with snow on top, where people go skiing.", word: "mountain" },
+                { no: 25, desc: "People live in this place, but it is not as big as a town or city.", word: "village" }
+            ]
+        },
+        {
+            id: 5,
+            title: "Set 5: Things we use & Jobs",
+            example: { no: 0, desc: "You need this to watch your favourite movie or shows.", word: "television" },
+            questions: [
+                { no: 21, desc: "This person uses a camera to take pictures of you and the scenery.", word: "photographer" },
+                { no: 22, desc: "Someone who paints pictures or creates beautiful things.", word: "artist" },
+                { no: 23, desc: "A small electronic machine used for doing math quickly.", word: "calculator" },
+                { no: 24, desc: "You need to wear this warm piece of clothing when you are feeling cold.", word: "sweater" },
+                { no: 25, desc: "He or she is the main person who cooks in a hotel or restaurant.", word: "chef" }
+            ]
+        }
+    ];
+
+    let currentQuiz = null;
+    let studentName = "";
+    let studentAnswers = {};
+
+    // 页面加载完成后执行
+    document.addEventListener("DOMContentLoaded", () => {
+        lucide.createIcons();
+        renderMainMenu();
+    });
+
+    // 渲染主菜单
+    function renderMainMenu() {
+        const container = document.getElementById("app");
+        container.innerHTML = `
+            <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8 transition-all">
+                <div class="text-center mb-8 relative">
+                    <div class="absolute inset-0 flex justify-center items-center opacity-10">
+                        <i data-lucide="book-open" class="h-32 w-32 text-blue-500"></i>
+                    </div>
+                    <i data-lucide="graduation-cap" class="relative mx-auto h-14 w-14 text-blue-600 mb-3"></i>
+                    <h1 class="relative text-3xl font-bold text-gray-800">English Vocabulary Practice</h1>
+                    <p class="relative text-gray-500 mt-2">Part 5 Reading and Writing</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Enter your name:</label>
+                    <input type="text" id="studentNameInput" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none text-lg" placeholder="e.g. Ali bin Ahmad" value="${studentName}">
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Select a Practice Set:</h2>
+                <div class="grid gap-3">
+                    ${quizzes.map(q => `
+                        <button onclick="startQuiz(${q.id})" class="flex items-center justify-between w-full text-left px-5 py-4 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 hover:shadow-md rounded-xl transition-all group">
+                            <span class="font-medium text-gray-700 group-hover:text-blue-700">${q.title}</span>
+                            <i data-lucide="chevron-right" class="text-gray-400 group-hover:text-blue-600 transform group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+
+    // 开始测试
+    function startQuiz(quizId) {
+        const nameInput = document.getElementById("studentNameInput").value.trim();
+        if (!nameInput) {
+            alert("Please enter your name first!");
+            return;
+        }
+        studentName = nameInput;
+        currentQuiz = quizzes.find(q => q.id === quizId);
+        studentAnswers = {};
+        renderQuizInterface();
+        
+        // 初始检查一次进度（进度条归零）
+        setTimeout(checkProgress, 100);
+    }
+
+    // 生成填空方格
+    function generateLetterBoxes(word, questionNo, isExample = false) {
+        let html = '<div class="flex flex-wrap gap-1 mt-1">';
+        for (let i = 0; i < word.length; i++) {
+            if (i === 0 || isExample) {
+                // 首字母或例题，直接显示，禁用输入
+                html += `<input type="text" class="letter-box" value="${word[i]}" disabled>`;
+            } else {
+                // 待填写的字母框
+                html += `<input type="text" class="letter-box bg-white" maxlength="1" data-qno="${questionNo}" data-index="${i}" oninput="handleInput(event)" onkeydown="handleKeyDown(event)">`;
+            }
+        }
+        html += '</div>';
+        return html;
+    }
+
+    // 渲染答题界面
+    function renderQuizInterface() {
+        const container = document.getElementById("app");
+        let html = `
+            <div class="max-w-4xl w-full bg-white rounded-xl shadow-lg p-6 md:p-10 transition-all relative overflow-hidden">
+                
+                <!-- 顶部进度条区域 -->
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
+                    <div id="progressBar" class="h-full bg-blue-500 transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+
+                <div class="flex justify-between items-center mb-6 mt-2">
+                    <button onclick="renderMainMenu()" class="flex items-center text-gray-500 hover:text-blue-600 transition-colors">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back
+                    </button>
+                    <div id="progressBadge" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-bold border border-blue-200 shadow-sm flex items-center transition-all">
+                        <i data-lucide="target" class="w-4 h-4 mr-1"></i>
+                        <span id="progressText">0 / 5 Completed</span>
+                    </div>
+                </div>
+                
+                <div class="text-center font-bold mb-6">
+                    <h2 class="text-2xl text-gray-800">PART 5</h2>
+                    <p class="text-lg font-normal text-gray-500">[5 marks]</p>
+                </div>
+
+                <div class="mb-6 font-medium text-gray-800 text-lg bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <p class="font-bold text-blue-800">Questions 21 to 25</p>
+                    <p class="font-normal mt-1">Read the descriptions of some words. What is the word for each one?</p>
+                    <p class="font-normal text-gray-600 text-base">The first letter is already there. There is one space for each letter in the word.</p>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-gray-300">
+                    <table class="w-full text-left border-collapse table-borders bg-white">
+                        <tr class="bg-gray-100">
+                            <td class="w-12 text-center font-bold text-lg border-b border-gray-300">${currentQuiz.example.no}</td>
+                            <td class="text-gray-800 text-lg py-4 px-3 border-b border-gray-300">${currentQuiz.example.desc}</td>
+                            <td class="whitespace-nowrap px-3 align-middle border-b border-gray-300">
+                                ${generateLetterBoxes(currentQuiz.example.word, currentQuiz.example.no, true)}
+                            </td>
+                            <td class="w-12 text-center align-middle border-b border-gray-300">
+                                <i data-lucide="check" class="w-6 h-6 text-gray-400 mx-auto"></i>
+                            </td>
+                        </tr>
+                        ${currentQuiz.questions.map(q => `
+                        <tr id="row-${q.no}" class="transition-colors duration-500 ease-out">
+                            <td class="w-12 text-center font-bold text-lg">${q.no}</td>
+                            <td class="text-gray-800 text-lg py-4 px-3 leading-relaxed">${q.desc}</td>
+                            <td class="whitespace-nowrap px-3 align-middle">
+                                ${generateLetterBoxes(q.word, q.no, false)}
+                            </td>
+                            <!-- 状态列，用来展示完成的绿勾 -->
+                            <td class="w-12 text-center align-middle" id="status-${q.no}"></td>
+                        </tr>
+                        `).join('')}
+                    </table>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button onclick="submitQuiz()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all flex items-center transform hover:-translate-y-0.5">
+                        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Submit Answers
+                    </button>
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+        lucide.createIcons();
+    }
+
+    // 处理输入和跳格特效
+    window.handleInput = function(e) {
+        const target = e.target;
+        target.value = target.value.toLowerCase(); // 强制小写
+        
+        // 重新触发跳动动画
+        target.classList.remove('pop-anim');
+        void target.offsetWidth; // 触发重绘
+        if(target.value) target.classList.add('pop-anim');
+
+        // 自动跳转下一个格子
+        if (target.value && target.nextElementSibling && target.nextElementSibling.tagName === 'INPUT') {
+            target.nextElementSibling.focus();
+        }
+
+        // 延迟检查整行进度
+        setTimeout(checkProgress, 50);
+    }
+
+    window.handleKeyDown = function(e) {
+        const target = e.target;
+        // 退格自动跳回上一个格子
+        if (e.key === 'Backspace' && !target.value && target.previousElementSibling && !target.previousElementSibling.disabled) {
+            target.previousElementSibling.focus();
+        }
+        // 只要按键，都重新检查进度
+        setTimeout(checkProgress, 50);
+    }
+
+    // 检查并更新进度 UI (打勾、进度条等)
+    function checkProgress() {
+        if(!currentQuiz) return;
+        let completedCount = 0;
+
+        currentQuiz.questions.forEach(q => {
+            const inputs = document.querySelectorAll(`input[data-qno="${q.no}"]`);
+            if(inputs.length === 0) return;
+            
+            // 判断当前题目的所有输入框是否都已填入字符
+            const isComplete = Array.from(inputs).every(inp => inp.value.trim() !== '');
+            const statusTd = document.getElementById(`status-${q.no}`);
+            const rowTr = document.getElementById(`row-${q.no}`);
+            
+            if(isComplete) {
+                completedCount++;
+                // 如果还没打勾，则展示完成特效
+                if(!statusTd.innerHTML.includes('check-circle')) {
+                    statusTd.innerHTML = '<i data-lucide="check-circle" class="w-7 h-7 text-green-500 pop-anim mx-auto"></i>';
+                    rowTr.classList.add('bg-green-50/60'); // 行背景变浅绿
+                    lucide.createIcons();
+                }
+            } else {
+                // 如果用户删除了字母，取消打勾
+                statusTd.innerHTML = '';
+                rowTr.classList.remove('bg-green-50/60');
+            }
+        });
+        
+        // 更新全局进度条和文本
+        const total = currentQuiz.questions.length;
+        const progressPercent = (completedCount / total) * 100;
+        document.getElementById('progressBar').style.width = `${progressPercent}%`;
+        
+        const badge = document.getElementById('progressBadge');
+        document.getElementById('progressText').innerText = `${completedCount} / ${total} Completed`;
+        
+        // 全部完成时，进度标识变成绿色
+        if(completedCount === total) {
+            badge.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-200');
+            badge.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+        } else {
+            badge.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-200');
+            badge.classList.remove('bg-green-100', 'text-green-700', 'border-green-300');
+        }
+    }
+
+    // 提交答案
+    function submitQuiz() {
+        // 收集所有输入的答案
+        currentQuiz.questions.forEach(q => {
+            const inputs = document.querySelectorAll(`input[data-qno="${q.no}"]`);
+            let answer = q.word[0]; // 包含首字母
+            inputs.forEach(input => {
+                answer += input.value.toLowerCase() || ' '; // 空格代替未填项
+            });
+            studentAnswers[q.no] = answer;
+        });
+
+        renderResults();
+    }
+
+    // 渲染结果与图表
+    function renderResults() {
+        const container = document.getElementById("app");
+        let score = 0;
+        let detailsHtml = '';
+
+        currentQuiz.questions.forEach(q => {
+            const isCorrect = studentAnswers[q.no] === q.word;
+            if (isCorrect) score++;
+            
+            detailsHtml += `
+                <div class="flex items-center justify-between p-4 mb-3 border rounded-xl ${isCorrect ? 'bg-green-50 border-green-200 shadow-sm' : 'bg-red-50 border-red-200 shadow-sm'}">
+                    <div class="flex-1">
+                        <div class="flex items-start">
+                            <span class="font-bold text-gray-700 mr-2 mt-0.5">${q.no}.</span>
+                            <span class="text-gray-700 text-lg">${q.desc}</span>
+                        </div>
+                        <div class="mt-2 pl-6">
+                            <span class="text-sm text-gray-500 uppercase font-bold tracking-wider">Your Answer: </span>
+                            <span class="font-bold text-lg tracking-widest ${isCorrect ? 'text-green-600' : 'text-red-600'}">${studentAnswers[q.no]}</span>
+                            ${!isCorrect ? `<span class="ml-4 text-sm text-gray-500 uppercase font-bold tracking-wider">Correct Answer: </span><span class="font-bold text-lg tracking-widest text-emerald-600">${q.word}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="pl-4">
+                        ${isCorrect ? `<i data-lucide="check-circle" class="w-10 h-10 text-green-500"></i>` : `<i data-lucide="x-circle" class="w-10 h-10 text-red-500"></i>`}
+                    </div>
+                </div>
+            `;
+        });
+
+        window.currentScore = score;
+        const scorePercentage = (score / 5) * 100;
+        
+        // 动态设置环形图表的CSS变量
+        let strokeColor = score >= 3 ? "text-green-500" : "text-orange-500";
+        if (score === 5) strokeColor = "text-blue-500";
+
+        container.innerHTML = `
+            <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-8 transition-all">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Quiz Results</h2>
+                    <p class="text-lg text-gray-600">Well done, <span class="font-bold text-blue-600">${studentName}</span>!</p>
+                    
+                    <!-- 环形成绩图表 (Donut Chart) -->
+                    <div class="relative w-40 h-40 mx-auto mt-6 mb-2">
+                        <svg class="w-full h-full" viewBox="0 0 36 36" style="--target-dash: ${scorePercentage};">
+                            <!-- 底部灰色环 -->
+                            <path class="text-gray-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="100, 100" />
+                            <!-- 动态彩色进度环 -->
+                            <path class="${strokeColor} circular-chart-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="0, 100" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pop-anim" style="animation-delay: 1.5s;">
+                            <span class="text-5xl font-black ${strokeColor.replace('text-', 'text-')}">${score}</span>
+                            <span class="text-xs font-bold text-gray-500 uppercase mt-1">out of 5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-10">
+                    ${detailsHtml}
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-4 border-t border-gray-100 pt-6">
+                    <button onclick="downloadExcel()" class="flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Excel
+                    </button>
+                    <button onclick="submitToTeacher()" id="submitBtn" class="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        <i data-lucide="cloud-upload" class="w-5 h-5 mr-2"></i> Send to Teacher
+                    </button>
+                    <button onclick="renderMainMenu()" class="flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl transition-all">
+                        <i data-lucide="home" class="w-5 h-5 mr-2"></i> Home
+                    </button>
+                </div>
+                <div id="statusContainer" class="mt-4 hidden p-3 rounded-lg border text-center font-medium"></div>
+            </div>
+        `;
+        lucide.createIcons();
+
+        // 触发礼花特效
+        triggerConfetti(score);
+    }
+
+    // 撒花庆祝特效
+    function triggerConfetti(score) {
+        if (score === 5) {
+            // 满分豪华撒花
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { return clearInterval(interval); }
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        } else if (score >= 3) {
+            // 及格普通撒花
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+    }
+    function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+    // 下载 Excel 表格
+    function downloadExcel() {
+        const ws_data = [
+            ["Student Name", "Quiz Title", "Score", "Total"],
+            [studentName, currentQuiz.title, window.currentScore, 5],
+            [],
+            ["Question No.", "Description", "Student Answer", "Correct Answer", "Status"]
+        ];
+
+        currentQuiz.questions.forEach(q => {
+            const isCorrect = studentAnswers[q.no] === q.word;
+            ws_data.push([
+                q.no,
+                q.desc,
+                studentAnswers[q.no].toUpperCase(),
+                q.word.toUpperCase(),
+                isCorrect ? "Correct" : "Incorrect"
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Quiz Results");
+        XLSX.writeFile(wb, `${studentName}_Part5_Results.xlsx`);
+    }
+
+    // 提交成绩给 Google Sheets
+    function submitToTeacher() {
+        const btn = document.getElementById('submitBtn');
+        const statusContainer = document.getElementById('statusContainer');
+        
+        statusContainer.classList.remove('hidden');
+        
+        if(GAS_URL === "替换成你的_WEB_APP_URL" || !GAS_URL) {
+            statusContainer.textContent = "Error: Please set up the Google Apps Script URL in the code first.";
+            statusContainer.className = "mt-4 p-3 rounded-lg border text-center font-medium block bg-red-50 text-red-600 border-red-200";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Sending...`;
+        lucide.createIcons();
+
+        const payload = {
+            timestamp: new Date().toLocaleString(),
+            studentName: studentName,
+            quizName: currentQuiz.title,
+            score: window.currentScore,
+            total: 5
+        };
+
+        fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors', 
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            btn.innerHTML = `<i data-lucide="check" class="w-5 h-5 mr-2"></i> Sent Successfully!`;
+            btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+            btn.classList.add('bg-green-600', 'hover:bg-green-700', 'cursor-default');
+            
+            statusContainer.textContent = "Your score has been successfully recorded to the teacher's spreadsheet.";
+            statusContainer.className = "mt-5 p-4 rounded-lg border text-center font-medium block bg-green-50 text-green-700 border-green-200 shadow-sm";
+            lucide.createIcons();
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="cloud-upload" class="w-5 h-5 mr-2"></i> Try Again`;
+            statusContainer.textContent = "Failed to send. Check your internet connection or URL.";
+            statusContainer.className = "mt-5 p-4 rounded-lg border text-center font-medium block bg-red-50 text-red-700 border-red-200 shadow-sm";
+            lucide.createIcons();
+        });
+    }
+
+</script>
+<div id="app" class="w-full flex justify-center items-center flex-col min-h-[80vh]"></div>
+</body>
+</html>
