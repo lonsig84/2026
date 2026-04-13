@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekod Bacaan – 13 April 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e8f4fd;
+    --blue: #4a90d9;
+    --blue-dark: #2c6fad;
+    --green: #5bbf8a;
+    --green-dark: #3a9a68;
+    --orange: #f5a623;
+    --pink: #f06292;
+    --purple: #7c5cbf;
+    --text: #2d3a4a;
+    --text-light: #6b7a8d;
+    --border: #c8ddf0;
+    --drag-bg: #fff8e1;
+    --drag-border: #f5a623;
+    --drop-filled: #d4edda;
+    --shadow: 0 4px 16px rgba(74,144,217,0.13);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #dbeeff 0%, #e8f4fd 50%, #edfaf3 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding-bottom: 60px;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+    color: white; padding: 20px 32px 16px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 4px 20px rgba(44,111,173,.3);
+  }
+  header .logo { font-size: 2.2rem; }
+  header h1 { font-family:'Baloo 2',sans-serif; font-size:1.45rem; font-weight:800; line-height:1.2; }
+  header p { font-size:.86rem; opacity:.85; margin-top:2px; }
+
+  /* Steps */
+  .steps {
+    display:flex; background:#fff;
+    border-bottom:2px solid var(--border); padding:0 32px; overflow-x:auto;
+  }
+  .step {
+    display:flex; align-items:center; gap:8px;
+    padding:11px 18px; font-size:.83rem; font-weight:700;
+    color:var(--text-light); white-space:nowrap;
+    border-bottom:3px solid transparent;
+  }
+  .step.on { color:var(--blue-dark); border-bottom-color:var(--blue); }
+  .step .num {
+    width:21px; height:21px; border-radius:50%;
+    background:var(--border); color:var(--text-light);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.76rem; font-weight:900;
+  }
+  .step.on .num { background:var(--blue); color:white; }
+  .sarr { color:var(--border); font-weight:700; padding:11px 2px; line-height:44px; }
+
+  /* Layout */
+  main {
+    max-width:1200px; margin:26px auto; padding:0 22px;
+    display:grid; grid-template-columns:290px 1fr;
+    gap:26px; align-items:start;
+  }
+
+  /* Left panel */
+  .sel-panel {
+    background:white; border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+    position:sticky; top:18px;
+  }
+  .panel-hd {
+    background:linear-gradient(135deg, var(--purple), #a07ed4);
+    color:white; padding:13px 17px;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:.97rem;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sel-body { padding:16px; }
+  .lbl {
+    font-size:.8rem; font-weight:800; color:var(--text-light);
+    text-transform:uppercase; letter-spacing:.05em;
+    margin-bottom:5px; margin-top:13px;
+  }
+  .lbl:first-child { margin-top:0; }
+
+  select {
+    width:100%; padding:10px 13px;
+    border:2px solid var(--border); border-radius:10px;
+    font-family:'Nunito',sans-serif; font-size:.93rem; font-weight:700;
+    color:var(--text); background:var(--sky);
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a90d9' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 11px center; cursor:pointer;
+  }
+  select:focus { outline:none; border-color:var(--blue); }
+
+  .book-list { margin-top:12px; display:flex; flex-direction:column; gap:7px; }
+  .book-btn {
+    padding:9px 13px; border-radius:10px; border:2px solid var(--border);
+    background:var(--sky); text-align:left; cursor:pointer;
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:.86rem; color:var(--text);
+    display:flex; align-items:center; gap:8px; transition:all .18s;
+  }
+  .book-btn:hover { border-color:var(--blue); background:#dbeeff; }
+  .book-btn.active { border-color:var(--blue-dark); background:var(--blue-dark); color:white; }
+  .book-btn .bnum {
+    min-width:23px; height:23px; border-radius:50%; background:var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.76rem; font-weight:900; flex-shrink:0;
+  }
+  .book-btn.active .bnum { background:rgba(255,255,255,.28); color:white; }
+  .btitle { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+
+  .hint-box {
+    background:linear-gradient(135deg,#fff8e1,#fff3cd);
+    border:2px solid var(--orange); border-radius:10px;
+    padding:11px 13px; font-size:.8rem; color:#8a6300;
+    font-weight:600; line-height:1.6; margin-top:14px;
+  }
+  .hint-box strong { font-weight:900; }
+
+  /* Right: info panel */
+  .info-panel {
+    background:white; border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+    animation:fadeUp .3s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .info-hd {
+    background:linear-gradient(135deg, var(--orange), #f7bc54);
+    color:white; padding:13px 18px;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:.97rem;
+    display:flex; align-items:center; gap:8px;
+  }
+
+  /* Row list */
+  .row-list { padding:8px 0; }
+
+  .info-row {
+    display:grid;
+    grid-template-columns:175px 1fr;
+    align-items:center;
+    border-bottom:1px solid #eef4fb;
+    min-height:50px;
+  }
+  .info-row:last-child { border-bottom:none; }
+  .info-row.tall { align-items:flex-start; min-height:88px; }
+
+  .row-lbl {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 15px;
+    background:#f7fbff; border-right:2px solid var(--border);
+    font-size:.81rem; font-weight:800; color:var(--text-light);
+    height:100%;
+  }
+  .info-row.tall .row-lbl { padding-top:13px; align-items:flex-start; }
+  .info-row.grey .row-lbl { background:#f6f6f6; border-right-color:#ddd; color:#bbb; }
+
+  .rnum {
+    min-width:22px; height:22px; border-radius:50%;
+    background:var(--blue); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:900; flex-shrink:0;
+  }
+  .info-row.grey .rnum { background:#bbb; }
+
+  .row-val {
+    display:flex; align-items:center; padding:7px 14px;
+    flex-wrap:wrap; gap:6px;
+  }
+  .info-row.tall .row-val { align-items:flex-start; padding-top:11px; padding-bottom:11px; }
+
+  /* Static filled value */
+  .static-val {
+    display:inline-flex; align-items:center; gap:6px;
+    background:#eaf7ef; border:2px solid var(--green);
+    border-radius:9px; padding:7px 13px;
+    font-weight:700; font-size:.88rem; color:var(--text);
+  }
+
+  /* Draggable chip */
+  .drag-chip {
+    display:inline-flex; align-items:flex-start; gap:7px;
+    background:var(--drag-bg); border:2.5px dashed var(--drag-border);
+    border-radius:9px; padding:7px 13px;
+    cursor:grab; font-weight:700; font-size:.88rem; color:#5a3800;
+    user-select:none; -webkit-user-select:none;
+    transition:all .18s; max-width:100%;
+    animation:popIn .2s ease both; line-height:1.45;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform:scale(.88); }
+    to   { opacity:1; transform:scale(1); }
+  }
+  .drag-chip:hover { background:#ffe8a0; transform:translateY(-1px); box-shadow:0 3px 10px rgba(245,166,35,.22); }
+  .drag-chip:active { cursor:grabbing; }
+  .drag-icon { font-size:.9rem; opacity:.5; flex-shrink:0; margin-top:1px; }
+  .chip-text { word-break:break-word; }
+
+  /* Grey rows */
+  .grey-note { font-size:.82rem; color:#bbb; font-style:italic; font-weight:600; }
+
+  /* Toggle */
+  .tog-grp { display:flex; border-radius:9px; overflow:hidden; border:2px solid var(--border); }
+  .tog-btn {
+    flex:1; padding:8px 10px; border:none;
+    background:var(--sky); font-family:'Nunito',sans-serif;
+    font-weight:800; font-size:.86rem; color:var(--text-light); cursor:pointer; transition:all .18s;
+  }
+  .tog-btn.on { background:var(--purple); color:white; }
+
+  /* Kategori */
+  .kat-sel {
+    padding:8px 30px 8px 11px;
+    border:2px solid var(--border); border-radius:9px;
+    font-family:'Nunito',sans-serif; font-size:.88rem; font-weight:700;
+    color:var(--text); background:var(--sky);
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%234a90d9' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 9px center;
+  }
+  .kat-sel.filled { border-color:var(--green); background-color:#eaf7ef; }
+
+  /* Bahasa */
+  .bhs-grp { display:flex; gap:6px; flex-wrap:wrap; }
+  .bhs-btn {
+    padding:6px 11px; border:2px solid var(--border); border-radius:8px;
+    background:var(--sky); font-family:'Nunito',sans-serif;
+    font-weight:700; font-size:.8rem; color:var(--text-light); cursor:pointer; transition:all .15s;
+  }
+  .bhs-btn.on { border-color:var(--green-dark); background:var(--green-dark); color:white; }
+
+  /* Empty state */
+  .empty-st { text-align:center; padding:56px 20px; color:var(--text-light); }
+  .empty-st .em { font-size:3.2rem; margin-bottom:12px; }
+  .empty-st p { font-weight:700; font-size:.97rem; }
+  .empty-st small { font-size:.8rem; opacity:.65; }
+
+  @media(max-width:860px){
+    main { grid-template-columns:1fr; }
+    .sel-panel { position:static; }
+    .info-row { grid-template-columns:130px 1fr; }
+  }
+  @media(max-width:480px){
+    main { padding:0 10px; }
+    .info-row { grid-template-columns:100px 1fr; }
+    .row-lbl { font-size:.72rem; padding:8px 9px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📚</div>
+  <div>
+    <h1>Rekod Bacaan Saya</h1>
+    <p>Tarikh: 13 April 2026 &nbsp;•&nbsp; Pilih nama dan buku, kemudian seret maklumat ke laman web AINS</p>
+  </div>
+</header>
+
+<div class="steps">
+  <div class="step on"><span class="num">1</span> Pilih Nama</div>
+  <div class="sarr">›</div>
+  <div class="step on"><span class="num">2</span> Pilih Buku</div>
+  <div class="sarr">›</div>
+  <div class="step on"><span class="num">3</span> Seret ke AINS</div>
+</div>
+
+<main>
+  <!-- LEFT -->
+  <div class="sel-panel">
+    <div class="panel-hd">🎓 Pilih Murid &amp; Buku</div>
+    <div class="sel-body">
+      <div class="lbl">Nama Murid</div>
+      <select id="stuSel" onchange="onStuChange()">
+        <option value="">— Pilih nama —</option>
+      </select>
+      <div id="bookLbl" class="lbl" style="display:none">Buku ke-</div>
+      <div class="book-list" id="bookList"></div>
+      <div class="hint-box" id="hintBox" style="display:none">
+        <strong>💡 Cara guna:</strong><br>
+        Klik dan <strong>seret / drag</strong> setiap baris maklumat terus ke kotak yang betul di laman web AINS. Setiap baris boleh diseret berasingan!
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="info-panel" id="infoPanel">
+    <div class="info-hd">📦 Maklumat Buku</div>
+    <div id="infoBody">
+      <div class="empty-st">
+        <div class="em">👆</div>
+        <p>Pilih nama dan buku dahulu</p>
+        <small>Maklumat akan muncul di sini untuk diseret</small>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const DATA = {"徐义恒":[{"Tarikh":"13.4.2026","Tajuk":"婴幼儿童话坊 - 讲分享","Kategori":"Fiksyen","Bilangan Mukasurat":"17","Penulis":"-","Penerbit":"四川出版集团 / 四川美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"关于可爱角色学习如何与朋友分享玩具和食物的故事。","Pengajaran":"学习分享会给大家带来快乐。"},{"Tarikh":"13.4.2026","Tajuk":"Di Ladang Datuk","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Dr Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Seorang kanak-kanak mengunjungi ladang datuknya dan belajar tentang haiwan ternakan seperti ayam dan itik.","Pengajaran":"Menghargai alam semula jadi dan kehidupan di ladang."},{"Tarikh":"13.4.2026","Tajuk":"A Present for Mum","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"Claire Llewellyn","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A child wants to find the perfect present for Mum's special day and thinks hard about what she would love.","Pengajaran":"Show love and appreciation to your mother always."}],"周宇晗":[{"Tarikh":"13.4.2026","Tajuk":"听一听 读一读 (Ting Yi Ting)","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"陕西出版集团 / 陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"通过有趣的听声音和跟读练习，帮助宝宝训练听觉和语言表达，培养早期语言学习能力。","Pengajaran":"多听多读，从小培养良好的语言学习习惯。"},{"Tarikh":"13.4.2026","Tajuk":"Ini Apa?","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Seorang kanak-kanak perempuan bertanya tentang pelbagai objek di sekelilingnya dan ingin tahu nama semuanya.","Pengajaran":"Sifat ingin tahu mendorong kanak-kanak untuk terus belajar."},{"Tarikh":"13.4.2026","Tajuk":"I Don't Like Orange!","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Alice Russ Watson","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A child refuses to eat orange but later discovers it is actually delicious after giving it a try.","Pengajaran":"Try new things before deciding you do not like them."}],"周宇婧":[{"Tarikh":"13.4.2026","Tajuk":"一个接一个的故事","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"-","Penerbit":"陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事一个接一个，带领小朋友进入充满想象力的世界，享受阅读的乐趣。","Pengajaran":"培养阅读兴趣，享受一个接一个的故事带来的欢乐。"},{"Tarikh":"13.4.2026","Tajuk":"Ke Pasar Raya","Kategori":"Fiksyen","Bilangan Mukasurat":"19","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sara dan ibunya pergi ke pasar raya untuk membeli keperluan harian. Sara belajar nama barang-barang di sana.","Pengajaran":"Belajar mengenal barang keperluan harian dalam kehidupan."},{"Tarikh":"13.4.2026","Tajuk":"TV Time","Kategori":"Fiksyen","Bilangan Mukasurat":"18","Penulis":"Jillian Powell","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A family gathers together to watch their favourite TV programme and enjoys quality time at home.","Pengajaran":"Spend quality time with family doing things together."}],"颜嘉丞":[{"Tarikh":"13.4.2026","Tajuk":"乖宝宝故事乐园","Kategori":"Fiksyen","Bilangan Mukasurat":"18","Penulis":"-","Penerbit":"四川出版集团 / 四川美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事乐园里收集了多个关于乖宝宝的温馨故事，鼓励小朋友养成好品格。","Pengajaran":"做个听话懂事的好宝宝，让家人和老师都开心。"},{"Tarikh":"13.4.2026","Tajuk":"Masa Berkebun","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Seorang kanak-kanak membantu ibunya berkebun, menyiram pokok dan menjaga tanaman dengan penuh kasih sayang.","Pengajaran":"Menjaga alam sekitar adalah tanggungjawab kita bersama."},{"Tarikh":"13.4.2026","Tajuk":"Splish, Splash, Splosh!","Kategori":"Fiksyen","Bilangan Mukasurat":"17","Penulis":"Tom Ottway","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A child plays in the water on a rainy day, making splashing sounds and enjoying the puddles outside.","Pengajaran":"Enjoy simple joys in nature and stay safe while playing."}],"吴宏泽":[{"Tarikh":"13.4.2026","Tajuk":"皮皮借尾巴 (Pi Pi Jie Wei Ba)","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"王奕苏","Penerbit":"陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"皮皮是一只小动物，它非常想要一条漂亮的尾巴，于是向各种动物借尾巴，经历了有趣的故事。","Pengajaran":"做自己最好，不必羡慕别人拥有的东西。"},{"Tarikh":"13.4.2026","Tajuk":"Cuti-cuti","Kategori":"Fiksyen","Bilangan Mukasurat":"18","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sebuah keluarga pergi bercuti bersama-sama dan menikmati pelbagai aktiviti menyeronokkan sepanjang percutian.","Pengajaran":"Masa bersama keluarga adalah kenangan indah yang berharga."},{"Tarikh":"13.4.2026","Tajuk":"Where's Dad?","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"Claire Llewellyn","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A child wonders where Dad has gone and searches the whole house before finding him in a surprise place.","Pengajaran":"Family members care for and look out for each other."}],"李蒿芋":[{"Tarikh":"13.4.2026","Tajuk":"婴幼儿童话坊 - 学美德","Kategori":"Fiksyen","Bilangan Mukasurat":"18","Penulis":"-","Penerbit":"四川出版集团 / 四川美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小角色通过日常生活中的小事，学习到做人应有的美德和良好品格。","Pengajaran":"从小培养美德，成为有品德的好孩子。"},{"Tarikh":"13.4.2026","Tajuk":"Hari Penyampaian Sijil","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"Dr Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Murid-murid sekolah dengan penuh semangat menyertai majlis Hari Penyampaian Sijil yang bermakna bersama guru.","Pengajaran":"Usaha gigih akan mendapat pengiktirafan dan penghargaan."},{"Tarikh":"13.4.2026","Tajuk":"Can I Do Yoga?","Kategori":"Fiksyen","Bilangan Mukasurat":"19","Penulis":"Sally Morgan","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A young child asks if they can do yoga with their family and learns different fun poses step by step.","Pengajaran":"Exercise and healthy habits should start from young."}],"李仲":[{"Tarikh":"13.4.2026","Tajuk":"闻一闻 动一动 (Wen Yi Wen)","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"18","Penulis":"-","Penerbit":"陕西出版集团 / 陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"通过用鼻子闻气味和用身体动一动的互动游戏，帮助宝宝认识各种气味和学习肢体动作。","Pengajaran":"通过感官游戏，提升宝宝的感知和肢体协调能力。"},{"Tarikh":"13.4.2026","Tajuk":"Mari Makan","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Ibu menyediakan makanan yang lazat untuk keluarga. Sara belajar adab makan bersama dengan cara yang betul.","Pengajaran":"Amalkan adab makan yang baik dan bersyukur atas rezeki."},{"Tarikh":"13.4.2026","Tajuk":"Do Giant Pandas Have Cereal for Breakfast?","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"15","Penulis":"Katie Foufouti","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"This book explores what different animals eat for breakfast and compares their diets with what children eat.","Pengajaran":"Learn about animals and appreciate the variety of life."}],"廖思彤":[{"Tarikh":"13.4.2026","Tajuk":"长知识","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"书中介绍了各种有趣的知识，帮助小朋友了解身边的世界，增长见识。","Pengajaran":"保持好奇心，多学习多探索，不断增长知识。"},{"Tarikh":"13.4.2026","Tajuk":"Jiran Saya","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sara berkenalan dengan jiran barunya dan belajar tentang pentingnya hidup berjiran dengan baik.","Pengajaran":"Jaga hubungan baik dengan jiran kerana mereka adalah keluarga terdekat kita."},{"Tarikh":"13.4.2026","Tajuk":"Why Do Baby Animals Play?","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"This book explains why baby animals love to play and how play helps them learn important life skills.","Pengajaran":"Play is important for learning and growing up healthy and strong."}],"梁添杰":[{"Tarikh":"13.4.2026","Tajuk":"巴布工程师 (Bob the Builder) 1","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"新疆人民出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"巴布工程师和他的机器朋友们一起努力完成各种建筑工程，展现团队合作的精神。","Pengajaran":"团结合作，任何困难都能克服。"},{"Tarikh":"13.4.2026","Tajuk":"Sara dan Kawan-kawan","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sara dan kawan-kawannya bermain bersama-sama dan belajar erti persahabatan yang sejati dalam kehidupan.","Pengajaran":"Persahabatan yang baik membawa kebahagiaan bersama."},{"Tarikh":"13.4.2026","Tajuk":"A Plane for Zane","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"Susannah Reed","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"Zane receives a toy plane as a gift and is very excited to play with it for the very first time.","Pengajaran":"Appreciate the gifts you receive with gratitude."}],"彭芯湉":[{"Tarikh":"13.4.2026","Tajuk":"爸爸妈妈讲故事","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"四川出版集团 / 四川美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"爸爸妈妈轮流给宝宝讲温馨的故事，通过亲子共读时光传递爱与关怀。","Pengajaran":"亲子共读增进感情，培养宝宝的阅读兴趣和想象力。"},{"Tarikh":"13.4.2026","Tajuk":"Hadiah untuk Nenek","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Dr Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Seorang kanak-kanak menyediakan hadiah yang istimewa untuk neneknya sebagai tanda kasih sayang yang tulus.","Pengajaran":"Tunjukkan kasih sayang kepada ahli keluarga terutama orang tua."},{"Tarikh":"13.4.2026","Tajuk":"Let's Make a Rocket (An Ivy and Mack Story)","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Rebecca Colby","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"Ivy and Mack work together to build a rocket from simple materials and imagine flying to outer space.","Pengajaran":"Creativity and teamwork can make big dreams come true."}],"伊娜拉":[{"Tarikh":"13.4.2026","Tajuk":"跳跳拔小牙","Kategori":"Fiksyen","Bilangan Mukasurat":"18","Penulis":"-","Penerbit":"陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"跳跳的乳牙开始松动了，她既紧张又好奇，在家人的鼓励下勇敢地拔掉了小牙。","Pengajaran":"成长过程中会遇到各种变化，要勇敢面对，不必害怕。"},{"Tarikh":"13.4.2026","Tajuk":"Tadika Cahaya","Kategori":"Fiksyen","Bilangan Mukasurat":"17","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Seorang murid baharu berasa gembira dan teruja pada hari pertama memasuki Tadika Cahaya bersama rakannya.","Pengajaran":"Sekolah adalah tempat yang menyeronokkan untuk belajar dan bermain."},{"Tarikh":"13.4.2026","Tajuk":"Why Can't I Swing Like a Monkey?","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A child wonders why humans cannot swing through trees like monkeys and discovers fascinating facts about animals.","Pengajaran":"Every living thing has unique abilities suited to their own way of life."}],"周丽思":[{"Tarikh":"13.4.2026","Tajuk":"看一看 认一认 (Kan Yi Kan)","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"19","Penulis":"-","Penerbit":"陕西出版集团 / 陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"通过生动的图画，引导宝宝观察身边的事物，认识各种日常生活中常见的物品和颜色。","Pengajaran":"观察生活中的事物，从小培养认知能力。"},{"Tarikh":"13.4.2026","Tajuk":"Di Rumah Sara","Kategori":"Fiksyen","Bilangan Mukasurat":"16","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sara membantu membersihkan rumah dengan menyapu lantai dan mengemas bilik tidurnya setiap pagi.","Pengajaran":"Bertanggungjawab menjaga kebersihan rumah sejak kecil."},{"Tarikh":"13.4.2026","Tajuk":"Catch, Patch!","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"Alice Russ Watson","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"Patch the dog loves to play catch with his owner every afternoon in the garden near their house.","Pengajaran":"Spending time with pets builds love and responsibility."}],"希娃":[{"Tarikh":"13.4.2026","Tajuk":"懂事的蛋蛋狼","Kategori":"Fiksyen","Bilangan Mukasurat":"18","Penulis":"-","Penerbit":"陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"蛋蛋狼是一只懂事的小狼，他总是体贴地帮助家人和朋友，深受大家的喜爱。","Pengajaran":"懂事体贴的孩子受人喜爱，从小培养关爱他人的品格。"},{"Tarikh":"13.4.2026","Tajuk":"Sara dan Zaki","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sara dan Zaki adalah sahabat baik yang suka bermain dan belajar bersama-sama setiap hari.","Pengajaran":"Persahabatan yang baik membawa kegembiraan dan semangat untuk belajar."},{"Tarikh":"13.4.2026","Tajuk":"What Can Fireworks Do?","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"16","Penulis":"-","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"This book explores the science and magic behind fireworks and explains how they create beautiful colours in the sky.","Pengajaran":"Science is behind many amazing things we see around us."}],"陈愷熠":[{"Tarikh":"13.4.2026","Tajuk":"婴幼儿童话坊 - 说友爱","Kategori":"Fiksyen","Bilangan Mukasurat":"19","Penulis":"-","Penerbit":"四川出版集团 / 四川美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事里的小动物们学会了友爱待人，互相帮助，共同度过快乐的每一天。","Pengajaran":"以友爱之心对待他人，世界更加美好。"},{"Tarikh":"13.4.2026","Tajuk":"Hati-hati, Hani!","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"Dr Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Hani suka berlari-lari di rumah. Ibunya sentiasa mengingatkan Hani supaya berhati-hati agar tidak jatuh.","Pengajaran":"Dengar nasihat orang tua demi keselamatan diri sendiri."},{"Tarikh":"13.4.2026","Tajuk":"Wait for Me! (An Ivy and Mack Story)","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Juliet Clare Bell","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"Ivy and Mack go on an adventure together, but Ivy keeps asking Mack to wait for her along the way.","Pengajaran":"Be patient and caring towards friends who need help."}],"王婉灵":[{"Tarikh":"13.4.2026","Tajuk":"尝一尝 说一说 (Chang Yi Chang)","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"15","Penulis":"-","Penerbit":"陕西出版集团 / 陕西旅游出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"小朋友通过品尝各种食物，学习用语言表达味道，培养语言表达能力和饮食常识。","Pengajaran":"勇于尝试新食物，学会用语言表达感受。"},{"Tarikh":"13.4.2026","Tajuk":"Jumpa Doktor","Kategori":"Fiksyen","Bilangan Mukasurat":"19","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Sara berasa tidak sihat dan pergi berjumpa doktor bersama ibunya. Doktor memeriksanya dengan teliti.","Pengajaran":"Jaga kesihatan dan berani berjumpa doktor apabila sakit."},{"Tarikh":"13.4.2026","Tajuk":"Croc Knows! (An Ivy and Mack Story)","Kategori":"Fiksyen","Bilangan Mukasurat":"19","Penulis":"Juliet Clare Bell","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"Croc surprises everyone by knowing the answers to many questions, proving that anyone can be smart.","Pengajaran":"Everyone has unique strengths and talents to share."}],"余淽颖":[{"Tarikh":"13.4.2026","Tajuk":"拇指姑娘 (Ibu Jari Gadis)","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"-","Penerbit":"陕西旅游出版社 / 陕西出版集团","Bahasa":"Lain-lain (中文)","Sinopsis":"拇指姑娘是一个非常小的女孩，她经历了许多奇妙的冒险，最终找到了属于自己的幸福家园。","Pengajaran":"勇敢面对困难，终会找到属于自己的幸福。"},{"Tarikh":"13.4.2026","Tajuk":"Didi","Kategori":"Fiksyen","Bilangan Mukasurat":"20","Penulis":"Aliza Ali","Penerbit":"Penerbitan Pelangi Sdn. Bhd.","Bahasa":"Bahasa Melayu","Sinopsis":"Didi ialah seekor kucing comel yang suka bermain bola. Setiap hari, Didi bermain dengan riang di rumahnya.","Pengajaran":"Kanak-kanak belajar berseronok dan bermain dengan gembira."},{"Tarikh":"13.4.2026","Tajuk":"A Mouse in the House","Kategori":"Fiksyen","Bilangan Mukasurat":"15","Penulis":"Jillian Powell","Penerbit":"Sasbadi","Bahasa":"English","Sinopsis":"A mouse sneaks into the house and causes lots of fun and chaos for the family living there.","Pengajaran":"Be observant and handle surprises calmly at home."}]};
+
+// Init student dropdown
+(function(){
+  const s = document.getElementById('stuSel');
+  Object.keys(DATA).sort().forEach(n => {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n; s.appendChild(o);
+  });
+})();
+
+function onStuChange() {
+  const name = document.getElementById('stuSel').value;
+  if (!name) { clearAll(); return; }
+  document.getElementById('bookLbl').style.display = 'block';
+  document.getElementById('hintBox').style.display = 'block';
+  const bl = document.getElementById('bookList');
+  bl.innerHTML = '';
+  DATA[name].forEach((bk, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'book-btn';
+    btn.innerHTML = `<span class="bnum">${i+1}</span><span class="btitle">${esc(bk.Tajuk)}</span>`;
+    btn.onclick = () => {
+      document.querySelectorAll('.book-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+      renderInfo(bk);
+    };
+    bl.appendChild(btn);
+  });
+  renderInfo(null);
+}
+
+function clearAll() {
+  document.getElementById('bookLbl').style.display='none';
+  document.getElementById('hintBox').style.display='none';
+  document.getElementById('bookList').innerHTML='';
+  renderInfo(null);
+}
+
+function renderInfo(bk) {
+  const body = document.getElementById('infoBody');
+  if (!bk) {
+    body.innerHTML = `<div class="empty-st"><div class="em">👆</div><p>Pilih nama dan buku dahulu</p><small>Maklumat akan muncul di sini untuk diseret</small></div>`;
+    return;
+  }
+
+  const penulis = (!bk.Penulis || bk.Penulis === '-') ? '-' : bk.Penulis;
+  const kat = bk.Kategori || '';
+  const bhs = bk.Bahasa || '';
+
+  // Build rows in required order
+  // Each row: [num, label, content_html, greyClass, tallClass]
+  function dragRow(val) {
+    return `<div class="drag-chip" draggable="true"
+      ondragstart="ds(event,'${esc(val)}')"
+      ondragend="de(event)">
+      <span class="drag-icon">⠿</span>
+      <span class="chip-text">${esc(val)}</span>
+    </div>`;
+  }
+
+  const bahsaOpts = ['Bahasa Melayu','English','Lain-lain (中文)'];
+  const bhsBtns = bahsaOpts.map(o =>
+    `<button class="bhs-btn${o===bhs?' on':''}" onclick="setBhs(this)">${esc(o)}</button>`
+  ).join('');
+
+  const rows = [
+    { n:1,  lbl:'Tarikh',             cls:'',      tall:false,
+      val: `<span class="static-val">📅 ${esc(bk.Tarikh)}</span>` },
+    { n:2,  lbl:'Tajuk',              cls:'',      tall:false,
+      val: dragRow(bk.Tajuk) },
+    { n:3,  lbl:'Jenis Buku',         cls:'',      tall:false,
+      val: `<div class="tog-grp"><button class="tog-btn on" onclick="togFiz(this)">Fizikal</button><button class="tog-btn" onclick="togEbk(this)">E-Buku</button></div>` },
+    { n:4,  lbl:'Kategori',           cls:'',      tall:false,
+      val: `<select class="kat-sel${kat?' filled':''}" onchange="this.classList.toggle('filled',this.value!=='')">
+              <option value="">Pilih satu</option>
+              <option value="Fiksyen"${kat==='Fiksyen'?' selected':''}>Fiksyen</option>
+              <option value="Bukan Fiksyen"${kat==='Bukan Fiksyen'?' selected':''}>Bukan Fiksyen</option>
+            </select>` },
+    { n:5,  lbl:'Bilangan Mukasurat', cls:'',      tall:false,
+      val: dragRow(bk['Bilangan Mukasurat']) },
+    { n:6,  lbl:'ISBN',               cls:' grey', tall:false,
+      val: `<span class="grey-note">— Tidak diperlukan —</span>` },
+    { n:7,  lbl:'Penulis',            cls:'',      tall:false,
+      val: dragRow(penulis) },
+    { n:8,  lbl:'Penerbit',           cls:'',      tall:false,
+      val: dragRow(bk.Penerbit) },
+    { n:9,  lbl:'Tahun Terbitan',     cls:' grey', tall:false,
+      val: `<span class="grey-note">— Tidak diperlukan —</span>` },
+    { n:10, lbl:'Bahasa',             cls:'',      tall:false,
+      val: `<div class="bhs-grp">${bhsBtns}</div>` },
+    { n:11, lbl:'Rumusan',            cls:'',      tall:true,
+      val: dragRow(bk.Sinopsis) },
+    { n:12, lbl:'Pengajaran',         cls:'',      tall:true,
+      val: dragRow(bk.Pengajaran) },
+  ];
+
+  let html = '<div class="row-list">';
+  rows.forEach((r,i) => {
+    const tallCls = r.tall ? ' tall' : '';
+    html += `<div class="info-row${r.cls}${tallCls}" style="animation-delay:${i*0.03}s;animation:fadeUp .28s ease both">
+      <div class="row-lbl"><span class="rnum">${r.n}</span>${esc(r.lbl)}</div>
+      <div class="row-val">${r.val}</div>
+    </div>`;
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function ds(e, val) {
+  e.dataTransfer.setData('text/plain', val);
+  e.dataTransfer.effectAllowed = 'copy';
+  setTimeout(() => { const c = e.target.closest('.drag-chip'); if(c) c.style.opacity='.4'; }, 0);
+}
+function de(e) {
+  const c = e.target.closest('.drag-chip'); if(c) c.style.opacity='';
+}
+function togFiz(btn) {
+  const g = btn.closest('.tog-grp');
+  g.querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function togEbk(btn) {
+  const g = btn.closest('.tog-grp');
+  g.querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function setBhs(btn) {
+  btn.closest('.bhs-grp').querySelectorAll('.bhs-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
