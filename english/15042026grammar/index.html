@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Grammar Quest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(-45deg, #0f172a, #312e81, #1e1b4b, #020617);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 玻璃拟态卡片 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 24px;
+        }
+
+        /* 任务选择按钮特效 */
+        .mission-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        .mission-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: 0.5s;
+        }
+        .mission-card:hover {
+            transform: translateY(-5px) scale(1.03);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #a855f7;
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);
+            cursor: pointer;
+        }
+        .mission-card:hover::before {
+            left: 150%;
+        }
+
+        /* 选项按钮动画 */
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.02);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+        }
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        /* 状态样式 */
+        .correct {
+            background: rgba(34, 197, 94, 0.3) !important;
+            border-color: #22c55e !important;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.6) !important;
+            color: #fff;
+        }
+        .wrong {
+            background: rgba(239, 68, 68, 0.3) !important;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6) !important;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* 连击文字浮动动画 */
+        .combo-text {
+            position: absolute;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #b45309;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 50;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            50% { transform: translateY(-30px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1); }
+        }
+
+        /* 进度条发光 */
+        .progress-glow {
+            box-shadow: 0 0 10px #3b82f6, 0 0 20px #8b5cf6;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 输入框样式 */
+        .glass-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+        }
+
+        /* 动态背景点 */
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+            from { transform: translateY(100vh); }
+            to { transform: translateY(-100px); }
+        }
+
+        /* 解释框弹出动画 */
+        .exp-box {
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative">
+
+    <!-- 背景特效容器 -->
+    <div id="particles" class="absolute inset-0 pointer-events-none z-0"></div>
+
+    <!-- 欢迎界面 (Screen 1) -->
+    <div id="welcome-screen" class="screen active flex-col items-center justify-center z-10 w-full max-w-md px-6">
+        <div class="glass-card p-10 w-full text-center space-y-6">
+            <div class="inline-block p-4 rounded-full bg-purple-600/30 text-purple-400 mb-2 shadow-[0_0_20px_rgba(168,85,247,0.5)]">
+                <i class="fa-solid fa-user-astronaut text-5xl"></i>
+            </div>
+            <h1 class="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 drop-shadow-lg">
+                Agent Login
+            </h1>
+            <p class="text-gray-300">Enter your name to access missions</p>
+            
+            <div class="space-y-4 pt-4">
+                <input type="text" id="student-name" placeholder="Agent Name" class="glass-input w-full px-5 py-4 rounded-xl text-lg text-center transition-all placeholder-gray-400">
+                <button id="login-btn" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-4 rounded-xl text-lg transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+                    ENTER HUB <i class="fa-solid fa-right-to-bracket ml-2"></i>
+                </button>
+            </div>
+            <p id="name-error" class="text-red-400 text-sm hidden mt-2">Please enter your name!</p>
+        </div>
+    </div>
+
+    <!-- 选关界面 (Screen 1.5 - 新增) -->
+    <div id="level-screen" class="screen flex-col items-center justify-center z-10 w-full max-w-4xl px-4 py-8">
+        <div class="text-center mb-10">
+            <h2 class="text-sm text-purple-400 font-bold tracking-[0.2em] uppercase mb-2">Mission Hub</h2>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg">Select Your Target</h1>
+            <p class="text-gray-300 mt-2">Welcome, <span id="display-agent-name" class="font-bold text-blue-300">Agent</span>!</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+            <!-- Unit 1 -->
+            <div class="mission-card rounded-2xl p-6 flex items-center space-x-6" data-unit="Unit 1: Past Continuous">
+                <div class="bg-blue-500/20 p-4 rounded-full text-blue-400">
+                    <i class="fa-solid fa-clock-rotate-left text-3xl w-8 text-center"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Unit 1</h3>
+                    <p class="text-blue-200">Past Continuous w/ When & While</p>
+                </div>
+            </div>
+
+            <!-- Unit 2 -->
+            <div class="mission-card rounded-2xl p-6 flex items-center space-x-6" data-unit="Unit 2: Used to">
+                <div class="bg-purple-500/20 p-4 rounded-full text-purple-400">
+                    <i class="fa-solid fa-hourglass-half text-3xl w-8 text-center"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Unit 2</h3>
+                    <p class="text-purple-200">Used to / Didn't use to</p>
+                </div>
+            </div>
+
+            <!-- Unit 3 -->
+            <div class="mission-card rounded-2xl p-6 flex items-center space-x-6" data-unit="Unit 3: Present Perfect">
+                <div class="bg-green-500/20 p-4 rounded-full text-green-400">
+                    <i class="fa-solid fa-check-double text-3xl w-8 text-center"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Unit 3</h3>
+                    <p class="text-green-200">Present Perfect (Affirmative/Never)</p>
+                </div>
+            </div>
+
+            <!-- Unit 4 (Mixed) -->
+            <div class="mission-card rounded-2xl p-6 flex items-center space-x-6" data-unit="Mixed Review">
+                <div class="bg-yellow-500/20 p-4 rounded-full text-yellow-400">
+                    <i class="fa-solid fa-shuffle text-3xl w-8 text-center"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Unit 4</h3>
+                    <p class="text-yellow-200">Mixed Review (Units 1-3)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 答题界面 (Screen 2) -->
+    <div id="quiz-screen" class="screen flex-col items-center justify-center z-10 w-full max-w-3xl px-4 h-screen py-8">
+        <!-- 顶部状态栏 -->
+        <div class="w-full flex justify-between items-end mb-4 px-2">
+            <div>
+                <p class="text-sm text-purple-300 font-semibold tracking-wider uppercase" id="unit-label">Unit 1</p>
+                <div class="text-xl font-bold">Score: <span id="score-display" class="text-yellow-400">0</span></div>
+            </div>
+            <div class="text-right">
+                <div class="text-lg font-bold text-orange-400" id="streak-display">🔥 Streak: 0</div>
+                <div class="text-sm text-gray-300">Question <span id="current-q-num">1</span> / <span id="total-q-num">20</span></div>
+            </div>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="w-full bg-gray-700/50 rounded-full h-2.5 mb-8 backdrop-blur-sm overflow-hidden">
+            <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full progress-glow" style="width: 0%"></div>
+        </div>
+
+        <!-- 题目卡片 -->
+        <div class="glass-card w-full p-8 md:p-10 flex-1 flex flex-col justify-center relative">
+            <h2 id="question-text" class="text-2xl md:text-3xl font-semibold mb-10 text-center leading-relaxed">
+                Loading question...
+            </h2>
+            
+            <div id="options-container" class="grid gap-4 w-full max-w-xl mx-auto">
+                <!-- 选项通过 JS 注入 -->
+            </div>
+
+            <!-- 解释框 (初始隐藏) -->
+            <div id="explanation-container" class="hidden mt-6 w-full max-w-xl mx-auto">
+                <div class="glass-card bg-black/40 p-5 rounded-xl border border-blue-400/30 text-left exp-box">
+                    <h4 class="text-blue-300 font-bold mb-3 text-lg"><i class="fa-solid fa-lightbulb text-yellow-400 mr-2"></i>Explanation / 解析 / Penerangan:</h4>
+                    <p id="explanation-text" class="text-gray-200 text-[15px] leading-relaxed"></p>
+                </div>
+                <button onclick="nextQuestion()" class="mt-5 w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-105 shadow-[0_0_15px_rgba(16,185,129,0.5)] exp-box">
+                    Next Question <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果结算界面 (Screen 3) -->
+    <div id="result-screen" class="screen flex-col items-center justify-center z-10 w-full max-w-md px-6">
+        <div class="glass-card p-10 w-full text-center space-y-6 relative overflow-hidden">
+            <!-- 加载遮罩 -->
+            <div id="loading-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-20 hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mb-4"></div>
+                <p class="font-semibold text-purple-300">Saving Data...</p>
+            </div>
+
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">Mission Complete!</h2>
+            <p class="text-purple-300 font-semibold" id="result-unit-label">Unit 1</p>
+            
+            <div class="py-4">
+                <p class="text-gray-300 mb-2">Final Score</p>
+                <div class="text-6xl font-extrabold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+                    <span id="final-score">0</span><span class="text-3xl text-gray-400" id="final-total">/20</span>
+                </div>
+                <p class="mt-4 text-lg text-yellow-400 font-bold" id="final-streak">Max Streak: 0 🔥</p>
+            </div>
+
+            <div id="submit-status" class="text-sm p-3 rounded-lg hidden"></div>
+
+            <button onclick="backToMissions()" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-[0_0_15px_rgba(59,130,246,0.4)]">
+                Back to Missions <i class="fa-solid fa-list-ul ml-2"></i>
+            </button>
+            <button onclick="location.reload()" class="w-full bg-transparent hover:bg-white/10 border border-white/20 text-white text-sm font-semibold py-2 mt-2 rounded-xl transition-all">
+                Change Agent (Log out)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 配置：将这里的 URL 替换为你的 Apps Script Web App URL
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCqbUUZAF5ga-bVf6D-6VHbIpZAZBGohvEI1Dj5BiSeIkF3Ao19Jh6iuXCewPx9NPt/exec"; 
+
+        // ==========================================
+        // 题目数据 (完整 80 题)
+        // ==========================================
+        const questions = [
+            // Unit 1: Past Continuous
+            { unit: "Unit 1: Past Continuous", q: "She ________ TV when the lights went out.", opts: ["watch", "was watching", "watched"], ans: 1, exp: "🇨🇳 过去进行时 (was/were + ing) 表示当时正在进行的动作。当灯熄灭时，她<b>正在看</b>电视。<br><br>🇲🇾 Masa lepas berterusan (Past continuous). Dia <b>sedang menonton</b> TV apabila lampu terpadam." },
+            { unit: "Unit 1: Past Continuous", q: "The alarm rang ________ they were rehearsing for the concert.", opts: ["when", "while", "but"], ans: 1, exp: "🇨🇳 <b>While</b> (当...时候) 后面通常接过去进行时 (were rehearsing)。<br><br>🇲🇾 <b>While</b> digunakan bersama perbuatan yang sedang berterusan (past continuous)." },
+            { unit: "Unit 1: Past Continuous", q: "I ________ my homework when the power cut happened.", opts: ["was doing", "did", "am doing"], ans: 0, exp: "🇨🇳 停电发生时，我<b>正在做</b>功课 (was doing)。<br><br>🇲🇾 Saya <b>sedang membuat</b> kerja rumah (was doing) apabila bekalan elektrik terputus." },
+            { unit: "Unit 1: Past Continuous", q: "They were having dinner ________ the fire alarm went off.", opts: ["until", "when", "then"], ans: 1, exp: "🇨🇳 <b>When</b> 用于接突然发生的短暂动作 (went off)。警报响起的那一刻，他们正在吃晚餐。<br><br>🇲🇾 <b>When</b> digunakan untuk kejadian yang tiba-tiba (penggera berbunyi) yang memotong perbuatan yang sedang berlaku (makan malam)." },
+            { unit: "Unit 1: Past Continuous", q: "He ________ home when he saw the accident.", opts: ["walks", "was walking", "walked"], ans: 1, exp: "🇨🇳 他看到意外发生时，他<b>正在走路</b>回家 (was walking)。<br><br>🇲🇾 Dia <b>sedang berjalan</b> pulang (was walking) apabila dia melihat kemalangan itu." },
+            { unit: "Unit 1: Past Continuous", q: "________ she was cooking, the electricity went off.", opts: ["When", "While", "Until"], ans: 1, exp: "🇨🇳 <b>While</b> 后面接过去进行时 (was cooking)，表示正在煮饭的期间。<br><br>🇲🇾 <b>While</b> digunakan kerana perbuatan memasak sedang berterusan." },
+            { unit: "Unit 1: Past Continuous", q: "The train stopped ________ we were travelling through the tunnel.", opts: ["while", "because", "so"], ans: 0, exp: "🇨🇳 当我们<b>正在</b>穿过隧道时 (were travelling)，火车停了。<br><br>🇲🇾 Kereta api berhenti semasa kami <b>sedang dalam perjalanan</b> (were travelling) melalui terowong." },
+            { unit: "Unit 1: Past Continuous", q: "My mum ________ a shower when the water went cold.", opts: ["has", "was having", "had"], ans: 1, exp: "🇨🇳 水变冷的那一刻，妈妈<b>正在洗澡</b> (was having a shower)。<br><br>🇲🇾 Ibu <b>sedang mandi</b> (was having) apabila air menjadi sejuk." },
+            { unit: "Unit 1: Past Continuous", q: "They were sitting in the living room ________ the storm started.", opts: ["so", "because", "when"], ans: 2, exp: "🇨🇳 <b>When</b> 后面接突发的短动作 (the storm started)。暴风雨开始时他们正坐在客厅。<br><br>🇲🇾 <b>When</b> digunakan untuk kejadian yang tiba-tiba berlaku (ribut bermula)." },
+            { unit: "Unit 1: Past Continuous", q: "I was washing my hair ________ the lights went out.", opts: ["after", "when", "before"], ans: 1, exp: "🇨🇳 <b>When</b> 接突发动作。灯熄灭(went out)时，我正在洗头。<br><br>🇲🇾 <b>When</b> digunakan untuk perbuatan yang tiba-tiba terjadi (lampu terpadam)." },
+            { unit: "Unit 1: Past Continuous", q: "________ the pupils were singing, the alarm rang.", opts: ["After", "While", "Until"], ans: 1, exp: "🇨🇳 <b>While</b> 后面接进行时的动作 (were singing)，表示在唱歌的期间。<br><br>🇲🇾 <b>While</b> bermaksud 'semasa', digunakan untuk perbuatan yang sedang berlaku." },
+            { unit: "Unit 1: Past Continuous", q: "The elephant escaped ________ the zookeeper was feeding it.", opts: ["when", "after", "before"], ans: 0, exp: "🇨🇳 大象逃跑是在饲养员<b>正在喂食的时候</b> (when/while 均可，选项中 when 最合适)。<br><br>🇲🇾 Gajah itu terlepas <b>apabila/semasa</b> penjaga zoo sedang memberinya makan." },
+            { unit: "Unit 1: Past Continuous", q: "She was reading a book ________ she heard a scream.", opts: ["while", "when", "so"], ans: 1, exp: "🇨🇳 听到尖叫声 (heard a scream) 是一瞬间的动作，前面用 <b>when</b> 连结。<br><br>🇲🇾 <b>When</b> digunakan untuk tindakan pendek/tiba-tiba (mendengar jeritan)." },
+            { unit: "Unit 1: Past Continuous", q: "They ________ on the boat when the engine stopped.", opts: ["were travelling", "travel", "travelled"], ans: 0, exp: "🇨🇳 引擎停止时，他们<b>正在</b>船上航行 (were travelling)。<br><br>🇲🇾 Mereka <b>sedang dalam perjalanan</b> (were travelling) apabila enjin berhenti." },
+            { unit: "Unit 1: Past Continuous", q: "The fire drill happened ________ we were in the classroom.", opts: ["until", "while", "after"], ans: 1, exp: "🇨🇳 <b>While</b> 表示“在...期间”，当我们在课室的期间，火警演习发生了。<br><br>🇲🇾 <b>While</b> bermaksud 'semasa' kami berada di dalam kelas." },
+            { unit: "Unit 1: Past Continuous", q: "I ________ dinner when the electricity came back.", opts: ["made", "was making", "make"], ans: 1, exp: "🇨🇳 电力恢复时，我<b>正在做</b>晚餐 (was making)。<br><br>🇲🇾 Saya <b>sedang menyediakan</b> makan malam (was making) apabila elektrik kembali." },
+            { unit: "Unit 1: Past Continuous", q: "________ I was walking to school, it started to rain.", opts: ["While", "After", "Before"], ans: 0, exp: "🇨🇳 <b>While</b> 后面接进行时态 (I was walking)，表示在我走路的期间。<br><br>🇲🇾 <b>While</b> (semasa) diikuti dengan perbuatan yang sedang berlaku (was walking)." },
+            { unit: "Unit 1: Past Continuous", q: "She was painting in art class ________ the alarm rang.", opts: ["when", "until", "while"], ans: 0, exp: "🇨🇳 <b>When</b> 接短动作 (the alarm rang)。警报响时，她正在画画。<br><br>🇲🇾 <b>When</b> digunakan untuk kejadian yang memotong perbuatan lain (penggera berbunyi)." },
+            { unit: "Unit 1: Past Continuous", q: "He was not watching ________ the elephant ran away.", opts: ["while", "when", "after"], ans: 1, exp: "🇨🇳 <b>When</b> 接短动作。大象跑掉的那一刻，他没有在看。<br><br>🇲🇾 <b>When</b> digunakan untuk kejadian pendek. Dia tidak sedang melihat apabila gajah itu lari." },
+            { unit: "Unit 1: Past Continuous", q: "________ he was climbing the mountain, he broke his leg.", opts: ["After", "While", "Because"], ans: 1, exp: "🇨🇳 <b>While</b> 接进行时。他正在爬山的时候 (he was climbing)，他摔断了腿。<br><br>🇲🇾 <b>While</b> (semasa) dia sedang mendaki, kakinya patah." },
+            
+            // Unit 2: Used to
+            { unit: "Unit 2: Used to", q: "People ________ use to have cars in the past.", opts: ["didn't", "don't", "weren't"], ans: 0, exp: "🇨🇳 过去否定习惯用 <b>didn't use to</b>。表示过去没有做某事的习惯。<br><br>🇲🇾 Ayat negatif masa lalu menggunakan <b>didn't use to</b> + kata kerja dasar." },
+            { unit: "Unit 2: Used to", q: "Samuel ________ travel to work by boat.", opts: ["use to", "used to", "was used to"], ans: 1, exp: "🇨🇳 肯定句表示过去习惯用 <b>used to</b> + 动词原形。<br><br>🇲🇾 Menunjukkan kebiasaan masa lalu menggunakan <b>used to</b>." },
+            { unit: "Unit 2: Used to", q: "Children ________ write with pen and ink in school.", opts: ["used to", "use to", "using to"], ans: 0, exp: "🇨🇳 孩子们过去习惯用钢笔写字：<b>used to</b> write。<br><br>🇲🇾 Kanak-kanak <b>biasa</b> (used to) menulis guna pen dan dakwat di sekolah dahulu." },
+            { unit: "Unit 2: Used to", q: "People didn't ________ have electricity in the past.", opts: ["uses to", "used to", "use to"], ans: 2, exp: "🇨🇳 否定句已经有 didn't，所以后面恢复用原形 <b>use to</b>。<br><br>🇲🇾 Selepas perkataan 'didn't', kita mesti gunakan kata kerja dasar <b>use to</b> (tanpa 'd')." },
+            { unit: "Unit 2: Used to", q: "He ________ wear three jackets because it was very cold.", opts: ["used to", "use to", "was using"], ans: 0, exp: "🇨🇳 过去习惯穿三件外套：<b>used to</b> wear。<br><br>🇲🇾 Dia <b>biasa</b> (used to) memakai tiga jaket kerana sangat sejuk." },
+            { unit: "Unit 2: Used to", q: "________ you use to walk to school when you were young?", opts: ["Did", "Were", "Do"], ans: 0, exp: "🇨🇳 过去时的疑问句借用助动词 <b>Did</b>，后接原形 use to。<br><br>🇲🇾 Soalan tentang masa lalu bermula dengan <b>Did</b> (Did you use to...?)." },
+            { unit: "Unit 2: Used to", q: "She ________ play with toys when she was little.", opts: ["use to", "used to", "using"], ans: 1, exp: "🇨🇳 肯定句：她过去常常玩玩具，用 <b>used to</b> play。<br><br>🇲🇾 Ayat positif: Dia <b>biasa</b> (used to) bermain mainan semasa kecil." },
+            { unit: "Unit 2: Used to", q: "They didn't use to ________ calculators at school.", opts: ["has", "having", "have"], ans: 2, exp: "🇨🇳 didn't use to 后面接动词原形 <b>have</b>。<br><br>🇲🇾 Selepas 'didn't use to', mesti guna kata kerja dasar <b>have</b>." },
+            { unit: "Unit 2: Used to", q: "People ________ pay an artist to paint portraits.", opts: ["used to", "use to", "uses to"], ans: 0, exp: "🇨🇳 人们过去习惯付钱请画家画像：<b>used to</b> pay。<br><br>🇲🇾 Orang zaman dahulu <b>biasa</b> (used to) membayar pelukis." },
+            { unit: "Unit 2: Used to", q: "He used to ________ in a cottage in the countryside.", opts: ["lived", "lives", "live"], ans: 2, exp: "🇨🇳 used to 后面必须接动词原形 <b>live</b>。<br><br>🇲🇾 Selepas 'used to', kata kerja mesti dalam bentuk asal (<b>live</b>)." },
+            { unit: "Unit 2: Used to", q: "My grandmother didn't use to ________ a computer.", opts: ["uses", "use", "using"], ans: 1, exp: "🇨🇳 否定句 didn't 后面接原形 <b>use to</b>。<br><br>🇲🇾 Dalam ayat negatif 'didn't', kita guna <b>use</b> (tanpa 'd')." },
+            { unit: "Unit 2: Used to", q: "________ he use to ride a horse to work?", opts: ["Do", "Did", "Was"], ans: 1, exp: "🇨🇳 过去时的疑问句开头用 <b>Did</b>。<br><br>🇲🇾 Soalan untuk kebiasaan masa lalu mesti dimulakan dengan <b>Did</b>." },
+            { unit: "Unit 2: Used to", q: "She used to ________ up the carpets every day.", opts: ["vacuum", "vacuumed", "vacuuming"], ans: 0, exp: "🇨🇳 used to 后面接动词原形 <b>vacuum</b>。<br><br>🇲🇾 Selepas 'used to', kata kerja tak perlu ditambah apa-apa (<b>vacuum</b>)." },
+            { unit: "Unit 2: Used to", q: "Yes, I ________ ! I used to do maths in my head.", opts: ["do", "did", "was"], ans: 1, exp: "🇨🇳 问句是 Did you...?，简短的肯定回答是 Yes, I <b>did</b>。<br><br>🇲🇾 Jawapan pendek untuk soalan 'Did...?' ialah 'Yes, I <b>did</b>.'" },
+            { unit: "Unit 2: Used to", q: "People ________ use to have watches, so they didn't know the time.", opts: ["didn't", "weren't", "don't"], ans: 0, exp: "🇨🇳 否定习惯：<b>didn't</b> use to have watches。<br><br>🇲🇾 Manusia zaman dahulu <b>tidak biasa</b> (didn't use to) mempunyai jam tangan." },
+            { unit: "Unit 2: Used to", q: "We didn't use to ________ so much homework.", opts: ["got", "getting", "get"], ans: 2, exp: "🇨🇳 didn't use to 后面接动词原形 <b>get</b>。<br><br>🇲🇾 Selepas 'didn't use to', kata kerja mesti dalam bentuk asal (<b>get</b>)." },
+            { unit: "Unit 2: Used to", q: "He ________ use to work in an office before.", opts: ["didn't", "wasn't", "don't"], ans: 0, exp: "🇨🇳 过去否定习惯用 <b>didn't</b> use to work。<br><br>🇲🇾 Ayat negatif untuk kebiasaan masa lalu ialah <b>didn't</b> use to." },
+            { unit: "Unit 2: Used to", q: "I used to ________ early when I was young.", opts: ["sleeps", "sleeping", "sleep"], ans: 2, exp: "🇨🇳 used to 后接动词原形 <b>sleep</b>。<br><br>🇲🇾 Selepas 'used to', guna kata kerja dasar (<b>sleep</b>)." },
+            { unit: "Unit 2: Used to", q: "She used to ________ her own clothes.", opts: ["choosing", "chose", "choose"], ans: 2, exp: "🇨🇳 used to 后接动词原形 <b>choose</b>。<br><br>🇲🇾 Selepas 'used to', guna kata kerja dasar (<b>choose</b>)." },
+            { unit: "Unit 2: Used to", q: "No, I ________ ! I didn't use to study history.", opts: ["didn't", "wasn't", "don't"], ans: 0, exp: "🇨🇳 问句是 Did you...?，简短的否定回答是 No, I <b>didn't</b>。<br><br>🇲🇾 Jawapan pendek negatif untuk soalan masa lalu ialah 'No, I <b>didn't</b>.'" },
+
+            // Unit 3: Present Perfect
+            { unit: "Unit 3: Present Perfect", q: "She ________ visited Toronto before.", opts: ["has never", "never has", "have never"], ans: 0, exp: "🇨🇳 She 是第三人称单数，搭配 <b>has</b> never。<br><br>🇲🇾 'She' mesti diikuti dengan <b>has</b> (has never visited)." },
+            { unit: "Unit 3: Present Perfect", q: "I ________ tried kayaking this month.", opts: ["have", "has", "am"], ans: 0, exp: "🇨🇳 I 搭配 <b>have</b> (I have tried)。<br><br>🇲🇾 'I' mesti diikuti dengan <b>have</b> untuk Present Perfect." },
+            { unit: "Unit 3: Present Perfect", q: "He has ________ been to a hot-air balloon festival.", opts: ["ever", "never", "always"], ans: 1, exp: "🇨🇳 题意表示“从未去过”，填 <b>never</b>。<br><br>🇲🇾 <b>never</b> membawa maksud 'tidak pernah' pergi ke festival itu." },
+            { unit: "Unit 3: Present Perfect", q: "They ________ swum with dolphins before.", opts: ["has", "have", "were"], ans: 1, exp: "🇨🇳 They (复数) 搭配 <b>have</b>。<br><br>🇲🇾 'They' (mereka) mesti diikuti dengan <b>have</b>." },
+            { unit: "Unit 3: Present Perfect", q: "She has never ________ a lion in the wild.", opts: ["seen", "see", "saw"], ans: 0, exp: "🇨🇳 Present perfect 结构：has/have + 过去分词 (V3)。see 的 V3 是 <b>seen</b>。<br><br>🇲🇾 Mesti guna 'Past Participle' (V3) selepas 'has/have'. V3 untuk 'see' ialah <b>seen</b>." },
+            { unit: "Unit 3: Present Perfect", q: "I ________ written a blog about my adventures.", opts: ["has", "have", "am"], ans: 1, exp: "🇨🇳 I 搭配 <b>have</b> (I have written)。<br><br>🇲🇾 'I' mesti diikuti dengan <b>have</b>." },
+            { unit: "Unit 3: Present Perfect", q: "He has ________ climbed Mount Kilimanjaro.", opts: ["never", "ever", "always"], ans: 0, exp: "🇨🇳 题意为“他从未爬过”，填 <b>never</b>。<br><br>🇲🇾 <b>never</b> bermaksud dia 'tidak pernah' memanjat gunung itu." },
+            { unit: "Unit 3: Present Perfect", q: "We have ________ to lots of different countries.", opts: ["flew", "fly", "flown"], ans: 2, exp: "🇨🇳 fly 的过去分词(V3)是 <b>flown</b>。<br><br>🇲🇾 Past Participle (V3) untuk 'fly' ialah <b>flown</b>." },
+            { unit: "Unit 3: Present Perfect", q: "She ________ never slept in a sleeping bag before.", opts: ["has", "have", "had"], ans: 0, exp: "🇨🇳 She 搭配 <b>has</b>。<br><br>🇲🇾 'She' (Dia - perempuan) mesti diikuti dengan <b>has</b>." },
+            { unit: "Unit 3: Present Perfect", q: "I have ________ a rucksack before — it's really heavy!", opts: ["never carried", "carry never", "never carry"], ans: 0, exp: "🇨🇳 never 放在 have 和 过去分词 之间：have <b>never carried</b>。<br><br>🇲🇾 Perkataan <b>never</b> mesti diletakkan di tengah-tengah: have <b>never carried</b>." },
+            { unit: "Unit 3: Present Perfect", q: "He has ________ in a hot-air balloon.", opts: ["never flown", "never flying", "fly never"], ans: 0, exp: "🇨🇳 结构：has + <b>never flown</b> (过去分词)。<br><br>🇲🇾 Struktur yang betul ialah 'has' + <b>never flown</b> (V3)." },
+            { unit: "Unit 3: Present Perfect", q: "They have ________ kayaking before.", opts: ["been", "be", "being"], ans: 0, exp: "🇨🇳 be动词的过去分词(V3)是 <b>been</b>。<br><br>🇲🇾 Past Participle (V3) untuk 'be' ialah <b>been</b>." },
+            { unit: "Unit 3: Present Perfect", q: "She has never ________ a tent in her life.", opts: ["putting up", "put up", "puts up"], ans: 1, exp: "🇨🇳 put 的过去分词仍然是 <b>put</b> (put up)。<br><br>🇲🇾 Past Participle (V3) untuk 'put' kekal sebagai <b>put</b>." },
+            { unit: "Unit 3: Present Perfect", q: "We ________ heard some fantastic music on our travels.", opts: ["has", "have", "had"], ans: 1, exp: "🇨🇳 We 搭配 <b>have</b>。<br><br>🇲🇾 'We' (Kami/Kita) mesti diikuti dengan <b>have</b>." },
+            { unit: "Unit 3: Present Perfect", q: "He ________ met lots of interesting people.", opts: ["have", "has", "is"], ans: 1, exp: "🇨🇳 He 搭配 <b>has</b>。<br><br>🇲🇾 'He' (Dia - lelaki) mesti diikuti dengan <b>has</b>." },
+            { unit: "Unit 3: Present Perfect", q: "I have never ________ in the sea.", opts: ["swum", "swim", "swimming"], ans: 0, exp: "🇨🇳 swim 的过去分词(V3)是 <b>swum</b>。<br><br>🇲🇾 Past Participle (V3) untuk 'swim' ialah <b>swum</b>." },
+            { unit: "Unit 3: Present Perfect", q: "She has ________ pandas in the wild.", opts: ["saw", "seen", "see"], ans: 1, exp: "🇨🇳 see 的过去分词(V3)是 <b>seen</b>。<br><br>🇲🇾 Past Participle (V3) untuk 'see' ialah <b>seen</b>." },
+            { unit: "Unit 3: Present Perfect", q: "They have never ________ a fire before.", opts: ["make", "made", "making"], ans: 1, exp: "🇨🇳 make 的过去分词(V3)是 <b>made</b>。<br><br>🇲🇾 Past Participle (V3) untuk 'make' ialah <b>made</b>." },
+            { unit: "Unit 3: Present Perfect", q: "He has ________ a blog for two years.", opts: ["written", "write", "writing"], ans: 0, exp: "🇨🇳 write 的过去分词(V3)是 <b>written</b>。<br><br>🇲🇾 Past Participle (V3) untuk 'write' ialah <b>written</b>." },
+            { unit: "Unit 3: Present Perfect", q: "I ________ never tried skiing before.", opts: ["has", "have", "had"], ans: 1, exp: "🇨🇳 I 搭配 <b>have</b>。<br><br>🇲🇾 'I' mesti diikuti dengan <b>have</b>." },
+
+            // Unit 4: Mixed Review
+            { unit: "Mixed Review", q: "She ________ cooking when the lights went out.", opts: ["was", "is", "were"], ans: 0, exp: "🇨🇳 She 是单数，过去进行时用 <b>was</b>。<br><br>🇲🇾 'She' menggunakan <b>was</b> untuk masa lepas berterusan." },
+            { unit: "Mixed Review", q: "People used to ________ candles for light in the past.", opts: ["using", "uses", "use"], ans: 2, exp: "🇨🇳 used to 后面接动词原形 <b>use</b>。<br><br>🇲🇾 Selepas 'used to', guna kata kerja dasar (<b>use</b>)." },
+            { unit: "Mixed Review", q: "He has never ________ in a kayak.", opts: ["been", "be", "being"], ans: 0, exp: "🇨🇳 be 的过去分词是 <b>been</b> (has never been)。<br><br>🇲🇾 Past Participle untuk 'be' ialah <b>been</b>." },
+            { unit: "Mixed Review", q: "They ________ dinner while the fire alarm was ringing.", opts: ["had", "were having", "have"], ans: 1, exp: "🇨🇳 while 后面接的是警报响的过程，前面表示他们<b>正在吃晚餐</b> (were having)。<br><br>🇲🇾 Mereka <b>sedang makan</b> (were having) semasa penggera berbunyi." },
+            { unit: "Mixed Review", q: "Did you ________ to walk to school when you were young?", opts: ["used", "use", "using"], ans: 1, exp: "🇨🇳 Did you 后面接原形动词 <b>use</b> to。<br><br>🇲🇾 Selepas 'Did', kita mesti guna perkataan asal <b>use</b>." },
+            { unit: "Mixed Review", q: "I ________ visited the CN Tower before.", opts: ["has never", "have never", "never have"], ans: 1, exp: "🇨🇳 I 搭配 <b>have never</b>。<br><br>🇲🇾 'I' mesti diikuti dengan <b>have never</b>." },
+            { unit: "Mixed Review", q: "She was watching TV ________ the accident happened.", opts: ["while", "when", "after"], ans: 1, exp: "🇨🇳 <b>when</b> 接突然发生的短动作 (the accident happened)。<br><br>🇲🇾 <b>when</b> digunakan untuk kejadian yang tiba-tiba (kemalangan berlaku)." },
+            { unit: "Mixed Review", q: "He ________ use to wear glasses, but he bought a pair.", opts: ["didn't", "wasn't", "don't"], ans: 0, exp: "🇨🇳 过去否定习惯用 <b>didn't</b> use to。<br><br>🇲🇾 Ayat negatif untuk kebiasaan masa lalu ialah <b>didn't</b> use to." },
+            { unit: "Mixed Review", q: "We have ________ lots of exciting things this year.", opts: ["do", "did", "done"], ans: 2, exp: "🇨🇳 do 的过去分词(V3)是 <b>done</b> (have done)。<br><br>🇲🇾 Past Participle untuk 'do' ialah <b>done</b>." },
+            { unit: "Mixed Review", q: "________ she was sleeping, someone knocked on the door.", opts: ["While", "When", "Both A and B"], ans: 0, exp: "🇨🇳 <b>While</b> 后接进行时 (was sleeping)，表示正在睡觉的期间。<br><br>🇲🇾 <b>While</b> digunakan kerana dia sedang tidur. (Perbuatan berterusan)." },
+            { unit: "Mixed Review", q: "People didn't ________ to have smartphones in the past.", opts: ["used", "uses", "use"], ans: 2, exp: "🇨🇳 didn't 后面接动词原形 <b>use</b>。<br><br>🇲🇾 Selepas 'didn't', mesti guna <b>use</b> (tanpa 'd')." },
+            { unit: "Mixed Review", q: "He has ________ been to Africa.", opts: ["ever", "never", "always"], ans: 1, exp: "🇨🇳 题意为去过非洲，根据句意填 <b>never</b>，表示从未。<br><br>🇲🇾 Dia <b>tidak pernah</b> (never) pergi ke Afrika." },
+            { unit: "Mixed Review", q: "They ________ having lunch when the fire engine arrived.", opts: ["was", "are", "were"], ans: 2, exp: "🇨🇳 They 搭配 <b>were</b> having。<br><br>🇲🇾 'They' mesti diikuti dengan <b>were</b> untuk masa lepas." },
+            { unit: "Mixed Review", q: "She used to ________ her grandmother every weekend.", opts: ["visits", "visiting", "visit"], ans: 2, exp: "🇨🇳 used to 后接动词原形 <b>visit</b>。<br><br>🇲🇾 Selepas 'used to', guna kata kerja dasar (<b>visit</b>)." },
+            { unit: "Mixed Review", q: "I ________ seen a bear in the wild before.", opts: ["has never", "have never", "never have"], ans: 1, exp: "🇨🇳 I 搭配 <b>have never</b>。<br><br>🇲🇾 'I' mesti menggunakan <b>have never</b>." },
+            { unit: "Mixed Review", q: "The train stopped ________ they were travelling.", opts: ["while", "because", "before"], ans: 0, exp: "🇨🇳 <b>while</b> 后接进行时 (were travelling)，表示在旅途中火车停了。<br><br>🇲🇾 <b>while</b> digunakan untuk menunjukkan perbuatan sedang berlaku." },
+            { unit: "Mixed Review", q: "He ________ to live in a cottage in the countryside.", opts: ["used", "use", "using"], ans: 0, exp: "🇨🇳 肯定句表示过去习惯用 <b>used</b> to。<br><br>🇲🇾 Ayat positif untuk kebiasaan masa lalu menggunakan <b>used to</b>." },
+            { unit: "Mixed Review", q: "She has ________ a fire before.", opts: ["making", "make", "never made"], ans: 2, exp: "🇨🇳 She has <b>never made</b> a fire (make 的过去分词是 made)。<br><br>🇲🇾 Past participle untuk 'make' ialah <b>made</b>." },
+            { unit: "Mixed Review", q: "What ________ you doing when the alarm rang?", opts: ["was", "were", "are"], ans: 1, exp: "🇨🇳 you 搭配 <b>were</b> (What were you doing?)。<br><br>🇲🇾 'you' mesti digunakan dengan <b>were</b> dalam soalan masa lepas." },
+            { unit: "Mixed Review", q: "People used to ________ horses to travel long distances.", opts: ["rides", "riding", "ride"], ans: 2, exp: "🇨🇳 used to 后接动词原形 <b>ride</b>。<br><br>🇲🇾 Selepas 'used to', guna kata kerja dasar (<b>ride</b>)." }
+        ];
+
+        let currentLevelQuestions = [];
+        let selectedUnit = "";
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let studentName = "";
+        let isAnswering = false;
+
+        // DOM 元素
+        const studentNameInput = document.getElementById('student-name');
+        const loginBtn = document.getElementById('login-btn');
+        const nameError = document.getElementById('name-error');
+        
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const streakDisplay = document.getElementById('streak-display');
+        const currentQNum = document.getElementById('current-q-num');
+        const totalQNum = document.getElementById('total-q-num');
+        const progressBar = document.getElementById('progress-bar');
+        const unitLabel = document.getElementById('unit-label');
+
+        // 初始化背景粒子
+        function initParticles() {
+            const container = document.getElementById('particles');
+            for(let i=0; i<30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                particle.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // 切换屏幕
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // 登录 (输入名字)
+        loginBtn.addEventListener('click', () => {
+            const name = studentNameInput.value.trim();
+            if(!name) {
+                nameError.classList.remove('hidden');
+                studentNameInput.classList.add('border-red-500');
+                return;
+            }
+            studentName = name;
+            document.getElementById('display-agent-name').textContent = studentName;
+            showScreen('level-screen'); // 进入选关大厅
+        });
+
+        // 绑定选关按钮点击事件
+        document.querySelectorAll('.mission-card').forEach(card => {
+            card.addEventListener('click', () => {
+                selectedUnit = card.getAttribute('data-unit');
+                startMission();
+            });
+        });
+
+        // 开始指定关卡
+        function startMission() {
+            // 过滤出该关卡的题目
+            currentLevelQuestions = questions.filter(q => q.unit === selectedUnit);
+            
+            // 重置状态
+            currentQuestionIndex = 0;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            
+            totalQNum.textContent = currentLevelQuestions.length;
+            document.getElementById('final-total').textContent = `/${currentLevelQuestions.length}`;
+            scoreDisplay.textContent = score;
+            updateStreakDisplay();
+            
+            showScreen('quiz-screen');
+            loadQuestion();
+        }
+
+        // 加载问题
+        function loadQuestion() {
+            isAnswering = false;
+            const q = currentLevelQuestions[currentQuestionIndex];
+            
+            // 隐藏解释框
+            document.getElementById('explanation-container').classList.add('hidden');
+
+            // 更新UI信息
+            currentQNum.textContent = currentQuestionIndex + 1;
+            unitLabel.textContent = q.unit;
+            questionText.innerHTML = q.q.replace('________', '<span class="border-b-2 border-dashed border-purple-400 w-16 inline-block mx-2"></span>');
+            
+            // 更新进度条
+            const progress = (currentQuestionIndex / currentLevelQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // 渲染选项
+            optionsContainer.innerHTML = '';
+            const labels = ['A', 'B', 'C'];
+            q.opts.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full text-left px-6 py-4 rounded-xl text-lg font-medium flex items-center justify-between';
+                btn.innerHTML = `<span class="flex-1"><span class="font-bold text-purple-300 mr-3">${labels[index]})</span> ${opt}</span> <i class="fa-solid fa-circle-check opacity-0 icon-check text-2xl"></i>`;
+                btn.onclick = (e) => selectOption(index, btn, e);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // 选择答案
+        function selectOption(selectedIndex, btnElement, event) {
+            if(isAnswering) return;
+            isAnswering = true;
+            
+            const q = currentLevelQuestions[currentQuestionIndex];
+            const isCorrect = selectedIndex === q.ans;
+            const allBtns = document.querySelectorAll('.option-btn');
+
+            allBtns.forEach(btn => btn.disabled = true); // 禁用所有按钮
+
+            if(isCorrect) {
+                // 回答正确
+                score++;
+                streak++;
+                if(streak > maxStreak) maxStreak = streak;
+                
+                btnElement.classList.add('correct');
+                btnElement.querySelector('.icon-check').classList.remove('opacity-0');
+                btnElement.querySelector('.icon-check').classList.add('text-green-400');
+                
+                showComboEffect(event, streak);
+                fireConfetti();
+                
+            } else {
+                // 回答错误
+                streak = 0;
+                btnElement.classList.add('wrong');
+                btnElement.querySelector('.icon-check').className = 'fa-solid fa-circle-xmark text-2xl text-red-400';
+                
+                // 标出正确答案
+                allBtns[q.ans].classList.add('correct');
+                allBtns[q.ans].style.opacity = '0.8';
+            }
+
+            // 更新分数显示
+            scoreDisplay.textContent = score;
+            updateStreakDisplay();
+
+            // 显示解释和下一步按钮 (取代自动跳转)
+            document.getElementById('explanation-text').innerHTML = q.exp || "🇨🇳 答题完成！<br><br>🇲🇾 Selesai!";
+            document.getElementById('explanation-container').classList.remove('hidden');
+        }
+
+        // 点击 Next Question 按钮进入下一题
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if(currentQuestionIndex < currentLevelQuestions.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // 连击 UI 更新
+        function updateStreakDisplay() {
+            streakDisplay.textContent = `🔥 Streak: ${streak}`;
+            if(streak >= 3) {
+                streakDisplay.classList.add('animate-pulse', 'text-red-400', 'scale-110');
+            } else {
+                streakDisplay.classList.remove('animate-pulse', 'text-red-400', 'scale-110');
+            }
+        }
+
+        // 连击浮动特效
+        function showComboEffect(e, currentStreak) {
+            if(currentStreak < 2) return;
+            
+            const text = document.createElement('div');
+            text.className = 'combo-text';
+            text.innerHTML = currentStreak > 2 ? `🔥 Combo x${currentStreak}!` : '✨ Nice!';
+            
+            // 随机在按钮附近显示
+            const rect = e.target.closest('button').getBoundingClientRect();
+            text.style.left = `${rect.left + (Math.random() * rect.width/2)}px`;
+            text.style.top = `${rect.top}px`;
+            
+            document.body.appendChild(text);
+            setTimeout(() => text.remove(), 1000);
+        }
+
+        // 放烟花特效
+        function fireConfetti() {
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.8 },
+                colors: ['#a855f7', '#3b82f6', '#22c55e', '#facc15']
+            });
+        }
+
+        // 完成测试
+        async function finishQuiz() {
+            progressBar.style.width = `100%`;
+            showScreen('result-screen');
+            document.getElementById('result-unit-label').textContent = selectedUnit;
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-streak').textContent = `Max Streak: ${maxStreak} 🔥`;
+            
+            // 大量烟花
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#a855f7', '#3b82f6'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#a855f7', '#3b82f6'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            // 提交数据到 Google Sheets
+            await submitToGoogleSheets();
+        }
+
+        // 返回大厅选关
+        function backToMissions() {
+            // 隐藏状态提示
+            document.getElementById('submit-status').classList.add('hidden');
+            showScreen('level-screen');
+        }
+
+        // 提交到 Google Sheets
+        async function submitToGoogleSheets() {
+            if (!SCRIPT_URL || SCRIPT_URL.includes("替换成你的Web App URL")) {
+                const statusDiv = document.getElementById('submit-status');
+                statusDiv.classList.remove('hidden');
+                statusDiv.classList.add('bg-yellow-500/20', 'text-yellow-300', 'border', 'border-yellow-500/50');
+                statusDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i> Note: Score not saved. Developer needs to set SCRIPT_URL.';
+                return;
+            }
+
+            const overlay = document.getElementById('loading-overlay');
+            const statusDiv = document.getElementById('submit-status');
+            overlay.classList.remove('hidden');
+            
+            const payload = {
+                name: studentName,
+                unit: selectedUnit, // 记录选择了哪个单元
+                score: score,
+                total: currentLevelQuestions.length,
+                maxStreak: maxStreak,
+                timestamp: new Date().toLocaleString()
+            };
+
+            try {
+                // Apps script doPost 接收 plain text body 解析
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                overlay.classList.add('hidden');
+                statusDiv.classList.remove('hidden', 'bg-red-500/20', 'text-red-300', 'bg-yellow-500/20', 'text-yellow-300');
+                statusDiv.classList.add('bg-green-500/20', 'text-green-300', 'border', 'border-green-500/50');
+                statusDiv.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Result saved successfully!';
+                
+            } catch (error) {
+                overlay.classList.add('hidden');
+                statusDiv.classList.remove('hidden', 'bg-green-500/20', 'text-green-300');
+                statusDiv.classList.add('bg-red-500/20', 'text-red-300', 'border', 'border-red-500/50');
+                statusDiv.innerHTML = '<i class="fa-solid fa-circle-exclamation mr-2"></i> Failed to save. Network error.';
+                console.error("Submission error:", error);
+            }
+        }
+
+        // 启动背景
+        initParticles();
+
+    </script>
+</body>
+</html>
