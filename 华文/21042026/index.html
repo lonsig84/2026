@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第八课《雨后的线索》互动侦探作业</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 for beautiful popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Canvas Confetti for celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        /* Part A: Matching Game Styles */
+        .match-btn {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .match-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .match-btn.selected {
+            background-color: #fef08a; /* yellow-200 */
+            border-color: #eab308; /* yellow-500 */
+            transform: scale(1.05);
+        }
+        .match-btn.matched {
+            background-color: #bbf7d0; /* green-200 */
+            border-color: #22c55e; /* green-500 */
+            color: #166534;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .match-btn.wrong {
+            animation: shake 0.5s;
+            background-color: #fecaca; /* red-200 */
+            border-color: #ef4444; /* red-500 */
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Fancy Radio Buttons */
+        .radio-custom:checked + label {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .scaffold-hint {
+            animation: bounce 2s infinite;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-800">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Header Section -->
+        <header class="glass-card rounded-2xl p-6 mb-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-teal-400 to-green-400"></div>
+            <i class="fas fa-search absolute top-4 right-4 text-4xl text-blue-100 opacity-50"></i>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">🕵️‍♂️ 侦探特工队：雨后的线索</h1>
+            <p class="text-slate-600 mb-6 font-medium">五年级华文 | 单元二：和谐之旅 (SP 2.1.1)</p>
+            
+            <form id="student-info-form" class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <div class="w-full md:w-1/3">
+                    <input type="text" id="studentName" required placeholder="请输入姓名 Nama" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition shadow-sm">
+                </div>
+                <div class="w-full md:w-1/3">
+                    <select id="studentClass" required class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition shadow-sm">
+                        <option value="" disabled selected>请选择班级 Kelas</option>
+                        <option value="5M">5 Merah</option>
+                        <option value="5B">5 Biru</option>
+                        <option value="5K">5 Kuning</option>
+                    </select>
+                </div>
+            </form>
+        </header>
+
+        <!-- Main Form -->
+        <form id="worksheet-form" onsubmit="return false;">
+            
+            <!-- Part A: Vocabulary Matching -->
+            <section class="glass-card rounded-2xl p-6 mb-8 relative">
+                <div class="absolute -top-4 -left-4 bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-lg">A</div>
+                <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2 mb-4"><i class="fas fa-puzzle-piece mr-2"></i> 词语密码配对</h2>
+                <p class="text-gray-600 mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100"><i class="fas fa-info-circle mr-1"></i> <strong>指示：</strong> 特工，请找出对应词语的解释。点击左边的<strong>词语</strong>，再点击右边正确的<strong>意思</strong>进行配对。(每题 4 分)</p>
+                
+                <div class="flex flex-col md:flex-row gap-6" id="matching-game">
+                    <!-- Words Column -->
+                    <div class="flex-1 flex flex-col gap-3" id="words-col">
+                        <button type="button" class="match-btn word-btn bg-white border-2 border-gray-200 p-4 rounded-xl font-bold text-lg text-center" data-id="1">添乱 (tiān luàn)</button>
+                        <button type="button" class="match-btn word-btn bg-white border-2 border-gray-200 p-4 rounded-xl font-bold text-lg text-center" data-id="2">敏锐 (mǐn ruì)</button>
+                        <button type="button" class="match-btn word-btn bg-white border-2 border-gray-200 p-4 rounded-xl font-bold text-lg text-center" data-id="3">对策 (duì cè)</button>
+                        <button type="button" class="match-btn word-btn bg-white border-2 border-gray-200 p-4 rounded-xl font-bold text-lg text-center" data-id="4">花苞 (huā bāo)</button>
+                        <button type="button" class="match-btn word-btn bg-white border-2 border-gray-200 p-4 rounded-xl font-bold text-lg text-center" data-id="5">错综 (cuò zōng)</button>
+                    </div>
+                    
+                    <!-- Meanings Column (Shuffled) -->
+                    <div class="flex-1 flex flex-col gap-3" id="meanings-col">
+                        <button type="button" class="match-btn meaning-btn bg-white border-2 border-gray-200 p-4 rounded-xl text-md text-left flex items-center" data-match="4"><span class="text-2xl mr-3">🌷</span> 花未开放时包着花朵的叶片</button>
+                        <button type="button" class="match-btn meaning-btn bg-white border-2 border-gray-200 p-4 rounded-xl text-md text-left flex items-center" data-match="2"><span class="text-2xl mr-3">🦅</span> 感觉灵敏，眼光尖锐</button>
+                        <button type="button" class="match-btn meaning-btn bg-white border-2 border-gray-200 p-4 rounded-xl text-md text-left flex items-center" data-match="5"><span class="text-2xl mr-3">🕸️</span> 交错综合，纷繁复杂</button>
+                        <button type="button" class="match-btn meaning-btn bg-white border-2 border-gray-200 p-4 rounded-xl text-md text-left flex items-center" data-match="1"><span class="text-2xl mr-3">🤦‍♂️</span> 增加麻烦</button>
+                        <button type="button" class="match-btn meaning-btn bg-white border-2 border-gray-200 p-4 rounded-xl text-md text-left flex items-center" data-match="3"><span class="text-2xl mr-3">💡</span> 对付的策略或办法</button>
+                    </div>
+                </div>
+                <!-- Hidden inputs to store matching score -->
+                <input type="hidden" id="partA_score" value="0">
+            </section>
+
+            <!-- Part B: Reading Comprehension -->
+            <section class="glass-card rounded-2xl p-6 mb-8 relative">
+                <div class="absolute -top-4 -left-4 bg-teal-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-lg">B</div>
+                <h2 class="text-2xl font-bold text-teal-800 border-b-2 border-teal-200 pb-2 mb-4"><i class="fas fa-book-open mr-2"></i> 案情分析</h2>
+                <p class="text-gray-600 mb-6 bg-teal-50 p-3 rounded-lg border border-teal-100"><i class="fas fa-info-circle mr-1"></i> <strong>指示：</strong> 根据课文内容，选出最正确的答案。如果遇到困难，可以点击提示灯泡。 (每题 20 分)</p>
+
+                <!-- Q1 -->
+                <div class="mb-8 bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold text-gray-800">1. 为什么校工虎伯会大发脾气？</h3>
+                        <button type="button" onclick="showHint('虎伯生气原因', '“好不容易才盼到百日菊盛开，三天两头却遭人摘走。”\n再加上他手中的扫把沾满了泥，越扫越脏。')" class="scaffold-hint text-yellow-500 hover:text-yellow-600 text-xl" title="点击获取线索"><i class="fas fa-lightbulb"></i></button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="relative">
+                            <input type="radio" name="q1" id="q1a" value="A" class="radio-custom hidden">
+                            <label for="q1a" class="block w-full p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition hover:bg-gray-50">A. 因为爱丽丝在科学园里奔跑，弄脏了走廊。</label>
+                        </div>
+                        <div class="relative">
+                            <input type="radio" name="q1" id="q1b" value="B" class="radio-custom hidden">
+                            <label for="q1b" class="block w-full p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition hover:bg-gray-50">B. 因为盛开的百日菊经常被人偷摘，而且地上满是泥巴扫不干净。</label>
+                        </div>
+                        <div class="relative">
+                            <input type="radio" name="q1" id="q1c" value="C" class="radio-custom hidden">
+                            <label for="q1c" class="block w-full p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition hover:bg-gray-50">C. 因为食堂飘来的香味让他肚子饿了。</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="mb-2 bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold text-gray-800">2. 为什么日蒙和奶奶认为“雨夜”是捉偷花贼的好时机？</h3>
+                        <button type="button" onclick="showHint('雨夜的秘密', '思考一下：下雨后的泥土会变得怎样？如果有人走过去，会留下什么？“凡走过必留下痕迹”。')" class="scaffold-hint text-yellow-500 hover:text-yellow-600 text-xl" title="点击获取线索"><i class="fas fa-lightbulb"></i></button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="relative">
+                            <input type="radio" name="q2" id="q2a" value="A" class="radio-custom hidden">
+                            <label for="q2a" class="block w-full p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition hover:bg-gray-50">A. 因为雨夜天气凉爽，偷花贼一定会出现。</label>
+                        </div>
+                        <div class="relative">
+                            <input type="radio" name="q2" id="q2b" value="B" class="radio-custom hidden">
+                            <label for="q2b" class="block w-full p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition hover:bg-gray-50">B. 因为雨夜天色昏暗，他们躲起来不容易被偷花贼发现。</label>
+                        </div>
+                        <div class="relative">
+                            <input type="radio" name="q2" id="q2c" value="C" class="radio-custom hidden">
+                            <label for="q2c" class="block w-full p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition hover:bg-gray-50">C. 因为下雨后泥地湿软，偷花贼踩过必定会留下清晰的鞋印（蛛丝马迹）。</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part C: KBAT Reasoning -->
+            <section class="glass-card rounded-2xl p-6 mb-8 relative">
+                <div class="absolute -top-4 -left-4 bg-indigo-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-lg">C</div>
+                <h2 class="text-2xl font-bold text-indigo-800 border-b-2 border-indigo-200 pb-2 mb-4"><i class="fas fa-brain mr-2"></i> 侦探推理演练 (KBAT)</h2>
+                <p class="text-gray-600 mb-6 bg-indigo-50 p-3 rounded-lg border border-indigo-100"><i class="fas fa-info-circle mr-1"></i> <strong>指示：</strong> 聪明的小侦探，请你梳理白奶奶的推理过程。从下拉菜单中选择正确的词语填空，完成推理报告。 (每空 10 分)</p>
+
+                <div class="bg-white p-6 rounded-xl border border-gray-200 text-lg leading-relaxed shadow-inner">
+                    <p class="mb-4">
+                        <i class="fas fa-quote-left text-indigo-300 text-2xl mr-2"></i>
+                        白奶奶首先敏锐地发现花圃里的百日菊不见了。接着，她在黎明的曙光中，观察到泥地上有
+                        <select id="blank1" class="border-b-2 border-indigo-400 bg-indigo-50 px-2 py-1 mx-1 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-300 rounded">
+                            <option value="" disabled selected>【请选择】</option>
+                            <option value="干净">干净</option>
+                            <option value="错综">错综</option>
+                            <option value="整齐">整齐</option>
+                        </select>
+                        的鞋印。
+                    </p>
+                    <p class="mb-4">
+                        她指着宗翔后头的鞋印说：“这些是你踩过泥地后，在
+                        <select id="blank2" class="border-b-2 border-indigo-400 bg-indigo-50 px-2 py-1 mx-1 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-300 rounded">
+                            <option value="" disabled selected>【请选择】</option>
+                            <option value="食堂">食堂</option>
+                            <option value="石灰墙">石灰墙</option>
+                            <option value="走廊">走廊</option>
+                        </select>
+                        上留下的脚印。”
+                    </p>
+                    <p>
+                        白奶奶的推理法则是：凡走过必留下
+                        <select id="blank3" class="border-b-2 border-indigo-400 bg-indigo-50 px-2 py-1 mx-1 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-300 rounded">
+                            <option value="" disabled selected>【请选择】</option>
+                            <option value="痕迹">痕迹</option>
+                            <option value="花瓣">花瓣</option>
+                            <option value="声音">声音</option>
+                        </select>
+                        。既然一路上走来，只有这里留下了痕迹，而且偷花贼还在这附近留下了一个小洞，这就证明了偷花贼必定
+                        <select id="blank4" class="border-b-2 border-indigo-400 bg-indigo-50 px-2 py-1 mx-1 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-300 rounded">
+                            <option value="" disabled selected>【请选择】</option>
+                            <option value="早就跑了">早就跑了</option>
+                            <option value="刚刚来过">刚刚来过</option>
+                            <option value="是虎伯">是虎伯</option>
+                        </select>
+                        ！
+                        <i class="fas fa-quote-right text-indigo-300 text-2xl ml-2"></i>
+                    </p>
+                </div>
+            </section>
+
+            <!-- Submit Action -->
+            <div class="text-center mt-10 mb-8">
+                <button type="button" onclick="submitWorksheet()" class="bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-bold py-4 px-12 rounded-full text-xl shadow-xl transform transition hover:scale-105">
+                    <i class="fas fa-paper-plane mr-2"></i> 呈交调查报告
+                </button>
+            </div>
+            
+            <div id="loading" class="hidden text-center text-blue-600 font-bold mt-4">
+                <i class="fas fa-spinner fa-spin text-2xl"></i> 正在安全传输数据...
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- CONSTANTS ---
+        // 老师，请将下面的 URL 替换为您从 Google Apps Script 部署获取的 Web App URL
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3wFA-I62OmLK9yr9nuIYlwI1fD6pEhaoOWw09TFa5FRcV6hWFWe1b45P3fQKuCOKP/exec";
+
+        // --- PART A: MATCHING GAME LOGIC ---
+        let selectedWordBtn = null;
+        let matchedCount = 0;
+        let partAScore = 0;
+
+        const wordBtns = document.querySelectorAll('.word-btn');
+        const meaningBtns = document.querySelectorAll('.meaning-btn');
+
+        wordBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(btn.classList.contains('matched')) return;
+                
+                // Deselect others
+                wordBtns.forEach(b => {
+                    if(!b.classList.contains('matched')) b.classList.remove('selected');
+                });
+                
+                btn.classList.add('selected');
+                selectedWordBtn = btn;
+            });
+        });
+
+        meaningBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(btn.classList.contains('matched') || !selectedWordBtn) return;
+
+                const wordId = selectedWordBtn.getAttribute('data-id');
+                const matchId = btn.getAttribute('data-match');
+
+                if(wordId === matchId) {
+                    // Correct Match
+                    selectedWordBtn.classList.remove('selected');
+                    selectedWordBtn.classList.add('matched');
+                    btn.classList.add('matched');
+                    
+                    // Visual link (change color)
+                    selectedWordBtn.style.backgroundColor = '#dcfce7'; // green-100
+                    btn.style.backgroundColor = '#dcfce7';
+                    
+                    selectedWordBtn = null;
+                    matchedCount++;
+                    partAScore += 4; // 5 items * 4 = 20 points
+                    document.getElementById('partA_score').value = partAScore;
+
+                    // Play tiny success sound or effect if desired
+                } else {
+                    // Wrong Match
+                    btn.classList.add('wrong');
+                    setTimeout(() => {
+                        btn.classList.remove('wrong');
+                    }, 500);
+                }
+            });
+        });
+
+        // --- SCAFFOLDING HINT FUNCTION ---
+        function showHint(title, text) {
+            Swal.fire({
+                title: `<span class="text-xl">🕵️‍♂️ 侦探手册: ${title}</span>`,
+                text: text,
+                icon: 'info',
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: '明白了!'
+            });
+        }
+
+        // --- SUBMIT AND AUTO-GRADE LOGIC ---
+        function submitWorksheet() {
+            // 1. Validation (Auto check first row)
+            const name = document.getElementById('studentName').value.trim();
+            const kelas = document.getElementById('studentClass').value;
+            
+            if(!name || !kelas) {
+                Swal.fire('资料不完整', '特工，请填妥您的姓名和班级！', 'warning');
+                return;
+            }
+
+            // 2. Calculate Scores
+            let totalScore = partAScore; // Part A max 20
+            
+            // Part B max 40 (20 each)
+            const q1Ans = document.querySelector('input[name="q1"]:checked');
+            const q2Ans = document.querySelector('input[name="q2"]:checked');
+            
+            if(!q1Ans || !q2Ans) {
+                Swal.fire('还有未完成的谜题', '请确保您回答了所有【B 项 案情分析】的选择题。', 'warning');
+                return;
+            }
+            if(q1Ans.value === 'B') totalScore += 20;
+            if(q2Ans.value === 'C') totalScore += 20;
+
+            // Part C max 40 (10 each)
+            const b1 = document.getElementById('blank1').value;
+            const b2 = document.getElementById('blank2').value;
+            const b3 = document.getElementById('blank3').value;
+            const b4 = document.getElementById('blank4').value;
+
+            if(!b1 || !b2 || !b3 || !b4) {
+                Swal.fire('报告未完成', '请完成【C 项 侦探推理演练】中所有的填空。', 'warning');
+                return;
+            }
+
+            if(b1 === '错综') totalScore += 10;
+            if(b2 === '走廊') totalScore += 10;
+            if(b3 === '痕迹') totalScore += 10;
+            if(b4 === '刚刚来过') totalScore += 10;
+
+            // 3. UI Feedback - Show loading
+            const btn = document.querySelector('button[onclick="submitWorksheet()"]');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('loading').classList.remove('hidden');
+
+            // 4. Prepare data for GAS
+            const formData = new FormData();
+            formData.append('timestamp', new Date().toLocaleString('zh-MY'));
+            formData.append('name', name);
+            formData.append('kelas', kelas);
+            formData.append('score', totalScore);
+            formData.append('partA', partAScore + '/20');
+            formData.append('partB_1', q1Ans.value);
+            formData.append('partB_2', q2Ans.value);
+            formData.append('partC', `${b1},${b2},${b3},${b4}`);
+
+            // 5. Send to GAS
+            // Note: If you haven't setup GAS, this will fail but will still show score to user.
+            fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Prevent CORS errors, but we won't get a readable response back
+            })
+            .then(() => {
+                showResult(totalScore, name);
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                // Even if offline/error, show result to student
+                showResult(totalScore, name);
+            });
+        }
+
+        function showResult(score, name) {
+            document.getElementById('loading').classList.add('hidden');
+            
+            // Fire Confetti
+            if(score >= 80) {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            let msg = "";
+            let icon = "success";
+            if(score === 100) {
+                msg = "太棒了！你是一位名副其实的超级大侦探！";
+            } else if (score >= 60) {
+                msg = "做得好！你找到了很多关键线索！";
+            } else {
+                msg = "没关系，侦探也需要多加练习，下次再接再厉！";
+                icon = "info";
+            }
+
+            Swal.fire({
+                title: `${name} 特工，调查结束！`,
+                html: `
+                    <div class="my-4">
+                        <span class="text-5xl font-bold ${score >= 60 ? 'text-green-500' : 'text-red-500'}">${score}</span>
+                        <span class="text-2xl">/100</span>
+                    </div>
+                    <p class="text-lg text-gray-700">${msg}</p>
+                `,
+                icon: icon,
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: '返回基地 (关闭)',
+                allowOutsideClick: false
+            }).then(() => {
+                // Optionally reset form
+                // location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
