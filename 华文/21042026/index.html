@@ -43,25 +43,12 @@
             border-color: #eab308; /* yellow-500 */
             transform: scale(1.05);
         }
-        .match-btn.matched {
-            background-color: #bbf7d0; /* green-200 */
-            border-color: #22c55e; /* green-500 */
-            color: #166534;
+        .match-btn.paired {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #9ca3af; /* gray-400 */
+            color: #4b5563; /* gray-600 */
             pointer-events: none;
-            opacity: 0.8;
-        }
-        .match-btn.wrong {
-            animation: shake 0.5s;
-            background-color: #fecaca; /* red-200 */
-            border-color: #ef4444; /* red-500 */
-        }
-
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
+            opacity: 0.9;
         }
 
         /* Fancy Radio Buttons */
@@ -108,7 +95,7 @@
             <section class="glass-card rounded-2xl p-6 mb-8 relative">
                 <div class="absolute -top-4 -left-4 bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl shadow-lg">A</div>
                 <h2 class="text-2xl font-bold text-blue-800 border-b-2 border-blue-200 pb-2 mb-4"><i class="fas fa-puzzle-piece mr-2"></i> 词语密码配对</h2>
-                <p class="text-gray-600 mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100"><i class="fas fa-info-circle mr-1"></i> <strong>指示：</strong> 特工，请找出对应词语的解释。点击左边的<strong>词语</strong>，再点击右边正确的<strong>意思</strong>进行配对。(每题 4 分)</p>
+                <p class="text-gray-600 mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100"><i class="fas fa-info-circle mr-1"></i> <strong>指示：</strong> 特工，请找出对应词语的解释。点击左边的<strong>词语</strong>，再点击右边你认为正确的<strong>意思</strong>进行配对。(每题 4 分)</p>
                 
                 <div class="flex flex-col md:flex-row gap-6" id="matching-game">
                     <!-- Words Column -->
@@ -129,8 +116,6 @@
                         <button type="button" class="match-btn meaning-btn bg-white border-2 border-gray-200 p-4 rounded-xl text-md text-left flex items-center" data-match="3"><span class="text-2xl mr-3">💡</span> 对付的策略或办法</button>
                     </div>
                 </div>
-                <!-- Hidden inputs to store matching score -->
-                <input type="hidden" id="partA_score" value="0">
             </section>
 
             <!-- Part B: Reading Comprehension -->
@@ -252,21 +237,21 @@
         // 老师，请将下面的 URL 替换为您从 Google Apps Script 部署获取的 Web App URL
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3wFA-I62OmLK9yr9nuIYlwI1fD6pEhaoOWw09TFa5FRcV6hWFWe1b45P3fQKuCOKP/exec";
 
-        // --- PART A: MATCHING GAME LOGIC ---
+        // --- PART A: NEW MATCHING GAME LOGIC ---
         let selectedWordBtn = null;
-        let matchedCount = 0;
-        let partAScore = 0;
+        let userMatches = {}; // 记录玩家配对: wordId -> 选中的意思的正确对应的matchId
+        let pairIndex = 1;
 
         const wordBtns = document.querySelectorAll('.word-btn');
         const meaningBtns = document.querySelectorAll('.meaning-btn');
 
         wordBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                if(btn.classList.contains('matched')) return;
+                if(btn.classList.contains('paired')) return; // 已配对则忽略
                 
-                // Deselect others
+                // 取消其他未配对按钮的选中状态
                 wordBtns.forEach(b => {
-                    if(!b.classList.contains('matched')) b.classList.remove('selected');
+                    if(!b.classList.contains('paired')) b.classList.remove('selected');
                 });
                 
                 btn.classList.add('selected');
@@ -276,34 +261,25 @@
 
         meaningBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                if(btn.classList.contains('matched') || !selectedWordBtn) return;
+                if(btn.classList.contains('paired') || !selectedWordBtn) return; // 未选择词语或已配对则忽略
 
                 const wordId = selectedWordBtn.getAttribute('data-id');
-                const matchId = btn.getAttribute('data-match');
+                const matchId = btn.getAttribute('data-match'); // 这个意思是属于哪一个词语的 (用于稍后算分)
 
-                if(wordId === matchId) {
-                    // Correct Match
-                    selectedWordBtn.classList.remove('selected');
-                    selectedWordBtn.classList.add('matched');
-                    btn.classList.add('matched');
-                    
-                    // Visual link (change color)
-                    selectedWordBtn.style.backgroundColor = '#dcfce7'; // green-100
-                    btn.style.backgroundColor = '#dcfce7';
-                    
-                    selectedWordBtn = null;
-                    matchedCount++;
-                    partAScore += 4; // 5 items * 4 = 20 points
-                    document.getElementById('partA_score').value = partAScore;
+                // 记录配对（不做对错判断）
+                userMatches[wordId] = matchId;
 
-                    // Play tiny success sound or effect if desired
-                } else {
-                    // Wrong Match
-                    btn.classList.add('wrong');
-                    setTimeout(() => {
-                        btn.classList.remove('wrong');
-                    }, 500);
-                }
+                // 改变 UI 状态为已配对，并添加数字标签方便学生查看
+                selectedWordBtn.classList.remove('selected');
+                selectedWordBtn.classList.add('paired');
+                btn.classList.add('paired');
+                
+                const badgeHtml = `<span class="inline-flex items-center justify-center bg-blue-500 text-white rounded-full w-6 h-6 text-sm mr-2 font-bold">${pairIndex}</span>`;
+                selectedWordBtn.innerHTML = badgeHtml + selectedWordBtn.innerHTML;
+                btn.innerHTML = badgeHtml + btn.innerHTML;
+                
+                pairIndex++;
+                selectedWordBtn = null;
             });
         });
 
@@ -320,7 +296,7 @@
 
         // --- SUBMIT AND AUTO-GRADE LOGIC ---
         function submitWorksheet() {
-            // 1. Validation (Auto check first row)
+            // 1. Validation (检查必填项)
             const name = document.getElementById('studentName').value.trim();
             const kelas = document.getElementById('studentClass').value;
             
@@ -329,10 +305,24 @@
                 return;
             }
 
-            // 2. Calculate Scores
-            let totalScore = partAScore; // Part A max 20
+            // 检查 A 项是否全部配对完成
+            if(Object.keys(userMatches).length < 5) {
+                Swal.fire('词语密码未完成', '特工，请完成【A 项】中所有的词语连线配对！', 'warning');
+                return;
+            }
+
+            // 2. Calculate Scores 后台计算分数
+            let partAScore = 0;
+            // 循环学生的配对，检查是否对上正确的 id
+            for (let wId in userMatches) {
+                if (wId === userMatches[wId]) {
+                    partAScore += 4; // 对一个加 4 分
+                }
+            }
+
+            let totalScore = partAScore; // Part A 满分 20 分
             
-            // Part B max 40 (20 each)
+            // Part B 满分 40 (每题 20 分)
             const q1Ans = document.querySelector('input[name="q1"]:checked');
             const q2Ans = document.querySelector('input[name="q2"]:checked');
             
@@ -343,7 +333,7 @@
             if(q1Ans.value === 'B') totalScore += 20;
             if(q2Ans.value === 'C') totalScore += 20;
 
-            // Part C max 40 (10 each)
+            // Part C 满分 40 (每空 10 分)
             const b1 = document.getElementById('blank1').value;
             const b2 = document.getElementById('blank2').value;
             const b3 = document.getElementById('blank3').value;
@@ -359,36 +349,37 @@
             if(b3 === '痕迹') totalScore += 10;
             if(b4 === '刚刚来过') totalScore += 10;
 
-            // 3. UI Feedback - Show loading
+            // 3. UI Feedback - 显示加载动画
             const btn = document.querySelector('button[onclick="submitWorksheet()"]');
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             document.getElementById('loading').classList.remove('hidden');
 
-            // 4. Prepare data for GAS
-            const formData = new FormData();
-            formData.append('timestamp', new Date().toLocaleString('zh-MY'));
-            formData.append('name', name);
-            formData.append('kelas', kelas);
-            formData.append('score', totalScore);
-            formData.append('partA', partAScore + '/20');
-            formData.append('partB_1', q1Ans.value);
-            formData.append('partB_2', q2Ans.value);
-            formData.append('partC', `${b1},${b2},${b3},${b4}`);
+            // 4. Prepare data for GAS using URLSearchParams (稳定支持 doPost 的 e.parameter)
+            const params = new URLSearchParams();
+            params.append('timestamp', new Date().toLocaleString('zh-MY'));
+            params.append('name', name);
+            params.append('kelas', kelas);
+            params.append('score', totalScore);
+            params.append('partA', partAScore + '/20'); // 传送 PartA 独立分数到表格
+            params.append('partB_1', q1Ans.value);
+            params.append('partB_2', q2Ans.value);
+            params.append('partC', `${b1}, ${b2}, ${b3}, ${b4}`);
 
-            // 5. Send to GAS
-            // Note: If you haven't setup GAS, this will fail but will still show score to user.
+            // 5. Send to GAS (发送至 Google 表格)
             fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                body: formData,
-                mode: 'no-cors' // Prevent CORS errors, but we won't get a readable response back
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded' // 更改为这个格式确保表格接收
+                },
+                body: params.toString(),
+                mode: 'no-cors' 
             })
             .then(() => {
                 showResult(totalScore, name);
             })
             .catch(error => {
                 console.error('Error!', error.message);
-                // Even if offline/error, show result to student
                 showResult(totalScore, name);
             });
         }
@@ -430,7 +421,7 @@
                 confirmButtonText: '返回基地 (关闭)',
                 allowOutsideClick: false
             }).then(() => {
-                // Optionally reset form
+                // 点击关闭后重新整理页面
                 // location.reload();
             });
         }
