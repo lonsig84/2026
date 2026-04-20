@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 4: Cool Jobs - Interactive Worksheet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Animated Gradient Background */
+            background: linear-gradient(-45deg, #FF6B6B, #4ECDC4, #45B7D1, #FDCB6E);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            color: #2d3748;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .title-font {
+            font-family: 'Comic Neue', cursive;
+        }
+
+        .input-field {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .select-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234A5568'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.25em 1.25em;
+        }
+
+        .section-header {
+            background: linear-gradient(90deg, #4ECDC4, #556270);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hover-float:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .correct-answer {
+            background-color: #C6F6D5 !important;
+            border-color: #48BB78 !important;
+            color: #22543D !important;
+        }
+
+        .wrong-answer {
+            background-color: #FED7D7 !important;
+            border-color: #F56565 !important;
+            color: #742A2A !important;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="max-w-4xl mx-auto glass-card p-6 md:p-10 relative overflow-hidden">
+        <!-- Decorative Header Background -->
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-500 via-teal-400 to-yellow-400 opacity-20"></div>
+
+        <!-- Header Section -->
+        <div class="relative z-10 text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold title-font mb-4 text-gray-800 drop-shadow-sm">
+                <i class="fa-solid fa-star text-yellow-400 animate-pulse"></i> 
+                Unit 4: Cool Jobs 
+                <i class="fa-solid fa-star text-yellow-400 animate-pulse"></i>
+            </h1>
+            <p class="text-lg text-gray-600 font-semibold mb-6">Let's explore some unusual and amazing jobs!</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left bg-white/60 p-4 rounded-xl shadow-inner">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fa-solid fa-user text-blue-500"></i> Name:</label>
+                    <input type="text" id="studentName" class="input-field" placeholder="Enter your name" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fa-solid fa-users text-teal-500"></i> Class:</label>
+                    <input type="text" id="studentClass" class="input-field" placeholder="e.g. 6 Bestari" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1"><i class="fa-solid fa-calendar-alt text-yellow-500"></i> Date:</label>
+                    <input type="date" id="studentDate" class="input-field" required>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500 text-left px-2 border-l-4 border-teal-400 bg-teal-50 p-2 rounded">
+                <strong>Subject:</strong> English <br>
+                <strong>Focus:</strong> Reading (SP 3.2.2 & 4.2.1)
+            </div>
+        </div>
+
+        <!-- READING SECTION -->
+        <div class="mb-12 hover-float transition-all duration-300">
+            <div class="bg-indigo-100 rounded-t-2xl p-4 border-b-4 border-indigo-400 flex items-center gap-3">
+                <div class="bg-white p-3 rounded-full shadow-md text-indigo-500 text-2xl">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-indigo-800">Reading Text: Unusual Jobs</h2>
+                    <p class="text-sm text-indigo-600">Read the magazine article carefully before answering the questions below.</p>
+                </div>
+            </div>
+            <div class="bg-white/80 rounded-b-2xl p-6 shadow-sm border border-t-0 border-gray-200">
+                <p class="text-gray-700 italic mb-6 text-center text-lg border-l-4 border-indigo-400 pl-4 py-3 bg-indigo-50/50 rounded-r-lg">
+                    "Have you ever thought about what job you'd like to do? A teacher, a journalist - or something a bit different? We spoke to four people with unusual jobs. We asked them why they chose the job and what they like most about it."
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Adela -->
+                    <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10 text-7xl"><i class="fa-solid fa-helicopter"></i></div>
+                        <h3 class="text-xl font-bold text-blue-800 mb-2 flex items-center gap-2">
+                            <span>🚁</span> The search and rescue pilot
+                        </h3>
+                        <p class="text-sm text-gray-700 leading-relaxed relative z-10">
+                            <strong>Adela Campo</strong> is a search and rescue pilot. She flies a helicopter to look for and save people in difficult situations. How long has she done this job? 'I learnt to fly at university and I've been a pilot <strong>for 12 years</strong>,' says Adela. 'I chose this job because <strong>I love flying</strong>. It's also very rewarding - it feels good to help people and keep them safe.' What does she enjoy most about her job? 'I love working as part of a team. We all work really well together.'
+                        </p>
+                    </div>
+
+                    <!-- Tyler -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10 text-7xl"><i class="fa-solid fa-horse"></i></div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <span>🐴</span> The police officer
+                        </h3>
+                        <p class="text-sm text-gray-700 leading-relaxed relative z-10">
+                            <strong>Tyler Hadden</strong> has been a police officer <strong>for eight years</strong>. But he doesn't drive a police car - he rides a horse! Bess, his horse, is very clever and friendly. Why did he choose this job? '<strong>I love horses</strong> and every day is different,' says Tyler. 'One day we're at a parade, the next we're at a football match. When there are lots of people at an event, there can be problems, so we need to make sure nothing goes wrong. I enjoy meeting new people most. People like police horses so they talk to me and Bess a lot.'
+                        </p>
+                    </div>
+
+                    <!-- Jill -->
+                    <div class="bg-orange-50 p-5 rounded-xl border border-orange-100 shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10 text-7xl"><i class="fa-solid fa-hippo"></i></div>
+                        <h3 class="text-xl font-bold text-orange-800 mb-2 flex items-center gap-2">
+                            <span>🦁</span> The wildlife vet
+                        </h3>
+                        <p class="text-sm text-gray-700 leading-relaxed relative z-10">
+                            <strong>Jill Johnson</strong> is a vet. She has worked with wild animals in South Africa <strong>since she left university</strong>. She looks after the animals to make sure they're healthy. 'I chose this job because <strong>it's exciting</strong> - there's always something new and challenging. Last week, we travelled for three hours to rescue a baby elephant that was stuck in the mud.' And what does she like most about her job? 'Working with wildlife is very special. Every animal teaches us something different.'
+                        </p>
+                    </div>
+
+                    <!-- Derek -->
+                    <div class="bg-green-50 p-5 rounded-xl border border-green-100 shadow-sm relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-10 text-7xl"><i class="fa-solid fa-leaf"></i></div>
+                        <h3 class="text-xl font-bold text-green-800 mb-2 flex items-center gap-2">
+                            <span>🌿</span> The gardener
+                        </h3>
+                        <p class="text-sm text-gray-700 leading-relaxed relative z-10">
+                            <strong>Derek Chatham</strong> is a gardener at an adventure safari park in Britain. He's worked here <strong>since 2001</strong>. He looks after plants which are more than two metres tall. 'The job used to take a long time, but now we have stilts so it's much faster and more fun,' says Derek. 'I love working as a gardener, I'm in the fresh air all day. I need to move around a lot, which is good because I'm very energetic - it keeps me healthy.' Why did he choose this job? 'I've always been <strong>interested in plants</strong> and I've never wanted to work in an office.'
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="worksheetForm" onsubmit="submitWorksheet(event)">
+            
+            <!-- PART A -->
+            <div class="mb-12 hover-float transition-all duration-300">
+                <div class="bg-slate-100 rounded-t-2xl p-4 border-b-4 border-slate-400 flex items-center gap-3">
+                    <div class="bg-white p-3 rounded-full shadow-md text-slate-500 text-2xl">
+                        <i class="fa-solid fa-pen-clip"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Part A: The Police Officer</h2>
+                        <p class="text-sm text-slate-600">Read about Tyler and choose the correct answers to complete the sentences.</p>
+                    </div>
+                </div>
+                <div class="bg-white/80 rounded-b-2xl p-6 shadow-sm border border-t-0 border-gray-200">
+                    <p class="text-lg leading-loose text-gray-700">
+                        Tyler Hadden has been a police officer for 
+                        <select id="q1" class="input-field select-field inline-block w-48 mx-2 text-slate-700 font-semibold" required>
+                            <option value="" disabled selected>-- Select time --</option>
+                            <option value="five years">five years</option>
+                            <option value="eight years">eight years</option>
+                            <option value="since 2001">since 2001</option>
+                        </select>. 
+                        He doesn't drive a police car, he rides a horse named Bess! He chose this job because 
+                        <select id="q2" class="input-field select-field inline-block w-64 mx-2 text-slate-700 font-semibold" required>
+                            <option value="" disabled selected>-- Select reason --</option>
+                            <option value="he loves horses">he loves horses</option>
+                            <option value="he loves flying">he loves flying</option>
+                            <option value="it is safe">it is safe</option>
+                        </select>.
+                    </p>
+                </div>
+            </div>
+
+            <!-- PART B -->
+            <div class="mb-12 hover-float transition-all duration-300">
+                <div class="bg-teal-100 rounded-t-2xl p-4 border-b-4 border-teal-400 flex items-center gap-3">
+                    <div class="bg-white p-3 rounded-full shadow-md text-teal-500 text-2xl">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-teal-800">Part B: Job Information Chart</h2>
+                        <p class="text-sm text-teal-600">Scan the text to find specific information about Adela, Jill, and Derek.</p>
+                    </div>
+                </div>
+                <div class="bg-white/80 rounded-b-2xl p-6 shadow-sm border border-t-0 border-gray-200 overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-teal-50 text-teal-800">
+                                <th class="p-3 border-b-2 border-teal-200 rounded-tl-lg">Name / Job</th>
+                                <th class="p-3 border-b-2 border-teal-200">How long?</th>
+                                <th class="p-3 border-b-2 border-teal-200 rounded-tr-lg">Chose job because...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Adela -->
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 font-semibold flex items-center gap-2 text-gray-700">
+                                    <span class="text-2xl">🚁</span> Adela (Pilot)
+                                </td>
+                                <td class="p-3">
+                                    <select id="q3" class="input-field select-field text-sm" required>
+                                        <option value="" disabled selected>Select duration...</option>
+                                        <option value="12 years">for 12 years</option>
+                                        <option value="since university">since university</option>
+                                        <option value="since 2001">since 2001</option>
+                                    </select>
+                                </td>
+                                <td class="p-3">
+                                    <select id="q4" class="input-field select-field text-sm" required>
+                                        <option value="" disabled selected>Select reason...</option>
+                                        <option value="it's exciting">it's exciting</option>
+                                        <option value="she loves flying">she loves flying</option>
+                                        <option value="she loves plants">she loves plants</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <!-- Jill -->
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 font-semibold flex items-center gap-2 text-gray-700">
+                                    <span class="text-2xl">🦁</span> Jill (Vet)
+                                </td>
+                                <td class="p-3">
+                                    <select id="q5" class="input-field select-field text-sm" required>
+                                        <option value="" disabled selected>Select duration...</option>
+                                        <option value="8 years">for 8 years</option>
+                                        <option value="since university">since university</option>
+                                        <option value="12 years">for 12 years</option>
+                                    </select>
+                                </td>
+                                <td class="p-3">
+                                    <select id="q6" class="input-field select-field text-sm" required>
+                                        <option value="" disabled selected>Select reason...</option>
+                                        <option value="she loves flying">she loves flying</option>
+                                        <option value="it's exciting">it's exciting</option>
+                                        <option value="she loves horses">she loves horses</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <!-- Derek -->
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="p-4 font-semibold flex items-center gap-2 text-gray-700">
+                                    <span class="text-2xl">🌿</span> Derek (Gardener)
+                                </td>
+                                <td class="p-3">
+                                    <select id="q7" class="input-field select-field text-sm" required>
+                                        <option value="" disabled selected>Select duration...</option>
+                                        <option value="for a few years">for a few years</option>
+                                        <option value="since university">since university</option>
+                                        <option value="since 2001">since 2001</option>
+                                    </select>
+                                </td>
+                                <td class="p-3">
+                                    <select id="q8" class="input-field select-field text-sm" required>
+                                        <option value="" disabled selected>Select reason...</option>
+                                        <option value="interested in plants">always been interested in plants</option>
+                                        <option value="it's exciting">it's exciting</option>
+                                        <option value="loves flying">she loves flying</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PART C -->
+            <div class="mb-10 hover-float transition-all duration-300">
+                <div class="bg-amber-100 rounded-t-2xl p-4 border-b-4 border-amber-400 flex items-center gap-3">
+                    <div class="bg-white p-3 rounded-full shadow-md text-amber-500 text-2xl">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-amber-800">Part C: Think & Answer</h2>
+                        <p class="text-sm text-amber-600">Use clues from the text to identify the person, then write a sentence.</p>
+                    </div>
+                </div>
+                <div class="bg-white/80 rounded-b-2xl p-6 shadow-sm border border-t-0 border-gray-200 space-y-6">
+                    
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 relative">
+                        <i class="fa-solid fa-circle-question absolute top-4 right-4 text-amber-200 text-3xl"></i>
+                        <p class="font-semibold text-gray-700 mb-2">1. Who likes working with people?</p>
+                        <select id="q9" class="input-field select-field w-full md:w-1/2" required>
+                            <option value="" disabled selected>Choose a person...</option>
+                            <option value="Adela">Adela</option>
+                            <option value="Tyler">Tyler</option>
+                            <option value="Jill">Jill</option>
+                            <option value="Derek">Derek</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 relative">
+                        <i class="fa-solid fa-circle-question absolute top-4 right-4 text-amber-200 text-3xl"></i>
+                        <p class="font-semibold text-gray-700 mb-2">2. Who doesn't want to work indoors (in an office)?</p>
+                        <select id="q10" class="input-field select-field w-full md:w-1/2" required>
+                            <option value="" disabled selected>Choose a person...</option>
+                            <option value="Adela">Adela</option>
+                            <option value="Tyler">Tyler</option>
+                            <option value="Jill">Jill</option>
+                            <option value="Derek">Derek</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-indigo-100">
+                        <p class="font-semibold text-indigo-800 mb-2">
+                            <i class="fa-solid fa-pencil mr-2"></i> 3. Choose one person from the text. Write one sentence to describe what they do.
+                        </p>
+                        <p class="text-xs text-indigo-500 mb-3">(Example: Tyler is a police officer and he rides a horse.)</p>
+                        <textarea id="q11" rows="2" class="input-field w-full" placeholder="Write your sentence here..." required></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-8">
+                <button type="submit" id="submitBtn" class="bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white font-bold py-4 px-12 rounded-full shadow-lg transform transition-all hover:scale-110 text-xl flex items-center justify-center mx-auto gap-3">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Answers
+                </button>
+            </div>
+            
+            <!-- Result Display -->
+            <div id="resultBox" class="hidden mt-8 bg-white p-6 rounded-2xl shadow-xl text-center border-4 border-green-400 transform transition-all duration-500 scale-90 opacity-0">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Awesome Job, <span id="displayName" class="text-blue-500"></span>!</h2>
+                <div class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 my-4" id="scoreDisplay">
+                    0 / 10
+                </div>
+                <p class="text-gray-600 font-medium">Your answers have been recorded.</p>
+                <div id="gasStatus" class="mt-3 text-sm font-semibold text-blue-600"></div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Logic and Functionality -->
+    <script>
+        // ==========================================
+        // TEACHER INSTRUCTION: 
+        // Replace this URL with your Google Apps Script Web App URL.
+        // It must be deployed as "Execute as: Me" and "Who has access: Anyone".
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyQrrwwAjYVOgCin79VZXTIrsK94kiQbgcjcxVn6CNXFM-4s22Uwi0kfpczFNmk-ZPXJg/exec"; 
+
+        const correctAnswers = {
+            q1: "eight years",
+            q2: "he loves horses",
+            q3: "12 years",
+            q4: "she loves flying",
+            q5: "since university",
+            q6: "it's exciting",
+            q7: "since 2001",
+            q8: "interested in plants",
+            q9: "Tyler",
+            q10: "Derek"
+        };
+
+        function submitWorksheet(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+
+            let score = 0;
+            const totalQuestions = 10; // q11 is open-ended, not auto-graded for score
+
+            // Check answers and apply visual feedback (Scaffolding effect after submission)
+            for (let i = 1; i <= 10; i++) {
+                let el = document.getElementById('q' + i);
+                let userAnswer = el.value;
+                let isCorrect = userAnswer === correctAnswers['q' + i];
+                
+                // Reset classes
+                el.classList.remove('correct-answer', 'wrong-answer');
+                
+                if (isCorrect) {
+                    score++;
+                    el.classList.add('correct-answer');
+                } else {
+                    el.classList.add('wrong-answer');
+                }
+            }
+
+            // Also check q11 is not empty (just UI feedback)
+            let q11 = document.getElementById('q11');
+            if(q11.value.trim() !== '') {
+                q11.classList.add('correct-answer');
+            }
+
+            // Show Results
+            const name = document.getElementById('studentName').value;
+            const className = document.getElementById('studentClass').value;
+            const date = document.getElementById('studentDate').value;
+            const openAnswer = q11.value;
+
+            document.getElementById('displayName').innerText = name;
+            document.getElementById('scoreDisplay').innerText = score + " / " + totalQuestions;
+            
+            const resultBox = document.getElementById('resultBox');
+            resultBox.classList.remove('hidden');
+            
+            // Animation for Result Box
+            setTimeout(() => {
+                resultBox.classList.remove('scale-90', 'opacity-0');
+                resultBox.classList.add('scale-100', 'opacity-100');
+                fireConfetti();
+            }, 100);
+
+            // Send to Google Sheets
+            sendToGoogleSheets({
+                name: name,
+                class: className,
+                date: date,
+                score: score,
+                openAnswer: openAnswer
+            });
+
+            btn.style.display = 'none'; // Hide button after submission
+        }
+
+        function sendToGoogleSheets(data) {
+            const statusDiv = document.getElementById('gasStatus');
+            statusDiv.innerText = "Saving score to Google Sheets...";
+
+            if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE") {
+                statusDiv.innerText = "⚠️ Note: Google Sheets recording is disabled (URL not set by teacher). But your score is calculated!";
+                statusDiv.className = "mt-3 text-sm font-semibold text-amber-500";
+                return;
+            }
+
+            // Create form data
+            const formData = new URLSearchParams();
+            formData.append('Name', data.name);
+            formData.append('Class', data.class);
+            formData.append('Date', data.date);
+            formData.append('Score', data.score);
+            formData.append('Sentence', data.openAnswer);
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors' // Use no-cors to avoid CORS issues for simple form posts
+            }).then(() => {
+                statusDiv.innerText = "✅ Score successfully saved to Google Sheets!";
+                statusDiv.className = "mt-3 text-sm font-semibold text-green-600";
+            }).catch(error => {
+                statusDiv.innerText = "⚠️ Could not save to Google Sheets. Check connection.";
+                statusDiv.className = "mt-3 text-sm font-semibold text-red-500";
+                console.error('Error!', error.message);
+            });
+        }
+
+        // --- Simple Confetti Effect ---
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+
+            for (let i = 0; i < 150; i++) {
+                pieces.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 + 100,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 1) * 20 - 5,
+                    size: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                
+                pieces.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.5; // gravity
+                    p.rotation += p.rotationSpeed;
+
+                    if (p.y < canvas.height) active = true;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (active) requestAnimationFrame(animate);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
