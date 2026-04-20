@@ -359,8 +359,9 @@
         // ==========================================
         // ⚠️ 请在这里填入您的 Google App Script Web App URL
         // 例如: "https://script.google.com/macros/s/AKfycb.../exec"
+        // 老师，请务必修改这行！
         // ==========================================
-        const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_WEB_APP_URL"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHtbF_DkrjhPHVnJUb5e8WaqLcpl4wB9BVeimluFsKS5V_MJwc6-Uj0kOhBXCWbAL1/exec"; 
 
         document.getElementById('quizForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -402,7 +403,7 @@
             statusMsg.innerText = "正在把成绩交给老师，请稍等... ⏳";
 
             // 如果链接未替换，这里做模拟提交（为了让您可以马上预览效果）
-            if(SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxHtbF_DkrjhPHVnJUb5e8WaqLcpl4wB9BVeimluFsKS5V_MJwc6-Uj0kOhBXCWbAL1/exec") {
+            if(SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_WEB_APP_URL") {
                 setTimeout(() => {
                     showResult(name, score);
                     resetForm();
@@ -415,7 +416,8 @@
                 method: 'POST',
                 mode: 'no-cors', 
                 headers: {
-                    'Content-Type': 'application/json',
+                    // ⚠️ 注意: 配合 Apps Script, 这里必须使用 text/plain 防止跨域(CORS)预检失败
+                    'Content-Type': 'text/plain;charset=utf-8',
                 },
                 body: JSON.stringify(payload)
             })
