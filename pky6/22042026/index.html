@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的成长之旅：青春期的心理变化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Styling the layout and custom animations */
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 24px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Interactive Cards */
+        .option-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .option-card.selected-correct {
+            border-color: #10B981;
+            background-color: #D1FAE5;
+            animation: popIn 0.4s ease;
+        }
+
+        .option-card.selected-wrong {
+            border-color: #EF4444;
+            background-color: #FEE2E2;
+            animation: shake 0.5s ease;
+        }
+
+        /* Sorting Game Elements */
+        .drag-item {
+            cursor: grab;
+            transition: transform 0.2s;
+        }
+        .drag-item:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+        
+        .drop-zone {
+            min-height: 150px;
+            transition: background-color 0.3s, border-color 0.3s;
+            border: 2px dashed #cbd5e1;
+        }
+        
+        .drop-zone.drag-over {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+        }
+
+        .bubble-left { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+        .bubble-right { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { transform: scale(0.9); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating { animation: float 4s ease-in-out infinite; }
+        .floating-delay { animation: float 4s ease-in-out infinite; animation-delay: 2s; }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            z-index: 1000;
+            animation: fall 3s linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Custom Radio */
+        .custom-radio input:checked + div {
+            border-color: #6366f1;
+            background-color: #e0e7ff;
+        }
+        .custom-radio input:checked + div .radio-dot {
+            background-color: #6366f1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 relative">
+
+    <!-- Background Decorative Elements -->
+    <div class="fixed top-[-50px] left-[-50px] w-64 h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+    <div class="fixed top-[20%] right-[-50px] w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+    <div class="fixed bottom-[-50px] left-[20%] w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+        
+        <!-- Header Section -->
+        <header class="text-center mb-10 mt-4">
+            <div class="inline-block px-4 py-1 rounded-full bg-white shadow-sm text-sm font-bold text-gray-500 mb-3 tracking-widest uppercase">六年级 体育与健康教育</div>
+            <h1 class="text-4xl md:text-5xl font-black mb-4 title-gradient drop-shadow-sm">青春期的心理变化</h1>
+            <p class="text-lg text-gray-600">一起探索成长的奥秘，学习做情绪的主人！🌱</p>
+        </header>
+
+        <!-- Student Info Form -->
+        <section class="glass-panel p-6 md:p-8 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-bl-full opacity-50 -z-10"></div>
+            <h2 class="text-2xl font-bold mb-4 flex items-center text-gray-800">
+                <i class="fas fa-id-card text-blue-500 mr-3 text-3xl"></i> 个人资料
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">姓名 Name</label>
+                    <input type="text" id="studentName" placeholder="输入你的全名" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition shadow-sm font-semibold text-gray-700">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">班级 Class</label>
+                    <select id="studentClass" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition shadow-sm font-semibold text-gray-700 appearance-none bg-white">
+                        <option value="" disabled selected>选择你的班级</option>
+                        <option value="6A">6A</option>
+                        <option value="6B">6B</option>
+                        <option value="6C">6C</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1 - Scaffolding Check -->
+        <section class="glass-panel p-6 md:p-8 mb-8">
+            <div class="flex items-start justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-brain text-pink-500 mr-3 text-3xl floating"></i> 
+                        任务一：识别青春期的特征
+                    </h2>
+                    <p class="text-gray-600 mt-2">阅读课本第102页后，找出<span class="font-bold text-pink-600">3个</span>属于青春期心理变化的特征。（自动检查，选错会抖动哦！）</p>
+                </div>
+                <div class="bg-pink-100 text-pink-700 px-4 py-2 rounded-xl font-bold text-lg shadow-sm">
+                    已选: <span id="q1-counter">0</span>/3
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="q1-container">
+                <!-- Javascript will populate this to handle the logic -->
+            </div>
+        </section>
+
+        <!-- Section 2 - Double Bubble Map -->
+        <section class="glass-panel p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center mb-2">
+                <i class="fas fa-project-diagram text-purple-500 mr-3 text-3xl floating-delay"></i> 
+                任务二：双气泡图分类
+            </h2>
+            <p class="text-gray-600 mb-6">点击下方词汇库中的卡片，然后点击对应的区域进行分类。</p>
+
+            <div class="flex flex-col md:flex-row gap-6 mb-8">
+                <!-- Left Bubble -->
+                <div class="flex-1 bg-white rounded-3xl p-5 shadow-md border-t-8 border-yellow-400 relative">
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white font-bold px-6 py-2 rounded-full shadow-lg">青春期特征</div>
+                    <div class="mt-4 drop-zone grid grid-cols-1 gap-3 p-2 rounded-xl" id="zone-characteristics" onclick="handleZoneClick('characteristics')">
+                        <div class="text-center text-gray-400 text-sm mt-10 pointer-events-none"><i class="fas fa-download mb-2 text-xl"></i><br>点击词汇放入此处</div>
+                    </div>
+                </div>
+
+                <!-- Middle connection (Visual only) -->
+                <div class="hidden md:flex flex-col justify-center items-center">
+                    <div class="w-10 h-1 bg-gray-300 rounded-full mb-2"></div>
+                    <div class="bg-gray-800 text-white text-xs font-bold px-3 py-1 rounded-full">VS</div>
+                    <div class="w-10 h-1 bg-gray-300 rounded-full mt-2"></div>
+                </div>
+
+                <!-- Right Bubble -->
+                <div class="flex-1 bg-white rounded-3xl p-5 shadow-md border-t-8 border-green-400 relative">
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-400 text-white font-bold px-6 py-2 rounded-full shadow-lg">情绪管理方法</div>
+                    <div class="mt-4 drop-zone grid grid-cols-1 gap-3 p-2 rounded-xl" id="zone-management" onclick="handleZoneClick('management')">
+                        <div class="text-center text-gray-400 text-sm mt-10 pointer-events-none"><i class="fas fa-download mb-2 text-xl"></i><br>点击词汇放入此处</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Word Bank -->
+            <div class="bg-gray-50 rounded-2xl p-5 border-2 border-gray-200 border-dashed">
+                <h3 class="text-sm font-bold text-gray-500 mb-3 text-center uppercase tracking-wider">词汇库 (点击选择)</h3>
+                <div class="flex flex-wrap justify-center gap-3" id="word-bank">
+                    <!-- Javascript populates -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3 - Scenario Application -->
+        <section class="glass-panel p-6 md:p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center mb-4">
+                <i class="fas fa-comment-dots text-orange-500 mr-3 text-3xl floating"></i> 
+                任务三：情境应用
+            </h2>
+            
+            <div class="bg-orange-50 rounded-2xl p-5 border-l-4 border-orange-400 mb-6 flex gap-4">
+                <div class="text-4xl">🧑🏻</div>
+                <div>
+                    <p class="font-bold text-gray-800">情境：</p>
+                    <p class="text-gray-700 mt-1">建成为青春期的身体变化感到非常困扰和焦虑，脾气变得暴躁。他应该采取哪<span class="font-bold text-orange-600">两项</span>行动来有效管理情绪？</p>
+                </div>
+            </div>
+
+            <div class="space-y-4" id="q3-container">
+                <!-- Checkboxes -->
+                <label class="custom-radio block cursor-pointer group">
+                    <input type="checkbox" name="scenario" value="wrong1" class="hidden peer">
+                    <div class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl group-hover:border-blue-300 transition-colors">
+                        <div class="w-6 h-6 rounded-md border-2 border-gray-300 mr-4 flex items-center justify-center flex-shrink-0 peer-checked:border-blue-500">
+                            <div class="w-3 h-3 bg-transparent rounded-sm radio-dot transition-transform transform scale-0"></div>
+                        </div>
+                        <span class="text-gray-700 font-medium">把自己关在房间里，不和任何人说话。</span>
+                    </div>
+                </label>
+
+                <label class="custom-radio block cursor-pointer group">
+                    <input type="checkbox" name="scenario" value="correct1" class="hidden peer">
+                    <div class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl group-hover:border-blue-300 transition-colors">
+                        <div class="w-6 h-6 rounded-md border-2 border-gray-300 mr-4 flex items-center justify-center flex-shrink-0 peer-checked:border-blue-500">
+                            <div class="w-3 h-3 bg-transparent rounded-sm radio-dot transition-transform transform scale-0"></div>
+                        </div>
+                        <span class="text-gray-700 font-medium"><i class="fas fa-bed text-blue-400 mr-2"></i>保持充足的睡眠，让身心得到休息。</span>
+                    </div>
+                </label>
+
+                <label class="custom-radio block cursor-pointer group">
+                    <input type="checkbox" name="scenario" value="wrong2" class="hidden peer">
+                    <div class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl group-hover:border-blue-300 transition-colors">
+                        <div class="w-6 h-6 rounded-md border-2 border-gray-300 mr-4 flex items-center justify-center flex-shrink-0 peer-checked:border-blue-500">
+                            <div class="w-3 h-3 bg-transparent rounded-sm radio-dot transition-transform transform scale-0"></div>
+                        </div>
+                        <span class="text-gray-700 font-medium">沉迷于观看限制级的色情视频来转移注意力。</span>
+                    </div>
+                </label>
+
+                <label class="custom-radio block cursor-pointer group">
+                    <input type="checkbox" name="scenario" value="correct2" class="hidden peer">
+                    <div class="flex items-center p-4 bg-white border-2 border-gray-200 rounded-xl group-hover:border-blue-300 transition-colors">
+                        <div class="w-6 h-6 rounded-md border-2 border-gray-300 mr-4 flex items-center justify-center flex-shrink-0 peer-checked:border-blue-500">
+                            <div class="w-3 h-3 bg-transparent rounded-sm radio-dot transition-transform transform scale-0"></div>
+                        </div>
+                        <span class="text-gray-700 font-medium"><i class="fas fa-user-shield text-green-500 mr-2"></i>寻找值得信任的成人（如父母、老师）倾诉，通过正确管道解决。</span>
+                    </div>
+                </label>
+            </div>
+        </section>
+
+        <!-- Submit Button -->
+        <div class="text-center mb-16">
+            <button id="submitBtn" onclick="submitQuiz()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-xl py-4 px-12 rounded-full shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all flex items-center justify-center mx-auto w-full md:w-auto">
+                <i class="fas fa-paper-plane mr-2"></i> 提交答案，查看成绩！
+            </button>
+            <p id="errorMsg" class="text-red-500 font-bold mt-4 hidden">请填写姓名和班级，并完成所有题目！</p>
+        </div>
+
+        <!-- Results Modal Overlay -->
+        <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex justify-center items-center backdrop-blur-sm">
+            <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center transform scale-95 transition-transform" id="modalContent">
+                <div class="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <i class="fas fa-check text-5xl text-white"></i>
+                </div>
+                <h2 class="text-3xl font-black text-gray-800 mb-2">太棒了！</h2>
+                <p class="text-gray-600 mb-6" id="resultName">测试完成</p>
+                
+                <div class="bg-gray-50 rounded-2xl p-6 mb-6">
+                    <p class="text-sm text-gray-500 uppercase tracking-widest font-bold mb-1">你的得分</p>
+                    <div class="text-5xl font-black gradient-text">
+                        <span id="finalScore">0</span><span class="text-2xl text-gray-400">/100</span>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-500 mb-6"><i class="fas fa-cloud-upload-alt mr-1"></i> 成绩已自动记录至系统</p>
+                
+                <button onclick="location.reload()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition">
+                    重新测试
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        /* 
+         * === CONFIGURATION ===
+         * Replace the URL below with your deployed Google Apps Script Web App URL.
+         */
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPRxiZoPoIwUIr8Dx7KtBBZ8tT9HGcje8H074MIVCSSr3nHw1s4E0Doz8SJbssQTFKNw/exec"; // <-- 请将您生成的 App Script URL 粘贴在这里
+
+        /* State and Data Initialization */
+        // Q1 Data
+        const q1Options = [
+            { id: 'q1_1', text: '情绪易起伏', icon: 'fa-wind', isCorrect: true },
+            { id: 'q1_2', text: '身高停止生长', icon: 'fa-ruler', isCorrect: false },
+            { id: 'q1_3', text: '渴望自主', icon: 'fa-dove', isCorrect: true },
+            { id: 'q1_4', text: '对异性没感觉', icon: 'fa-users-slash', isCorrect: false },
+            { id: 'q1_5', text: '注重外表', icon: 'fa-mirror', isCorrect: true },
+            { id: 'q1_6', text: '脾气越来越好', icon: 'fa-smile-beam', isCorrect: false }
+        ];
+
+        let q1Selected = [];
+
+        // Q2 Data
+        const words = [
+            { id: 'w1', text: '爱与人比较', type: 'characteristics', icon: 'fa-balance-scale' },
+            { id: 'w2', text: '充足睡眠', type: 'management', icon: 'fa-bed' },
+            { id: 'w3', text: '开始有性感觉', type: 'characteristics', icon: 'fa-heartbeat' },
+            { id: 'w4', text: '适度运动', type: 'management', icon: 'fa-running' },
+            { id: 'w5', text: '对异性有兴趣', type: 'characteristics', icon: 'fa-user-friends' },
+            { id: 'w6', text: '通过正确管道解决', type: 'management', icon: 'fa-comments' }
+        ];
+
+        let selectedWordId = null;
+        let sortedItems = { characteristics: [], management: [] };
+
+        /* Rendering Dynamic Content */
+        // Render Q1
+        function renderQ1() {
+            const container = document.getElementById('q1-container');
+            container.innerHTML = '';
+            q1Options.forEach(opt => {
+                const isSelected = q1Selected.includes(opt.id);
+                
+                // Scaffolding Logic: Evaluate immediately if selected
+                let extraClasses = 'bg-white text-gray-700 shadow-sm border-gray-200';
+                if (isSelected) {
+                    if (opt.isCorrect) {
+                        extraClasses = 'selected-correct text-green-800';
+                    } else {
+                        // Temporal class for animation, then deselect
+                        extraClasses = 'selected-wrong text-red-800';
+                        setTimeout(() => {
+                            q1Selected = q1Selected.filter(id => id !== opt.id);
+                            renderQ1();
+                        }, 600); // Wait for shake animation
+                    }
+                }
+
+                container.innerHTML += `
+                    <div onclick="handleQ1Click('${opt.id}', ${opt.isCorrect})" 
+                         class="option-card p-4 rounded-xl flex flex-col items-center justify-center text-center ${extraClasses} ${!isSelected && q1Selected.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-2 shadow-inner">
+                            <i class="fas ${opt.icon} text-xl ${isSelected && opt.isCorrect ? 'text-green-600' : 'text-gray-500'}"></i>
+                        </div>
+                        <span class="font-bold text-sm">${opt.text}</span>
+                        ${isSelected && opt.isCorrect ? '<i class="fas fa-check-circle absolute top-2 right-2 text-green-500"></i>' : ''}
+                    </div>
+                `;
+            });
+            document.getElementById('q1-counter').innerText = q1Selected.length;
+        }
+
+        // Render Q2 Word Bank and Zones
+        function renderQ2() {
+            const bankContainer = document.getElementById('word-bank');
+            const charZone = document.getElementById('zone-characteristics');
+            const mgmtZone = document.getElementById('zone-management');
+
+            // Clear containers (except the placeholder text in zones)
+            bankContainer.innerHTML = '';
+            const charItemsHtml = sortedItems.characteristics.map(w => createWordChip(w)).join('');
+            const mgmtItemsHtml = sortedItems.management.map(w => createWordChip(w)).join('');
+            
+            if(charItemsHtml) charZone.innerHTML = charItemsHtml;
+            if(mgmtItemsHtml) mgmtZone.innerHTML = mgmtItemsHtml;
+
+            // Render remaining words in bank
+            words.forEach(w => {
+                if (!sortedItems.characteristics.find(i => i.id === w.id) && !sortedItems.management.find(i => i.id === w.id)) {
+                    bankContainer.innerHTML += createWordChip(w, true);
+                }
+            });
+        }
+
+        function createWordChip(w, isBank = false) {
+            const isSelectedClass = selectedWordId === w.id ? 'ring-4 ring-blue-400 transform scale-105 shadow-lg' : 'shadow-sm';
+            const clickHandler = isBank ? `onclick="selectWord('${w.id}')"` : `onclick="returnWord('${w.id}', event)"`;
+            
+            return `
+                <div ${clickHandler} class="cursor-pointer bg-white px-4 py-3 rounded-full border-2 border-gray-100 flex items-center gap-2 transition-all hover:-translate-y-1 hover:shadow-md ${isSelectedClass}">
+                    <i class="fas ${w.icon} text-indigo-400"></i>
+                    <span class="font-bold text-gray-700 text-sm">${w.text}</span>
+                </div>
+            `;
+        }
+
+        /* Event Handlers */
+        function handleQ1Click(id, isCorrect) {
+            if (q1Selected.includes(id)) {
+                // Deselect if already correct (prevent deselecting wrong ones as they are handled by timeout)
+                if (isCorrect) {
+                    q1Selected = q1Selected.filter(item => item !== id);
+                }
+            } else {
+                if (q1Selected.length < 3) {
+                    q1Selected.push(id);
+                }
+            }
+            renderQ1();
+        }
+
+        function selectWord(id) {
+            selectedWordId = selectedWordId === id ? null : id; // Toggle selection
+            renderQ2();
+        }
+
+        function handleZoneClick(zone) {
+            if (selectedWordId) {
+                const word = words.find(w => w.id === selectedWordId);
+                sortedItems[zone].push(word);
+                selectedWordId = null;
+                renderQ2();
+            }
+        }
+
+        function returnWord(id, event) {
+            event.stopPropagation(); // Prevent triggering zone click
+            sortedItems.characteristics = sortedItems.characteristics.filter(w => w.id !== id);
+            sortedItems.management = sortedItems.management.filter(w => w.id !== id);
+            renderQ2();
+        }
+
+        /* Submission and Scoring Logic */
+        function calculateScore() {
+            let score = 0;
+            
+            // Q1: 30 points (10 per correct selected). Max 3 selected due to UI.
+            const correctQ1 = q1Selected.filter(id => q1Options.find(o => o.id === id).isCorrect).length;
+            score += correctQ1 * 10;
+
+            // Q2: 40 points (approx 6.6 per correct sort)
+            words.forEach(w => {
+                const inChar = sortedItems.characteristics.some(i => i.id === w.id);
+                const inMgmt = sortedItems.management.some(i => i.id === w.id);
+                
+                if (w.type === 'characteristics' && inChar) score += 6.66;
+                if (w.type === 'management' && inMgmt) score += 6.66;
+            });
+
+            // Q3: 30 points (15 per correct checkbox)
+            const checkboxes = document.querySelectorAll('input[name="scenario"]:checked');
+            let q3Correct = 0;
+            checkboxes.forEach(cb => {
+                if(cb.value.startsWith('correct')) q3Correct++;
+                if(cb.value.startsWith('wrong')) q3Correct--; // Penalty for wrong
+            });
+            if(q3Correct > 0) score += q3Correct * 15;
+
+            return Math.min(100, Math.max(0, Math.round(score))); // Cap between 0-100
+        }
+
+        function submitQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            const stdClass = document.getElementById('studentClass').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            // Basic Validation
+            if (!name || !stdClass || q1Selected.length < 3 || (sortedItems.characteristics.length + sortedItems.management.length) < 6) {
+                errorMsg.classList.remove('hidden');
+                // Auto scroll to top to show missing inputs
+                if(!name || !stdClass) window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            
+            errorMsg.classList.add('hidden');
+            const score = calculateScore();
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 提交中...';
+            btn.disabled = true;
+
+            // Prepare Data for App Script
+            const payload = {
+                name: name,
+                class: stdClass,
+                score: score
+            };
+
+            // Send to Google Apps Script
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Essential for preventing CORS errors when just submitting data to GAS
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                // Since no-cors hides the actual response, we assume success if no network error
+                showResult(name, score);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Even on error, show result to student so they don't get stuck
+                showResult(name, score);
+                alert("成绩记录时网络可能不稳定，但你的得分已计算。");
+            });
+        }
+
+        /* Feedback and Confetti Effects */
+        function showResult(name, score) {
+            document.getElementById('resultName').innerText = `${name} 同学，完成得很好！`;
+            
+            // Animate score counting up
+            let currentScore = 0;
+            const scoreElement = document.getElementById('finalScore');
+            const interval = setInterval(() => {
+                currentScore += 2;
+                if(currentScore >= score) {
+                    currentScore = score;
+                    clearInterval(interval);
+                }
+                scoreElement.innerText = currentScore;
+            }, 20);
+
+            // Show Modal
+            const modal = document.getElementById('resultModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('modalContent').classList.remove('scale-95');
+                document.getElementById('modalContent').classList.add('scale-100');
+            }, 50);
+
+            // Trigger Confetti
+            if(score > 50) fireConfetti();
+        }
+
+        function fireConfetti() {
+            const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                
+                // Random shapes
+                if (Math.random() > 0.5) confetti.style.borderRadius = '50%';
+                
+                document.body.appendChild(confetti);
+                
+                // Clean up DOM
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // Initialize App
+        renderQ1();
+        renderQ2();
+
+    </script>
+</body>
+</html>
