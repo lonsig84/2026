@@ -43,6 +43,7 @@
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: pointer;
             border: 2px solid transparent;
+            position: relative;
         }
         
         .option-card:hover {
@@ -50,16 +51,11 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        .option-card.selected-correct {
-            border-color: #10B981;
-            background-color: #D1FAE5;
-            animation: popIn 0.4s ease;
-        }
-
-        .option-card.selected-wrong {
-            border-color: #EF4444;
-            background-color: #FEE2E2;
-            animation: shake 0.5s ease;
+        /* Normal selected state (No auto-check) */
+        .option-card.selected-neutral {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            animation: popIn 0.3s ease;
         }
 
         /* Sorting Game Elements */
@@ -83,20 +79,11 @@
             border-color: #6366f1;
         }
 
-        .bubble-left { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-        .bubble-right { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
-
         /* Animations */
         @keyframes popIn {
             0% { transform: scale(0.9); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
         }
 
         @keyframes float {
@@ -171,7 +158,7 @@
             </div>
         </section>
 
-        <!-- Section 1 - Scaffolding Check -->
+        <!-- Section 1 - Selection without auto-check -->
         <section class="glass-panel p-6 md:p-8 mb-8">
             <div class="flex items-start justify-between mb-6">
                 <div>
@@ -179,7 +166,7 @@
                         <i class="fas fa-brain text-pink-500 mr-3 text-3xl floating"></i> 
                         任务一：识别青春期的特征
                     </h2>
-                    <p class="text-gray-600 mt-2">阅读课本第102页后，找出<span class="font-bold text-pink-600">3个</span>属于青春期心理变化的特征。（自动检查，选错会抖动哦！）</p>
+                    <p class="text-gray-600 mt-2">阅读课本第102页后，找出<span class="font-bold text-pink-600">3个</span>属于青春期心理变化的特征。</p>
                 </div>
                 <div class="bg-pink-100 text-pink-700 px-4 py-2 rounded-xl font-bold text-lg shadow-sm">
                     已选: <span id="q1-counter">0</span>/3
@@ -202,7 +189,7 @@
             <div class="flex flex-col md:flex-row gap-6 mb-8">
                 <!-- Left Bubble -->
                 <div class="flex-1 bg-white rounded-3xl p-5 shadow-md border-t-8 border-yellow-400 relative">
-                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white font-bold px-6 py-2 rounded-full shadow-lg">青春期特征</div>
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white font-bold px-6 py-2 rounded-full shadow-lg whitespace-nowrap">青春期特征</div>
                     <div class="mt-4 drop-zone grid grid-cols-1 gap-3 p-2 rounded-xl" id="zone-characteristics" onclick="handleZoneClick('characteristics')">
                         <div class="text-center text-gray-400 text-sm mt-10 pointer-events-none"><i class="fas fa-download mb-2 text-xl"></i><br>点击词汇放入此处</div>
                     </div>
@@ -216,8 +203,8 @@
                 </div>
 
                 <!-- Right Bubble -->
-                <div class="flex-1 bg-white rounded-3xl p-5 shadow-md border-t-8 border-green-400 relative">
-                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-400 text-white font-bold px-6 py-2 rounded-full shadow-lg">情绪管理方法</div>
+                <div class="flex-1 bg-white rounded-3xl p-5 shadow-md border-t-8 border-green-400 relative mt-8 md:mt-0">
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-green-400 text-white font-bold px-6 py-2 rounded-full shadow-lg whitespace-nowrap">情绪管理方法</div>
                     <div class="mt-4 drop-zone grid grid-cols-1 gap-3 p-2 rounded-xl" id="zone-management" onclick="handleZoneClick('management')">
                         <div class="text-center text-gray-400 text-sm mt-10 pointer-events-none"><i class="fas fa-download mb-2 text-xl"></i><br>点击词汇放入此处</div>
                     </div>
@@ -345,7 +332,7 @@
             { id: 'q1_6', text: '脾气越来越好', icon: 'fa-smile-beam', isCorrect: false }
         ];
 
-        let q1Selected = [];
+        let q1Selected = []; // Holds selected option IDs regardless of correctness
 
         // Q2 Data
         const words = [
@@ -361,36 +348,30 @@
         let sortedItems = { characteristics: [], management: [] };
 
         /* Rendering Dynamic Content */
-        // Render Q1
+        // Render Q1 (No auto-check logic here anymore)
         function renderQ1() {
             const container = document.getElementById('q1-container');
             container.innerHTML = '';
             q1Options.forEach(opt => {
                 const isSelected = q1Selected.includes(opt.id);
                 
-                // Scaffolding Logic: Evaluate immediately if selected
                 let extraClasses = 'bg-white text-gray-700 shadow-sm border-gray-200';
+                let iconColorClass = 'text-gray-500';
+
+                // Only apply a neutral selection color (Blue) when selected
                 if (isSelected) {
-                    if (opt.isCorrect) {
-                        extraClasses = 'selected-correct text-green-800';
-                    } else {
-                        // Temporal class for animation, then deselect
-                        extraClasses = 'selected-wrong text-red-800';
-                        setTimeout(() => {
-                            q1Selected = q1Selected.filter(id => id !== opt.id);
-                            renderQ1();
-                        }, 600); // Wait for shake animation
-                    }
+                    extraClasses = 'selected-neutral text-blue-800 border-blue-500';
+                    iconColorClass = 'text-blue-600';
                 }
 
                 container.innerHTML += `
-                    <div onclick="handleQ1Click('${opt.id}', ${opt.isCorrect})" 
-                         class="option-card p-4 rounded-xl flex flex-col items-center justify-center text-center ${extraClasses} ${!isSelected && q1Selected.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}">
-                        <div class="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-2 shadow-inner">
-                            <i class="fas ${opt.icon} text-xl ${isSelected && opt.isCorrect ? 'text-green-600' : 'text-gray-500'}"></i>
+                    <div onclick="handleQ1Click('${opt.id}')" 
+                         class="option-card p-4 rounded-xl flex flex-col items-center justify-center text-center border-2 ${extraClasses} ${!isSelected && q1Selected.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 shadow-inner">
+                            <i class="fas ${opt.icon} text-xl ${iconColorClass}"></i>
                         </div>
                         <span class="font-bold text-sm">${opt.text}</span>
-                        ${isSelected && opt.isCorrect ? '<i class="fas fa-check-circle absolute top-2 right-2 text-green-500"></i>' : ''}
+                        ${isSelected ? '<i class="fas fa-check-circle absolute top-2 right-2 text-blue-500"></i>' : ''}
                     </div>
                 `;
             });
@@ -432,13 +413,13 @@
         }
 
         /* Event Handlers */
-        function handleQ1Click(id, isCorrect) {
+        // Simplified click handler for Q1 (No Correctness Check on click)
+        function handleQ1Click(id) {
             if (q1Selected.includes(id)) {
-                // Deselect if already correct (prevent deselecting wrong ones as they are handled by timeout)
-                if (isCorrect) {
-                    q1Selected = q1Selected.filter(item => item !== id);
-                }
+                // Deselect if already selected
+                q1Selected = q1Selected.filter(item => item !== id);
             } else {
+                // Select if less than 3 are selected
                 if (q1Selected.length < 3) {
                     q1Selected.push(id);
                 }
