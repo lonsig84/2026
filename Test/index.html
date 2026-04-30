@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二年级数学：梦幻海洋大冒险</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ocean-light: #e0f2fe;
+            --ocean-medium: #7dd3fc;
+            --ocean-deep: #0ea5e9;
+        }
+        body {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            background: linear-gradient(180deg, #bae6fd 0%, #38bdf8 50%, #0284c7 100%);
+            color: #1e3a8a;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .ocean-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border: 3px solid #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #ffffff;
+            border: 2px solid #bae6fd;
+            color: #0369a1;
+        }
+        .option-btn:hover {
+            transform: scale(1.03) translateY(-5px);
+            background: #f0f9ff;
+            border-color: #38bdf8;
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+        }
+        .progress-bar {
+            height: 14px;
+            background: linear-gradient(90deg, #fcd34d, #f59e0b);
+            transition: width 0.5s ease-out;
+            border-radius: 10px;
+        }
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            bottom: -50px;
+            animation: rise 6s infinite linear;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            20% { opacity: 0.6; }
+            100% { transform: translateY(-110vh) translateX(30px); opacity: 0; }
+        }
+        .swimming { animation: swim 5s ease-in-out infinite; }
+        @keyframes swim {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(15px, -10px) rotate(5deg); }
+            50% { transform: translate(30px, 0px) rotate(0deg); }
+            75% { transform: translate(15px, 10px) rotate(-5deg); }
+        }
+        .shake { animation: shake 0.5s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 relative">
+
+    <script>
+        for (let i = 0; i < 15; i++) {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            const size = Math.random() * 30 + 10;
+            b.style.width = size + 'px';
+            b.style.height = size + 'px';
+            b.style.left = Math.random() * 100 + 'vw';
+            b.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            b.style.animationDelay = (Math.random() * 5) + 's';
+            document.body.appendChild(b);
+        }
+    </script>
+
+    <!-- 姓名输入界面 -->
+    <div id="start-screen" class="fixed inset-0 bg-sky-500 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl text-center max-w-sm w-full">
+            <div class="text-6xl mb-4">🐬</div>
+            <h1 class="text-3xl font-bold text-blue-900 mb-6">欢迎来到海洋测验</h1>
+            <input type="text" id="student-name" placeholder="请输入你的名字" class="w-full p-4 border-2 border-blue-200 rounded-xl mb-6 text-center text-xl outline-none focus:border-blue-500">
+            <button onclick="startGame()" class="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-10 py-4 rounded-xl text-2xl font-bold w-full transition-all">开始探险</button>
+        </div>
+    </div>
+
+    <!-- 状态栏 -->
+    <div class="w-full max-w-2xl mt-4 mb-4 flex justify-between items-center bg-white/40 backdrop-blur-sm p-4 rounded-3xl border border-white/50 z-10 shadow-sm">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">💎</span>
+            <span class="text-xl font-bold">珍珠: <span id="score" class="text-blue-700">0</span></span>
+        </div>
+        <div class="text-xl font-bold text-blue-800">
+            关卡: <span id="q-count">1</span> / 15
+        </div>
+    </div>
+
+    <!-- 进度条 -->
+    <div class="w-full max-w-2xl bg-blue-100/50 rounded-full h-4 mb-6 border border-white z-10 overflow-hidden">
+        <div id="progress" class="progress-bar w-0"></div>
+    </div>
+
+    <!-- 核心卡片 -->
+    <div id="game-container" class="w-full max-w-2xl z-10">
+        <div id="question-card" class="ocean-card p-8 flex flex-col items-center">
+            <div id="illustration-box" class="h-40 flex items-center justify-center mb-4"></div>
+            <div id="question-text" class="text-2xl md:text-3xl text-center mb-8 font-bold text-blue-900 leading-snug">准备中...</div>
+            <div id="options-grid" class="grid grid-cols-1 gap-4 w-full"></div>
+        </div>
+    </div>
+
+    <!-- 弹窗反馈 -->
+    <div id="modal" class="fixed inset-0 bg-sky-900/40 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-10 rounded-[3rem] text-center max-w-sm w-full shadow-2xl border-4 border-blue-200">
+            <div id="modal-icon" class="text-6xl mb-4">✨</div>
+            <h2 id="modal-title" class="text-4xl mb-2 font-bold">太棒了！</h2>
+            <p id="modal-msg" class="text-xl mb-8 text-gray-600">你真棒！</p>
+            <button id="modal-btn" onclick="nextQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white px-12 py-4 rounded-2xl text-2xl font-bold transition-transform active:scale-95 shadow-lg">下一关</button>
+        </div>
+    </div>
+
+    <!-- 成绩单 -->
+    <div id="final-screen" class="fixed inset-0 bg-gradient-to-b from-sky-300 to-blue-600 hidden flex flex-col items-center justify-center p-4 z-50">
+        <div class="bg-white/90 p-12 rounded-[4rem] text-center shadow-2xl border-8 border-yellow-300 flex flex-col items-center max-w-lg">
+            <div class="text-8xl mb-4">👑</div>
+            <h1 class="text-5xl mb-2 font-bold text-blue-900">探险结束</h1>
+            <p class="text-2xl mb-2 text-blue-700">学生：<span id="display-name"></span></p>
+            <p class="text-2xl mb-2 text-blue-700">答对题数：<span id="final-score" class="text-4xl font-black text-orange-500">0</span> / 15</p>
+            <p class="text-xl mb-6 text-blue-600">所用时间：<span id="final-time">0</span> 秒</p>
+            <p id="data-status" class="text-sm mb-6 text-gray-500 font-bold">正在上传成绩...</p>
+            <button onclick="location.reload()" class="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-16 py-5 rounded-3xl text-3xl font-black shadow-xl transition-all hover:rotate-2">重新挑战</button>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 👇 请将下方的 URL 替换为你新部署的 Google Apps Script Web App URL 👇
+        // =========================================================================
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwyAwuP8Ha0c3HMqpMm3qEL6oQ-aU44ix9wEWv7zkQI_7kA4IsgY13E4wdsV6hBanSq/exec";
+        // =========================================================================
+
+        const oceanCreatures = [
+            `<svg width="140" height="100" viewBox="0 0 100 80" class="swimming"><path d="M 10 40 Q 30 10 70 30 L 95 10 L 95 70 L 70 50 Q 30 70 10 40" fill="#ff7f50" stroke="#fff" stroke-width="2" /><circle cx="30" cy="35" r="4" fill="#fff" /><circle cx="31" cy="35" r="2" fill="#000" /></svg>`,
+            `<svg width="120" height="120" viewBox="0 0 100 100" class="swimming"><path d="M 20 50 Q 20 10 50 10 Q 80 10 80 50 L 20 50" fill="#a29bfe" opacity="0.8" /><path d="M 30 50 V 80 M 40 50 V 90 M 50 50 V 80 M 60 50 V 90 M 70 50 V 80" stroke="#a29bfe" stroke-width="4" stroke-linecap="round" /></svg>`,
+            `<svg width="120" height="100" viewBox="0 0 100 80" class="swimming"><circle cx="50" cy="50" r="25" fill="#ff4757" /><circle cx="35" cy="45" r="3" fill="#fff" /><circle cx="65" cy="45" r="3" fill="#fff" /><path d="M 20 30 L 35 40 M 80 30 L 65 40" stroke="#ff4757" stroke-width="6" /><path d="M 10 60 L 30 55 M 90 60 L 70 55" stroke="#ff4757" stroke-width="4" /></svg>`,
+            `<svg width="100" height="100" viewBox="0 0 100 100" class="swimming"><path d="M 50 5 L 63 38 L 95 38 L 68 58 L 78 90 L 50 72 L 22 90 L 32 58 L 5 38 L 37 38 Z" fill="#ffa502" /></svg>`
+        ];
+
+        const questions = [
+            { q: "大海里有 120 条红鱼和 30 条绿鱼。一共有多少条鱼？", a: ["150", "140", "160", "130"], correct: 0 },
+            { q: "沙滩上有 500 个贝壳，海浪冲走 200 个，还剩多少个？", a: ["200", "300", "400", "700"], correct: 1 },
+            { q: "一共有 4 只猫，每只猫有 4 条腿，一共有多少条腿？", a: ["8", "12", "16", "20"], correct: 2 },
+            { q: "妈妈买了 15 个苹果，平均分给 3 个孩子，每人得几个？", a: ["3", "4", "5", "6"], correct: 2 },
+            { q: "计算：125 + 50 = ?", a: ["175", "165", "185", "155"], correct: 0 },
+            { q: "海龟下了 80 个蛋，孵出了 50 只小海龟，还有多少个蛋？", a: ["20", "30", "40", "130"], correct: 1 },
+            { q: "2 的 8 倍是多少？", a: ["10", "14", "16", "18"], correct: 2 },
+            { q: "10 支铅笔，每 2 支放一盒，需要多少个盒子？", a: ["4", "5", "6", "8"], correct: 1 },
+            { q: "算式 60 + 40 的结果是多少？", a: ["100", "90", "110", "80"], correct: 0 },
+            { q: "一个秋千坐 2 个人，4 个秋千坐多少个人？", a: ["6", "8", "10", "12"], correct: 1 },
+            { q: "比 300 少 10 的数是：", a: ["310", "290", "280", "200"], correct: 1 },
+            { q: "20 朵花平分给 4 个老师，每个老师得几朵？", a: ["4", "5", "6", "10"], correct: 1 },
+            { q: "5 + 5 + 5 可以写成：", a: ["5 X 2", "5 X 3", "3 + 5", "5 X 5"], correct: 1 },
+            { q: "小明有 140 张贴纸，送给弟弟 40 张，他还有多少张？", a: ["100", "180", "140", "120"], correct: 0 },
+            { q: "终极关卡：10 + 10 + 10 = ?", a: ["20", "30", "40", "10"], correct: 1 }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let startTime;
+        let studentName = "";
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function startGame() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if (!nameInput) {
+                alert("请输入名字才能开始哦！");
+                return;
+            }
+            studentName = nameInput;
+            document.getElementById('start-screen').classList.add('hidden');
+            startTime = new Date();
+            loadQuestion();
+        }
+
+        function playSound(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1046, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            }
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('question-text').innerText = q.q;
+            document.getElementById('q-count').innerText = currentQ + 1;
+            document.getElementById('progress').style.width = `${(currentQ / 15) * 100}%`;
+            document.getElementById('illustration-box').innerHTML = oceanCreatures[Math.floor(Math.random() * oceanCreatures.length)];
+
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+            q.a.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full p-5 rounded-2xl text-2xl font-bold shadow-sm';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(index) {
+            if (index === questions[currentQ].correct) {
+                score++;
+                document.getElementById('score').innerText = score;
+                playSound('correct');
+                showModal(true);
+            } else {
+                document.getElementById('question-card').classList.add('shake');
+                setTimeout(() => document.getElementById('question-card').classList.remove('shake'), 500);
+                playSound('wrong');
+                showModal(false);
+            }
+        }
+
+        function showModal(isCorrect) {
+            const m = document.getElementById('modal');
+            const t = document.getElementById('modal-title');
+            const msg = document.getElementById('modal-msg');
+            const icon = document.getElementById('modal-icon');
+            const btn = document.getElementById('modal-btn');
+            
+            if (isCorrect) {
+                t.innerText = "答对了！"; t.className = "text-4xl mb-2 font-bold text-blue-600";
+                msg.innerText = "你真聪明，获得了一颗珍珠！";
+                icon.innerText = "✨";
+            } else {
+                t.innerText = "加油哦！"; t.className = "text-4xl mb-2 font-bold text-orange-400";
+                msg.innerText = `正确答案是 ${questions[currentQ].a[questions[currentQ].correct]}`;
+                icon.innerText = "🌊";
+            }
+            
+            if (currentQ === questions.length - 1) {
+                btn.innerText = "查看成绩";
+            } else {
+                btn.innerText = "下一关";
+            }
+            m.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            document.getElementById('modal').classList.add('hidden');
+            currentQ++;
+            if (currentQ < questions.length) {
+                loadQuestion();
+            } else {
+                showFinal();
+            }
+        }
+
+        async function showFinal() {
+            const endTime = new Date();
+            const timeTaken = Math.floor((endTime - startTime) / 1000); 
+            
+            document.getElementById('display-name').innerText = studentName;
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-time').innerText = timeTaken;
+            document.getElementById('final-screen').classList.remove('hidden');
+
+            const statusEl = document.getElementById('data-status');
+
+            // 构造提交数据
+            const payload = {
+                name: studentName,
+                score: score,
+                timeTaken: timeTaken
+            };
+
+            // 方案 A: 使用 Fetch 提交
+            const formData = new URLSearchParams();
+            for (const key in payload) formData.append(key, payload[key]);
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                
+                statusEl.innerText = "成绩已提交到云端！✅";
+                statusEl.className = "text-sm mb-6 text-green-600 font-bold";
+            } catch (error) {
+                console.warn('Fetch 失败，尝试后备方案...', error);
+                
+                // 方案 B: 后备方案 - 使用隐形表单提交 (跨域最稳健的方法)
+                try {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = WEB_APP_URL;
+                    form.target = 'hidden_iframe';
+                    form.style.display = 'none';
+
+                    for (const key in payload) {
+                        const input = document.createElement('input');
+                        input.name = key;
+                        input.value = payload[key];
+                        form.appendChild(input);
+                    }
+
+                    // 创建一个隐藏的 iframe 来接收响应，防止页面跳转
+                    let iframe = document.getElementById('hidden_iframe');
+                    if (!iframe) {
+                        iframe = document.createElement('iframe');
+                        iframe.id = 'hidden_iframe';
+                        iframe.name = 'hidden_iframe';
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                    
+                    setTimeout(() => {
+                        statusEl.innerText = "成绩已通过安全通道提交！✅";
+                        statusEl.className = "text-sm mb-6 text-green-600 font-bold";
+                        form.remove();
+                    }, 1000);
+                } catch (e) {
+                    statusEl.innerText = "提交遇到一点麻烦，请截图保存成绩。❌";
+                    statusEl.className = "text-sm mb-6 text-red-600 font-bold";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
