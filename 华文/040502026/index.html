@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>捉贼特工队：雨后的线索</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 自定义动画与基础样式 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15%); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 1s infinite;
+        }
+        /* 禁止选中文字，提升游戏体验 */
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        /* 雨滴特效背景 */
+        .bg-rain {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjIwIj48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjMpIi8+PC9zdmc+');
+            background-size: 20px 40px;
+            transform: scale(1.2) rotate(15deg);
+        }
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #78716c; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen bg-stone-900 font-sans flex items-center justify-center p-2 md:p-4 text-stone-800">
+
+    <!-- 游戏主容器 -->
+    <div class="w-full max-w-4xl bg-stone-800 rounded-2xl shadow-2xl overflow-hidden border-4 border-stone-600 relative flex flex-col md:flex-row h-[90vh] md:h-[600px]">
+
+        <!-- ================= 标题画面 ================= -->
+        <div id="screen-title" class="absolute inset-0 z-50 bg-[#e8dbb9] flex flex-col items-center justify-center p-8 bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')]">
+            <div class="border-8 border-red-800 text-red-800 font-black text-4xl md:text-6xl px-10 py-4 transform -rotate-6 mb-10 opacity-80 tracking-widest text-center shadow-sm">
+                绝密档案
+            </div>
+            <h1 class="text-3xl md:text-5xl font-bold text-stone-800 mb-4 tracking-wider text-center">
+                捉贼特工队：雨后的线索
+            </h1>
+            <p class="text-xl text-stone-600 mb-12">侦探学院 互动调查游戏</p>
+            <button onclick="startGame()" class="bg-amber-700 hover:bg-amber-800 text-white text-xl md:text-2xl font-bold py-4 px-10 rounded-xl shadow-[0_6px_0_#78350f] active:shadow-[0_0px_0_#78350f] active:translate-y-2 transition-all flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                接受特训任务
+            </button>
+        </div>
+
+        <!-- ================= 游戏画面 (地图 + 侧边栏) ================= -->
+        <div id="screen-playing" class="hidden flex-1 relative flex-col md:flex-row w-full h-full">
+            
+            <!-- 左侧：地图视图 -->
+            <div class="flex-1 relative flex flex-col bg-black overflow-hidden h-3/5 md:h-full">
+                <!-- 顶栏 -->
+                <div class="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-4 flex justify-between text-white pointer-events-none">
+                    <span id="scene-name" class="font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                        科学园 (白天)
+                    </span>
+                    <span class="text-sm bg-blue-600 px-3 py-1 rounded-full border border-blue-400 shadow-[0_0_10px_#3b82f6]">搜证中...</span>
+                </div>
+
+                <!-- 地图渲染区 -->
+                <div id="scene-bg" class="flex-1 flex items-center justify-center relative overflow-hidden transition-colors duration-1000 bg-green-100">
+                    <div class="relative shadow-2xl bg-white/20 p-2 rounded">
+                        <div id="map-grid" class="flex flex-col"></div>
+                        <!-- 玩家 -->
+                        <div id="player" class="absolute flex items-center justify-center text-3xl md:text-4xl transition-all duration-200 z-10 filter drop-shadow-lg" style="width: 40px; height: 40px;">
+                            <div class="animate-bounce-slow">🕵️</div>
+                        </div>
+                    </div>
+                    <!-- 雨滴特效 -->
+                    <div id="rain-effect" class="hidden absolute inset-0 pointer-events-none bg-rain opacity-40 animate-pulse"></div>
+                </div>
+
+                <!-- 对话框 -->
+                <div id="dialogue-box" onclick="closeDialogue()" class="hidden absolute bottom-4 left-4 right-4 bg-stone-900/95 border-2 border-stone-400 text-white p-4 rounded-lg z-30 shadow-2xl cursor-pointer transform transition-transform">
+                    <div id="dialogue-speaker" class="font-bold text-amber-400 mb-1 border-b border-stone-600 pb-1"></div>
+                    <div id="dialogue-text" class="text-lg leading-relaxed mt-2"></div>
+                    <div class="text-xs text-stone-500 mt-3 text-right animate-pulse">点击或按空格键继续 ▼</div>
+                </div>
+            </div>
+
+            <!-- 右侧/底部：侧边栏 UI -->
+            <div class="w-full md:w-72 bg-stone-200 flex flex-col border-t-4 md:border-t-0 md:border-l-4 border-stone-600 h-2/5 md:h-full">
+                <!-- 线索记事本 -->
+                <div class="p-4 flex-1 overflow-y-auto">
+                    <h3 class="font-bold text-stone-800 text-lg mb-3 flex items-center gap-2 border-b-2 border-stone-400 pb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        探员记事本
+                    </h3>
+                    <ul id="clues-list" class="space-y-2">
+                        <li class="text-stone-500 text-sm italic text-center mt-4 border border-dashed border-stone-400 p-4 rounded">暂无线索，四处走走探索一下。</li>
+                    </ul>
+                </div>
+
+                <!-- 虚拟控制台 -->
+                <div class="p-4 bg-stone-300 pb-8 md:pb-4 border-t border-stone-400">
+                    <div class="text-xs text-stone-500 text-center mb-2 font-bold uppercase tracking-widest">控制台 (或使用 WASD)</div>
+                    <div class="grid grid-cols-3 gap-2 max-w-[200px] mx-auto">
+                        <div></div>
+                        <button onclick="move(0, -1)" class="bg-stone-700 active:bg-amber-600 text-white p-3 md:p-4 rounded-lg shadow-md flex justify-center items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                        </button>
+                        <div></div>
+                        <button onclick="move(-1, 0)" class="bg-stone-700 active:bg-amber-600 text-white p-3 md:p-4 rounded-lg shadow-md flex justify-center items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        </button>
+                        <button onclick="move(0, 1)" class="bg-stone-700 active:bg-amber-600 text-white p-3 md:p-4 rounded-lg shadow-md flex justify-center items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                        </button>
+                        <button onclick="move(1, 0)" class="bg-stone-700 active:bg-amber-600 text-white p-3 md:p-4 rounded-lg shadow-md flex justify-center items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 结案汇报小游戏 ================= -->
+        <div id="screen-report" class="hidden absolute inset-0 z-50 bg-blue-900 text-white p-4 md:p-10 flex flex-col items-center overflow-y-auto">
+            <h2 class="text-2xl md:text-3xl font-bold mb-2 text-blue-200 mt-4">终极特训：案情汇报</h2>
+            <p class="text-blue-100 mb-8 opacity-80 text-center text-sm md:text-base">用最清晰的逻辑向探长汇报你的调查结果！</p>
+
+            <!-- FlowMap 阶段 -->
+            <div id="report-step-1" class="w-full max-w-2xl bg-blue-950 p-4 md:p-6 rounded-xl border-2 border-blue-400/30">
+                <h3 class="text-lg md:text-xl mb-4 font-bold">1. 梳理案情流动图 (点击下方线索排序)</h3>
+                
+                <div id="flow-selected" class="flex flex-wrap gap-2 justify-center mb-6 bg-black/40 p-4 min-h-[80px] rounded-lg items-center">
+                    <!-- 动态插入选中项 -->
+                </div>
+
+                <div id="flow-buttons" class="grid grid-cols-2 gap-3 md:gap-4">
+                    <!-- 动态插入按钮 -->
+                </div>
+
+                <button id="btn-verify-flow" onclick="checkFlowMap()" class="hidden w-full mt-6 bg-green-500 text-white font-bold py-3 rounded hover:bg-green-600 transition-colors">验证逻辑</button>
+                <button onclick="resetFlowMap()" class="mt-4 text-blue-300 text-sm underline w-full text-center hover:text-white">重新排序</button>
+            </div>
+
+            <!-- Connectors 阶段 -->
+            <div id="report-step-2" class="hidden w-full max-w-2xl bg-blue-950 p-4 md:p-6 rounded-xl border-2 border-blue-400/30 animate-fade-in">
+                <h3 class="text-lg md:text-xl mb-4 font-bold">2. 串联线索的关键密码 (填入关联词)</h3>
+                
+                <div id="connector-buttons" class="flex gap-2 md:gap-4 justify-center mb-6">
+                    <!-- 动态插入词库按钮 -->
+                </div>
+
+                <div class="space-y-4 text-sm md:text-lg bg-black/40 p-4 md:p-6 rounded-lg leading-loose">
+                    <p><span class="conn-slot inline-block w-16 md:w-20 border-b-2 border-white text-center text-purple-300 font-bold cursor-pointer" onclick="removeConnector(0)"></span> ，我们发现校园里的百日菊无故失窃了。</p>
+                    <p><span class="conn-slot inline-block w-16 md:w-20 border-b-2 border-white text-center text-purple-300 font-bold cursor-pointer" onclick="removeConnector(1)"></span> ，大家成立了捉贼特工队。</p>
+                    <p><span class="conn-slot inline-block w-16 md:w-20 border-b-2 border-white text-center text-purple-300 font-bold cursor-pointer" onclick="removeConnector(2)"></span> ，在一个雨夜，我们顺着泥迹一路追踪到了小洞。</p>
+                    <p><span class="conn-slot inline-block w-16 md:w-20 border-b-2 border-white text-center text-purple-300 font-bold cursor-pointer" onclick="removeConnector(3)"></span> ，我们在老人家里查明了真相，原来是小猫吃了花。</p>
+                </div>
+
+                <button id="btn-verify-conn" onclick="checkConnectors()" class="hidden w-full mt-6 bg-green-500 text-white font-bold py-3 rounded hover:bg-green-600 text-lg transition-colors">完成终极汇报！</button>
+                <button onclick="resetConnectors()" class="mt-4 text-blue-300 text-sm underline w-full text-center hover:text-white">清空重填</button>
+            </div>
+        </div>
+
+        <!-- ================= 游戏结束画面 ================= -->
+        <div id="screen-end" class="hidden absolute inset-0 z-50 bg-[#e8dbb9] flex flex-col items-center justify-center p-8 bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] animate-fade-in">
+            <div class="text-green-700 font-black text-5xl md:text-6xl border-8 border-green-700 px-8 py-4 transform rotate-6 mb-8 tracking-widest shadow-lg bg-white/50">
+                CASE CLOSED
+            </div>
+            <h2 class="text-3xl font-bold text-stone-800 mb-6">探长评价：完美！</h2>
+            <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg border-2 border-stone-300 relative">
+                <div class="absolute -top-3 -left-3 text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <p class="text-stone-700 text-base md:text-lg leading-relaxed">
+                    你不仅成功找到了偷花的“小贼”，还能用 <strong>流动图</strong> 理清线索，并准确使用 <strong>关联词</strong>（首先、接着、然后、最后）完成了完美汇报！
+                    <br><br>
+                    恭喜你，晋升为侦探学院的 <span class="text-red-600 font-bold text-xl">首席探员</span>！
+                </p>
+            </div>
+            <button onclick="location.reload()" class="mt-10 bg-stone-800 hover:bg-stone-900 text-white font-bold py-3 px-8 rounded-full flex items-center gap-2 shadow-lg hover:shadow-xl transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+                重玩游戏
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 游戏主逻辑 JS -->
+    <script>
+        // === 数据定义 ===
+        const SCENES = {
+            garden: {
+                name: "科学园 (白天)",
+                bg: "bg-green-100",
+                isRainy: false,
+                grid: [
+                    ['W','W','W','W','W','W','W','W','W','W'],
+                    ['W','F','F','F','F','F','F','F','F','W'],
+                    ['W','F','F','H','F','F','F','F','F','W'],
+                    ['W','.','.','.','.','.','.','.','.','W'],
+                    ['W','.','A','.','.','.','Z','.','.','W'],
+                    ['W','.','.','.','.','.','.','.','.','W'],
+                    ['W','.','.','.','.','.','.','.','.','W'],
+                    ['W','W','W','W','D','D','W','W','W','W'],
+                ],
+                start: {x: 4, y: 6}
+            },
+            night: {
+                name: "校园走廊 (雨夜)",
+                bg: "bg-slate-800",
+                isRainy: true,
+                grid: [
+                    ['W','W','W','W','W','W','W','W','W','W'],
+                    ['W','.','.','.','W','W','.','.','O','W'],
+                    ['W','.','W','.','W','W','.','W','W','W'],
+                    ['W','.','W','M','M','.','M','W','W','W'],
+                    ['W','.','W','M','W','W','.','W','W','W'],
+                    ['W','.','W','M','.','.','B','W','W','W'],
+                    ['W','.','W','.','W','W','.','W','W','W'],
+                    ['W','D','W','W','W','W','W','W','W','W'],
+                ],
+                start: {x: 1, y: 6}
+            },
+            house: {
+                name: "老人家门外",
+                bg: "bg-stone-300",
+                isRainy: false,
+                grid: [
+                    ['W','W','W','W','W','W','W','W','W','W'],
+                    ['W','W','E','.','C','.','W','W','W','W'],
+                    ['W','W','.','.','.','.','W','W','W','W'],
+                    ['W','W','.','.','.','.','W','W','W','W'],
+                    ['W','W','W','W','.','.','W','W','W','W'],
+                    ['W','W','W','W','.','.','W','W','W','W'],
+                    ['W','W','W','W','.','.','W','W','W','W'],
+                    ['W','W','W','W','D','D','W','W','W','W'],
+                ],
+                start: {x: 4, y: 6}
+            }
+        };
+
+        const TILES = {
+            'W': { icon: '🌲', solid: true },
+            'F': { icon: '🌼', solid: true, interact: 'flower' },
+            '.': { icon: '', solid: false },
+            'D': { icon: '🚪', solid: false, interact: 'door' },
+            'H': { icon: '👨‍🌾', solid: true, interact: 'hu' },
+            'A': { icon: '👧', solid: true, interact: 'alice' },
+            'Z': { icon: '👦', solid: true, interact: 'zong' },
+            'B': { icon: '👵', solid: true, interact: 'bai' },
+            'M': { icon: '🐾', solid: false, interact: 'mud' },
+            'O': { icon: '🕳️', solid: true, interact: 'hole' },
+            'E': { icon: '👴', solid: true, interact: 'oldman' },
+            'C': { icon: '🐈', solid: true, interact: 'cat' },
+        };
+
+        // === 状态变量 ===
+        let gameState = 'title'; // title, playing, report, end
+        let currentSceneKey = 'garden';
+        let pos = { x: 4, y: 6 };
+        let facing = 'down'; // up, down, left, right
+        let clues = [];
+        let isDialogueActive = false;
+
+        // === DOM 元素获取 ===
+        const elScreenTitle = document.getElementById('screen-title');
+        const elScreenPlaying = document.getElementById('screen-playing');
+        const elScreenReport = document.getElementById('screen-report');
+        const elScreenEnd = document.getElementById('screen-end');
+        const elSceneBg = document.getElementById('scene-bg');
+        const elSceneName = document.getElementById('scene-name');
+        const elRainEffect = document.getElementById('rain-effect');
+        const elMapGrid = document.getElementById('map-grid');
+        const elPlayer = document.getElementById('player');
+        const elDialogueBox = document.getElementById('dialogue-box');
+        const elDialogueSpeaker = document.getElementById('dialogue-speaker');
+        const elDialogueText = document.getElementById('dialogue-text');
+        const elCluesList = document.getElementById('clues-list');
+
+        // === 初始化与渲染 ===
+        function getCellSize() {
+            // 匹配 Tailwind 的 md 断点
+            return window.innerWidth < 768 ? 40 : 48; 
+        }
+
+        function startGame() {
+            gameState = 'playing';
+            elScreenTitle.classList.add('hidden');
+            elScreenPlaying.classList.remove('hidden');
+            elScreenPlaying.classList.add('flex');
+            loadScene('garden');
+            
+            showDialogue("系统指引", "欢迎来到侦探学院。请使用键盘方向键或控制台按钮移动。去寻找【虎伯】了解情况吧。");
+            
+            // 监听窗口大小改变，重绘画布位置
+            window.addEventListener('resize', updatePlayerRender);
+        }
+
+        function loadScene(sceneKey) {
+            currentSceneKey = sceneKey;
+            const scene = SCENES[sceneKey];
+            pos = { ...scene.start };
+            
+            // 更新背景与UI
+            elSceneBg.className = `flex-1 flex items-center justify-center relative overflow-hidden transition-colors duration-1000 ${scene.bg}`;
+            elSceneName.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg> ${scene.name}`;
+            
+            if (scene.isRainy) elRainEffect.classList.remove('hidden');
+            else elRainEffect.classList.add('hidden');
+
+            // 渲染地图网格
+            elMapGrid.innerHTML = '';
+            scene.grid.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex';
+                row.forEach(cell => {
+                    const tile = TILES[cell];
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = `w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-2xl md:text-3xl border border-black/5 ${tile?.solid ? 'bg-black/10' : ''}`;
+                    cellDiv.innerHTML = tile ? tile.icon : '';
+                    rowDiv.appendChild(cellDiv);
+                });
+                elMapGrid.appendChild(rowDiv);
+            });
+
+            updatePlayerRender();
+        }
+
+        function updatePlayerRender() {
+            const size = getCellSize();
+            elPlayer.style.width = `${size}px`;
+            elPlayer.style.height = `${size}px`;
+            // +8px 是因为外层 wrapper (bg-white/20) 有 p-2 padding (8px)
+            elPlayer.style.left = `${pos.x * size + 8}px`; 
+            elPlayer.style.top = `${pos.y * size + 8}px`;
+            elPlayer.style.transform = facing === 'left' ? 'scaleX(-1)' : 'none';
+        }
+
+        function updateCluesUI() {
+            if (clues.length === 0) return;
+            elCluesList.innerHTML = '';
+            clues.forEach(c => {
+                const li = document.createElement('li');
+                li.className = 'bg-white p-2 rounded shadow-sm border-l-4 border-red-600 text-sm font-medium animate-fade-in flex items-center gap-2';
+                li.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> ${c}`;
+                elCluesList.appendChild(li);
+            });
+        }
+
+        function addClue(text) {
+            if (!clues.includes(text)) {
+                clues.push(text);
+                updateCluesUI();
+            }
+        }
+
+        // === 交互与移动逻辑 ===
+        function showDialogue(speaker, text) {
+            isDialogueActive = true;
+            elDialogueSpeaker.innerText = speaker;
+            elDialogueText.innerText = text;
+            elDialogueBox.classList.remove('hidden');
+        }
+
+        function closeDialogue() {
+            if (!isDialogueActive) return;
+            isDialogueActive = false;
+            elDialogueBox.classList.add('hidden');
+        }
+
+        function handleInteract(tileId) {
+            switch (tileId) {
+                case 'flower':
+                    showDialogue('旁白', '一片狼藉的花坛，饱满的花苞不见了。');
+                    break;
+                case 'hu':
+                    showDialogue('虎伯', '是谁？谁给我添乱！好不容易盼到百日菊盛开，三天两头却遭人摘走！气死我了！');
+                    addClue('百日菊失窃');
+                    break;
+                case 'alice':
+                    showDialogue('爱丽丝', '虎伯好可怜。日蒙，宗翔，我们一起成立“捉贼特工队”找出偷花贼吧！');
+                    if (clues.includes('百日菊失窃')) addClue('成立特工队');
+                    break;
+                case 'zong':
+                    showDialogue('宗翔', '没问题！我的胆子最大，日蒙的观察力最强，我们一定能抓到小偷！');
+                    break;
+                case 'door':
+                    if (currentSceneKey === 'garden') {
+                        if (clues.includes('百日菊失窃') && clues.includes('成立特工队')) {
+                            showDialogue('系统', '夜幕降临，天开始下起了大雨... 你们悄悄回到了学校走廊。');
+                            setTimeout(() => { closeDialogue(); loadScene('night'); }, 2000);
+                        } else {
+                            showDialogue('日蒙 (你)', '现在还不能离开，我需要先和【虎伯】以及【爱丽丝】了解情况。');
+                        }
+                    } else if (currentSceneKey === 'night') {
+                        showDialogue('日蒙 (你)', '必须跟着泥迹走，不能回去。');
+                    }
+                    break;
+                case 'bai':
+                    showDialogue('白奶奶', '孩子们，凡走过必留下痕迹。看地上，偷花贼必定在这附近留下蛛丝马迹。顺着泥巴脚印找找吧！');
+                    break;
+                case 'mud':
+                    showDialogue('日蒙 (你)', '泥迹向远处延伸... 跟着它走。');
+                    addClue('雨夜追踪泥迹');
+                    break;
+                case 'hole':
+                    if (clues.includes('雨夜追踪泥迹')) {
+                        showDialogue('系统', '你们发现了一个小洞！隐约听到“喵喵”的叫声。穿过去看看！');
+                        setTimeout(() => { closeDialogue(); loadScene('house'); }, 2000);
+                    } else {
+                        showDialogue('日蒙 (你)', '这里有个洞，但我还没找到它和案件的联系。');
+                    }
+                    break;
+                case 'cat':
+                    showDialogue('小猫', '喵呜~ (嘴角还挂着一片黄色的百日菊花瓣)');
+                    addClue('小猫偷花');
+                    break;
+                case 'oldman':
+                    if (clues.includes('小猫偷花')) {
+                        showDialogue('老人家', '哎呀！啧啧啧，你这个小东西，竟然偷吃校园里的花，真是不可思议！对不起啊孩子们，真相大白了。');
+                        addClue('查明真相');
+                        setTimeout(() => {
+                            showDialogue('探长 (系统)', '案件调查结束！现在进入探长特训环节：用流动图梳理案情并进行汇报演练！');
+                            setTimeout(() => { closeDialogue(); startReportGame(); }, 3000);
+                        }, 4000);
+                    } else {
+                        showDialogue('老人家', '大雨天的，你们几个小孩在这里做什么？');
+                    }
+                    break;
+            }
+        }
+
+        function move(dx, dy) {
+            if (gameState !== 'playing' || isDialogueActive) return;
+
+            if (dx > 0) facing = 'right';
+            if (dx < 0) facing = 'left';
+            if (dy > 0) facing = 'down';
+            if (dy < 0) facing = 'up';
+
+            const grid = SCENES[currentSceneKey].grid;
+            const newX = pos.x + dx;
+            const newY = pos.y + dy;
+
+            if (newY >= 0 && newY < grid.length && newX >= 0 && newX < grid[0].length) {
+                const cellChar = grid[newY][newX];
+                const tile = TILES[cellChar];
+
+                if (tile) {
+                    if (tile.interact) handleInteract(tile.interact);
+                    if (!tile.solid) {
+                        pos.x = newX; pos.y = newY;
+                    }
+                } else {
+                    pos.x = newX; pos.y = newY;
+                }
+            }
+            updatePlayerRender();
+        }
+
+        // 键盘监听
+        window.addEventListener('keydown', (e) => {
+            if (gameState === 'playing' && isDialogueActive) {
+                if (e.key === ' ' || e.key === 'Enter') closeDialogue();
+                return;
+            }
+            switch (e.key) {
+                case 'ArrowUp': case 'w': case 'W': move(0, -1); break;
+                case 'ArrowDown': case 's': case 'S': move(0, 1); break;
+                case 'ArrowLeft': case 'a': case 'A': move(-1, 0); break;
+                case 'ArrowRight': case 'd': case 'D': move(1, 0); break;
+            }
+        });
+
+        // ================= 结案汇报小游戏逻辑 =================
+        const flowSteps = ["找到老人家，查明真相", "雨夜行动，追踪泥迹", "发现百日菊失窃", "成立捉贼特工队"];
+        const correctOrder = ["发现百日菊失窃", "成立捉贼特工队", "雨夜行动，追踪泥迹", "找到老人家，查明真相"];
+        let selectedFlow = [];
+
+        const connectorsWords = ["最后", "首先", "然后", "接着"];
+        const correctConnectors = ["首先", "接着", "然后", "最后"];
+        let filledConns = [null, null, null, null];
+
+        function startReportGame() {
+            gameState = 'report';
+            elScreenPlaying.classList.add('hidden');
+            elScreenPlaying.classList.remove('flex');
+            elScreenReport.classList.remove('hidden');
+            renderFlowUI();
+        }
+
+        // --- FlowMap 部分 ---
+        function renderFlowUI() {
+            const container = document.getElementById('flow-selected');
+            const btns = document.getElementById('flow-buttons');
+            
+            container.innerHTML = '';
+            selectedFlow.forEach((step, i) => {
+                const el = document.createElement('div');
+                el.className = "flex items-center gap-1 md:gap-2";
+                el.innerHTML = `<span class="bg-blue-600 px-2 md:px-4 py-2 rounded shadow text-xs md:text-sm font-bold text-center">${step}</span>
+                                ${i < 3 ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><polyline points="9 18 15 12 9 6"></polyline></svg>' : ''}`;
+                container.appendChild(el);
+            });
+
+            btns.innerHTML = '';
+            flowSteps.forEach(step => {
+                const isSelected = selectedFlow.includes(step);
+                const btn = document.createElement('button');
+                btn.className = `p-2 md:p-3 rounded font-bold text-sm md:text-base transition-all ${isSelected ? 'bg-stone-700 text-stone-500 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-500 active:scale-95 text-white'}`;
+                btn.innerText = step;
+                btn.onclick = () => {
+                    if (!isSelected && selectedFlow.length < 4) {
+                        selectedFlow.push(step);
+                        renderFlowUI();
+                        if(selectedFlow.length === 4) document.getElementById('btn-verify-flow').classList.remove('hidden');
+                    }
+                };
+                btns.appendChild(btn);
+            });
+        }
+
+        function resetFlowMap() {
+            selectedFlow = [];
+            document.getElementById('btn-verify-flow').classList.add('hidden');
+            renderFlowUI();
+        }
+
+        function checkFlowMap() {
+            if (selectedFlow.join(',') === correctOrder.join(',')) {
+                document.getElementById('report-step-1').classList.add('hidden');
+                document.getElementById('report-step-2').classList.remove('hidden');
+                renderConnUI();
+            } else {
+                alert("逻辑顺序不对哦！请重新梳理。");
+                resetFlowMap();
+            }
+        }
+
+        // --- Connectors 部分 ---
+        function renderConnUI() {
+            const btns = document.getElementById('connector-buttons');
+            btns.innerHTML = '';
+            connectorsWords.forEach(word => {
+                const isUsed = filledConns.includes(word);
+                const btn = document.createElement('button');
+                btn.className = `px-3 md:px-4 py-2 rounded font-bold text-sm md:text-base ${isUsed ? 'bg-stone-700 text-stone-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 text-white'}`;
+                btn.innerText = word;
+                btn.onclick = () => {
+                    if (!isUsed) {
+                        const emptyIdx = filledConns.indexOf(null);
+                        if (emptyIdx !== -1) {
+                            filledConns[emptyIdx] = word;
+                            updateConnSlots();
+                            renderConnUI();
+                        }
+                    }
+                };
+                btns.appendChild(btn);
+            });
+            updateConnSlots();
+        }
+
+        function updateConnSlots() {
+            const slots = document.querySelectorAll('.conn-slot');
+            slots.forEach((slot, i) => {
+                slot.innerText = filledConns[i] || '';
+            });
+            if (!filledConns.includes(null)) {
+                document.getElementById('btn-verify-conn').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-verify-conn').classList.add('hidden');
+            }
+        }
+
+        function removeConnector(idx) {
+            if (filledConns[idx]) {
+                filledConns[idx] = null;
+                updateConnSlots();
+                renderConnUI();
+            }
+        }
+
+        function resetConnectors() {
+            filledConns = [null, null, null, null];
+            updateConnSlots();
+            renderConnUI();
+        }
+
+        function checkConnectors() {
+            if (filledConns.join(',') === correctConnectors.join(',')) {
+                endGame();
+            } else {
+                alert("关联词使用错误，汇报链条断裂了！重试！");
+                resetConnectors();
+            }
+        }
+
+        function endGame() {
+            gameState = 'end';
+            elScreenReport.classList.add('hidden');
+            elScreenEnd.classList.remove('hidden');
+            elScreenEnd.classList.add('flex');
+        }
+
+    </script>
+</body>
+</html>
