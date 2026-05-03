@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>动物身体部位配对</title>
+    <style>
+        body {
+            /* 使用稍微优雅一点的字体，背景是清新的浅绿色 */
+            font-family: 'KaiTi', '楷体', 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f4f9f4; 
+            text-align: center;
+            color: #333;
+        }
+        h2 { 
+            color: #2c5e3b; 
+            margin-top: 40px;
+            letter-spacing: 2px;
+        }
+        .game-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+        .draggables, .dropzones {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .drag-item {
+            padding: 15px 30px;
+            background-color: #fff;
+            border: 2px dashed #8fa896;
+            border-radius: 12px; /* 圆角更大，看起来更柔和 */
+            cursor: grab;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .drag-item:hover {
+            background-color: #f0f7f2;
+        }
+        .drop-zone {
+            width: 220px;
+            height: 150px;
+            background-color: #e8f0ea;
+            border: 3px solid #7ea88d;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #5c8d6d;
+            overflow: hidden; /* 确保图片不会跑出框外 */
+        }
+        /* 设置放入框内的图片大小 */
+        .drop-zone img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain; /* 保持图片比例 */
+            pointer-events: none; /* 防止图片干扰拖拽动作 */
+        }
+        .drop-zone.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <h2>把动物的身体部位拖拽到正确的图片上吧！</h2>
+
+    <div class="game-container">
+        <!-- 拖拽的部位 -->
+        <div class="draggables">
+            <div class="drag-item" id="part-web" draggable="true" ondragstart="drag(event)">蹼</div>
+            <div class="drag-item" id="part-horn" draggable="true" ondragstart="drag(event)">犀角</div>
+            <div class="drag-item" id="part-scale" draggable="true" ondragstart="drag(event)">鳞片</div>
+        </div>
+
+        <!-- 接收的动物框 -->
+        <div class="dropzones">
+            <!-- 鸭子的接收框：把图片放在这里 -->
+            <div class="drop-zone" id="zone-duck" data-match="part-web" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <!-- ★ 请注意这里！把 src 后面的名字改成您电脑里鸭子图片的名字 ★ -->
+                <img src="duck.png" alt="鸭">
+            </div>
+            
+            <div class="drop-zone" id="zone-rhino" data-match="part-horn" ondrop="drop(event)" ondragover="allowDrop(event)">
+                🦏 犀牛 (等待加入图片)
+            </div>
+            
+            <div class="drop-zone" id="zone-fish" data-match="part-scale" ondrop="drop(event)" ondragover="allowDrop(event)">
+                🐟 鱼 (等待加入图片)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+            var dropZone = ev.target;
+
+            // 如果拖到了图片上，让目标指向它的父元素（接收框）
+            if (dropZone.tagName === 'IMG') {
+                dropZone = dropZone.parentElement;
+            }
+
+            // 检查是否配对正确
+            if (dropZone.getAttribute('data-match') === data) {
+                dropZone.appendChild(draggedElement);
+                dropZone.classList.add('correct');
+                draggedElement.draggable = false; 
+                draggedElement.style.border = "none";
+                draggedElement.style.boxShadow = "none";
+                draggedElement.style.backgroundColor = "transparent";
+            } else {
+                alert("再想想看，这个部位属于它吗？");
+            }
+        }
+    </script>
+
+</body>
+</html>
