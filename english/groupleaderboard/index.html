@@ -80,16 +80,8 @@
   </div>
 
   <script>
-    // --- 模拟数据 (用于在非 GAS 环境下预览) ---
-    const mockData = [
-      { group: 'A', score: 120, students: ['Alice', 'Bob', 'Charlie', 'David', 'Eve'] },
-      { group: 'B', score: 95,  students: ['Frank', 'Grace', 'Hannah', 'Ian'] },
-      { group: 'C', score: 150, students: ['Jack', 'Kathy', 'Leo', 'Mia', 'Noah'] },
-      { group: 'D', score: 80,  students: ['Olivia', 'Paul', 'Quinn', 'Rachel'] }
-    ];
-
     // --- 后端通信封装 ---
-    // 这个函数智能判断当前是否在 Google 环境，如果在，则调用表格，否则使用模拟数据以便预览
+    // 直接调用 Google Apps Script 后端的方法
     function runBackend(methodName, ...args) {
       return new Promise((resolve, reject) => {
         if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -98,20 +90,7 @@
             .withFailureHandler(reject)
             [methodName](...args);
         } else {
-          // 模拟器：让画布预览也能工作
-          setTimeout(() => {
-            if (methodName === 'getGroupData') {
-              resolve(JSON.parse(JSON.stringify(mockData)));
-            } else if (methodName === 'addScore') {
-              const target = mockData.find(g => g.group === args[0]);
-              if (target) {
-                target.score += Number(args[1]);
-                resolve(target.score);
-              } else {
-                reject("Group not found");
-              }
-            }
-          }, 600); // 模拟网络延迟
+            reject("Please deploy this script as a Google Web App to load data from your sheet.");
         }
       });
     }
@@ -156,6 +135,8 @@
         document.getElementById('loading').style.display = 'none';
         renderGroups(groups);
       } catch (err) {
+        // 如果出错，显示错误信息并隐藏加载动画
+        document.getElementById('loading').style.display = 'none';
         alert("Failed to load data: " + err);
       }
     };
