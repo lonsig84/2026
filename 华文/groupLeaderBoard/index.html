@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 五年级华语 - 组别积分榜</title>
+  <!-- 引入 Tailwind CSS 快速排版和美化 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 canvas-confetti 礼花特效库 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    body {
+      background-color: #f1f5f9; /* 调整为更纯净的浅色底色 */
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden; /* 防止动态背景球溢出 */
+    }
+    
+    /* 玻璃拟态风格卡片（增强透明度和高光边框） */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.25); /* 降低白色透明度以透出背景 */
+      backdrop-filter: blur(20px); /* 增加模糊度 */
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6); /* 顶部和左侧强光 */
+      border-right: 1px solid rgba(255, 255, 255, 0.2); /* 底部和右侧弱光，增加立体感 */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 35px 0 rgba(31, 38, 135, 0.15);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+    }
+    .glass-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px -10px rgba(31, 38, 135, 0.25);
+    }
+
+    /* 背景装饰光球动画 */
+    @keyframes blob {
+      0% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+      animation: blob 8s infinite alternate ease-in-out;
+    }
+    .animation-delay-2000 { animation-delay: 2s; }
+    .animation-delay-4000 { animation-delay: 4s; }
+
+    /* 浮动加分文字动画 */
+    @keyframes floatUp {
+      0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+      20% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+      80% { transform: translate(-50%, -60px) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -80px) scale(1); opacity: 0; }
+    }
+    .floating-points {
+      animation: floatUp 1.2s ease-out forwards;
+      text-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* 分数跳动动画 */
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); color: #fbbf24; }
+      100% { transform: scale(1); }
+    }
+    .score-pop {
+      animation: pop 0.4s ease-out;
+    }
+
+    /* 自定义颜色主题 */
+    .theme-A { --theme-color: #ec4899; --theme-bg: #fdf2f8; } /* 粉红 */
+    .theme-B { --theme-color: #06b6d4; --theme-bg: #ecfeff; } /* 蓝绿 */
+    .theme-C { --theme-color: #10b981; --theme-bg: #ecfdf5; } /* 翠绿 */
+  </style>
+</head>
+<body class="min-h-screen py-10 px-4 md:px-10 relative">
+
+  <!-- 动态背景装饰球，用于突显玻璃化折射效果 -->
+  <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+    <div class="absolute top-[-5%] left-[-5%] w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-[80px] opacity-60 animate-blob"></div>
+    <div class="absolute top-[10%] right-[-5%] w-[30rem] h-[30rem] bg-cyan-400 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-[-10%] left-[20%] w-[25rem] h-[25rem] bg-emerald-400 rounded-full mix-blend-multiply filter blur-[90px] opacity-60 animate-blob animation-delay-4000"></div>
+    <div class="absolute bottom-[10%] right-[15%] w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-[80px] opacity-60 animate-blob"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto relative z-10">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-slate-800 drop-shadow-sm mb-4 tracking-wide">🏆 五年级华语课</h1>
+      <p class="text-slate-500 font-medium text-lg">输入分数，见证小组的荣耀时刻！</p>
+      
+      <!-- 重置分数按钮 -->
+      <button id="reset-btn" onclick="resetAllScores()" class="mt-4 text-sm text-gray-400 hover:text-red-500 transition-colors underline decoration-dashed">
+        🔄 重置所有分数
+      </button>
+    </header>
+
+    <!-- 加载中提示 -->
+    <div id="loading" class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+    </div>
+
+    <!-- 卡片容器 (采用 3 列布局适合 A,B,C 三组) -->
+    <div id="groups-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 hidden">
+      <!-- 卡片由 JS 动态生成 -->
+    </div>
+  </div>
+
+  <script>
+    // --- 填入您的 Google Apps Script Web App URL ---
+    // 将下方引号内的地址替换为您新部署的 Web App URL
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzVIkBnEEEuByC4r6NBwlnDHjs3rQwvRJZRpJbhtGVm-Rl9iZhosHux58D4m9s_9Lp8YA/exec"; 
+
+    let groupData = [];
+
+    // 自定义提示框 (替代原生 alert)
+    function showToast(message, isError = false) {
+      const toast = document.createElement('div');
+      toast.className = `fixed top-10 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl z-50 font-bold text-white transition-all duration-300 ${isError ? 'bg-red-500' : 'bg-emerald-500'}`;
+      toast.innerText = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -20px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // --- 后端通信封装 (Fetch API) ---
+    async function runBackend(methodName, ...args) {
+      let url = GAS_API_URL + "?action=" + methodName;
+      
+      if (methodName === 'addScore') {
+        url += "&group=" + encodeURIComponent(args[0]) + "&score=" + encodeURIComponent(args[1]);
+      }
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          return data.result;
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error("API Error:", error);
+        throw new Error("网络请求失败，请检查 GAS URL 是否已正确填入。");
+      }
+    }
+
+    // 重置所有分数 (双击确认模式，替代原生 confirm)
+    let resetClickCount = 0;
+    let resetTimeout;
+    async function resetAllScores() {
+      const btn = document.getElementById('reset-btn');
+      if (resetClickCount === 0) {
+        resetClickCount = 1;
+        btn.innerText = "⚠️ 再次点击以确认清零 Google Sheet 数据";
+        btn.classList.add('text-red-500', 'font-bold');
+        resetTimeout = setTimeout(() => {
+          resetClickCount = 0;
+          btn.innerText = "🔄 重置所有分数";
+          btn.classList.remove('text-red-500', 'font-bold');
+        }, 3000); // 3秒不点击则恢复原样
+        return;
+      }
+      
+      // 第二次点击，执行重置
+      clearTimeout(resetTimeout);
+      resetClickCount = 0;
+      btn.innerText = "🔄 重置所有分数";
+      btn.classList.remove('text-red-500', 'font-bold');
+
+      document.getElementById('loading').style.display = 'flex';
+      document.getElementById('groups-container').classList.add('hidden');
+      
+      try {
+        groupData = await runBackend('resetScores');
+        renderGroups(groupData);
+        showToast("所有小组分数已成功清零！");
+      } catch (err) {
+        showToast("重置失败: " + err.message, true);
+        document.getElementById('groups-container').classList.remove('hidden');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    // --- 音效生成器 (Web Audio API) ---
+    function playDingSound() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      
+      // 第一个音符 (叮~)
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(987.77, ctx.currentTime); // B5
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.5);
+
+      // 第二个音符 (高八度，增加悦耳感)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1318.51, ctx.currentTime + 0.1); // E6
+      gain2.gain.setValueAtTime(0, ctx.currentTime + 0.1);
+      gain2.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+      osc2.start(ctx.currentTime + 0.1);
+      osc2.stop(ctx.currentTime + 0.8);
+    }
+
+    // --- 页面初始化渲染 ---
+    window.onload = async () => {
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        groupData = await runBackend('getGroupData');
+        document.getElementById('loading').style.display = 'none';
+        renderGroups(groupData);
+      } catch (err) {
+        document.getElementById('loading').style.display = 'none';
+        showToast("数据加载失败，请确保您已将 Web App URL 填入代码中。", true);
+      }
+    };
+
+    function getThemeClass(groupName) {
+      if (groupName.includes('A')) return 'theme-A from-pink-500 to-rose-500';
+      if (groupName.includes('B')) return 'theme-B from-cyan-400 to-blue-500';
+      if (groupName.includes('C')) return 'theme-C from-emerald-400 to-green-500';
+      return 'from-gray-400 to-gray-600'; // 默认
+    }
+
+    function renderGroups(groups) {
+      const container = document.getElementById('groups-container');
+      container.innerHTML = '';
+      container.classList.remove('hidden');
+
+      groups.forEach((g, index) => {
+        const theme = getThemeClass(g.group);
+        
+        // 构建学生标签 (调整为半透明玻璃样式)
+        const studentTags = g.students.map(name => 
+          `<span class="inline-block bg-white/40 backdrop-blur-md text-slate-800 text-sm px-3 py-1.5 rounded-full border border-white/60 mb-2 mr-2 shadow-sm font-medium transition hover:bg-white/60">${name}</span>`
+        ).join('');
+
+        const card = document.createElement('div');
+        card.className = `glass-card rounded-3xl overflow-hidden relative group-card-${index}`;
+        card.innerHTML = `
+          <!-- 卡片顶部彩色装饰 -->
+          <div class="h-3 w-full bg-gradient-to-r ${theme} opacity-90"></div>
+          
+          <div class="p-6 relative flex flex-col h-full">
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-3xl font-black text-slate-800 tracking-tight drop-shadow-sm">${g.group}</h2>
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br ${theme} text-white flex items-center justify-center font-bold text-xl shadow-lg">
+                ${g.group.charAt(0)}
+              </div>
+            </div>
+            
+            <!-- 分数展示区 -->
+            <div class="text-center my-8">
+              <p class="text-gray-500 text-sm font-bold uppercase tracking-widest mb-1 drop-shadow-sm">总积分</p>
+              <div class="text-7xl font-black text-slate-800 score-display transition-colors drop-shadow-md" id="score-${index}">${g.score}</div>
+            </div>
+
+            <!-- 学生名单 -->
+            <div class="mb-8 flex-grow">
+              <p class="text-xs text-gray-500 font-bold mb-3 flex items-center drop-shadow-sm">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                小组成员
+              </p>
+              <div>${studentTags}</div>
+            </div>
+
+            <!-- 控制区 (同样使用玻璃效果) -->
+            <div class="bg-white/30 backdrop-blur-md p-3 rounded-2xl border border-white/50 flex items-center shadow-inner mt-auto relative z-10">
+              <input type="number" id="input-${index}" placeholder="输入分数" 
+                class="w-full bg-white/60 hover:bg-white/80 focus:bg-white/90 border border-white/70 rounded-xl py-3 px-4 text-lg font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none placeholder-gray-500 transition-colors"
+                onkeypress="if(event.key === 'Enter') handleAddScore(${index}, this)">
+              
+              <button onclick="handleAddScore(${index}, document.getElementById('input-${index}'))" 
+                class="ml-3 bg-gradient-to-r ${theme} text-white font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transform active:scale-95 transition-all whitespace-nowrap">
+                加分
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- 核心加分与特效逻辑 ---
+    async function handleAddScore(index, inputElement) {
+      const points = parseInt(inputElement.value);
+      if (!points || isNaN(points)) return;
+
+      const groupName = groupData[index].group; // 获取当前组名
+      const button = inputElement.nextElementSibling;
+      const cardElement = inputElement.closest('.glass-card');
+      const scoreElement = document.getElementById(`score-${index}`);
+      
+      // UI 状态：防连点，设置为加载中
+      const originalBtnText = button.innerHTML;
+      button.innerHTML = '...';
+      button.disabled = true;
+      inputElement.disabled = true;
+
+      try {
+        // 调用后端保存数据并接收云端返回的最新分数
+        const newScore = await runBackend('addScore', groupName, points);
+        groupData[index].score = newScore;
+        
+        // 1. 播放音效
+        playDingSound();
+
+        // 2. 礼花特效
+        triggerConfetti(button);
+
+        // 3. 上浮加分文字特效 (+10 或 -5)
+        const displayPoints = points > 0 ? `+${points}` : points;
+        showFloatingText(cardElement, displayPoints, points > 0 ? 'text-amber-500' : 'text-red-500');
+
+        // 4. 更新分数并执行跳动动画
+        scoreElement.innerText = newScore;
+        scoreElement.classList.remove('score-pop');
+        void scoreElement.offsetWidth; // 触发重绘
+        scoreElement.classList.add('score-pop');
+
+        // 清空输入框
+        inputElement.value = '';
+      } catch (err) {
+        showToast("加分失败，请检查网络或后端配置！", true);
+      } finally {
+        // 恢复 UI 状态
+        button.innerHTML = originalBtnText;
+        button.disabled = false;
+        inputElement.disabled = false;
+        inputElement.focus();
+      }
+    }
+
+    // 生成屏幕局部的粒子礼花
+    function triggerConfetti(originElement) {
+      const rect = originElement.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+      confetti({
+        particleCount: 70,
+        spread: 80,
+        origin: { x: x, y: y },
+        colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff'],
+        disableForReducedMotion: true
+      });
+    }
+
+    // 生成上浮数字特效
+    function showFloatingText(cardElement, text, colorClass) {
+      const floater = document.createElement('div');
+      floater.textContent = text;
+      // 设置绝对定位和浮动样式
+      floater.className = `absolute top-[30%] left-[50%] text-6xl font-black ${colorClass} pointer-events-none z-50 floating-points`;
+      
+      cardElement.appendChild(floater);
+      
+      // 动画结束后自动移除 DOM 元素
+      setTimeout(() => {
+        if (cardElement.contains(floater)) {
+          cardElement.removeChild(floater);
+        }
+      }, 1200);
+    }
+  </script>
+</body>
+</html>
