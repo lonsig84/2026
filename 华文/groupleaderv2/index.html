@@ -155,11 +155,11 @@
       }, [groups, history]);
 
       // --- 核心业务逻辑 ---
-      const logHistory = (action, points, targetName) => {
+      const logHistory = (action, points, targetName, payload = null) => {
         const newLog = {
           id: Date.now(),
           time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
-          action, points, targetName
+          action, points, targetName, payload
         };
         setHistory(prev => [newLog, ...prev].slice(0, 80)); // 保留最近80条防止数据过大
       };
@@ -206,10 +206,17 @@
 
       const deleteStudent = (groupId, studentId, name) => {
         if(!window.confirm(`确定要将 ${name} 移出小组吗？`)) return;
+        
+        // 删除前先保存该学生的数据快照
+        const targetGroup = groups.find(g => g.id === groupId);
+        const studentToRestore = targetGroup.students.find(s => s.id === studentId);
+
         setGroups(prev => prev.map(g => g.id === groupId ? {
           ...g, students: g.students.filter(s => s.id !== studentId)
         } : g));
-        logHistory('移出小组', 0, name);
+        
+        // 在历史记录中携带恢复数据包
+        logHistory('移出小组', 0, name, { type: 'restore_student', groupId, data: studentToRestore });
         setSelectedStudent(null);
       };
 
@@ -231,6 +238,41 @@
 
         setGroups(prev => [...prev, newGroup]);
         logHistory('新建了小组', 0, groupName);
+      };
+
+      const deleteGroup = (groupId, groupName) => {
+        if(!window.confirm(`⚠️ 危险操作：确定要解散【${groupName}】吗？\n\n该组的所有分数和成员名单将被永久删除！`)) return;
+        
+        // 删除前先保存该小组的数据快照（包含全部分数和成员）
+        const groupToRestore = groups.find(g => g.id === groupId);
+        
+        setGroups(prev => prev.filter(g => g.id !== groupId));
+        
+        // 在历史记录中携带恢复数据包
+        logHistory('解散了小组', 0, groupName, { type: 'restore_group', data: groupToRestore });
+      };
+
+      // --- 恢复被删除的数据逻辑 ---
+      const restoreGroup = (logId, groupData) => {
+        if(groups.some(g => g.id === groupData.id)) return alert("该小组已存在，无需恢复！");
+        setGroups(prev => [...prev, groupData]);
+        logHistory('撤销删除，恢复了小组', 0, groupData.name);
+        // 恢复后隐藏该条记录的撤销按钮
+        setHistory(prev => prev.map(log => log.id === logId ? { ...log, payload: null } : log));
+      };
+
+      const restoreStudent = (logId, groupId, studentData) => {
+        setGroups(prev => prev.map(g => {
+          if (g.id === groupId) {
+            // 检查是否已经存在
+            if (g.students.some(s => s.id === studentData.id)) return g;
+            return { ...g, students: [...g.students, studentData] };
+          }
+          return g;
+        }));
+        logHistory('撤销删除，恢复了成员', 0, studentData.name);
+        // 恢复后隐藏该条记录的撤销按钮
+        setHistory(prev => prev.map(log => log.id === logId ? { ...log, payload: null } : log));
       };
 
       const triggerEffects = (points, element) => {
@@ -294,6 +336,9 @@
                       <h2 className="text-3xl font-black text-slate-800 drop-shadow-sm flex items-center gap-3">
                         <span className="w-10 h-10 rounded-xl text-white flex items-center justify-center text-xl shadow-lg" style={{background: 'var(--c-grad)'}}>{group.name.charAt(0)}</span>
                         {group.name}
+                        <button onClick={() => deleteGroup(group.id, group.name)} className="ml-1 w-7 h-7 flex items-center justify-center rounded-full bg-white/50 text-red-400 hover:bg-red-500 hover:text-white transition-all opacity-40 hover:opacity-100 shadow-sm" title="解散该小组">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
                       </h2>
                     </div>
                     <div className="text-right flex items-center gap-4">
@@ -372,7 +417,18 @@
                           <span className="font-bold">{log.targetName}</span> {log.action} 
                           {log.points !== 0 && <span className={`ml-1 font-black ${log.points > 0 ? 'text-green-500' : 'text-red-500'}`}>{log.points > 0 ? `+${log.points}` : log.points}</span>}
                         </p>
-                        <p className="text-[10px] text-slate-400">{log.time}</p>
+                        
+                        <div className="flex justify-between items-center mt-1">
+                          <p className="text-[10px] text-slate-400">{log.time}</p>
+                          
+                          {/* 如果存在恢复数据包，则渲染“撤销删除”按钮 */}
+                          {log.payload?.type === 'restore_group' && (
+                            <button onClick={() => restoreGroup(log.id, log.payload.data)} className="text-[10px] bg-blue-50 text-blue-500 px-2 py-0.5 rounded shadow-sm border border-blue-100 hover:bg-blue-500 hover:text-white transition-all font-bold">撤销删除</button>
+                          )}
+                          {log.payload?.type === 'restore_student' && (
+                            <button onClick={() => restoreStudent(log.id, log.payload.groupId, log.payload.data)} className="text-[10px] bg-blue-50 text-blue-500 px-2 py-0.5 rounded shadow-sm border border-blue-100 hover:bg-blue-500 hover:text-white transition-all font-bold">撤销删除</button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
