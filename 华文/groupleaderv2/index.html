@@ -48,6 +48,8 @@
     .theme-pink { --c-main: #f43f5e; --c-light: #fff1f2; --c-grad: linear-gradient(135deg, #ff758f, #e63946); }
     .theme-blue { --c-main: #0ea5e9; --c-light: #f0f9ff; --c-grad: linear-gradient(135deg, #48cae4, #0077b6); }
     .theme-green { --c-main: #10b981; --c-light: #ecfdf5; --c-grad: linear-gradient(135deg, #52b788, #2d6a4f); }
+    .theme-orange { --c-main: #f97316; --c-light: #fff7ed; --c-grad: linear-gradient(135deg, #fb923c, #ea580c); }
+    .theme-purple { --c-main: #a855f7; --c-light: #faf5ff; --c-grad: linear-gradient(135deg, #c084fc, #9333ea); }
   </style>
 </head>
 <body>
@@ -211,6 +213,26 @@
         setSelectedStudent(null);
       };
 
+      const addNewGroup = () => {
+        const groupName = prompt("请输入新小组的名称（例如：D组 或 第四组）：");
+        if (!groupName) return;
+        
+        // 系统内置5种主题色，自动循环分配给新小组
+        const themes = ['theme-pink', 'theme-blue', 'theme-green', 'theme-orange', 'theme-purple'];
+        const themeToUse = themes[groups.length % themes.length];
+        
+        const newGroup = {
+          id: 'G' + Date.now().toString(), // 自动生成系统唯一ID
+          name: groupName,
+          theme: themeToUse,
+          score: 0,
+          students: [] // 新建的小组默认没有成员
+        };
+
+        setGroups(prev => [...prev, newGroup]);
+        logHistory('新建了小组', 0, groupName);
+      };
+
       const triggerEffects = (points, element) => {
         points > 0 ? playSound('add') : playSound('minus');
         if (points > 0 && element) {
@@ -270,7 +292,7 @@
                   <div className="flex justify-between items-end mb-6 relative z-10">
                     <div>
                       <h2 className="text-3xl font-black text-slate-800 drop-shadow-sm flex items-center gap-3">
-                        <span className="w-10 h-10 rounded-xl text-white flex items-center justify-center text-xl shadow-lg" style={{background: 'var(--c-grad)'}}>{group.id}</span>
+                        <span className="w-10 h-10 rounded-xl text-white flex items-center justify-center text-xl shadow-lg" style={{background: 'var(--c-grad)'}}>{group.name.charAt(0)}</span>
                         {group.name}
                       </h2>
                     </div>
@@ -308,6 +330,14 @@
                   </div>
                 </div>
               ))}
+              
+              {}
+              <button 
+                onClick={addNewGroup}
+                className="w-full glass-panel rounded-3xl p-6 border-2 border-dashed border-slate-300 text-slate-400 hover:border-blue-400 hover:text-blue-500 font-bold text-lg flex items-center justify-center gap-2 transition-all hover:bg-white/50"
+              >
+                <span className="text-2xl">+</span> 添加新小组
+              </button>
             </div>
 
             {/* 右侧：侧边栏 */}
