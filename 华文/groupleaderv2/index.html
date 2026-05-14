@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌟 华语课堂 2.0 - 云端管理系统</title>
+  
+  <!-- 引入核心依赖 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(254, 226, 226, 0.9) 0px, transparent 50%),
+        radial-gradient(at 90% 10%, rgba(224, 242, 254, 0.9) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(243, 232, 255, 0.9) 0px, transparent 50%),
+        radial-gradient(at 80% 90%, rgba(209, 250, 229, 0.9) 0px, transparent 50%),
+        radial-gradient(at 20% 90%, rgba(254, 240, 138, 0.6) 0px, transparent 50%);
+      background-attachment: fixed;
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #334155;
+    }
+    
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 0 20px rgba(255, 255, 255, 0.5) inset;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+    
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-slide-in { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    @keyframes pulse-soft { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.95); } }
+    .animate-syncing { animation: pulse-soft 1s infinite ease-in-out; }
+
+    .theme-pink { --c-main: #f43f5e; --c-light: #fff1f2; --c-grad: linear-gradient(135deg, #ff758f, #e63946); }
+    .theme-blue { --c-main: #0ea5e9; --c-light: #f0f9ff; --c-grad: linear-gradient(135deg, #48cae4, #0077b6); }
+    .theme-green { --c-main: #10b981; --c-light: #ecfdf5; --c-grad: linear-gradient(135deg, #52b788, #2d6a4f); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // ==========================================
+    // ⚠️ 请在这里填入您部署好的 Google Apps Script Web App URL
+    // ==========================================
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyoMB9jbb0FwAucBzlwzjVOZusSUapnSpXazF9KYb4ssGI58OxIUa54egCHBM24fao/exec"; 
+
+    // 默认数据结构 (当云端没数据时使用)
+    const INITIAL_DATA = [
+      { id: 'A', name: 'A组', theme: 'theme-pink', score: 0, students: [{id: 'A1', name: '俊杰', score: 0}, {id: 'A2', name: '子涵', score: 0}, {id: 'A3', name: '雨晴', score: 0}] },
+      { id: 'B', name: 'B组', theme: 'theme-blue', score: 0, students: [{id: 'B1', name: '嘉欣', score: 0}, {id: 'B2', name: '宇哲', score: 0}, {id: 'B3', name: '诗颖', score: 0}] },
+      { id: 'C', name: 'C组', theme: 'theme-green', score: 0, students: [{id: 'C1', name: '凯文', score: 0}, {id: 'C2', name: '欣宜', score: 0}, {id: 'C3', name: '文博', score: 0}] }
+    ];
+
+    // 音效系统
+    const playSound = (type) => {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      if (type === 'add') {
+        osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, ctx.currentTime);
+        gain.gain.setValueAtTime(0, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+      } else if (type === 'minus') {
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(300, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3);
+      }
+    };
+
+    function App() {
+      // 状态管理
+      const [groups, setGroups] = useState([]);
+      const [history, setHistory] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [syncStatus, setSyncStatus] = useState('synced'); // 'synced' | 'syncing' | 'error'
+      const [selectedStudent, setSelectedStudent] = useState(null);
+      const [groupInputs, setGroupInputs] = useState({});
+      
+      const isFirstLoad = useRef(true);
+
+      // --- 1. 初次加载：从云端拉取数据 ---
+      useEffect(() => {
+        const fetchInitialData = async () => {
+          try {
+            const response = await fetch(`${GAS_API_URL}?action=getData`);
+            const resData = await response.json();
+            
+            if (resData.status === 'success' && resData.data.groups) {
+              setGroups(resData.data.groups);
+              setHistory(resData.data.history || []);
+            } else {
+              setGroups(INITIAL_DATA); // 云端无数据则用默认
+            }
+          } catch (error) {
+            console.error("云端加载失败，使用本地默认数据", error);
+            alert("连接云端失败，正在使用脱机模式。");
+            setGroups(INITIAL_DATA);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchInitialData();
+      }, []);
+
+      // --- 2. 自动保存：监听数据变化，防抖上传云端 ---
+      useEffect(() => {
+        if (isFirstLoad.current || loading) {
+          isFirstLoad.current = false;
+          return;
+        }
+
+        setSyncStatus('syncing');
+        // 防抖：停止操作 1.5 秒后才执行云端上传，极大地提升网页流畅度
+        const timeoutId = setTimeout(async () => {
+          try {
+            const response = await fetch(GAS_API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避开 CORS 预检
+              body: JSON.stringify({ action: 'saveData', groups, history })
+            });
+            const data = await response.json();
+            if(data.status === 'success') {
+              setSyncStatus('synced');
+            } else throw new Error(data.message);
+          } catch (err) {
+            console.error("保存失败", err);
+            setSyncStatus('error');
+          }
+        }, 1500);
+
+        return () => clearTimeout(timeoutId);
+      }, [groups, history]);
+
+      // --- 核心业务逻辑 ---
+      const logHistory = (action, points, targetName) => {
+        const newLog = {
+          id: Date.now(),
+          time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit', second:'2-digit'}),
+          action, points, targetName
+        };
+        setHistory(prev => [newLog, ...prev].slice(0, 80)); // 保留最近80条防止数据过大
+      };
+
+      const addGroupScore = (groupId, points, event) => {
+        if(!points || isNaN(points)) return;
+        setGroups(prev => prev.map(g => g.id === groupId ? { ...g, score: g.score + points } : g));
+        logHistory(points > 0 ? '奖励' : '扣除', points, groups.find(g => g.id === groupId).name);
+        triggerEffects(points, event.target);
+      };
+
+      const addStudentScore = (groupId, studentId, points, event) => {
+        if(!points || isNaN(points)) return;
+        setGroups(prev => prev.map(g => {
+          if (g.id !== groupId) return g;
+          return {
+            ...g,
+            score: g.score + points,
+            students: g.students.map(s => s.id === studentId ? { ...s, score: s.score + points } : s)
+          };
+        }));
+        const sName = groups.find(g=>g.id===groupId).students.find(s=>s.id===studentId).name;
+        logHistory(points > 0 ? '表现出色' : '违纪扣分', points, sName);
+        triggerEffects(points, event?.target);
+      };
+
+      const addStudent = (groupId) => {
+        const name = prompt("请输入新学生姓名：");
+        if (!name) return;
+        setGroups(prev => prev.map(g => {
+          if (g.id !== groupId) return g;
+          return { ...g, students: [...g.students, { id: Date.now().toString(), name, score: 0 }] };
+        }));
+        logHistory('加入小组', 0, name);
+      };
+
+      const updateStudentName = (groupId, studentId, newName) => {
+        if (!newName) return;
+        setGroups(prev => prev.map(g => g.id === groupId ? {
+          ...g, students: g.students.map(s => s.id === studentId ? { ...s, name: newName } : s)
+        } : g));
+        setSelectedStudent(null);
+      };
+
+      const deleteStudent = (groupId, studentId, name) => {
+        if(!window.confirm(`确定要将 ${name} 移出小组吗？`)) return;
+        setGroups(prev => prev.map(g => g.id === groupId ? {
+          ...g, students: g.students.filter(s => s.id !== studentId)
+        } : g));
+        logHistory('移出小组', 0, name);
+        setSelectedStudent(null);
+      };
+
+      const triggerEffects = (points, element) => {
+        points > 0 ? playSound('add') : playSound('minus');
+        if (points > 0 && element) {
+          const rect = element.getBoundingClientRect();
+          confetti({ particleCount: 40, spread: 60, origin: { x: (rect.left+rect.width/2)/window.innerWidth, y: (rect.top+rect.height/2)/window.innerHeight } });
+        }
+      };
+
+      const leaderboard = useMemo(() => {
+        let allStudents = [];
+        groups.forEach(g => { g.students.forEach(s => allStudents.push({ ...s, groupName: g.name, theme: g.theme })); });
+        return allStudents.sort((a, b) => b.score - a.score).slice(0, 10);
+      }, [groups]);
+
+      // --- 界面渲染 ---
+      if (loading) {
+        return (
+          <div className="h-screen flex flex-col items-center justify-center space-y-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+            <p className="text-slate-500 font-bold tracking-widest animate-pulse">正在连接云端系统...</p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen p-6 md:p-10 max-w-7xl mx-auto flex flex-col gap-8">
+          
+          {/* 顶部区 */}
+          <header className="glass-panel rounded-3xl p-8 text-center relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 via-blue-500 to-green-500"></div>
+            <div className="text-left">
+              <h1 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight mb-2">🏆 华语课堂积分系统 <span className="text-xl text-blue-500 bg-blue-100 px-3 py-1 rounded-full align-middle">v2.0 ☁️</span></h1>
+              <p className="text-slate-500 font-medium text-lg flex items-center gap-2">
+                当前状态: 
+                {syncStatus === 'syncing' && <span className="text-amber-500 animate-syncing flex items-center gap-1"><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 同步中...</span>}
+                {syncStatus === 'synced' && <span className="text-green-500 flex items-center gap-1">✅ 已保存至云端</span>}
+                {syncStatus === 'error' && <span className="text-red-500 flex items-center gap-1">❌ 同步失败，请检查网络</span>}
+              </p>
+            </div>
+            <button 
+              onClick={() => { if(confirm('确定清零所有分数记录吗？成员名单将保留。')) { 
+                setGroups(groups.map(g => ({...g, score:0, students: g.students.map(s => ({...s, score:0}))})));
+                setHistory([{id: Date.now(), time: new Date().toLocaleTimeString(), action: '清零了所有数据', points: 0, targetName: '老师'}]);
+              } }}
+              className="text-red-400 hover:text-red-600 font-bold bg-white/50 px-4 py-2 rounded-xl border border-red-100 transition whitespace-nowrap">
+              重置数据
+            </button>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* 左侧：小组控制 */}
+            <div className="lg:col-span-2 space-y-8">
+              {groups.map((group, idx) => (
+                <div key={group.id} className={`glass-panel rounded-3xl p-6 relative ${group.theme} animate-slide-in`} style={{animationDelay: `${idx*0.1}s`}}>
+                  <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 filter blur-2xl" style={{background: 'var(--c-main)'}}></div>
+                  
+                  <div className="flex justify-between items-end mb-6 relative z-10">
+                    <div>
+                      <h2 className="text-3xl font-black text-slate-800 drop-shadow-sm flex items-center gap-3">
+                        <span className="w-10 h-10 rounded-xl text-white flex items-center justify-center text-xl shadow-lg" style={{background: 'var(--c-grad)'}}>{group.id}</span>
+                        {group.name}
+                      </h2>
+                    </div>
+                    <div className="text-right flex items-center gap-4">
+                      <div className="text-6xl font-black text-slate-800 drop-shadow-md">{group.score}</div>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex gap-1 justify-end">
+                          <button onClick={(e) => addGroupScore(group.id, 5, e)} className="bg-white/80 hover:bg-white text-slate-800 font-bold w-10 h-8 rounded-lg shadow-sm hover:scale-105 transition text-sm">+5</button>
+                          <button onClick={(e) => addGroupScore(group.id, -2, e)} className="bg-white/50 hover:bg-white/80 text-red-500 font-bold w-10 h-8 rounded-lg shadow-sm hover:scale-105 transition text-sm">-2</button>
+                        </div>
+                        <div className="flex items-center bg-white/60 p-1 rounded-lg shadow-inner border border-white/60">
+                          <input type="number" placeholder="±分" value={groupInputs[group.id] || ''}
+                            onChange={(e) => setGroupInputs({...groupInputs, [group.id]: e.target.value})}
+                            onKeyDown={(e) => { if(e.key === 'Enter') { addGroupScore(group.id, parseInt(groupInputs[group.id]), e); setGroupInputs({...groupInputs, [group.id]: ''}); } }}
+                            className="w-14 bg-transparent text-center font-bold text-slate-700 outline-none text-sm placeholder-gray-400" />
+                          <button onClick={(e) => { addGroupScore(group.id, parseInt(groupInputs[group.id]), e); setGroupInputs({...groupInputs, [group.id]: ''}); }}
+                            className="w-7 h-7 bg-white text-blue-500 rounded font-bold text-xs shadow-sm hover:bg-blue-50">✓</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/40 p-4 rounded-2xl shadow-inner border border-white/50">
+                    <p className="text-xs font-bold text-slate-500 mb-3">团队成员 (点击操作)</p>
+                    <div className="flex flex-wrap gap-3">
+                      {group.students.map(student => (
+                        <button key={student.id} onClick={() => setSelectedStudent({ group, student })}
+                          className="group relative flex items-center bg-white hover:bg-slate-50 px-3 py-1.5 rounded-full shadow-sm border border-slate-200 transition hover:-translate-y-1">
+                          <span className="font-bold text-slate-700 mr-2">{student.name}</span>
+                          <span className="bg-slate-100 text-slate-600 text-xs font-black px-2 py-0.5 rounded-full">{student.score}</span>
+                        </button>
+                      ))}
+                      <button onClick={() => addStudent(group.id)} className="w-8 h-8 rounded-full bg-white/50 border border-dashed border-slate-400 text-slate-500 hover:bg-white hover:text-blue-500">+</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 右侧：侧边栏 */}
+            <div className="flex flex-col gap-8 h-[calc(100vh-10rem)] sticky top-6">
+              
+              <div className="glass-panel rounded-3xl p-6 flex-1 flex flex-col min-h-[300px]">
+                <h3 className="text-xl font-black text-slate-800 mb-4">🎖️ 个人英雄榜</h3>
+                <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                  {leaderboard.map((student, i) => (
+                    <div key={student.id} className="flex justify-between items-center bg-white/60 p-3 rounded-xl shadow-sm border border-white/50">
+                      <div className="flex items-center gap-3">
+                        <span className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-black text-white ${i===0?'bg-yellow-400':i===1?'bg-gray-400':i===2?'bg-amber-600':'bg-slate-300'}`}>{i+1}</span>
+                        <div>
+                          <p className="font-bold text-slate-700 text-sm">{student.name}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">{student.groupName}</p>
+                        </div>
+                      </div>
+                      <div className="text-lg font-black" style={{color: 'var(--c-main)'}}>{student.score}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="glass-panel rounded-3xl p-6 flex-1 flex flex-col min-h-[300px]">
+                <h3 className="text-xl font-black text-slate-800 mb-4">📜 动态记录</h3>
+                <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                  {history.map(log => (
+                    <div key={log.id} className="flex items-start gap-3 border-b border-slate-200/50 pb-2 last:border-0">
+                      <div className={`mt-1 w-2 h-2 rounded-full ${log.points > 0 ? 'bg-green-400' : log.points < 0 ? 'bg-red-400' : 'bg-blue-400'}`}></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-slate-700">
+                          <span className="font-bold">{log.targetName}</span> {log.action} 
+                          {log.points !== 0 && <span className={`ml-1 font-black ${log.points > 0 ? 'text-green-500' : 'text-red-500'}`}>{log.points > 0 ? `+${log.points}` : log.points}</span>}
+                        </p>
+                        <p className="text-[10px] text-slate-400">{log.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 模态框 */}
+          {selectedStudent && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-slide-in">
+              <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl relative">
+                <button onClick={() => setSelectedStudent(null)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-800">✖</button>
+                
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 mx-auto bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-3xl font-black mb-3">{selectedStudent.student.name.charAt(0)}</div>
+                  <h3 className="text-2xl font-black text-slate-800">{selectedStudent.student.name}</h3>
+                  <p className="text-sm font-bold text-slate-400 mt-1">{selectedStudent.group.name} · 个人总分: {selectedStudent.student.score}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <button onClick={(e) => addStudentScore(selectedStudent.group.id, selectedStudent.student.id, 2, e)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 py-3 rounded-xl font-bold flex flex-col items-center"><span className="text-2xl">+2</span><span className="text-xs">表现极佳</span></button>
+                  <button onClick={(e) => addStudentScore(selectedStudent.group.id, selectedStudent.student.id, 1, e)} className="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 py-3 rounded-xl font-bold flex flex-col items-center"><span className="text-2xl">+1</span><span className="text-xs">积极回答</span></button>
+                  <button onClick={(e) => addStudentScore(selectedStudent.group.id, selectedStudent.student.id, -1, e)} className="col-span-2 bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 py-2 rounded-xl font-bold">-1 (违纪扣分)</button>
+                  
+                  <div className="col-span-2 flex items-center gap-2 mt-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <input type="number" placeholder="输入分数 (如: 5 或 -3)" id="customScore" className="flex-1 border px-3 py-2 rounded-lg text-sm font-bold focus:outline-none focus:border-blue-400"
+                      onKeyDown={(e) => { if(e.key === 'Enter') { addStudentScore(selectedStudent.group.id, selectedStudent.student.id, parseInt(e.target.value), e); e.target.value=''; } }} />
+                    <button onClick={(e) => { const v = document.getElementById('customScore'); addStudentScore(selectedStudent.group.id, selectedStudent.student.id, parseInt(v.value), e); v.value=''; }} className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold text-sm">确认</button>
+                  </div>
+                </div>
+
+                <div className="flex justify-between border-t border-slate-100 pt-4">
+                  <button onClick={() => updateStudentName(selectedStudent.group.id, selectedStudent.student.id, prompt("修改名字为:", selectedStudent.student.name))} className="text-sm font-bold text-blue-500">编辑名字</button>
+                  <button onClick={() => deleteStudent(selectedStudent.group.id, selectedStudent.student.id, selectedStudent.student.name)} className="text-sm font-bold text-red-400">移出小组</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
