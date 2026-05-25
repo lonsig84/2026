@@ -123,16 +123,21 @@
           // 将刚提交的留言加入弹幕池，并多放几遍以确保马上能看到
           setMessages(prev => [newMsg, newMsg, ...prev]);
           
-          // 发送数据到 Google Sheets 保存
+          // 【更新】：用表单(Form)的形式发送数据，避开跨域拦截
           if (GAS_API_URL) {
+            const formData = new URLSearchParams();
+            formData.append('name', nameInput.trim());
+            formData.append('message', messageInput.trim());
+
             fetch(GAS_API_URL, {
               method: 'POST',
-              headers: {
-                // 使用 text/plain 可以避免浏览器的 CORS 跨域拦截预检请求
-                'Content-Type': 'text/plain;charset=utf-8',
-              },
-              body: JSON.stringify({ name: nameInput.trim(), message: messageInput.trim() })
-            }).catch(err => console.log('保存留言失败:', err));
+              body: formData,
+              mode: 'no-cors' // 关键代码：告诉浏览器忽略 CORS 跨域报错
+            }).then(() => {
+              console.log('留言发送请求已发出');
+            }).catch(err => {
+              console.log('留言发送出错:', err);
+            });
           }
           
           handleStart();
