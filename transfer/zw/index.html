@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星空弹幕留言墙</title>
+  
+  <!-- 引入 Tailwind CSS (用于快速写样式) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 引入 React 和 ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- 引入 Babel (用于在浏览器中解析 JSX 语法) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <!-- React 应用将渲染到这里 -->
+  <div id="root"></div>
+
+  <!-- 在 script 标签中编写 React 代码，设置 type="text/babel" -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ==========================================
+    // 🎈 配置区域 (你可以在这里修改你的本地资源)
+    // ==========================================
+    // 换成你自己的照片路径。请在 index.html 同级目录下新建一个 images 文件夹，把照片放进去。
+    const SAMPLE_PHOTOS = [
+      "./images/photo1.png", 
+      "./images/photo2.png",
+      "./images/photo3.png",
+      "./images/photo4.png"
+      // 如果有更多照片，可以在这里继续添加，例如: "./images/photo5.png"
+    ];
+
+    // 替换为你的背景音乐链接 (上传 GitHub 后换成 './music/bgm.mp3')
+    const BGM_URL = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"; 
+
+    // 替换为你部署好的 GAS 接口 URL
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwQJ4vn80_2wFI3U9IBXofJD2NKNQp5jk30BlZOXDd_nnv9J7INMU0P6potDZq3wC3V/exec"; 
+
+    // 可爱的弹幕颜色库 (深色系，配合明亮背景)
+    const DANMAKU_COLORS = [
+      '#D81B60', // 玫瑰红
+      '#8E24AA', // 梦幻紫
+      '#3949AB', // 海洋蓝
+      '#00897B', // 治愈绿
+      '#E53935', // 热情红
+      '#F4511E', // 活力橙
+      '#43A047', // 草木绿
+      '#5E35B1'  // 星空紫
+    ];
+
+    // SVG 图标组件
+    const PlayIcon = () => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    );
+    const HeartIcon = ({ className }) => (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    );
+    const SparklesIcon = ({ className }) => (
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.485-6.364l-2.121 2.121M7.636 17.657l-2.121 2.121M16.485 17.657l-2.121-2.121M7.636 6.364l-2.121-2.121"/></svg>
+    );
+
+    function App() {
+      const [isStarted, setIsStarted] = useState(false);
+      const [nameInput, setNameInput] = useState('');
+      const [messageInput, setMessageInput] = useState('');
+      const [messages, setMessages] = useState([
+        "同学，祝你前程似锦！🌟", 
+        "常联系，友谊长存~", 
+        "新的学校也要加油哦！", 
+        "舍不得你，一切顺利！",
+        "不要忘记我们哦！",
+        "未来可期，顶峰相见！🎓"
+      ]);
+      const [photoIndex, setPhotoIndex] = useState(0);
+      const audioRef = useRef(null);
+
+      // 照片轮播逻辑
+      useEffect(() => {
+        if (!isStarted) return;
+        const timer = setInterval(() => {
+          setPhotoIndex(prev => {
+            let next = Math.floor(Math.random() * SAMPLE_PHOTOS.length);
+            while (next === prev && SAMPLE_PHOTOS.length > 1) {
+              next = Math.floor(Math.random() * SAMPLE_PHOTOS.length);
+            }
+            return next;
+          });
+        }, 5000); 
+        return () => clearInterval(timer);
+      }, [isStarted]);
+
+      // 从 Google Sheets 拉取留言
+      useEffect(() => {
+        if (!isStarted || !GAS_API_URL) return;
+        
+        const fetchMessages = async () => {
+          try {
+            const response = await fetch(GAS_API_URL);
+            const data = await response.json();
+            if (data && data.length > 0) {
+              const formattedMessages = data.map(item => `${item.name}: ${item.message}`);
+              setMessages(prev => [...prev, ...formattedMessages]);
+            }
+          } catch (error) {
+            console.error("无法获取最新留言:", error);
+          }
+        };
+
+        fetchMessages();
+        const interval = setInterval(fetchMessages, 30000); 
+        return () => clearInterval(interval);
+      }, [isStarted]);
+
+      const handleStart = () => {
+        setIsStarted(true);
+        if (audioRef.current) {
+          audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+        }
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (nameInput.trim() && messageInput.trim()) {
+          const newMsg = `${nameInput}: ${messageInput}`;
+          // 将刚提交的留言加入弹幕池，并多放几遍以确保马上能看到
+          setMessages(prev => [newMsg, newMsg, ...prev]);
+          
+          // 用表单(Form)的形式发送数据，避开跨域拦截
+          if (GAS_API_URL) {
+            const formData = new URLSearchParams();
+            formData.append('name', nameInput.trim());
+            formData.append('message', messageInput.trim());
+
+            fetch(GAS_API_URL, {
+              method: 'POST',
+              body: formData,
+              mode: 'no-cors'
+            }).then(() => {
+              console.log('留言发送请求已发出');
+            }).catch(err => {
+              console.log('留言发送出错:', err);
+            });
+          }
+          
+          handleStart();
+        }
+      };
+
+      // 渲染流动的爱心、星星、樱花等唯美图案
+      const renderFlowingBackground = () => {
+        const shapes = ['❤', '⭐', '✨', '💖', '🌸', '🫧'];
+        return Array.from({ length: 45 }).map((_, i) => {
+          // 随机选择一个图案
+          const shape = shapes[Math.floor(Math.random() * shapes.length)];
+          
+          // 随机生成动画参数
+          const startX = Math.random() * 100; // 屏幕横向初始位置 (0-100vw)
+          const tx = (Math.random() - 0.5) * 60; // 飘动时的左右偏移 (-30vw 到 +30vw)
+          const rot = Math.random() * 360; // 旋转角度
+          const duration = Math.random() * 15 + 15; // 飘动时长 15-30秒，越慢越唯美
+          const delay = Math.random() * -30; // 负数延迟，让一开始屏幕上就已经充满图案
+          const size = Math.random() * 15 + 15; // 大小 15px-30px
+          
+          // 根据不同图案分配不同颜色
+          let color = 'rgba(255, 105, 180, 0.7)'; // 默认粉色(爱心)
+          if (shape === '⭐' || shape === '✨') color = 'rgba(255, 223, 0, 0.8)'; // 金色(星星)
+          if (shape === '🫧') color = 'rgba(255, 255, 255, 0.6)'; // 白色(泡泡)
+          if (shape === '🌸') color = 'rgba(255, 183, 197, 0.9)'; // 浅粉色(樱花)
+
+          const style = {
+            left: `${startX}vw`,
+            fontSize: `${size}px`,
+            animationDuration: `${duration}s`,
+            animationDelay: `${delay}s`,
+            '--tx': `${tx}vw`,      // 传入 CSS 变量控制 X 轴流动偏移
+            '--rot': `${rot}deg`,   // 传入 CSS 变量控制旋转
+            color: color,
+            textShadow: '0 0 10px rgba(255,255,255,0.6)' // 增加发光效果
+          };
+
+          return <div key={`shape-${i}`} className="flowing-shape" style={style}>{shape}</div>;
+        });
+      };
+
+      const renderDanmaku = () => {
+        const displayMessages = [...messages, ...messages, ...messages];
+        
+        return displayMessages.map((msg, index) => {
+          const topPos = Math.random() * 85 + 5; 
+          const duration = Math.random() * 15 + 10; 
+          const delay = Math.random() * -20; 
+          const fontSize = Math.random() * 10 + 18; 
+          const color = DANMAKU_COLORS[Math.floor(Math.random() * DANMAKU_COLORS.length)];
+
+          const style = {
+            top: `${topPos}%`,
+            animationDuration: `${duration}s`,
+            animationDelay: `${delay}s`,
+            fontSize: `${fontSize}px`,
+            color: color,
+            zIndex: 10
+          };
+
+          return (
+            <div key={`danmaku-${index}`} className="danmaku-item" style={style}>
+              {msg}
+            </div>
+          );
+        });
+      };
+
+      return (
+        <div className="cute-animated-bg relative w-full h-screen overflow-hidden font-sans selection:bg-pink-300 selection:text-white">
+          <style>{`
+            /* 梦幻棉花糖渐变背景动画 */
+            @keyframes gradientBG {
+              0% { background-position: 0% 50%; }
+              50% { background-position: 100% 50%; }
+              100% { background-position: 0% 50%; }
+            }
+            .cute-animated-bg {
+              background: linear-gradient(-45deg, #ffd1ff, #fad0c4, #a1c4fd, #ffecd2);
+              background-size: 400% 400%;
+              animation: gradientBG 15s ease infinite;
+            }
+
+            /* 唯美流动形状飘浮动画 (支持位移和旋转) */
+            @keyframes flowAcross {
+              0% { transform: translate(0, 10vh) rotate(0deg) scale(0.8); opacity: 0; }
+              20% { opacity: 0.9; }
+              80% { opacity: 0.9; }
+              100% { transform: translate(var(--tx), -110vh) rotate(var(--rot)) scale(1.5); opacity: 0; }
+            }
+            .flowing-shape {
+              position: absolute;
+              bottom: -50px;
+              animation: flowAcross linear infinite;
+              pointer-events: none;
+              z-index: 1;
+            }
+
+            /* 弹幕向左滚动 */
+            @keyframes slideLeft {
+              from { left: 100%; transform: translateX(0); }
+              to { left: -100%; transform: translateX(-100%); }
+            }
+            .danmaku-item {
+              position: absolute;
+              white-space: nowrap;
+              font-weight: bold;
+              /* 白色发光描边，让深色字在明亮背景上更清晰 */
+              text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0px 0px 8px rgba(255,255,255,0.9);
+              animation: slideLeft linear infinite;
+              will-change: transform, left;
+              pointer-events: none;
+            }
+
+            /* 照片框可爱阴影 */
+            .photo-frame {
+              box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3), 0 0 0 8px rgba(255,255,255,0.6);
+              border-radius: 20px;
+            }
+          `}</style>
+
+          <audio ref={audioRef} src={BGM_URL} loop />
+
+          {/* 渲染流动的爱心和星星背景 */}
+          {renderFlowingBackground()}
+
+          {/* 留言引导页 */}
+          {!isStarted && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-1000 p-4">
+              {/* 可爱风的玻璃拟态卡片 */}
+              <div className="w-full max-w-xl bg-white/40 backdrop-blur-xl rounded-[2rem] p-8 md:p-10 border-2 border-white/60 shadow-[0_8px_32px_rgba(255,192,203,0.5)] relative overflow-hidden">
+                
+                <div className="text-center space-y-4 mb-8 relative z-10">
+                  <h1 className="text-3xl md:text-4xl text-purple-700 font-bold tracking-wider flex items-center justify-center gap-2">
+                    <SparklesIcon className="text-pink-500 w-8 h-8" />
+                    梓文同学转校了
+                    <SparklesIcon className="text-pink-500 w-8 h-8" />
+                  </h1>
+                  <p className="text-pink-600 text-lg md:text-xl font-medium">
+                    大家有什么话对他说？
+                  </p>
+                  <p className="text-purple-500 text-sm font-medium tracking-widest bg-white/50 inline-block px-4 py-1 rounded-full">
+                    一样来制作这美好的回忆吧！
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+                  <div>
+                    <input 
+                      type="text" 
+                      placeholder="你的姓名"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      required
+                      className="w-full px-5 py-4 bg-white/70 border-2 border-pink-100 rounded-2xl text-purple-900 placeholder-purple-300 focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-200 transition-all text-lg shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <textarea 
+                      placeholder="写下你想对他说的话..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      required
+                      rows="3"
+                      className="w-full px-5 py-4 bg-white/70 border-2 border-pink-100 rounded-2xl text-purple-900 placeholder-purple-300 focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-200 transition-all resize-none text-lg shadow-inner"
+                    ></textarea>
+                  </div>
+                  
+                  <button 
+                    type="submit"
+                    className="w-full group relative px-8 py-4 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border border-white/50 rounded-2xl text-white text-lg font-bold transition-all duration-300 overflow-hidden flex items-center justify-center gap-3 shadow-[0_10px_20px_rgba(236,72,153,0.3)] hover:shadow-[0_10px_25px_rgba(236,72,153,0.5)] hover:-translate-y-1 mt-4"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <PlayIcon />
+                      <span className="tracking-wider">留言给他，开启回忆</span>
+                    </span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* 弹幕与照片回忆墙 */}
+          {isStarted && (
+            <>
+              <div className="absolute inset-0 z-20 overflow-hidden pointer-events-none">
+                {renderDanmaku()}
+              </div>
+
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="relative w-4/5 max-w-2xl aspect-[4/3] overflow-hidden photo-frame transition-transform duration-1000 hover:scale-105">
+                  {SAMPLE_PHOTOS.map((photo, index) => (
+                    <img
+                      key={index}
+                      src={photo}
+                      alt="Memories"
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-2000 ease-in-out ${
+                        index === photoIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+                      }`}
+                      style={{ transitionProperty: 'opacity, transform' }}
+                    />
+                  ))}
+                  {/* 可爱的内阴影边框效果 */}
+                  <div className="absolute inset-0 rounded-2xl shadow-[inset_0_0_20px_rgba(255,255,255,0.8)] pointer-events-none"></div>
+                </div>
+              </div>
+
+              <div className="absolute bottom-6 right-6 z-30 flex items-center gap-2 text-pink-600 bg-white/60 px-5 py-2 rounded-full backdrop-blur-md text-sm font-bold shadow-[0_4px_15px_rgba(255,192,203,0.5)] border border-white">
+                <HeartIcon className="text-pink-500 animate-bounce" />
+                <span>Forever Memories</span>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
