@@ -12,12 +12,12 @@
             background-color: #FFE5F1; 
             margin: 0;
             padding: 0;
-            height: 100vh; /* 锁死高度为视口(屏幕)的100% */
-            overflow: hidden; /* 绝对禁止出现滚动条 */
+            height: 100vh;
+            overflow: hidden; 
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* 让卡片永远在屏幕正中间 */
+            justify-content: center; 
         }
 
         #quiz-container {
@@ -27,7 +27,7 @@
             padding: 20px;
             width: 92%;
             max-width: 700px;
-            height: 92vh; /* 卡片高度占据屏幕的92%，留出一点鲜艳的背景边框 */
+            height: 92vh; 
             box-sizing: border-box;
             text-align: center;
             border: 8px solid #FFD700; 
@@ -35,7 +35,6 @@
             flex-direction: column;
         }
 
-        /* 保证各个界面的内容能在卡片里居中 */
         #student-info-screen, #result-screen {
             flex: 1;
             display: flex;
@@ -44,7 +43,6 @@
             align-items: center;
         }
 
-        /* 答题卡片区域：利用 flex 自动均匀分配上下空间 */
         #question-screen {
             flex: 1;
             display: flex;
@@ -52,7 +50,6 @@
             justify-content: space-between; 
         }
 
-        /* 题目文字：调整间距，紧凑显示 */
         .question-text {
             font-size: 28px; 
             font-weight: bold;
@@ -61,25 +58,22 @@
             line-height: 1.3;
         }
 
-        /* 图片样式：超级关键！限制最大高度为屏幕35%，绝不把选项挤下去 */
         .question-image {
             max-width: 100%;
             max-height: 35vh; 
-            object-fit: contain; /* 保证图片完整显示不被裁剪 */
+            object-fit: contain; 
             border-radius: 15px;
             margin: 0 auto 10px auto;
             border: 4px dashed #4ECDC4; 
         }
 
-        /* 选项容器：改成 2x2 的田字格，极其节省空间且容易点击 */
         #options-container {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 左右两列平分 */
-            gap: 15px; /* 选项之间的缝隙 */
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
             margin-bottom: 10px;
         }
 
-        /* 选项按钮：适应田字格，大号文字依然保留 */
         .option-btn {
             width: 100%;
             padding: 15px 5px; 
@@ -161,147 +155,27 @@
     <script>
         // ======= 1. 题库设置 =======
         const originalQuestions = [
-    {
-        // Q3
-        question: "图中的孩子是应用哪项官能进行观察？",
-        image_url: "./03.png", 
-        options: ["嗅觉", "听觉", "触觉", "味觉"],
-        answer: "味觉"
-    },
-    {
-        // Q4
-        question: "图中物品的味道是什么？",
-        image_url: "./04.png", 
-        options: ["甜", "酸", "咸", "苦"],
-        answer: "咸"
-    },
-    {
-        // Q5
-        question: "利用味觉来观察图中的食物，它的味道是",
-        image_url: "./05.png", 
-        options: ["甜", "酸", "咸", "苦"],
-        answer: "酸"
-    },
-    {
-        // Q7
-        question: "舌头尝了这食物的味道是什么？",
-        image_url: "./07.png", 
-        options: ["咸", "苦", "酸", "甜"],
-        answer: "甜"
-    },
-    {
-        // Q8
-        question: "图中的人利用哪项沟通方法？",
-        image_url: "./08.png", 
-        options: ["书写", "绘图", "口述", "信息与通讯技术"],
-        answer: "信息与通讯技术"
-    },
-    {
-        // Q14
-        question: "图中说明了生物",
-        image_url: "./14.png", 
-        options: ["会繁殖", "需要水", "会移动", "会成长"],
-        answer: "会成长"
-    },
-    {
-        // Q15
-        question: "图中的动物名称是",
-        image_url: "./15.png", 
-        options: ["水牛", "河马", "犀牛", "大象"],
-        answer: "犀牛"
-    },
-    {
-        // Q16
-        question: "图中显示一种动物的某身体部位，它的名称是什么？",
-        image_url: "./16.png", 
-        options: ["羽毛", "尾巴", "外壳", "毛发"],
-        answer: "外壳"
-    },
-    {
-        // Q17
-        question: "北极熊的毛发的功能是什么？",
-        image_url: "./17.png", 
-        options: ["保护自己", "保暖", "飞行", "对抗敌人"],
-        answer: "保暖"
-    },
-    {
-        // Q19 
-        question: "哪种动物有毛发？",
-        image_url: "", 
-        options: ["鱼", "骆驼", "犀牛", "蛇"],
-        answer: "骆驼"
-    },
-    {
-        // Q20
-        question: "图中显示某动物的身体部位，其功用是什么？",
-        image_url: "./20.png", 
-        options: ["保暖", "保护自己", "嗅气味", "游泳"],
-        answer: "游泳"
-    },
-    {
-        // Q21 
-        question: "哪种植物不会开花？",
-        image_url: "", 
-        options: ["羊角豆", "大红花", "仙人掌", "羊齿植物"],
-        answer: "羊齿植物"
-    },
-    {
-        // Q22
-        question: "图中植物的部分有什么功能？",
-        image_url: "./22.png", 
-        options: ["呼吸", "制造食物", "输送水、食物及养料", "吸收水分及养料"],
-        answer: "吸收水分及养料"
-    },
-    {
-        // Q24
-        question: "图中植物的叶子是什么叶脉？",
-        image_url: "./24.png", 
-        options: ["平行叶脉", "网状叶脉"],
-        answer: "平行叶脉"
-    },
-    {
-        // Q27
-        question: "图中植物的名称是什么？",
-        image_url: "./27.png", 
-        options: ["木槿", "苔藓", "木瓜", "玫瑰"],
-        answer: "玫瑰"
-    },
-    {
-        // Q28 
-        question: "图中的生物说明了什么？",
-        image_url: "./28.png", 
-        options: ["生物会繁殖", "生物会呼吸", "生物会成长", "生物会移动"],
-        answer: "生物会繁殖"
-    },
-    {
-        // Q26
-        question: "以下的植物都不会开花，除了",
-        image_url: "", 
-        options: ["苔藓", "木槿", "鸟巢蕨", "羊齿植物"],
-        answer: "木槿"
-    },
-    {
-        // Q12
-        question: "什么是生物？",
-        image_url: "", 
-        options: ["有生命的东西", "会飞行的东西", "能发出声音的东西", "不会长大的东西"],
-        answer: "有生命的东西"
-    },
-    {
-        // Q11
-        question: "如果长时间不浇水，植物会怎样？",
-        image_url: "", 
-        options: ["植物会长高", "植物会枯死", "植物会变绿", "植物会开花"],
-        answer: "植物会枯死"
-    },
-    {
-        // Q9
-        question: "哪两个感觉器官可以确认物体的形状？",
-        image_url: "", 
-        options: ["舌头和鼻子", "耳朵和眼睛", "眼睛和皮肤", "鼻子和皮肤"],
-        answer: "眼睛和皮肤"
-    }
-];
+            { question: "图中的孩子是应用哪项官能进行观察？", image_url: "./03.png", options: ["嗅觉", "听觉", "触觉", "味觉"], answer: "味觉" },
+            { question: "图中物品的味道是什么？", image_url: "./04.png", options: ["甜", "酸", "咸", "苦"], answer: "咸" },
+            { question: "利用味觉来观察图中的食物，它的味道是", image_url: "./05.png", options: ["甜", "酸", "咸", "苦"], answer: "酸" },
+            { question: "舌头尝了这食物的味道是什么？", image_url: "./07.png", options: ["咸", "苦", "酸", "甜"], answer: "甜" },
+            { question: "图中的人利用哪项沟通方法？", image_url: "./08.png", options: ["书写", "绘图", "口述", "信息与通讯技术"], answer: "信息与通讯技术" },
+            { question: "图中说明了生物", image_url: "./14.png", options: ["会繁殖", "需要水", "会移动", "会成长"], answer: "会成长" },
+            { question: "图中的动物名称是", image_url: "./15.png", options: ["水牛", "河马", "犀牛", "大象"], answer: "犀牛" },
+            { question: "图中显示一种动物的某身体部位，它的名称是什么？", image_url: "./16.png", options: ["羽毛", "尾巴", "外壳", "毛发"], answer: "外壳" },
+            { question: "北极熊的毛发的功能是什么？", image_url: "./17.png", options: ["保护自己", "保暖", "飞行", "对抗敌人"], answer: "保暖" },
+            { question: "哪种动物有毛发？", image_url: "", options: ["鱼", "骆驼", "犀牛", "蛇"], answer: "骆驼" },
+            { question: "图中显示某动物的身体部位，其功用是什么？", image_url: "./20.png", options: ["保暖", "保护自己", "嗅气味", "游泳"], answer: "游泳" },
+            { question: "哪种植物不会开花？", image_url: "", options: ["羊角豆", "大红花", "仙人掌", "羊齿植物"], answer: "羊齿植物" },
+            { question: "图中植物的部分有什么功能？", image_url: "./22.png", options: ["呼吸", "制造食物", "输送水、食物及养料", "吸收水分及养料"], answer: "吸收水分及养料" },
+            { question: "图中植物的叶子是什么叶脉？", image_url: "./24.png", options: ["平行叶脉", "网状叶脉"], answer: "平行叶脉" },
+            { question: "图中植物的名称是什么？", image_url: "./27.png", options: ["木槿", "苔藓", "木瓜", "玫瑰"], answer: "玫瑰" },
+            { question: "图中的生物说明了什么？", image_url: "./28.png", options: ["生物会繁殖", "生物会呼吸", "生物会成长", "生物会移动"], answer: "生物会繁殖" },
+            { question: "以下的植物都不会开花，除了", image_url: "", options: ["苔藓", "木槿", "鸟巢蕨", "羊齿植物"], answer: "木槿" },
+            { question: "什么是生物？", image_url: "", options: ["有生命的东西", "会飞行的东西", "能发出声音的东西", "不会长大的东西"], answer: "有生命的东西" },
+            { question: "如果长时间不浇水，植物会怎样？", image_url: "", options: ["植物会长高", "植物会枯死", "植物会变绿", "植物会开花"], answer: "植物会枯死" },
+            { question: "哪两个感觉器官可以确认物体的形状？", image_url: "", options: ["舌头和鼻子", "耳朵和眼睛", "眼睛和皮肤", "鼻子和皮肤"], answer: "眼睛和皮肤" }
+        ];
 
         // ======= 2. 核心逻辑 =======
         let questions = [];
@@ -309,10 +183,9 @@
         let score = 0;
         let studentData = {};
 
-        // ！！！在这里填入你即将创建的 Google Apps Script Web App URL ！！！
+        // 这是你专属的 Google Apps Script 网址
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwpC4b8Ksp0jSOMQBH4gk0s_fB9UyNby_avoJZuuHhttUpcASacafdbrRpAg1ZUZCXy/exec";
 
-        // 洗牌算法 (Fisher-Yates)
         function shuffleArray(array) {
             let shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -332,7 +205,6 @@
             }
 
             studentData = { name: name, class: cls };
-            
             questions = shuffleArray(originalQuestions);
             currentQuestionIndex = 0;
             score = 0;
@@ -345,4 +217,99 @@
 
         function showQuestion() {
             const q = questions[currentQuestionIndex];
-            document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} 题 / 共 ${questions.length}
+            // 之前你的代码就是断在这里！现在已经补全了 👇
+            document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} 题 / 共 ${questions.length} 题`;
+            document.getElementById('q-text').innerText = q.question;
+            
+            const imgElement = document.getElementById('q-image');
+            if(q.image_url) {
+                imgElement.src = q.image_url;
+                imgElement.classList.remove('hidden');
+            } else {
+                imgElement.classList.add('hidden');
+            }
+
+            const shuffledOptions = shuffleArray(q.options);
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, q.answer);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct) {
+            if(selected === correct) {
+                score += 1;
+                // document.getElementById('sound-correct').play(); 
+                triggerMiniConfetti(); 
+            } else {
+                // document.getElementById('sound-wrong').play(); 
+            }
+
+            currentQuestionIndex++;
+            if(currentQuestionIndex < questions.length) {
+                setTimeout(showQuestion, 500); 
+            } else {
+                showResult();
+            }
+        }
+
+        function triggerMiniConfetti() {
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+        }
+
+        function showResult() {
+            document.getElementById('question-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('score-display').innerText = `${score} / ${questions.length}`;
+            
+            // document.getElementById('sound-cheer').play(); 
+            
+            var duration = 3000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff0000', '#00ff00', '#0000ff'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff0000', '#00ff00', '#0000ff'] });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+
+            sendDataToGoogleSheet();
+        }
+
+        function sendDataToGoogleSheet() {
+            if(GAS_WEB_APP_URL === "你的_GOOGLE_APPS_SCRIPT_网址") {
+                document.getElementById('upload-status').innerText = "提示：老师还没配置好 Google Sheet 链接哦。";
+                return;
+            }
+
+            const payload = {
+                name: studentData.name,
+                class: studentData.class,
+                score: score,
+                total: questions.length,
+                timestamp: new Date().toLocaleString('zh-MY')
+            };
+
+            fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                document.getElementById('upload-status').innerText = "✅ 成绩上传成功！你真棒！";
+            })
+            .catch((error) => {
+                document.getElementById('upload-status').innerText = "❌ 哎呀，网络好像有点问题，成绩没传上去。";
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
