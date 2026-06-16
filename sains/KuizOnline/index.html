@@ -6,90 +6,122 @@
     <title>🌟 一年级科学大挑战 🌟</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        /* 核心设定：大号印刷体，鲜艳背景 */
+        /* 核心设定：锁死屏幕高度，绝对禁止滚动 */
         body {
-            /* 使用标准清晰的黑体/印刷体 */
             font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; 
-            background-color: #FFE5F1; /* 鲜艳的马卡龙粉红背景 */
+            background-color: #FFE5F1; 
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            height: 100vh; /* 锁死高度为视口(屏幕)的100% */
+            overflow: hidden; /* 绝对禁止出现滚动条 */
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* 让卡片永远在屏幕正中间 */
         }
 
         #quiz-container {
             background-color: #FFFFFF;
             border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            padding: 20px;
+            width: 92%;
+            max-width: 700px;
+            height: 92vh; /* 卡片高度占据屏幕的92%，留出一点鲜艳的背景边框 */
+            box-sizing: border-box;
             text-align: center;
-            border: 8px solid #FFD700; /* 明黄色的粗边框 */
+            border: 8px solid #FFD700; 
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 题目文字：超大号，深蓝色保护视力 */
+        /* 保证各个界面的内容能在卡片里居中 */
+        #student-info-screen, #result-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 答题卡片区域：利用 flex 自动均匀分配上下空间 */
+        #question-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+        }
+
+        /* 题目文字：调整间距，紧凑显示 */
         .question-text {
-            font-size: 32px; 
+            font-size: 28px; 
             font-weight: bold;
             color: #2C3E50;
-            margin-bottom: 25px;
-            line-height: 1.4;
+            margin: 10px 0;
+            line-height: 1.3;
         }
 
-        /* 图片样式 */
+        /* 图片样式：超级关键！限制最大高度为屏幕35%，绝不把选项挤下去 */
         .question-image {
             max-width: 100%;
-            height: auto;
+            max-height: 35vh; 
+            object-fit: contain; /* 保证图片完整显示不被裁剪 */
             border-radius: 15px;
-            margin-bottom: 20px;
-            border: 4px dashed #4ECDC4; /* 可爱的青色虚线边框 */
+            margin: 0 auto 10px auto;
+            border: 4px dashed #4ECDC4; 
         }
 
-        /* 选项按钮：极其鲜艳，大号文字 */
+        /* 选项容器：改成 2x2 的田字格，极其节省空间且容易点击 */
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 左右两列平分 */
+            gap: 15px; /* 选项之间的缝隙 */
+            margin-bottom: 10px;
+        }
+
+        /* 选项按钮：适应田字格，大号文字依然保留 */
         .option-btn {
-            display: block;
             width: 100%;
-            padding: 20px;
-            margin-bottom: 15px;
-            font-size: 28px; /* 超大选项文字 */
+            padding: 15px 5px; 
+            font-size: 26px; 
             font-weight: bold;
             font-family: inherit;
             color: white;
-            background-color: #FF6B6B; /* 鲜艳的西瓜红 */
+            background-color: #FF6B6B; 
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #C0392B; /* 立体按钮效果 */
+            box-shadow: 0 6px 0 #C0392B; 
             transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .option-btn:active {
-            transform: translateY(6px); /* 按下时的 Q 弹效果 */
+            transform: translateY(6px); 
             box-shadow: 0 0px 0 #C0392B;
         }
 
-        /* 选项颜色的交替，让视觉更丰富 */
         .option-btn:nth-child(even) { background-color: #4DABF7; box-shadow: 0 6px 0 #228BE6; }
         .option-btn:nth-child(even):active { box-shadow: 0 0 0 #228BE6; }
         
         .option-btn:nth-child(3n) { background-color: #51CF66; box-shadow: 0 6px 0 #2B8A3E; }
         .option-btn:nth-child(3n):active { box-shadow: 0 0 0 #2B8A3E; }
 
-        /* 填资料区域的输入框 */
         input[type="text"] {
-            width: 80%;
+            width: 90%;
             padding: 15px;
             font-size: 24px;
             margin-bottom: 20px;
             border: 3px solid #4DABF7;
             border-radius: 15px;
             text-align: center;
+            box-sizing: border-box;
         }
 
         #score-display {
-            font-size: 40px;
+            font-size: 50px;
             color: #FF1493;
             font-weight: bold;
         }
@@ -127,146 +159,145 @@
     </div>
 
     <script>
-        // ======= 1. 题库设置 (你可以在这里加题目) =======
-        // 已经根据你提供的考卷截图提取了部分题目
+        // ======= 1. 题库设置 =======
         const originalQuestions = [
     {
         // Q3
         question: "图中的孩子是应用哪项官能进行观察？",
-        image_url: "./03.png", // 请填入吃辣椒男孩的图片链接
+        image_url: "./03.png", 
         options: ["嗅觉", "听觉", "触觉", "味觉"],
         answer: "味觉"
     },
     {
         // Q4
         question: "图中物品的味道是什么？",
-        image_url: "./04.png", // 请填入盐巴的图片链接
+        image_url: "./04.png", 
         options: ["甜", "酸", "咸", "苦"],
         answer: "咸"
     },
     {
         // Q5
         question: "利用味觉来观察图中的食物，它的味道是",
-        image_url: "./05.png", // 请填入酸橙(Lime)的图片链接
+        image_url: "./05.png", 
         options: ["甜", "酸", "咸", "苦"],
         answer: "酸"
     },
     {
         // Q7
         question: "舌头尝了这食物的味道是什么？",
-        image_url: "./07.png", // 请填入糖粉的图片链接
+        image_url: "./07.png", 
         options: ["咸", "苦", "酸", "甜"],
         answer: "甜"
     },
     {
         // Q8
         question: "图中的人利用哪项沟通方法？",
-        image_url: "./08.png", // 请填入用电脑的男孩图片链接
+        image_url: "./08.png", 
         options: ["书写", "绘图", "口述", "信息与通讯技术"],
         answer: "信息与通讯技术"
     },
     {
         // Q14
         question: "图中说明了生物",
-        image_url: "./14.png", // 请填入人类成长过程图片链接
+        image_url: "./14.png", 
         options: ["会繁殖", "需要水", "会移动", "会成长"],
         answer: "会成长"
     },
     {
         // Q15
         question: "图中的动物名称是",
-        image_url: "./15.png", // 请填入犀牛图片链接
+        image_url: "./15.png", 
         options: ["水牛", "河马", "犀牛", "大象"],
         answer: "犀牛"
     },
     {
         // Q16
         question: "图中显示一种动物的某身体部位，它的名称是什么？",
-        image_url: "./16.png", // 请填入蜗牛壳图片链接
+        image_url: "./16.png", 
         options: ["羽毛", "尾巴", "外壳", "毛发"],
         answer: "外壳"
     },
     {
         // Q17
         question: "北极熊的毛发的功能是什么？",
-        image_url: "./17.png", // 请填入北极熊图片链接
+        image_url: "./17.png", 
         options: ["保护自己", "保暖", "飞行", "对抗敌人"],
         answer: "保暖"
     },
     {
-        // Q19 (原卷选项为图片，这里转为文字)
+        // Q19 
         question: "哪种动物有毛发？",
-        image_url: "", // 这题不需要主图
+        image_url: "", 
         options: ["鱼", "骆驼", "犀牛", "蛇"],
         answer: "骆驼"
     },
     {
         // Q20
         question: "图中显示某动物的身体部位，其功用是什么？",
-        image_url: "./20.png", // 请填入鸭蹼图片链接
+        image_url: "./20.png", 
         options: ["保暖", "保护自己", "嗅气味", "游泳"],
         answer: "游泳"
     },
     {
-        // Q21 (原卷选项为图片，这里转为文字)
+        // Q21 
         question: "哪种植物不会开花？",
-        image_url: "", // 这题不需要主图
+        image_url: "", 
         options: ["羊角豆", "大红花", "仙人掌", "羊齿植物"],
         answer: "羊齿植物"
     },
     {
         // Q22
         question: "图中植物的部分有什么功能？",
-        image_url: "./22.png", // 请填入植物根部图片链接
+        image_url: "./22.png", 
         options: ["呼吸", "制造食物", "输送水、食物及养料", "吸收水分及养料"],
         answer: "吸收水分及养料"
     },
     {
         // Q24
         question: "图中植物的叶子是什么叶脉？",
-        image_url: "./24.png", // 请填入香蕉树叶图片链接
+        image_url: "./24.png", 
         options: ["平行叶脉", "网状叶脉"],
         answer: "平行叶脉"
     },
     {
         // Q27
         question: "图中植物的名称是什么？",
-        image_url: "./27.png", // 请填入玫瑰图片链接
+        image_url: "./27.png", 
         options: ["木槿", "苔藓", "木瓜", "玫瑰"],
         answer: "玫瑰"
     },
     {
-        // Q28 (修复了原卷选项A和C重复的问题)
+        // Q28 
         question: "图中的生物说明了什么？",
-        image_url: "./28.png", // 请填入母鸡孵蛋图片链接
+        image_url: "./28.png", 
         options: ["生物会繁殖", "生物会呼吸", "生物会成长", "生物会移动"],
         answer: "生物会繁殖"
     },
     {
         // Q26
         question: "以下的植物都不会开花，除了",
-        image_url: "", // 没有图片
+        image_url: "", 
         options: ["苔藓", "木槿", "鸟巢蕨", "羊齿植物"],
         answer: "木槿"
     },
     {
         // Q12
         question: "什么是生物？",
-        image_url: "", // 没有图片
+        image_url: "", 
         options: ["有生命的东西", "会飞行的东西", "能发出声音的东西", "不会长大的东西"],
         answer: "有生命的东西"
     },
     {
         // Q11
         question: "如果长时间不浇水，植物会怎样？",
-        image_url: "", // 没有图片
+        image_url: "", 
         options: ["植物会长高", "植物会枯死", "植物会变绿", "植物会开花"],
         answer: "植物会枯死"
     },
     {
         // Q9
         question: "哪两个感觉器官可以确认物体的形状？",
-        image_url: "", // 没有图片
+        image_url: "", 
         options: ["舌头和鼻子", "耳朵和眼睛", "眼睛和皮肤", "鼻子和皮肤"],
         answer: "眼睛和皮肤"
     }
@@ -281,7 +312,7 @@
         // ！！！在这里填入你即将创建的 Google Apps Script Web App URL ！！！
         const GAS_WEB_APP_URL = "你的_GOOGLE_APPS_SCRIPT_网址";
 
-        // 洗牌算法 (Fisher-Yates) - 用于打乱题目和选项
+        // 洗牌算法 (Fisher-Yates)
         function shuffleArray(array) {
             let shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -302,7 +333,6 @@
 
             studentData = { name: name, class: cls };
             
-            // 打乱题目顺序
             questions = shuffleArray(originalQuestions);
             currentQuestionIndex = 0;
             score = 0;
@@ -315,102 +345,4 @@
 
         function showQuestion() {
             const q = questions[currentQuestionIndex];
-            document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} 题 / 共 ${questions.length} 题`;
-            document.getElementById('q-text').innerText = q.question;
-            
-            // 处理图片
-            const imgElement = document.getElementById('q-image');
-            if(q.image_url) {
-                imgElement.src = q.image_url;
-                imgElement.classList.remove('hidden');
-            } else {
-                imgElement.classList.add('hidden');
-            }
-
-            // 打乱选项顺序
-            const shuffledOptions = shuffleArray(q.options);
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-
-            shuffledOptions.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(opt, q.answer);
-                optionsContainer.appendChild(btn);
-            });
-        }
-
-        function checkAnswer(selected, correct) {
-            if(selected === correct) {
-                score += 1;
-                // document.getElementById('sound-correct').play(); // 取消注释启用音效
-                triggerMiniConfetti(); 
-            } else {
-                // document.getElementById('sound-wrong').play(); // 取消注释启用音效
-            }
-
-            currentQuestionIndex++;
-            if(currentQuestionIndex < questions.length) {
-                setTimeout(showQuestion, 500); // 稍微延迟一下进入下一题
-            } else {
-                showResult();
-            }
-        }
-
-        function triggerMiniConfetti() {
-            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
-        }
-
-        function showResult() {
-            document.getElementById('question-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.remove('hidden');
-            document.getElementById('score-display').innerText = `${score} / ${questions.length}`;
-            
-            // document.getElementById('sound-cheer').play(); // 取消注释启用音效
-            
-            // 华丽满屏撒花特效！
-            var duration = 3000;
-            var end = Date.now() + duration;
-            (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff0000', '#00ff00', '#0000ff'] });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff0000', '#00ff00', '#0000ff'] });
-                if (Date.now() < end) { requestAnimationFrame(frame); }
-            }());
-
-            sendDataToGoogleSheet();
-        }
-
-        // 利用 Fetch API 自动把数据抛给 Google Sheet
-        function sendDataToGoogleSheet() {
-            if(GAS_WEB_APP_URL === "你的_GOOGLE_APPS_SCRIPT_网址") {
-                document.getElementById('upload-status').innerText = "提示：老师还没配置好 Google Sheet 链接哦。";
-                return;
-            }
-
-            const payload = {
-                name: studentData.name,
-                class: studentData.class,
-                score: score,
-                total: questions.length,
-                timestamp: new Date().toLocaleString('zh-MY')
-            };
-
-            fetch(GAS_WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors', // 解决跨域问题，但无法读取 response
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(() => {
-                document.getElementById('upload-status').innerText = "✅ 成绩上传成功！你真棒！";
-            })
-            .catch((error) => {
-                document.getElementById('upload-status').innerText = "❌ 哎呀，网络好像有点问题，成绩没传上去。";
-                console.error('Error:', error);
-            });
-        }
-    </script>
-</body>
-</html>
+            document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} 题 / 共 ${questions.length}
