@@ -6,22 +6,33 @@
     <title>🌟 一年级科学大挑战 🌟</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        /* 核心设定：锁死屏幕高度，绝对禁止滚动 */
+        /* 核心设定：动态渐变呼吸背景，锁死屏幕高度 */
         body {
             font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif; 
-            background-color: #FFE5F1; 
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 100vh; 
             overflow: hidden; 
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center; 
+            
+            /* 魔法变色背景设定 */
+            background: linear-gradient(45deg, #FFE5F1, #E0F7FA, #FFF9C4, #E8F5E9);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite; /* 12秒完成一次颜色循环 */
+        }
+
+        /* 控制背景变色的动画关键帧 */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         #quiz-container {
-            background-color: #FFFFFF;
+            background-color: rgba(255, 255, 255, 0.95); /* 稍微变半透明一点，透出后面的彩虹色 */
             border-radius: 25px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             padding: 20px;
@@ -74,6 +85,7 @@
             margin-bottom: 10px;
         }
 
+        /* 选项按钮基础形态 */
         .option-btn {
             width: 100%;
             padding: 15px 5px; 
@@ -81,11 +93,9 @@
             font-weight: bold;
             font-family: inherit;
             color: white;
-            background-color: #FF6B6B; 
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #C0392B; 
             transition: all 0.1s ease;
             display: flex;
             align-items: center;
@@ -94,14 +104,26 @@
 
         .option-btn:active {
             transform: translateY(6px); 
-            box-shadow: 0 0px 0 #C0392B;
         }
 
-        .option-btn:nth-child(even) { background-color: #4DABF7; box-shadow: 0 6px 0 #228BE6; }
-        .option-btn:nth-child(even):active { box-shadow: 0 0 0 #228BE6; }
+        /* 🔥 分配四种不同的专属颜色 🔥 */
         
-        .option-btn:nth-child(3n) { background-color: #51CF66; box-shadow: 0 6px 0 #2B8A3E; }
-        .option-btn:nth-child(3n):active { box-shadow: 0 0 0 #2B8A3E; }
+        /* 选项1: 西瓜红 */
+        .option-btn:nth-child(1) { background-color: #FF6B6B; box-shadow: 0 6px 0 #C0392B; }
+        .option-btn:nth-child(1):active { box-shadow: 0 0px 0 #C0392B; }
+
+        /* 选项2: 晴空蓝 */
+        .option-btn:nth-child(2) { background-color: #4DABF7; box-shadow: 0 6px 0 #228BE6; }
+        .option-btn:nth-child(2):active { box-shadow: 0 0px 0 #228BE6; }
+        
+        /* 选项3: 草地绿 */
+        .option-btn:nth-child(3) { background-color: #51CF66; box-shadow: 0 6px 0 #2B8A3E; }
+        .option-btn:nth-child(3):active { box-shadow: 0 0px 0 #2B8A3E; }
+
+        /* 选项4: 活力橙 */
+        .option-btn:nth-child(4) { background-color: #FF922B; box-shadow: 0 6px 0 #D9480F; }
+        .option-btn:nth-child(4):active { box-shadow: 0 0px 0 #D9480F; }
+
 
         input[type="text"] {
             width: 90%;
@@ -217,7 +239,6 @@
 
         function showQuestion() {
             const q = questions[currentQuestionIndex];
-            // 之前你的代码就是断在这里！现在已经补全了 👇
             document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} 题 / 共 ${questions.length} 题`;
             document.getElementById('q-text').innerText = q.question;
             
