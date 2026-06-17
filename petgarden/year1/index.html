@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { backgroundImage: { 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))', } } }
+    }
+  </script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { user-select: none; -webkit-user-select: none; margin: 0; overflow: hidden; background-color: #f8fafc; }
+
+    /* 喂养：爱心喷发上浮 */
+    @keyframes floatUpBurst {
+      0% { transform: translateY(0) scale(0.5); opacity: 1; }
+      100% { transform: translateY(-160px) scale(1.5); opacity: 0; }
+    }
+    /* 扣分：心碎掉落 */
+    @keyframes dropDown {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(100px) scale(0.8); opacity: 0; }
+    }
+    /* 扣分：左右摇晃震动 */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px) rotate(-3deg); }
+      50% { transform: translateX(8px) rotate(3deg); }
+      75% { transform: translateX(-8px) rotate(-3deg); }
+    }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+    @keyframes spinSlow { 100% { transform: rotate(360deg); } }
+    .animate-spin-slow { animation: spinSlow 6s linear infinite; }
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.1); opacity: 1; }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .animate-bounce-in { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ========================================================
+    // 🚀 核心基建：全栈分离后的 API 通信引擎
+    // ========================================================
+    // ⚠️ 请在这里填入你部署后获取到的 Google Apps Script Web App URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbw3ZtmvhxvkARaJZOkK_s0mIG1sB-6j9J5FIrDXxNw1M_c7WTboFqLThoDUuxTETXEh/exec"; 
+
+    // 统一的 fetchGAS 通信引擎，完美替代 google.script.run
+    const fetchGAS = async (action, payload = {}) => {
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          // ⚠️ 核心技巧：使用 text/plain 绕过复杂的 CORS 预检
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          // 将 action 注入数据包，对应后端的 switch(action)
+          body: JSON.stringify({ action, ...payload }),
+        });
+        const result = await response.json();
+        if (result.error) throw new Error(result.error);
+        return result;
+      } catch (error) {
+        console.error(`API 请求失败 [${action}]:`, error);
+        throw error;
+      }
+    };
+
+    // ========================================================
+    // 🎵 全局常量与音频资源
+    // ========================================================
+    const LEVEL_THRESHOLDS = [0, 0, 10, 30, 60, 100, 150, 210, 280];
+    const soundCheers = new Audio('https://actions.google.com/sounds/v1/crowds/female_crowd_celebration.ogg');
+    const soundFeed = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+    const soundLevelUp = new Audio('https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg');
+    const soundClaim = new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg');
+    const soundSad = new Audio('https://actions.google.com/sounds/v1/cartoon/slide_whistle_down.ogg');
+    const HEART_EMOJIS = [' ❤️ ', ' 💖 ', ' 💗 ', ' 💓 ', ' 💞 ', ' 💕 ', ' 💘 ', ' 💝 ', ' ✨ ', ' 🌟 '];
+
+    // --- 下方紧接着的是你原本的“积木 1：悬浮式底部导航栏 (BottomNav)” ---
+
+// 积木 1：悬浮式底部导航栏 (BottomNav)
+    function BottomNav({ onOpenModal }) {
+      return (
+        <div className="absolute bottom-6 w-[90%] max-w-md bg-white/80 backdrop-blur-md border border-white shadow-xl rounded-3xl p-2 flex justify-around items-center z-40">
+          <button onClick={() => onOpenModal(null)} className="flex flex-col items-center p-2 text-indigo-600 transition-all hover:scale-110 active:scale-95">
+            <span className="text-2xl mb-1"> 🏠 </span>
+            <span className="text-[10px] font-bold">宠物园</span>
+          </button>
+          <button onClick={() => onOpenModal('history')} className="flex flex-col items-center p-2 text-slate-400 hover:text-indigo-500 transition-all hover:scale-110 active:scale-95">
+            <span className="text-2xl mb-1"> 📜 </span>
+            <span className="text-[10px] font-bold">足迹</span>
+          </button>
+          <button onClick={() => onOpenModal('leaderboard')} className="flex flex-col items-center p-2 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-95">
+            <span className="text-2xl mb-1"> 🏆 </span>
+            <span className="text-[10px] font-bold">荣誉榜</span>
+          </button>
+          <button onClick={() => onOpenModal('shop')} className="flex flex-col items-center p-2 text-slate-400 hover:text-pink-500 transition-all hover:scale-110 active:scale-95">
+            <span className="text-2xl mb-1"> 🛍️ </span>
+            <span className="text-[10px] font-bold">兑换</span>
+          </button>
+          <button onClick={() => onOpenModal('memorial')} className="flex flex-col items-center p-2 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-95">
+            <span className="text-2xl mb-1"> 🏅 </span>
+            <span className="text-[10px] font-bold">纪念册</span>
+          </button>
+        </div>
+      );
+    }
+
+    // 积木 2：精美的荣誉排行榜弹窗 (LeaderboardModal)
+    function LeaderboardModal({ onClose, globalStudents, currentStudentName, levelThresholds, githubUser, githubRepo }) {
+      const getCurrentLevel = (exp, petId) => {
+        if (!petId) return 0;
+        for (let i = levelThresholds.length - 1; i >= 1; i--) {
+          if (exp >= levelThresholds[i]) return i;
+        }
+        return 1;
+      };
+      
+      const sorted = [...globalStudents]
+        .filter(s => s.petId)
+        .sort((a, b) => {
+          const aBadges = (a.petHistory || []).length;
+          const bBadges = (b.petHistory || []).length;
+          if (bBadges !== aBadges) return bBadges - aBadges;
+          return b.totalExp - a.totalExp;
+        });
+        
+      return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <div className="p-4 bg-gradient-to-r from-amber-100 to-orange-100 flex justify-between items-center border-b border-amber-200">
+              <h3 className="font-bold text-amber-900 text-lg"> 🏆 班级荣誉榜</h3>
+              <button onClick={onClose} className="text-amber-700 hover:text-amber-900 text-2xl font-bold active:scale-90">&times;</button>
+            </div>
+            <div className="p-4 bg-slate-50 flex flex-col gap-3 max-h-96 overflow-y-auto">
+              {sorted.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 font-medium">还没有同学领养宠物哦~</div>
+              ) : (
+                sorted.map((s, index) => {
+                  const level = getCurrentLevel(s.totalExp, s.petId);
+                  const petUrl = `https://cdn.jsdelivr.net/gh/${githubUser}/${githubRepo}/avatar/${s.petId}/${level}.webp`;
+                  const isMe = s.name === currentStudentName;
+                  const badgeCount = (s.petHistory || []).length;
+
+                  return (
+                    <div key={s.id} className={`flex items-center p-3 rounded-2xl border transition-all ${isMe ? 'bg-indigo-50 border-indigo-300 shadow-md' : index < 3 ? 'bg-gradient-to-r from-white to-amber-50 border-amber-300 shadow-md' : 'bg-white border-slate-200 shadow-sm'}`}>
+                      <div className="w-8 font-black text-2xl text-center mr-2">
+                        {index === 0 ? ' 🥇 ' : index === 1 ? ' 🥈 ' : index === 2 ? ' 🥉 ' : <span className="text-slate-400 text-lg">{index + 1}</span>}
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center mr-2 shadow-sm overflow-hidden">
+                        <img src={petUrl} className="w-8 h-8 object-contain" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-bold text-slate-700 text-sm flex items-center gap-1">
+                          {s.name}
+                          {isMe && <span className="text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full">我</span>}
+                        </div>
+                        <div className="text-xs text-indigo-500 font-bold"> 🎓 {badgeCount} · Lv.{level}</div>
+                      </div>
+                      <div className="font-black text-amber-500 text-sm">
+                        {s.totalExp} <span className="text-[10px] font-normal text-slate-400">EXP</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 积木 3：成长足迹弹窗 (HistoryModal) - 🚀 核心改造：无缝接入 fetchGAS
+    function HistoryModal({ onClose, studentName }) {
+      const [history, setHistory] = useState([]);
+      const [loading, setLoading] = useState(true);
+      
+      useEffect(() => {
+        const loadHistory = async () => {
+          try {
+            const data = await fetchGAS('getStudentLogs', { studentName });
+            setHistory(data);
+          } catch (err) {
+            console.error('读取足迹失败:', err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        loadHistory();
+      }, [studentName]);
+
+      return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <div className="p-4 bg-gradient-to-r from-blue-100 to-indigo-100 flex justify-between items-center border-b border-blue-200">
+              <h3 className="font-bold text-indigo-900 text-lg"> 📜 成长足迹</h3>
+              <button onClick={onClose} className="text-indigo-700 hover:text-indigo-900 text-2xl font-bold active:scale-90">&times;</button>
+            </div>
+            <div className="p-4 bg-slate-50 flex flex-col gap-3 max-h-96 overflow-y-auto">
+              {loading ? (
+                <div className="text-center py-8 text-slate-400 font-medium">读取中...</div>
+              ) : history.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 font-medium">还没有足迹哦~</div>
+              ) : (
+                history.map((record, index) => (
+                  <div key={index} className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition-transform hover:scale-[1.02]">
+                    <div className="flex-1">
+                      <div className="font-bold text-slate-700">{record.reason}</div>
+                      <div className="text-xs text-slate-500 mt-1">
+                        {record.teacher} · {record.subject} · {record.date}
+                      </div>
+                    </div>
+                    <div className={`font-black text-xl ${record.type === 'add' ? 'text-green-500' : 'text-red-500'}`}>
+                      {record.type === 'add' ? '+' : ''}{record.points}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 纪念册组件 (MemorialModal)
+    function MemorialModal({ onClose, petHistory, githubUser, githubRepo }) {
+      return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <div className="p-4 bg-gradient-to-r from-amber-100 to-orange-100 flex justify-between items-center border-b border-amber-200">
+              <h3 className="font-bold text-amber-900 text-lg"> 🏅 毕业纪念册</h3>
+              <button onClick={onClose} className="text-amber-700 hover:text-amber-900 text-2xl font-bold active:scale-90">&times;</button>
+            </div>
+            <div className="p-4 bg-slate-50 max-h-96 overflow-y-auto">
+              {petHistory.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 font-medium">还没有毕业的宠物哦~努力养成吧！</div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {petHistory.map((petId, index) => (
+                    <div key={index} className="bg-white p-3 rounded-2xl border border-amber-200 shadow-sm flex flex-col items-center gap-2">
+                      <div className="w-16 h-16 flex items-center justify-center bg-amber-50 rounded-xl border border-amber-100 p-1">
+                        <img src={`https://cdn.jsdelivr.net/gh/${githubUser}/${githubRepo}/avatar/${petId}/8.webp`} alt={petId} className="max-w-full max-h-full object-contain" />
+                      </div>
+                      <span className="text-[10px] font-black text-amber-600"> 🎓 已毕业</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-amber-50 text-center text-xs font-bold text-amber-700 border-t border-amber-100">
+              已收集 {petHistory.length} 只毕业宠物 🏅
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 积木 4：兑换小屋弹窗 (ShopModal) - 🚀 核心改造：商品库存更新走 fetchGAS
+    function ShopModal({ onClose, badges, onExchangeItem, globalProducts, setGlobalProducts }) {
+      return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+            <div className="p-4 bg-gradient-to-r from-pink-100 to-rose-100 flex justify-between items-center border-b border-pink-200">
+              <h3 className="font-bold text-pink-900 text-lg"> 🛍️ 兑换小屋</h3>
+              <button onClick={onClose} className="text-pink-700 hover:text-pink-900 text-2xl font-bold active:scale-90">&times;</button>
+            </div>
+            <div className="p-3 bg-pink-50 text-center text-sm font-bold text-pink-800 shadow-inner flex items-center justify-center gap-2">
+              当前可用徽章: <span className="text-2xl text-amber-500">{badges}</span> 🏅
+            </div>
+            <div className="p-4 bg-slate-50 flex flex-col gap-3 max-h-80 overflow-y-auto">
+              {globalProducts.length === 0 ? (
+                <div className="text-center py-8 text-slate-400 font-medium">暂时没有商品哦~</div>
+              ) : (
+                globalProducts.map(item => (
+                  <div key={item.id} className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between transition-transform hover:scale-[1.02]">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl drop-shadow-sm">{item.icon}</span>
+                      <div>
+                        <span className="font-bold text-slate-700">{item.name}</span>
+                        <p className="text-xs text-slate-400 mt-0.5">库存: {item.stock}</p>
+                      </div>
+                    </div>
+                    <button
+                      disabled={badges < item.cost || item.stock <= 0}
+                      onClick={async () => {
+                        const newStock = item.stock - 1;
+                        // 先更新前端状态，保证体验流畅
+                        setGlobalProducts(prev => prev.map(p => p.id === item.id ? { ...p, stock: newStock } : p));
+                        
+                        // 后台异步扣除库存
+                        try {
+                          await fetchGAS('updateProductStock', { id: item.id, newStock });
+                        } catch(err) {
+                          console.error('更新商品库存失败:', err);
+                        }
+                        onExchangeItem(item);
+                      }}
+                      className={`font-bold py-2 px-4 rounded-xl shadow-md transition-all active:scale-95 ${
+                        badges >= item.cost && item.stock > 0
+                          ? 'bg-pink-500 hover:bg-pink-600 text-white'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {item.stock <= 0 ? '已售完' : `${item.cost} 🏅 `}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+// 🧱 积木 5：终极科任老师面板 (动态增删小组 + 独立记账与双向充值完美融合版)
+    function TeacherPanel({ onExit, subject, teacherName, rules, globalStudents }) {
+      const [students, setStudents] = useState([]);
+
+      useEffect(() => {
+        setStudents(globalStudents.map(s => ({
+          id: s.id,
+          name: s.name,
+          exp: s.totalExp || 0,
+          totalScore: s.totalScore || 0,
+          group: null 
+        })));
+      }, [globalStudents]);
+
+      // ★ 核心改造：本科分数状态拉取
+      const [subjectScores, setSubjectScores] = useState({});
+      useEffect(() => {
+        const loadSubjectScores = async () => {
+          try {
+            const scores = await fetchGAS('getStudentScoreByTeacher', { teacherName, subject });
+            setSubjectScores(scores || {});
+          } catch (err) {
+            console.error('读取科目分失败:', err);
+          }
+        };
+        loadSubjectScores();
+      }, [teacherName, subject]);
+
+      const [groupsList, setGroupsList] = useState([""]);
+      const [newGroupName, setNewGroupName] = useState(""); 
+      const [groupScores, setGroupScores] = useState("");
+      const [groupIds, setGroupIds] = useState({});
+
+      // ★ 核心改造：启动时读取该老师的分组
+      useEffect(() => {
+        const loadGroups = async () => {
+          try {
+            const data = await fetchGAS('getGroups', { teacherName });
+            if (!data) return;
+            const names = data.map(g => g.name);
+            const scores = {};
+            const ids = {};
+            const memberMap = {};
+
+            data.forEach(g => {
+              scores[g.name] = g.score;
+              ids[g.name] = g.id;
+              memberMap[g.name] = g.members;
+            });
+
+            setGroupsList(names);
+            setGroupScores(scores);
+            setGroupIds(ids);
+
+            setStudents(prev => prev.map(s => ({
+              ...s,
+              group: Object.keys(memberMap).find(gName => memberMap[gName].includes(s.name)) || null
+            })));
+          } catch (err) {
+            console.error('读取分组失败:', err);
+          }
+        };
+        loadGroups();
+      }, [teacherName]);
+
+      const RULES = rules || [];
+      const [isEditMode, setIsEditMode] = useState(false); 
+      const [selectedStudentIds, setSelectedStudentIds] = useState([]); 
+      const [activeGroupForAssign, setActiveGroupForAssign] = useState("第一组"); 
+      const [toastMsg, setToastMsg] = useState("");
+      const [viewingStudent, setViewingStudent] = useState(null);   
+      const [studentLogs, setStudentLogs] = useState([]);           
+      const [logsLoading, setLogsLoading] = useState(false);        
+      const [ruleFilter, setRuleFilter] = useState('all');  
+      const [ruleSearch, setRuleSearch] = useState('');      
+
+      const getGroupScore = (groupName) => {
+        return groupScores[groupName] || 0;
+      };
+
+      const toggleSelectStudent = (id) => {
+        if (isEditMode) return;
+        if (selectedStudentIds.includes(id)) {
+          setSelectedStudentIds(selectedStudentIds.filter(sId => sId !== id));
+        } else {
+          setSelectedStudentIds([...selectedStudentIds, id]);
+        }
+      };
+
+      const toggleSelectGroupAll = (groupName) => {
+        if (isEditMode) return;
+        const groupStudentIds = students.filter(s => s.group === groupName).map(s => s.id);
+        const allSelected = groupStudentIds.length > 0 && groupStudentIds.every(id => selectedStudentIds.includes(id));
+
+        if (allSelected) {
+          setSelectedStudentIds(selectedStudentIds.filter(id => !groupStudentIds.includes(id)));
+        } else {
+          const newSelected = [...selectedStudentIds, ...groupStudentIds.filter(id => !selectedStudentIds.includes(id))];
+          setSelectedStudentIds(newSelected);
+        }
+      };
+
+      // ★ 核心改造：升级打分函数 (异步更新云端)
+      const handleScore = async (rule) => {
+        if (selectedStudentIds.length === 0) return;
+        new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg').play();
+        
+        const affectedGroups = [...new Set(students.filter(s => selectedStudentIds.includes(s.id) && s.group).map(s => s.group))];
+
+        // 实时更新分组分到前端与云端
+        affectedGroups.forEach(gName => {
+          const newScore = Math.max(0, (groupScores[gName] || 0) + rule.points);
+          setGroupScores(prev => ({ ...prev, [gName]: newScore }));
+          
+          fetchGAS('updateGroup', {
+            groupId: groupIds[gName],
+            members: students.filter(s => s.group === gName).map(s => s.name),
+            score: newScore
+          }).catch(err => console.error('组分更新失败:', err));
+        });
+
+        // 实时更新学生前端分数
+        setStudents(prev => prev.map(s => {
+          if (selectedStudentIds.includes(s.id)) {
+            return { ...s, exp: Math.max(0, s.exp + rule.points), totalScore: Math.max(0, (s.totalScore || 0) + rule.points) }; 
+          }
+          return s;
+        }));
+
+        setSubjectScores(prev => {
+          const next = { ...prev };
+          students.filter(s => selectedStudentIds.includes(s.id)).forEach(s => {
+            next[s.name] = Math.max(0, (next[s.name] || 0) + rule.points);
+          });
+          return next;
+        });
+
+        // 记录 Logs 存入云端
+        const selectedNames = students.filter(s => selectedStudentIds.includes(s.id)).map(s => s.name);
+        try {
+          await fetchGAS('addLogs', {
+            teacher: teacherName,
+            subject: subject,
+            studentNames: selectedNames,
+            points: rule.points,
+            reason: rule.label
+          });
+        } catch (err) {
+          console.error('Logs写入失败:', err);
+        }
+
+        const names = students.filter(s => selectedStudentIds.includes(s.id)).map(s => s.name).join(', ');
+        setToastMsg(`已给【${names}】及所属小组同步下发：${rule.label} ${rule.points > 0 ? '+' : ''}${rule.points}分`);
+        setTimeout(() => { setToastMsg(""); setSelectedStudentIds([]); }, 2000);
+      };
+
+      // 允许老师在管理模式下完全自主改写某组的总分
+      const handleManualGroupScoreChange = (groupName, newScore) => {
+        const parsedScore = Math.max(0, parseInt(newScore) || 0);
+        setGroupScores(prev => ({ ...prev, [groupName]: parsedScore }));
+        
+        fetchGAS('updateGroup', {
+          groupId: groupIds[groupName],
+          members: students.filter(s => s.group === groupName).map(s => s.name),
+          score: parsedScore
+        }).catch(err => console.error('手动改分失败:', err));
+      };
+
+      // 将未分配的学生加入当前选中的小组
+      const assignToGroup = (studentId) => {
+        setStudents(prev => {
+          const updated = prev.map(s => s.id === studentId ? { ...s, group: activeGroupForAssign } : s);
+          const newMembers = updated.filter(s => s.group === activeGroupForAssign).map(s => s.name);
+          
+          fetchGAS('updateGroup', {
+            groupId: groupIds[activeGroupForAssign],
+            members: newMembers,
+            score: groupScores[activeGroupForAssign] || 0
+          }).catch(err => console.error('分配失败:', err));
+          
+          return updated;
+        });
+      };
+
+      // 将学生踢出小组
+      const removeFromGroup = (studentId) => {
+        setStudents(prev => {
+          const student = prev.find(s => s.id === studentId);
+          const groupName = student?.group;
+          const updated = prev.map(s => s.id === studentId ? { ...s, group: null } : s);
+          
+          if (groupName) {
+            const newMembers = updated.filter(s => s.group === groupName).map(s => s.name);
+            fetchGAS('updateGroup', {
+              groupId: groupIds[groupName],
+              members: newMembers,
+              score: groupScores[groupName] || 0
+            }).catch(err => console.error('踢出失败:', err));
+          }
+          return updated;
+        });
+        setSelectedStudentIds(selectedStudentIds.filter(id => id !== studentId));
+      };
+
+      // 添加新组
+      const handleAddGroup = async () => {
+        const trimmedName = newGroupName.trim();
+        if (!trimmedName) return;
+        if (groupsList.includes(trimmedName)) {
+          alert("这个小组名字已经存在啦！");
+          return;
+        }
+
+        const newId = 'G_' + teacherName + '_' + Date.now();
+        setGroupsList([...groupsList, trimmedName]);
+        setGroupScores(prev => ({ ...prev, [trimmedName]: 0 }));
+        setGroupIds(prev => ({ ...prev, [trimmedName]: newId }));
+        setActiveGroupForAssign(trimmedName);
+        setNewGroupName("");
+
+        try {
+          await fetchGAS('addGroup', { id: newId, name: trimmedName, teacherName });
+        } catch (err) {
+          console.error('建组写入云端失败:', err);
+        }
+      };
+
+      // 删除组
+      const handleDeleteGroup = async (groupName) => {
+        if (!confirm(`确定要解散【${groupName}】吗？\n该组所有学生将自动退回到“未分配”状态。`)) return;
+
+        setStudents(prev => prev.map(s => s.group === groupName ? { ...s, group: null } : s));
+        const updatedList = groupsList.filter(g => g !== groupName);
+        setGroupsList(updatedList);
+
+        setGroupScores(prev => {
+          const nextScores = { ...prev };
+          delete nextScores[groupName];
+          return nextScores;
+        });
+        
+        if (activeGroupForAssign === groupName) {
+          setActiveGroupForAssign(updatedList[0] || "");
+        }
+
+        try {
+          await fetchGAS('deleteGroup', { groupId: groupIds[groupName] });
+        } catch (err) {
+          console.error('云端删组失败:', err);
+        }
+      };
+
+      return (
+        <div className="relative w-screen h-screen flex flex-col bg-slate-100 overflow-hidden">
+          {/* 顶部状态栏 */}
+          <div className="w-full bg-white shadow-sm p-4 flex justify-between items-center z-10">
+            <div>
+              <h2 className="text-xl font-black text-indigo-900"> 👩‍🏫 {subject || "科任"}课堂打分台 <span className="text-xs font-normal text-slate-400">({teacherName || "独立记账版"})</span></h2>
+              <p className="text-xs text-slate-500 font-bold">
+                模式：{isEditMode ? " ⚙️ 组员调配与自主建组" : " ⚡ 团队独立积分与分粮控制台"}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setIsEditMode(!isEditMode); setSelectedStudentIds([]); }}
+                className={`px-4 py-2 rounded-xl font-bold transition-all active:scale-95 text-sm ${isEditMode ? 'bg-emerald-500 text-white shadow-md' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-100'}`}
+              >
+                {isEditMode ? " ✅ 完成管理" : " ⚙️ 管理分组"}
+              </button>
+              <button onClick={onExit} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold active:scale-95">退出</button>
+            </div>
+          </div>
+          
+          {/* 核心内容区 */}
+          <div className="flex-1 w-full max-w-5xl mx-auto p-4 flex flex-col gap-4 overflow-y-auto md:flex-row md:overflow-hidden">
+
+            {/* 左侧/主体：小组大卡片展示区 */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4 min-h-[200px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {groupsList.map(groupName => {
+                  const groupStudents = students.filter(s => s.group === groupName);
+                  const isGroupAllSelected = groupStudents.length > 0 && groupStudents.every(s => selectedStudentIds.includes(s.id));
+
+                  return (
+                    <div key={groupName} className={`bg-white p-4 rounded-3xl border shadow-sm transition-all ${isGroupAllSelected ? 'border-indigo-400 bg-indigo-50/30' : 'border-slate-100'}`}>
+                      {/* 小组头部 */}
+                      <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-3">
+                        <button
+                          disabled={isEditMode || groupStudents.length === 0}
+                          onClick={() => toggleSelectGroupAll(groupName)}
+                          className={`font-black text-base flex items-center gap-1 ${isEditMode ? 'cursor-default text-slate-700' : 'text-indigo-900 hover:text-indigo-600'}`}
+                        >
+                          {!isEditMode && groupStudents.length > 0 && <span>{isGroupAllSelected ? " ☑️ " : " ⬜ "}</span>}
+                          {groupName}
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          {isEditMode ? (
+                            <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-xl px-2 py-1 animate-[fadeIn_0.15s_ease-out]">
+                              <span className="text-[10px] font-black text-amber-800"> 🏆 独立分:</span>
+                              <input
+                                type="number"
+                                value={getGroupScore(groupName)}
+                                onChange={(e) => handleManualGroupScoreChange(groupName, e.target.value)}
+                                className="w-14 text-center font-black text-xs bg-white border border-amber-300 rounded-md text-amber-900 focus:outline-none focus:border-amber-500 shadow-sm"
+                              />
+                            </div>
+                          ) : (
+                            <span className="bg-amber-100 text-amber-800 text-xs font-black px-2 py-1 rounded-full">
+                              🏆 组总分: {getGroupScore(groupName)} 分
+                            </span>
+                          )}
+
+                          {isEditMode && (
+                            <button onClick={() => handleDeleteGroup(groupName)} className="text-rose-500 hover:text-rose-700 text-xs font-black bg-rose-50 px-2 py-1 rounded-md transition-all active:scale-90"> 🗑️ 删组</button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* 组内学生名单 */}
+                      <div className="flex flex-wrap gap-2">
+                        {groupStudents.length === 0 ? (
+                          <p className="text-xs text-slate-400 py-2 font-medium">暂无组员，请在管理模式添加</p>
+                        ) : (
+                          groupStudents.map(student => {
+                            const isSelected = selectedStudentIds.includes(student.id);
+                            return (
+                              <div
+                                key={student.id}
+                                onClick={() => !isEditMode && toggleSelectStudent(student.id)}
+                                className={`px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-1 shadow-sm border transition-all ${
+                                  isEditMode
+                                    ? 'bg-slate-50 border-slate-200 text-slate-700'
+                                    : isSelected
+                                      ? 'bg-indigo-500 text-white border-indigo-600 scale-95'
+                                      : 'bg-white hover:border-indigo-300 text-slate-600 cursor-pointer active:scale-95'
+                                }`}
+                              >
+                                <span> 👤 {student.name}</span>
+                                <span className={`text-[10px] px-1 rounded ${isSelected ? 'bg-indigo-600' : 'bg-slate-100 text-slate-400'}`}>{subjectScores[student.name] || 0}分</span>
+                                
+                                {/* ★ 核心改造：独立读取学生的足迹历史走 fetchGAS */}
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    setViewingStudent(student.name);
+                                    setLogsLoading(true);
+                                    try {
+                                      const data = await fetchGAS('getStudentLogsBySubject', { studentName: student.name, teacherName, subject });
+                                      setStudentLogs(data || []);
+                                    } catch (err) {
+                                      console.error('读取记录失败:', err);
+                                    } finally {
+                                      setLogsLoading(false);
+                                    }
+                                  }}
+                                  className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 hover:bg-indigo-100 font-bold"
+                                >
+                                  📋
+                                </button>
+
+                                {isEditMode && (
+                                  <button onClick={(e) => { e.stopPropagation(); removeFromGroup(student.id); }} className="text-red-500 hover:text-red-700 font-black ml-1 text-xs">&times;</button>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* 右侧：操作面板 */}
+            <div className={`w-full md:w-80 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col overflow-hidden md:max-h-none ${isEditMode ? '' : 'max-h-64'}`}>
+
+              {/* 模式 A：日常打分控制台 */}
+              {!isEditMode && (
+                <div className="flex flex-col h-full relative">
+                  {selectedStudentIds.length === 0 && (
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] z-10 flex items-center justify-center text-center p-4">
+                      <p className="bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg animate-pulse"> 👈 请先在左边点击勾选学生或小组</p>
+                    </div>
+                  )}
+                  <div className="flex gap-1 mb-3">
+                    <button onClick={() => setRuleFilter('all')} className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${ruleFilter === 'all' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-500'}`}>全部</button>
+                    <button onClick={() => setRuleFilter('add')} className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${ruleFilter === 'add' ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-600'}`}> 🟢 加分</button>
+                    <button onClick={() => setRuleFilter('sub')} className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${ruleFilter === 'sub' ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-600'}`}> 🔴 扣分</button>
+                  </div>
+                  <input
+                    type="text"
+                    value={ruleSearch}
+                    onChange={e => setRuleSearch(e.target.value)}
+                    placeholder="搜索规则..."
+                    className="w-full px-3 py-1.5 mb-2 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-indigo-500 bg-slate-50 shadow-inner"
+                  />
+                  <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto">
+                    {RULES.filter(rule => (ruleFilter === 'all' || rule.type === ruleFilter) && (ruleSearch === '' || rule.label.includes(ruleSearch))).map(rule => (
+                      <button
+                        key={rule.id} onClick={() => handleScore(rule)}
+                        className={`flex items-center justify-between p-3 rounded-2xl border-2 transition-all active:scale-95 ${rule.type === 'add' ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800 hover:bg-emerald-100' : 'bg-rose-50/50 border-rose-100 text-rose-800 hover:bg-rose-100'}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{rule.icon}</span>
+                          <span className="font-bold text-sm">{rule.label}</span>
+                        </div>
+                        <span className="font-black text-sm">{rule.points > 0 ? '+' : ''}{rule.points} 🍎 </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* 模式 B：管理分组控制台 */}
+              {isEditMode && (
+                <div className="flex flex-col h-full gap-4 overflow-hidden">
+                  {/* 新建小组的输入区 */}
+                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <h3 className="font-bold text-slate-700 mb-2 text-xs"> ✨ 自由编写并新建小组：</h3>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        placeholder="输入自定义组名..."
+                        className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 font-bold focus:outline-none focus:border-indigo-500 shadow-inner"
+                      />
+                      <button
+                        onClick={handleAddGroup}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all active:scale-95 shadow-md flex-shrink-0"
+                      >
+                        ➕ 建组
+                      </button>
+                    </div>
+                  </div>
+                  {/* 选择目标组 */}
+                  <div>
+                    <h3 className="font-bold text-slate-700 mb-2 text-xs">1. 选择目标小组：</h3>
+                    <select
+                      value={activeGroupForAssign}
+                      onChange={(e) => setActiveGroupForAssign(e.target.value)}
+                      className="w-full p-2 border border-slate-200 rounded-xl font-bold text-sm text-slate-700 bg-slate-50 focus:outline-none focus:border-indigo-500"
+                    >
+                      {groupsList.map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  </div>
+
+                  {/* 待分配的学生池 */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    <h3 className="font-bold text-slate-700 mb-2 text-xs">2. 点击学生塞进【{activeGroupForAssign}】：</h3>
+                    <div className="flex-1 border-2 border-dashed border-slate-200 rounded-2xl p-2 overflow-y-auto bg-slate-50 flex flex-col gap-1.5">
+                      {students.filter(s => s.group === null).length === 0 ? (
+                        <p className="text-xs text-slate-400 text-center py-8 font-medium">所有学生都已分配完毕 🎉 </p>
+                      ) : (
+                        students.filter(s => s.group === null).map(student => (
+                          <button
+                            key={student.id} onClick={() => assignToGroup(student.id)}
+                            className="w-full p-2 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-xl font-bold text-xs text-slate-600 text-left flex justify-between items-center transition-all active:scale-98"
+                          >
+                            <span> 👤 {student.name}</span>
+                            <span className="text-indigo-500 font-black">+ 塞入</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* 学生足迹查阅弹窗 */}
+          {viewingStudent && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+              <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+                <div className="p-4 bg-gradient-to-r from-indigo-100 to-blue-100 flex justify-between items-center border-b border-indigo-200">
+                  <h3 className="font-bold text-indigo-900 text-base"> 📋 {viewingStudent} · {subject}</h3>
+                  <button onClick={() => { setViewingStudent(null); setStudentLogs([]); }} className="text-indigo-700 text-2xl font-bold">&times;</button>
+                </div>
+                <div className="p-4 bg-slate-50 flex flex-col gap-2 max-h-96 overflow-y-auto">
+                  {logsLoading ? (
+                    <div className="text-center py-8 text-slate-400">读取中...</div>
+                  ) : studentLogs.length === 0 ? (
+                    <div className="text-center py-8 text-slate-400">还没有记录哦～</div>
+                  ) : (
+                    studentLogs.map((log, i) => (
+                      <div key={i} className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-slate-700 text-sm">{log.reason}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{log.date}</p>
+                        </div>
+                        <span className={`font-black text-base ${log.points > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {log.points > 0 ? '+' : ''}{log.points}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="p-3 bg-indigo-50 text-center text-xs font-bold text-indigo-700 border-t border-indigo-100">
+                  共 {studentLogs.length} 条记录 · 本科累计 {subjectScores[viewingStudent] || 0} 分
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 发分成功提示 */}
+          {toastMsg && (
+            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-50 animate-[fadeIn_0.3s_ease-out]">
+              <div className="bg-slate-800 text-white text-xs px-5 py-2.5 rounded-full font-bold shadow-2xl flex items-center gap-2">
+                <span className="text-green-400 text-base"> ✓ </span> {toastMsg}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+// ========================================================
+    //  👑  终极完全体：班主任独立超级大后台 (AdminPanel - 五板斧大满贯版)
+    // ========================================================
+    function AdminPanel({
+      onExit, teachersList, setTeachersList, globalStudents, setGlobalStudents,
+      levelThresholds, setLevelThresholds, levelTitles, setLevelTitles,
+      globalRules, setGlobalRules, globalProducts, setGlobalProducts, setAdminPassword
+    }) {
+
+      const [activeTab, setActiveTab] = useState("students");
+      
+      // 1. 学生大总管状态
+      const [singleName, setSingleName] = useState("");
+      const [bulkInput, setBulkInput] = useState("");
+      const [toastMsg, setToastMsg] = useState("");
+      
+      // 2. 商店进货商状态
+      const [newItemName, setNewItemName] = useState("");
+      const [newItemCost, setNewItemCost] = useState(1);
+      const [newItemIcon, setNewItemIcon] = useState(" 🎫 ");
+      const [newItemStock, setNewItemStock] = useState(10);
+      
+      // 3. 班级金科玉律状态
+      const [newRuleLabel, setNewRuleLabel] = useState("");
+      const [newRulePoints, setNewRulePoints] = useState(2);
+      const [newRuleType, setNewRuleType] = useState("add");
+      const [newRuleIcon, setNewRuleIcon] = useState(" 📝 ");
+      const [editingRule, setEditingRule] = useState(null); 
+      
+      // 4. 科任教师授权状态
+      const [newTeacherName, setNewTeacherName] = useState("");
+      const [newTeacherSubject, setNewTeacherSubject] = useState("");
+      const [newTeacherPin, setNewTeacherPin] = useState("");
+      const [newAdminPin, setNewAdminPin] = useState(""); 
+
+      // ========================================================
+      //  🛠️  核心业务逻辑处理函数 (全面升级为 async/await fetchGAS)
+      // ========================================================
+
+      const handleAddSingle = async () => {
+        const name = singleName.trim();
+        if (!name) return;
+        if (globalStudents.some(s => s.name === name)) {
+          alert(`班级里已经有【${name}】啦！`); return;
+        }
+
+        const tempId = 's_' + Date.now(); 
+        const newKid = {
+          id: tempId, name, pin: "123456", totalExp: 0, unfedFood: 0, badges: 0,
+          group: null, mythUnlocked: false, petId: null,
+          pendingRedemptions: [], redeemedItems: [], hasOrder: false
+        };
+
+        setGlobalStudents(prev => [...prev, newKid]);
+        setSingleName('');
+        showToast(`成功添加学生：${name}`);
+
+        try {
+          const realId = await fetchGAS('addStudent', { name, pin: "123456" });
+          setGlobalStudents(prev => prev.map(s => s.id === tempId ? { ...s, id: realId } : s));
+        } catch (err) {
+          console.error('学生写入失败:', err);
+        }
+      };
+
+      const handleAddBulk = async () => {
+        if (!bulkInput.trim()) return;
+        const names = bulkInput.split(/[\n,，]/).map(n => n.trim()).filter(n => n.length > 0);
+        if (names.length === 0) return;
+        
+        const newStudents = [];
+        names.forEach((name, index) => {
+          if (!globalStudents.some(s => s.name === name) && !newStudents.some(s => s.name === name)) {
+            newStudents.push({ id: `s_b_${Date.now()}_${index}`, name, pin: "123456", totalExp: 0, badges: 0, group: null, mythUnlocked: false, petId: null });
+          }
+        });
+        
+        setGlobalStudents([...globalStudents, ...newStudents]);
+        setBulkInput("");
+        showToast(` 🚀  成功批量导入 ${newStudents.length} 位同学！`);
+        
+        const tempIds = newStudents.map(k => k.id);
+        try {
+          const realIds = await fetchGAS('addStudentsBulk', { names: newStudents.map(k => k.name), pin: "123456" });
+          setGlobalStudents(prev => prev.map(s => {
+            const index = tempIds.indexOf(s.id);
+            if (index !== -1) return { ...s, id: realIds[index] };
+            return s;
+          }));
+        } catch (err) {
+          console.error('批量写入失败:', err);
+        }
+      };
+
+      const handleDeleteStudent = async (student) => {
+        if (!confirm(` ⚠️  确定要删除【${student.name}】吗？`)) return;
+        setGlobalStudents(globalStudents.filter(s => s.id !== student.id)); 
+        showToast(`已删除学生：${student.name}`);
+        
+        try {
+          await fetchGAS('deleteStudent', { username: student.id });
+        } catch (err) {
+          console.error('删除学生失败:', err);
+        }
+      };
+
+      const handleToggleMyth = async (id) => {
+        const newValue = !globalStudents.find(s => s.id === id)?.mythUnlocked;
+        setGlobalStudents(prev => prev.map(s => s.id === id ? { ...s, mythUnlocked: !s.mythUnlocked } : s));
+        showToast(" 🌟  成功更新该同学的山海神兽领养特权！");
+        
+        try {
+          await fetchGAS('updateMythUnlocked', { username: id, value: newValue });
+        } catch (err) {
+          console.error('神兽特权更新失败:', err);
+        }
+      };
+
+      const handleAddItem = async () => {
+        if (!newItemName.trim()) return;
+        const newItem = {
+          id: 'P_' + Date.now(),
+          name: newItemName.trim(),
+          cost: Number(newItemCost),
+          icon: newItemIcon,
+          stock: Number(newItemStock)
+        };
+        
+        setGlobalProducts(prev => [...prev, newItem]);
+        setNewItemName("");
+        setNewItemStock(10);
+        showToast(` 🛍️  成功上架奖品：${newItemName}`);
+
+        try {
+          await fetchGAS('addProduct', { id: newItem.id, name: newItem.name, cost: newItem.cost, icon: newItem.icon, stock: newItem.stock });
+        } catch (err) {
+          console.error('商品写入失败:', err);
+        }
+      };
+
+      const handleAddRule = async () => {
+        if (!newRuleLabel.trim()) return;
+        const pts = Number(newRulePoints);
+        const newRule = {
+          id: 'r_' + Date.now(),
+          label: newRuleLabel.trim(),
+          points: newRuleType === 'add' ? Math.abs(pts) : -Math.abs(pts),
+          type: newRuleType,
+          icon: newRuleIcon
+        };
+
+        setGlobalRules([...globalRules, newRule]);
+        setNewRuleLabel('');
+        setNewRuleType('add');    
+        setNewRulePoints(2);      
+        setNewRuleIcon(' 📝 ');     
+        showToast(` 📜  成功颁布全班新规：${newRuleLabel}`);
+
+        try {
+          await fetchGAS('addRule', { id: newRule.id, type: newRule.type, label: newRule.label, points: newRule.points, icon: newRule.icon });
+        } catch (err) {
+          console.error('规则写入失败:', err);
+        }
+      };
+
+      const handleAddTeacher = async () => {
+        const name = newTeacherName.trim();
+        const pin = newTeacherPin.trim();
+        if (!name || !pin) { alert("老师姓名和6位密码都必须填写哦！"); return; }
+        if (pin.length !== 6 || isNaN(pin)) { alert("密码必须是 6 位纯数字！"); return; }
+        if (teachersList.some(t => t.name === name && t.subject === newTeacherSubject)) {
+          alert(`【${newTeacherSubject}】已经授权过【${name}】了！`); return;
+        }
+
+        const newTeacher = { id: 't_' + Date.now(), name, subject: newTeacherSubject, pin };
+        setTeachersList([...teachersList, newTeacher]);
+        setNewTeacherName(""); setNewTeacherPin("");
+        showToast(` 👩‍🏫  成功授权：${newTeacherSubject} · ${name}`);
+        
+        try {
+          await fetchGAS('addTeacher', { id: newTeacher.id, name, subject: newTeacherSubject, pin });
+        } catch (err) {
+          console.error('教师写入失败:', err);
+        }
+      };
+
+      const handleThresholdChange = (index, val) => {
+        const num = parseInt(val) || 0;
+        setLevelThresholds(prev => {
+          const next = [...prev];
+          next[index] = num;
+          return next;
+        });
+      };
+
+      const handleTitleChange = (index, text) => {
+        setLevelTitles(prev => {
+          const next = [...prev];
+          next[index] = text;
+          return next;
+        });
+      };
+
+      const showToast = (msg) => { setToastMsg(msg); setTimeout(() => setToastMsg(""), 2500); };
+
+      return (
+        <div className="w-screen h-screen bg-slate-50 flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+          {/* 👑  顶部超级控制顶栏 */}
+          <div className="bg-gradient-to-r from-indigo-900 to-slate-950 p-4 shadow-md flex flex-col sm:flex-row justify-between items-center text-white gap-4 z-10">
+            <div>
+              <h2 className="text-xl font-black tracking-wide flex items-center gap-2"> 👑  班主任超级后台</h2>
+              <p className="text-xs text-indigo-300 font-bold">
+                当前板块：{activeTab === 'students' ? "花名册与神兽权限" : activeTab === 'grow_config' ? "宠物成长数值局" : activeTab === 'shop' ? "兑换商店进货商" : activeTab === 'rules' ? "全班金科玉律" : "系统设置"}
+              </p>
+            </div>
+            {/* 🛠️  顶部分流导航 */}
+            <div className="bg-white/10 p-1 rounded-2xl flex gap-1 border border-white/10 overflow-x-auto max-w-full">
+              <button onClick={() => setActiveTab("students")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'students' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 👤  学生大总管</button>
+              <button onClick={() => setActiveTab("grow_config")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'grow_config' ? 'bg-amber-500 text-white shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 📈  宠物成长局</button>
+              <button onClick={() => setActiveTab("shop")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'shop' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 🛍️  商店进货商</button>
+              <button onClick={() => setActiveTab("rules")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'rules' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 📜  班级金科玉律</button>
+              <button onClick={() => setActiveTab("teachers")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'teachers' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> ⚙️  系统设置</button>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={onExit} className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-xl text-sm active:scale-95">退出</button>
+            </div>
+          </div>
+
+          {/* 📢  第一板斧：学生大总管 */}
+          {activeTab === 'students' && (
+            <div className="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 overflow-y-auto animate-[fadeIn_0.15s_ease-out]">
+              <div className="w-full md:w-[400px] flex flex-col gap-4 pr-1">
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                  <h3 className="font-black text-slate-700 text-sm mb-3 flex items-center gap-1"> 👤  单个学生新增</h3>
+                  <div className="flex gap-2">
+                    <input type="text" value={singleName} onChange={(e) => setSingleName(e.target.value)} placeholder="输入学生姓名..." className="flex-1 px-4 py-2 rounded-xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-indigo-500 shadow-inner" />
+                    <button onClick={handleAddSingle} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all active:scale-95 flex-shrink-0 shadow-sm">添加</button>
+                  </div>
+                </div>
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col min-h-[150px] md:min-h-[250px]">
+                  <h3 className="font-black text-slate-700 text-sm mb-1 flex items-center gap-1"> 🚀  一键输入全班学生名字</h3>
+                  <p className="text-[10px] text-slate-400 font-bold mb-3">支持从 Excel 复制整列名字直接粘贴。</p>
+                  <textarea value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} placeholder="张小明&#10;李小华&#10;陈大雷" className="w-full flex-1 p-3 rounded-2xl border border-slate-200 font-bold text-sm focus:outline-none focus:border-indigo-500 shadow-inner resize-none bg-slate-50 text-slate-600 font-mono" />
+                  <button onClick={handleAddBulk} className="w-full mt-3 bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-[0.98]"> ✨  导入上方全班学生</button>
+                </div>
+              </div>
+              <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex flex-col overflow-y-auto">
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                  <h3 className="font-black text-slate-800 text-base"> 📋  全局花名册管理中心</h3>
+                  <span className="bg-indigo-50 text-indigo-700 font-black px-3 py-1 rounded-full text-xs">总人数: {globalStudents.length} 人</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pr-1 pb-6">
+                  {globalStudents.map((student, index) => (
+                    <div key={student.id} className="p-4 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col justify-between hover:bg-indigo-50/40 hover:border-indigo-200 transition-all group shadow-sm gap-3">
+                      <div className="flex justify-between items-center w-full">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <span className="text-[11px] font-black text-slate-300 font-mono">{String(index + 1).padStart(2, '0')}</span>
+                          <span className="font-black text-slate-700 text-sm truncate">{student.name}</span>
+                        </div>
+                        <button onClick={() => handleDeleteStudent(student)} className="text-slate-400 hover:text-rose-600 font-bold text-xs p-1 hover:bg-rose-50 rounded-md transition-all active:scale-90"> 🗑️  删除</button>
+                      </div>
+                      
+                      {/* 待发奖品核销 */}
+                      {student.hasOrder && student.redeemedItems && student.redeemedItems.length > 0 && (
+                        <div className="mt-1 p-2 bg-amber-50 rounded-xl border border-amber-200 shadow-inner">
+                          <p className="text-[11px] font-black text-amber-600 mb-1.5 flex items-center gap-1">
+                            🎁  收到 {student.redeemedItems.length} 项待发奖品：
+                          </p>
+                          <div className="flex flex-col gap-1.5">
+                            {student.redeemedItems.map(gift => (
+                              <div key={gift.id} className="flex justify-between items-center bg-white p-1.5 rounded-lg border border-amber-100 shadow-sm">
+                                <span className="text-xs font-bold text-slate-600 break-words flex-1 mr-2 text-left">
+                                  {gift.icon} {gift.name}
+                                </span>
+                                <button
+                                  onClick={async () => {
+                                    const remainingItems = student.redeemedItems.filter(g => g.id !== gift.id);
+                                    setGlobalStudents(prevList => prevList.map(s => s.id === student.id ? { ...s, redeemedItems: remainingItems, hasOrder: remainingItems.length > 0 } : s));
+                                    try {
+                                      await fetchGAS('updateRedeemedItems', { username: student.id, redeemedItems: remainingItems });
+                                    } catch (err) {
+                                      console.error('核销奖品失败:', err);
+                                    }
+                                  }}
+                                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1 rounded-md text-[10px] font-black shadow-sm active:scale-95 transition-all flex-shrink-0"
+                                >
+                                  当场发放
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <button
+                        onClick={() => handleToggleMyth(student.id)}
+                        className={`w-full py-1.5 rounded-xl text-[10px] font-black transition-all border ${student.mythUnlocked ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-500 hover:text-indigo-600'}`}
+                      >
+                        {student.mythUnlocked ? " 🐲  已授权解封山海神兽" : " 🔒  山海神兽处于锁闭期"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 📢   ⭐ 宠物成长设置局 */}
+          {activeTab === 'grow_config' && (
+            <div className="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col gap-4 overflow-y-auto pr-1 pb-10 animate-[fadeIn_0.15s_ease-out]">
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 className="font-black text-slate-800 text-base border-b border-slate-100 pb-2 flex items-center gap-2"> 📊  1. 等级递进经验大盘（级差总控制）</h3>
+                <p className="text-xs text-slate-400 font-bold mt-2 mb-4">修改各等级所需的累计经验分。当前完美卡在您给出的等差模型上，Lv.8代表毕业线。</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+                  {levelThresholds.slice(2).map((threshold, idx) => {
+                    const actualLevel = idx + 2;
+                    return (
+                      <div key={actualLevel} className="bg-slate-50 p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
+                        <label className="text-[10px] font-black text-slate-400">解锁 Lv.{actualLevel}</label>
+                        <input
+                          type="number"
+                          value={threshold}
+                          onChange={(e) => handleThresholdChange(actualLevel, e.target.value)}
+                          className="w-full bg-white text-indigo-600 font-black text-sm py-1.5 px-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 shadow-inner text-center"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+                <div>
+                  <h3 className="font-black text-slate-800 text-base border-b border-slate-100 pb-2 flex items-center gap-2"> 🏷️  2. 全景等级荣誉称号定制面板</h3>
+                  <p className="text-xs text-slate-400 font-bold mt-2">在这里任意自定义修改学生在各个成长阶段显示的荣誉头衔。</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {levelTitles.map((title, levelIdx) => (
+                    <div key={levelIdx} className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center gap-3 shadow-sm">
+                      <span className="text-[10px] font-black text-indigo-700 bg-indigo-50/60 border border-indigo-100 px-2 py-1 rounded-xl min-w-[65px] text-center font-mono">
+                        {levelIdx === 0 ? "新蛋期" : `Lv.${levelIdx} 称号`}
+                      </span>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => handleTitleChange(levelIdx, e.target.value)}
+                        className="flex-1 bg-white text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 shadow-inner"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex justify-end">
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetchGAS('saveLevelConfig', { thresholds: levelThresholds, titles: levelTitles });
+                      showToast(' ✅  成长配置已存入云端！');
+                    } catch (err) {
+                      console.error('保存失败:', err);
+                    }
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md active:scale-95"
+                >
+                  💾  存入云端表格
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 📢  第二板斧：商店进货商 */}
+          {activeTab === 'shop' && (
+            <div className="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 overflow-y-auto animate-[fadeIn_0.15s_ease-out]">
+              <div className="w-full md:w-[340px] bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4 h-fit">
+                <h3 className="font-black text-slate-800 text-base border-b border-slate-100 pb-2"> 🛍️  上架定制新特权</h3>
+                <div className="flex gap-2">
+                  <div className="w-16 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">图标</label>
+                    <select value={newItemIcon} onChange={(e) => setNewItemIcon(e.target.value)} className="w-full p-2 text-center border rounded-xl bg-slate-50 font-black text-sm shadow-inner"><option value=" 🎫 "> 🎫  券</option><option value=" 📸 "> 📸  影</option><option value=" 🎁 "> 🎁  盒</option><option value=" 👑 "> 👑  权</option></select>
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400">商品特权名称</label>
+                    <input type="text" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="优先换座位券..." className="w-full px-3 py-1.5 border rounded-xl text-xs font-bold bg-slate-50 focus:outline-none shadow-inner" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-400">所需毕业徽章数量 ( 🏅 )</label><div className="flex flex-col gap-1"><input type="number" min="1" value={newItemCost} onChange={(e) => setNewItemCost(e.target.value)} className="w-full px-3 py-1.5 border rounded-xl text-xs font-black bg-slate-50 shadow-inner text-amber-600" />
+                  <label className="text-[10px] font-bold text-slate-400">库存数量</label><input type="number" min="1" value={newItemStock} onChange={(e) => setNewItemStock(e.target.value)} className="w-full px-3 py-1.5 border rounded-xl text-xs font-black bg-slate-50 shadow-inner text-emerald-600" />
+                  </div>
+                </div>
+                <button onClick={handleAddItem} className="w-full bg-pink-500 hover:bg-pink-600 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] mt-2"> 🚀  批准上架发售</button>
+              </div>
+              <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex flex-col overflow-y-auto">
+                <h3 className="font-black text-slate-800 text-base mb-3 pb-2 border-b border-slate-100"> 🏪  学生端《兑换小屋》实货监控</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
+                  {globalProducts.map(item => (
+                    <div key={item.id} className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl bg-white p-2 rounded-xl border shadow-inner">{item.icon}</span>
+                        <div><p className="font-black text-slate-700 text-sm">{item.name}</p><p className="text-xs font-bold text-pink-500 mt-0.5">售价: {item.cost}  🏅  徽章</p><p className="text-xs font-bold text-emerald-600 mt-0.5">库存: {item.stock} 件</p></div>
+                      </div>
+                      <button onClick={async () => {
+                        setGlobalProducts(prev => prev.filter(p => p.id !== item.id));
+                        try {
+                          await fetchGAS('deleteProduct', { id: item.id });
+                        } catch (err) {
+                          console.error('商品删除失败:', err);
+                        }
+                      }} className="text-xs text-rose-500 bg-rose-50 px-2 py-1 rounded border border-rose-100">下架</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 📢  第三板斧：班级金科玉律 */}
+          {activeTab === 'rules' && (
+            <div className="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 overflow-y-auto animate-[fadeIn_0.15s_ease-out]">
+              <div className="w-full md:w-[340px] bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4 h-fit">
+                <h3 className="font-black text-slate-800 text-base border-b border-slate-100 pb-2"> 📜  颁布全班通用新规</h3>
+                <div className="flex gap-2">
+                  <div className="w-20 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400">奖惩方向</label>
+                    <select value={newRuleType} onChange={(e) => setNewRuleType(e.target.value)} className="w-full p-2 text-center border rounded-xl bg-slate-50 font-black text-xs shadow-inner"><option value="add"> 🟢  加分</option><option value="sub"> 🔴  扣分</option></select>
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400">校规事由条目</label>
+                    <input type="text" value={newRuleLabel} onChange={(e) => setNewRuleLabel(e.target.value)} placeholder="如: 代表班级出赛..." className="w-full px-3 py-1.5 border rounded-xl text-xs font-bold bg-slate-50 focus:outline-none" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-16 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400">图标</label>
+                    <select value={newRuleIcon} onChange={(e) => setNewRuleIcon(e.target.value)} className="w-full p-1.5 text-center border rounded-xl bg-slate-50 font-bold text-sm"><option value=" 📝 "> 📝 </option><option value=" 🙋 "> 🙋 </option><option value=" 🤝 "> 🤝 </option><option value=" 🏆 "> 🏆 </option></select>
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400">分值比重 ( 🍎  口粮)</label>
+                    <input type="number" min="1" max="10" value={newRulePoints} onChange={(e) => setNewRulePoints(e.target.value)} className="w-full px-3 py-1.5 border rounded-xl text-xs font-black bg-slate-50 text-indigo-600 shadow-inner" />
+                  </div>
+                </div>
+                <button onClick={handleAddRule} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] mt-2"> 📜  全班发布实施</button>
+              </div>
+              
+              <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex flex-col overflow-y-auto">
+                <h3 className="font-black text-slate-800 text-base mb-3 pb-2 border-b border-slate-100"> 📋  所有科任老师打分台通用规则库</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
+                  {globalRules.map(rule => (
+                    <div key={rule.id} className={`p-3 rounded-2xl border flex justify-between items-center shadow-sm transition-all ${rule.type === 'add' ? 'bg-emerald-50/40 border-emerald-100 text-emerald-950' : 'bg-rose-50/40 border-rose-100 text-rose-950'}`}>
+                      {editingRule?.id === rule.id ? (
+                        <div className="flex flex-col gap-2 w-full">
+                          <div className="flex gap-2">
+                            <select value={editingRule.type} onChange={e => {
+                              const newType = e.target.value;
+                              setEditingRule({...editingRule, type: newType, points: newType === 'add' ? Math.abs(editingRule.points) : -Math.abs(editingRule.points)});
+                            }} className="p-1.5 border rounded-xl bg-white text-xs font-black">
+                              <option value="add"> 🟢  加分</option>
+                              <option value="sub"> 🔴  扣分</option>
+                            </select>
+                            <select value={editingRule.icon} onChange={e => setEditingRule({...editingRule, icon: e.target.value})} className="p-1.5 border rounded-xl bg-white text-sm">
+                              <option value=" 📝 "> 📝 </option>
+                              <option value=" 🙋 "> 🙋 </option>
+                              <option value=" 🤝 "> 🤝 </option>
+                              <option value=" 🏆 "> 🏆 </option>
+                            </select>
+                            <input type="text" value={editingRule.label} onChange={e => setEditingRule({...editingRule, label: e.target.value})} className="flex-1 px-2 py-1.5 border rounded-xl text-xs font-bold bg-white focus:outline-none"/>
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            <span className="text-xs font-bold text-slate-500">分值：</span>
+                            <input type="number" min="1" value={Math.abs(editingRule.points)} onChange={e => {
+                              const val = Math.abs(Number(e.target.value)) || 1;
+                              setEditingRule({...editingRule, points: editingRule.type === 'add' ? val : -val});
+                            }} className="w-20 px-2 py-1.5 border border-slate-300 rounded-xl text-xs font-black bg-white focus:outline-none text-center text-slate-700 shadow-inner"/>
+                            <div className="flex gap-2 ml-auto">
+                              <button onClick={() => setEditingRule(null)} className="px-3 py-1 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">取消</button>
+                              <button onClick={async () => {
+                                const updated = {...editingRule, points: editingRule.type === 'add' ? Math.abs(editingRule.points) : -Math.abs(editingRule.points)};
+                                setGlobalRules(globalRules.map(r => r.id === updated.id ? updated : r));
+                                setEditingRule(null);
+                                try {
+                                  await fetchGAS('updateRule', { id: updated.id, type: updated.type, label: updated.label, points: updated.points, icon: updated.icon });
+                                  showToast(' ✅  规则已更新！');
+                                } catch (err) {
+                                  console.error('更新失败:', err);
+                                }
+                              }} className="px-3 py-1 bg-indigo-600 text-white rounded-xl text-xs font-bold">✅  保存</button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl bg-white p-2 rounded-xl shadow-inner">{rule.icon}</span>
+                            <div>
+                              <p className="font-black text-sm">{rule.label}</p>
+                              <p className={`text-xs font-black mt-0.5 ${rule.type === 'add' ? 'text-emerald-600' : 'text-rose-600'}`}>{rule.points > 0 ? '+' : ''}{rule.points}  🍎 </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button onClick={() => setEditingRule({...rule})} className="text-xs bg-white text-indigo-600 font-bold px-3 py-1.5 rounded-xl border shadow-sm active:scale-90">✏️  编辑</button>
+                            <button onClick={async () => {
+                              setGlobalRules(globalRules.filter(r => r.id !== rule.id));
+                              try {
+                                await fetchGAS('deleteRule', { id: rule.id });
+                              } catch (err) {
+                                console.error('删除规则失败:', err);
+                              }
+                            }} className="text-xs bg-white text-slate-500 hover:text-rose-600 font-bold px-3 py-1.5 rounded-xl border shadow-sm active:scale-90">废除</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 📢  第四板斧：科任老师授权 */}
+          {activeTab === 'teachers' && (
+            <div className="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 overflow-y-auto animate-[fadeIn_0.15s_ease-out]">
+              <div className="w-full md:w-[340px] bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col gap-4">
+                <h3 className="font-black text-slate-800 text-base border-b border-slate-100 pb-2"> 🔑  颁发科任打分权限</h3>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-400">1. 选择任教科目</label>
+                  <input type="text" value={newTeacherSubject} onChange={(e) => setNewTeacherSubject(e.target.value)} placeholder="如: 华文、数学、科学..." className="w-full p-2.5 border rounded-xl bg-slate-50 font-black text-sm shadow-inner focus:outline-none focus:border-indigo-500" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-400">2. 教师姓名/尊称</label>
+                  <input type="text" value={newTeacherName} onChange={(e) => setNewTeacherName(e.target.value)} placeholder="如: 张老师, Mr. Wong..." className="w-full px-3 py-2 border rounded-xl text-sm font-bold bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-slate-400">3. 设置独立6位白板登录密码</label>
+                  <input type="text" maxLength="6" value={newTeacherPin} onChange={(e) => setNewTeacherPin(e.target.value)} placeholder="如: 345678" className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
+                </div>
+                <button onClick={handleAddTeacher} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] mt-2"> ✨  批准并下发门禁卡</button>
+                
+                <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 flex flex-col gap-3 mt-2">
+                  <h3 className="font-black text-slate-700 text-sm border-b border-slate-200 pb-2"> 🔐  修改班主任密码</h3>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-slate-400">新的6位密码</label>
+                    <input type="password" maxLength="6" value={newAdminPin} onChange={(e) => setNewAdminPin(e.target.value)} placeholder="输入新密码..." className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-white focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
+                  </div>
+                  <button onClick={async () => {
+                    if (newAdminPin.length !== 6 || isNaN(newAdminPin)) { alert("密码必须是 6 位纯数字！"); return; }
+                    try {
+                      await fetchGAS('setAdminPassword', { newPassword: newAdminPin });
+                      showToast(' ✅  班主任密码已更新！');
+                      setAdminPassword(newAdminPin);
+                      setNewAdminPin("");
+                    } catch (err) {
+                      console.error('修改密码失败:', err);
+                    }
+                  }} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-95">
+                    🔐  更新密码
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-100 p-5 flex flex-col overflow-y-auto">
+                <h3 className="font-black text-slate-800 text-base mb-3 pb-2 border-b border-slate-100"> 👩‍🏫  班级当前科任老师名册 (卡片墙数据源)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
+                  {teachersList.length === 0 ? (
+                    <p className="col-span-full text-center text-slate-400 py-12 text-xs font-bold"> 📭  您尚未给本班级配置任何科任老师，请在左侧添加！</p>
+                  ) : (
+                    teachersList.map(t => (
+                      <div key={t.id} className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl bg-indigo-100 p-2 text-indigo-700 rounded-xl border font-mono"> 👩‍🏫 </span>
+                          <div>
+                            <p className="font-black text-slate-800 text-sm">{t.name} <span className="text-xs bg-indigo-500 text-white font-black px-1.5 py-0.5 rounded ml-1">{t.subject}</span></p>
+                            <p className="text-[11px] font-bold text-slate-400 mt-1">白板登录PIN码: <span className="font-mono text-indigo-600 font-black">******</span></p>
+                          </div>
+                        </div>
+                        <button onClick={async () => {
+                          setTeachersList(teachersList.filter(item => item.id !== t.id));
+                          try {
+                            await fetchGAS('deleteTeacher', { id: t.id });
+                          } catch (err) {
+                            console.error('删除教师失败:', err);
+                          }
+                        }} className="text-xs bg-rose-50 border border-rose-100 text-rose-600 font-bold px-2 py-1.5 rounded-xl hover:bg-rose-100">
+                          收回门禁
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {toastMsg && (
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 animate-[fadeIn_0.3s_ease-out]">
+              <div className="bg-slate-900 text-white text-xs px-5 py-3 rounded-full font-bold shadow-2xl flex items-center gap-2 border border-slate-800"><span className="text-emerald-400 text-sm"> ✓ </span> {toastMsg}</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+// 🧱 积木 7：学生数字键盘密码弹窗 (PinPadModal)
+    function PinPadModal({ studentName, onClose, onSuccess, globalStudents }) {
+      const [pinInput, setPinInput] = useState("");
+      const [error, setError] = useState(false);
+      const student = globalStudents.find(s => s.name === studentName);
+      
+      const handlePress = (num) => {
+        if (pinInput.length < 6) {
+          const newVal = pinInput + num;
+          setPinInput(newVal);
+          setError(false);
+          if (newVal.length === 6) {
+            if (newVal === student?.pin || newVal === "888888") { // 万能密码兜底
+              setTimeout(() => onSuccess(student), 200);
+            } else {
+              setTimeout(() => { setError(true); setPinInput(""); }, 300);
+            }
+          }
+        }
+      };
+
+      return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="w-full max-w-xs bg-white rounded-3xl shadow-2xl p-5 text-center transform transition-all">
+            <h3 className="font-black text-slate-800 text-lg mb-1"> 👤 {studentName}</h3>
+            <p className="text-xs text-slate-500 font-bold mb-4">请输入 6 位专属密码解锁宠物</p>
+            
+            <div className="flex justify-center gap-2 mb-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className={`w-4 h-4 rounded-full transition-all duration-300 ${i < pinInput.length ? 'bg-indigo-600 scale-110 shadow-sm' : 'bg-slate-200'} ${error ? 'bg-rose-500 animate-shake' : ''}`} />
+              ))}
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                <button key={num} onClick={() => handlePress(num)} className="h-14 rounded-2xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 text-xl font-black text-slate-700 hover:text-indigo-600 shadow-sm transition-all active:scale-90 active:bg-indigo-100">
+                  {num}
+                </button>
+              ))}
+              <div />
+              <button onClick={() => handlePress(0)} className="h-14 rounded-2xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 text-xl font-black text-slate-700 hover:text-indigo-600 shadow-sm transition-all active:scale-90 active:bg-indigo-100">0</button>
+              <button onClick={() => setPinInput(pinInput.slice(0, -1))} className="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200 text-sm font-black text-slate-600 shadow-sm transition-all active:scale-90">删除</button>
+            </div>
+            
+            <button onClick={onClose} className="w-full py-3 rounded-xl text-slate-400 hover:text-slate-600 font-bold text-sm transition-all">取消登录</button>
+          </div>
+        </div>
+      );
+    }
+
+    // 积木 8：老师/管理员专属键盘 (TeacherLoginModal)
+    function TeacherLoginModal({ title, correctPassword, onClose, onSuccess }) {
+      const [pinInput, setPinInput] = useState("");
+      const [error, setError] = useState(false);
+
+      const handlePress = (num) => {
+        if (pinInput.length < 6) {
+          const newVal = pinInput + num;
+          setPinInput(newVal);
+          setError(false);
+          if (newVal.length === 6) {
+            if (newVal === correctPassword) {
+              setTimeout(() => onSuccess(), 200);
+            } else {
+              setTimeout(() => { setError(true); setPinInput(""); }, 300);
+            }
+          }
+        }
+      };
+
+      return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-xs bg-white rounded-3xl shadow-2xl p-5 text-center">
+            <h3 className="font-black text-indigo-900 text-lg mb-1">{title}</h3>
+            <p className="text-xs text-slate-500 font-bold mb-4">请输入 6 位管理密码</p>
+            <div className="flex justify-center gap-2 mb-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className={`w-4 h-4 rounded-full transition-all ${i < pinInput.length ? 'bg-amber-500 scale-110' : 'bg-slate-200'} ${error ? 'bg-rose-500 animate-shake' : ''}`} />
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                <button key={num} onClick={() => handlePress(num)} className="h-14 rounded-2xl bg-slate-50 border border-slate-100 text-xl font-black text-slate-700 active:scale-90">{num}</button>
+              ))}
+              <div />
+              <button onClick={() => handlePress(0)} className="h-14 rounded-2xl bg-slate-50 border border-slate-100 text-xl font-black text-slate-700 active:scale-90">0</button>
+              <button onClick={() => setPinInput(pinInput.slice(0, -1))} className="h-14 rounded-2xl bg-slate-100 text-sm font-black text-slate-600 active:scale-90">删除</button>
+            </div>
+            <button onClick={onClose} className="w-full py-3 rounded-xl text-slate-400 font-bold text-sm">取消</button>
+          </div>
+        </div>
+      );
+    }
+
+    // ========================================================
+    // 🌟 全球主脑核心组件 (App) - fetchGAS 驱动版
+    // ========================================================
+    function App() {
+      // --- 全局数据池 ---
+      const [dataLoaded, setDataLoaded] = useState(false);
+      const [globalStudents, setGlobalStudents] = useState([]);
+      const [teachersList, setTeachersList] = useState([]);
+      const [globalRules, setGlobalRules] = useState([]);
+      const [globalProducts, setGlobalProducts] = useState([]);
+      const [adminPassword, setAdminPassword] = useState("");
+      
+      const [levelThresholds, setLevelThresholds] = useState(LEVEL_THRESHOLDS);
+      const [levelTitles, setLevelTitles] = useState(["新蛋期", "幼体期", "成长期", "进化期", "成熟期", "完全体", "究极体", "神圣体", "传说级"]);
+      
+      const githubUser = "lonsig84";
+      const githubRepo = "pet";
+
+      // --- 核心加载引擎 ---
+      useEffect(() => {
+        const loadAllData = async () => {
+          try {
+            console.log("🚀 开始通过 API_URL 拉取云端数据...");
+            const [students, teachers, rules, products, levelConf, adminPwd] = await Promise.all([
+              fetchGAS('getStudents'),
+              fetchGAS('getTeachers'),
+              fetchGAS('getRules'),
+              fetchGAS('getProducts'),
+              fetchGAS('getLevelConfig'),
+              fetchGAS('getAdminPassword')
+            ]);
+            
+            setGlobalStudents(students || []);
+            setTeachersList(teachers || []);
+            setGlobalRules(rules || []);
+            setGlobalProducts(products || []);
+            if (levelConf && levelConf.thresholds) {
+              setLevelThresholds(levelConf.thresholds);
+              setLevelTitles(levelConf.titles);
+            }
+            setAdminPassword(adminPwd || "888888");
+            setDataLoaded(true);
+            console.log("✅ 全局数据加载完毕！");
+          } catch (err) {
+            console.error("❌ 数据加载彻底失败，请检查 API_URL 是否正确部署：", err);
+            alert("无法连接到数据库，请刷新页面或联系 Wong 老师检查 GAS Web App URL。");
+          }
+        };
+        loadAllData();
+      }, []);
+
+      // --- 视图与互动状态 ---
+      const [currentView, setCurrentView] = useState("home"); // home | teacher | admin
+      const [currentTeacher, setCurrentTeacher] = useState(null);
+      const [activeModal, setActiveModal] = useState(null);
+      
+      const [selectedStudentForLogin, setSelectedStudentForLogin] = useState(null);
+      const [currentStudentForPet, setCurrentStudentForPet] = useState(null);
+      const [showTeacherAuth, setShowTeacherAuth] = useState(false);
+      const [showAdminAuth, setShowAdminAuth] = useState(false);
+
+      const [hearts, setHearts] = useState([]);
+      const [badMarks, setBadMarks] = useState([]);
+      const [isShaking, setIsShaking] = useState(false);
+      const [isLevelingUp, setIsLevelingUp] = useState(false);
+      const [feedPoints, setFeedPoints] = useState(0); 
+
+      // --- 核心计算函数 ---
+      const getCurrentLevel = (exp, petId) => {
+        if (!petId) return 0;
+        for (let i = levelThresholds.length - 1; i >= 1; i--) {
+          if (exp >= levelThresholds[i]) return i;
+        }
+        return 1;
+      };
+
+      // --- 宠物互动核心逻辑 ---
+      const handleFeed = async () => {
+        if (!currentStudentForPet) return;
+        const currentDB = globalStudents.find(s => s.name === currentStudentForPet.name);
+        if (!currentDB || currentDB.unfedFood <= 0) return;
+
+        soundFeed.currentTime = 0; soundFeed.play();
+        const currentLevel = getCurrentLevel(currentDB.totalExp, currentDB.petId);
+        
+        // 前端即时更新动画与数值
+        const newHearts = Array.from({ length: currentDB.unfedFood }).map((_, i) => ({
+          id: Date.now() + i,
+          emoji: HEART_EMOJIS[Math.floor(Math.random() * HEART_EMOJIS.length)],
+          left: 30 + Math.random() * 40 + '%',
+          animationDuration: 0.8 + Math.random() * 0.5 + 's'
+        }));
+        setHearts(prev => [...prev, ...newHearts]);
+        setFeedPoints(currentDB.unfedFood);
+        
+        setTimeout(() => {
+          setHearts([]);
+          setFeedPoints(0);
+        }, 1500);
+
+        const newExp = currentDB.totalExp + currentDB.unfedFood;
+        const newLevel = getCurrentLevel(newExp, currentDB.petId);
+
+        // 云端异步同步数据
+        try {
+          await fetchGAS('updateStudentStats', { 
+            username: currentDB.id, 
+            exp: newExp, 
+            unfedFood: 0 
+          });
+          
+          setGlobalStudents(prevList => prevList.map(s => 
+            s.id === currentDB.id ? { ...s, totalExp: newExp, unfedFood: 0 } : s
+          ));
+
+          // 触发升级
+          if (newLevel > currentLevel) {
+            setTimeout(() => {
+              soundLevelUp.currentTime = 0; soundLevelUp.play();
+              setIsLevelingUp(true);
+              setTimeout(() => setIsLevelingUp(false), 2000);
+            }, 800);
+          }
+
+          // 触发毕业
+          if (newLevel >= 8) {
+            setTimeout(async () => {
+              soundCheers.currentTime = 0; soundCheers.play();
+              alert(`🎉 太棒啦！【${currentDB.name}】的宠物终于长成完全体，顺利毕业啦！你获得了一枚毕业徽章 🏅 ！`);
+              
+              setGlobalStudents(gList => gList.map(s => {
+                if (s.id === currentDB.id) {
+                  return { ...s, petId: null, totalExp: 0, petHistory: [...(s.petHistory || []), currentDB.petId] };
+                }
+                return s;
+              }));
+              setCurrentStudentForPet(null);
+              
+              // 同步毕业状态到云端
+              await fetchGAS('graduatePet', { username: currentDB.id, petId: currentDB.petId });
+            }, 2000);
+          }
+        } catch (err) {
+          console.error("喂食同步失败:", err);
+        }
+      };
+
+      // 扣除历史欠分
+      const handleSettleDeductions = async () => {
+        if (!currentStudentForPet) return;
+        const currentDB = globalStudents.find(s => s.name === currentStudentForPet.name);
+        
+        try {
+          const pendingDeductions = await fetchGAS('getStudentPendingDeductions', { studentName: currentDB.name });
+          if (!pendingDeductions || pendingDeductions.length === 0) return;
+          
+          const totalDeduct = pendingDeductions.reduce((sum, item) => sum + Math.abs(item.points), 0);
+          const newExp = Math.max(0, currentDB.totalExp - totalDeduct);
+          
+          // 更新前端与云端
+          setGlobalStudents(prevList => prevList.map(s => s.id === currentDB.id ? { ...s, totalExp: newExp } : s));
+          await fetchGAS('updateStudentStats', { username: currentDB.id, exp: newExp, unfedFood: currentDB.unfedFood });
+          await fetchGAS('claimAllDeductions', { studentName: currentDB.name });
+
+          // 扣分动画
+          soundSad.currentTime = 0; soundSad.play();
+          setIsShaking(true);
+          setTimeout(() => setIsShaking(false), 400);
+          
+          const newBadMark = { id: Date.now(), points: totalDeduct };
+          setBadMarks(prev => [...prev, newBadMark]);
+          setTimeout(() => setBadMarks([]), 1200);
+
+        } catch (err) {
+          console.error('结账扣分失败:', err);
+        }
+      };
+
+      // --- 界面渲染器 ---
+      if (!dataLoaded) {
+        return (
+          <div className="w-screen h-screen flex flex-col items-center justify-center bg-slate-50">
+            <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-indigo-800 font-bold animate-pulse">正在连接班级宠物宇宙...</p>
+          </div>
+        );
+      }
+
+      if (currentView === "teacher") {
+        return <TeacherPanel onExit={() => setCurrentView("home")} subject={currentTeacher?.subject} teacherName={currentTeacher?.name} rules={globalRules} globalStudents={globalStudents} />;
+      }
+      
+      if (currentView === "admin") {
+        return <AdminPanel onExit={() => setCurrentView("home")} teachersList={teachersList} setTeachersList={setTeachersList} globalStudents={globalStudents} setGlobalStudents={setGlobalStudents} levelThresholds={levelThresholds} setLevelThresholds={setLevelThresholds} levelTitles={levelTitles} setLevelTitles={setLevelTitles} globalRules={globalRules} setGlobalRules={setGlobalRules} globalProducts={globalProducts} setGlobalProducts={setGlobalProducts} setAdminPassword={setAdminPassword} />;
+      }
+
+      // --- 默认主大厅界面 ---
+      const activeStudentObj = currentStudentForPet ? globalStudents.find(s => s.name === currentStudentForPet.name) : null;
+      const petLevel = activeStudentObj ? getCurrentLevel(activeStudentObj.totalExp, activeStudentObj.petId) : 0;
+      const currentTitle = petLevel > 0 ? (levelTitles[petLevel] || "神秘宠物") : "未领养";
+      const petImageUrl = activeStudentObj?.petId ? `https://cdn.jsdelivr.net/gh/${githubUser}/${githubRepo}/avatar/${activeStudentObj.petId}/${petLevel}.webp` : null;
+      
+      const expProgress = petLevel < 8 && petLevel > 0 
+        ? ((activeStudentObj.totalExp - levelThresholds[petLevel]) / (levelThresholds[petLevel + 1] - levelThresholds[petLevel])) * 100 
+        : 100;
+
+      return (
+        <div className="relative w-screen h-screen flex flex-col bg-slate-100 items-center justify-center overflow-hidden">
+          {/* 背景装饰 */}
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-200 rounded-full blur-[100px] opacity-60"></div>
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-200 rounded-full blur-[100px] opacity-60"></div>
+
+          {/* 顶部入口 */}
+          <div className="absolute top-4 right-4 flex gap-2 z-20">
+            <button onClick={() => setShowTeacherAuth(true)} className="bg-white/80 backdrop-blur border border-white text-indigo-700 font-bold px-3 py-1.5 rounded-full text-xs shadow-sm active:scale-95">👩‍🏫 科任登入</button>
+            <button onClick={() => setShowAdminAuth(true)} className="bg-white/80 backdrop-blur border border-white text-slate-700 font-bold px-3 py-1.5 rounded-full text-xs shadow-sm active:scale-95">👑 班主任</button>
+          </div>
+
+          {!currentStudentForPet ? (
+            // A. 未选定学生的选人名册
+            <div className="w-full max-w-4xl p-6 h-[85vh] flex flex-col z-10 animate-[fadeIn_0.3s_ease-out]">
+              <div className="text-center mb-6">
+                <h1 className="text-3xl font-black text-indigo-950 drop-shadow-sm mb-2">🐾 班级宠物园</h1>
+                <p className="text-sm text-indigo-600/80 font-bold">请点击你的名字，召唤你的专属神兽</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto pr-2 pb-20">
+                {globalStudents.map(student => (
+                  <button
+                    key={student.id} onClick={() => setSelectedStudentForLogin(student.name)}
+                    className="relative bg-white/90 backdrop-blur-md p-4 rounded-3xl border border-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col items-center gap-2 active:scale-95"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-slate-50 border-2 border-indigo-50 shadow-inner flex items-center justify-center overflow-hidden">
+                      {student.petId 
+                        ? <img src={`https://cdn.jsdelivr.net/gh/${githubUser}/${githubRepo}/avatar/${student.petId}/${getCurrentLevel(student.totalExp, student.petId)}.webp`} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform" />
+                        : <span className="text-2xl text-slate-300">🥚</span>
+                      }
+                    </div>
+                    <span className="font-black text-slate-700 text-sm">{student.name}</span>
+                    {student.unfedFood > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-md animate-bounce">
+                        +{student.unfedFood} 🍎
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // B. 选定学生后的宠物互动主界面
+            <div className="w-full max-w-md h-full flex flex-col relative z-10 animate-[fadeIn_0.3s_ease-out]">
+              {/* 顶部状态栏 */}
+              <div className="flex justify-between items-center p-5 pt-8">
+                <button onClick={() => setCurrentStudentForPet(null)} className="w-10 h-10 bg-white/80 backdrop-blur rounded-full shadow-sm flex items-center justify-center text-slate-600 font-bold active:scale-90 transition-all border border-white">
+                  ←
+                </button>
+                <div className="bg-white/80 backdrop-blur px-5 py-2 rounded-full shadow-sm border border-white flex items-center gap-2">
+                  <span className="font-black text-slate-800">{activeStudentObj.name}</span>
+                  <span className="text-xs bg-amber-100 text-amber-700 font-black px-2 py-0.5 rounded-full">
+                    {activeStudentObj.petHistory?.length || 0} 🏅
+                  </span>
+                </div>
+                <div className="w-10 h-10" />
+              </div>
+
+              {/* 宠物中心展示区 */}
+              <div className="flex-1 flex flex-col items-center justify-center mt-[-10vh] relative">
+                
+                {/* 动画层 */}
+                {hearts.map(heart => (
+                  <div key={heart.id} className="absolute text-3xl z-40 pointer-events-none drop-shadow-md" style={{ left: heart.left, bottom: '40%', animation: `floatUpBurst ${heart.animationDuration} ease-out forwards` }}>{heart.emoji}</div>
+                ))}
+                {badMarks.map(bad => (
+                  <div key={bad.id} className="absolute text-5xl z-40 pointer-events-none text-red-500 font-black drop-shadow-xl" style={{ left: '45%', top: '30%', animation: 'dropDown 1s ease-in forwards' }}>-{bad.points}</div>
+                ))}
+
+                {activeStudentObj.petId ? (
+                  <>
+                    <div className="text-center mb-6 z-20">
+                      <div className="inline-block bg-indigo-600 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-md mb-2 tracking-widest uppercase">
+                        Lv.{petLevel} · {currentTitle}
+                      </div>
+                    </div>
+
+                    <div className={`relative w-64 h-64 flex items-center justify-center z-10 ${isShaking ? 'animate-shake' : ''}`}>
+                      <div className="absolute inset-0 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+                      {isLevelingUp && <div className="absolute inset-[-20%] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] animate-spin-slow opacity-50 mix-blend-overlay"></div>}
+                      
+                      <img src={petImageUrl} className={`max-w-[85%] max-h-[85%] object-contain drop-shadow-2xl transition-all duration-500 ${isLevelingUp ? 'scale-125 brightness-110 drop-shadow-[0_0_30px_rgba(79,70,229,0.8)]' : 'hover:scale-105'} ${isShaking ? 'filter grayscale brightness-75' : ''}`} alt="pet" />
+                    </div>
+
+                    {/* 经验值进度条 */}
+                    <div className="w-64 mt-8 bg-white/50 backdrop-blur p-1.5 rounded-full shadow-inner border border-white/60">
+                      <div className="h-3 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" style={{ width: `${expProgress}%` }}>
+                        <div className="absolute inset-0 bg-white/20 w-full h-full" style={{ animation: 'shimmer 2s infinite' }}></div>
+                      </div>
+                    </div>
+                    <div className="text-[10px] font-black text-slate-400 mt-2 uppercase tracking-wider">
+                      {activeStudentObj.totalExp} / {levelThresholds[petLevel + 1]} EXP
+                    </div>
+                    
+                    {/* 喂食大按钮 */}
+                    {activeStudentObj.unfedFood > 0 ? (
+                      <button onClick={handleFeed} className="mt-8 relative group active:scale-95 transition-all">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full blur opacity-70 group-hover:opacity-100 transition duration-200 animate-pulse"></div>
+                        <div className="relative bg-white px-8 py-3 rounded-full flex items-center gap-2 border border-rose-100 shadow-xl">
+                          <span className="text-xl">🍎</span>
+                          <span className="font-black text-rose-600">喂食 (+{activeStudentObj.unfedFood})</span>
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="mt-8 px-8 py-3 rounded-full bg-slate-200/50 backdrop-blur border border-slate-300 text-slate-400 font-bold text-sm flex items-center gap-2 shadow-inner">
+                        <span>😴</span> 宠物现在很饱，上课多发言赚口粮吧~
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // C. 未领养宠物的选蛋界面
+                  <div className="text-center w-full px-6 flex flex-col items-center">
+                    <div className="w-32 h-32 bg-white rounded-full shadow-xl border-4 border-indigo-50 flex items-center justify-center mb-6 animate-bounce">
+                      <span className="text-6xl">🥚</span>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-800 mb-2">领养你的宠物蛋</h2>
+                    <p className="text-xs font-bold text-slate-500 mb-8 max-w-[200px] leading-relaxed">
+                      不同的宠物蛋会孵化出完全不同的神兽哦，凭借直觉选择一个吧！
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 w-full">
+                      {[1, 2, 3, 4].map(id => (
+                        <button
+                          key={id}
+                          onClick={async () => {
+                            if (!confirm("选定宠物后，毕业前不能更改哦！确定领养这颗蛋吗？")) return;
+                            setGlobalStudents(gList => gList.map(s => s.id === activeStudentObj.id ? { ...s, petId: id, totalExp: 0, unfedFood: 0 } : s));
+                            try {
+                              await fetchGAS('adoptPet', { username: activeStudentObj.id, petId: id });
+                            } catch (err) {
+                              console.error('领养写入失败:', err);
+                            }
+                          }}
+                          className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 hover:border-indigo-400 hover:shadow-md transition-all active:scale-95 flex flex-col items-center"
+                        >
+                          <img src={`https://cdn.jsdelivr.net/gh/${githubUser}/${githubRepo}/avatar/${id}/0.webp`} className="w-12 h-12 object-contain opacity-80" />
+                          <span className="text-[10px] font-black text-slate-400 mt-2">点击领养</span>
+                        </button>
+                      ))}
+                    </div>
+                    {activeStudentObj.mythUnlocked && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm("隐藏的传说神兽！确定领养吗？")) return;
+                          setGlobalStudents(gList => gList.map(s => s.id === activeStudentObj.id ? { ...s, petId: 5, totalExp: 0, unfedFood: 0, mythUnlocked: false } : s));
+                          try {
+                            await fetchGAS('adoptPet', { username: activeStudentObj.id, petId: 5 });
+                            await fetchGAS('updateMythUnlocked', { username: activeStudentObj.id, value: false });
+                          } catch (err) { console.error('神兽领养失败:', err); }
+                        }}
+                        className="mt-6 w-full bg-gradient-to-r from-purple-600 to-indigo-600 p-4 rounded-3xl shadow-lg border border-purple-400 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 group"
+                      >
+                        <img src={`https://cdn.jsdelivr.net/gh/${githubUser}/${githubRepo}/avatar/5/0.webp`} className="w-10 h-10 object-contain drop-shadow-md group-hover:rotate-12 transition-transform" />
+                        <span className="font-black text-white text-sm tracking-widest drop-shadow-sm">✨ 领养隐藏山海神兽 ✨</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 渲染各种弹窗 */}
+          {currentStudentForPet && <BottomNav onOpenModal={setActiveModal} />}
+
+          {activeModal === 'leaderboard' && <LeaderboardModal onClose={() => setActiveModal(null)} globalStudents={globalStudents} currentStudentName={currentStudentForPet?.name} levelThresholds={levelThresholds} githubUser={githubUser} githubRepo={githubRepo} />}
+          {activeModal === 'history' && <HistoryModal onClose={() => setActiveModal(null)} studentName={currentStudentForPet?.name} />}
+          {activeModal === 'memorial' && <MemorialModal onClose={() => setActiveModal(null)} petHistory={activeStudentObj?.petHistory || []} githubUser={githubUser} githubRepo={githubRepo} />}
+          {activeModal === 'shop' && (
+            <ShopModal 
+              onClose={() => setActiveModal(null)} 
+              badges={activeStudentObj?.petHistory?.length || 0} 
+              globalProducts={globalProducts} setGlobalProducts={setGlobalProducts}
+              onExchangeItem={async (item) => {
+                const currentBadges = activeStudentObj?.petHistory?.length || 0;
+                if (currentBadges < item.cost) { alert("徽章不足哦！"); return; }
+                const newBadges = currentBadges - item.cost;
+                const newHistory = activeStudentObj.petHistory.slice(0, newBadges);
+                const updatedRedeemed = [...(activeStudentObj.redeemedItems || []), item];
+                
+                setGlobalStudents(prevList => prevList.map(s => 
+                  s.id === activeStudentObj.id ? { ...s, petHistory: newHistory, redeemedItems: updatedRedeemed, hasOrder: true } : s
+                ));
+                alert(`🎉 兑换成功！你获得了 ${item.name}！老师会在后台看到你的订单，准备发货啦！`);
+                
+                try {
+                  await fetchGAS('exchangeItem', { username: activeStudentObj.id, cost: item.cost, redeemedItems: updatedRedeemed });
+                } catch (err) { console.error('兑换云端同步失败:', err); }
+              }} 
+            />
+          )}
+
+          {/* 密码验证与后台入口 */}
+          {selectedStudentForLogin && (
+            <PinPadModal
+              studentName={selectedStudentForLogin}
+              globalStudents={globalStudents}
+              onClose={() => setSelectedStudentForLogin(null)}
+              onSuccess={async (studentDB) => {
+                setCurrentStudentForPet(studentDB);
+                setSelectedStudentForLogin(null);
+                
+                // 登录成功后，静默拉取未领取的加分与扣分
+                try {
+                  // 拉取加分（转换为食物）
+                  const additions = await fetchGAS('getStudentPendingAdditions', { studentName: studentDB.name });
+                  if (additions && additions.length > 0) {
+                    const totalAdd = additions.reduce((sum, item) => sum + item.points, 0);
+                    const newFood = studentDB.unfedFood + totalAdd;
+                    setGlobalStudents(prevList => prevList.map(s => s.id === studentDB.id ? { ...s, unfedFood: newFood } : s));
+                    
+                    soundClaim.currentTime = 0; soundClaim.play();
+                    await fetchGAS('claimAllAdditions', { studentName: studentDB.name });
+                  }
+                  
+                  // 处理扣分（直接在组件内调用已写好的函数）
+                  handleSettleDeductions();
+                } catch (err) {
+                  console.error('拉取待处理分数失败:', err);
+                }
+              }}
+            />
+          )}
+
+          {showTeacherAuth && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+              <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+                <div className="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
+                  <h3 className="font-black text-indigo-900">👩‍🏫 科任登录</h3>
+                  <button onClick={() => setShowTeacherAuth(false)} className="text-indigo-400 hover:text-indigo-700 font-bold active:scale-90">&times;</button>
+                </div>
+                <div className="p-4 flex flex-col gap-2 max-h-80 overflow-y-auto">
+                  {teachersList.length === 0 ? (
+                    <p className="text-center text-sm text-slate-400 py-6">班主任还未添加任何科任老师哦！</p>
+                  ) : (
+                    teachersList.map(teacher => (
+                      <button key={teacher.id} onClick={() => setCurrentTeacher(teacher)} className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${currentTeacher?.id === teacher.id ? 'bg-indigo-500 text-white border-indigo-600 shadow-md' : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-indigo-300'}`}>
+                        <span className="font-bold">{teacher.name}</span>
+                        <span className={`text-xs font-black px-2 py-1 rounded-full ${currentTeacher?.id === teacher.id ? 'bg-indigo-400 text-white' : 'bg-indigo-100 text-indigo-600'}`}>{teacher.subject}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+                {currentTeacher && (
+                  <div className="p-4 bg-slate-50 border-t border-slate-100">
+                    <TeacherLoginModal title={`欢迎, ${currentTeacher.name}`} correctPassword={currentTeacher.pin} onClose={() => { setCurrentTeacher(null); setShowTeacherAuth(false); }} onSuccess={() => { setCurrentView("teacher"); setShowTeacherAuth(false); }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {showAdminAuth && <TeacherLoginModal title="班主任超级后台" correctPassword={adminPassword} onClose={() => setShowAdminAuth(false)} onSuccess={() => { setCurrentView("admin"); setShowAdminAuth(false); }} />}
+        </div>
+      );
+    }
+
+    // 🚀 最终渲染挂载点
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
