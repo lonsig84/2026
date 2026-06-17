@@ -1942,8 +1942,9 @@
                 if (deductions && deductions.length > 0) {
                   const totalDeduct = deductions.reduce((sum, d) => sum + Math.abs(d.points), 0);
                   setStudent(prev => {
-                    const minExp = levelThresholds[getCurrentLevel(prev.totalExp)];
-                    const newExp = Math.max(minExp, prev.totalExp - totalDeduct);
+                    // 🌟 核心修改：移除了最低等级保护，直接用现有经验减去扣除的经验，并限制最低为 0
+                    const newExp = Math.max(0, prev.totalExp - totalDeduct);
+                    
                     fetchGAS('updateStudentStats', { username: currentDB.id, totalExp: newExp, unfedFood: prev.unfedFood });
                     setGlobalStudents(gList => gList.map(s => s.name === prev.name ? { ...s, totalExp: newExp } : s));
                     return { ...prev, totalExp: newExp };
