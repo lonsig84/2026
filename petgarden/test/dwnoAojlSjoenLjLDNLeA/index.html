@@ -1733,24 +1733,56 @@
         await fetchGAS('updateStudentBadges', { username: student.id, badges: nextBadgeCount });
       };
 
+//  🛍️  极其安全的独立兑换扣款函数（彻底修复云端同步 Bug）
       const handleExchangeInApp = async (item) => {
-        if (student.badges < item.cost) { alert(` ❌ 你的大奖章余额不足！兑换需要 ${item.cost} 枚徽章。`); return; }
+        // 1. 检查余额
+        if (student.badges < item.cost) { 
+          alert(` ❌ 你的大奖章余额不足！兑换需要 ${item.cost} 枚徽章。`); 
+          return; 
+        }
+        
         const nextBadgeCount = student.badges - item.cost;
+        
+        // 2. 立刻扣除右下角个人卡片的徽章显示
         setStudent(prev => ({ ...prev, badges: nextBadgeCount }));
-        await fetchGAS('updateStudentBadges', { username: student.id, badges: nextBadgeCount });
 
-        let updatedRedeemed = [];
+        // 🌟 核心修复 1：先在外面精确计算出加入新礼物后的“购物车”数组！
+        const studentInGlobal = globalStudents.find(s => s.name === student.name);
+        const currentItems = studentInGlobal?.redeemedItems || [];
+        
+        const newGift = { 
+          id: 'gift_' + Date.now() + Math.floor(Math.random() * 1000), 
+          name: item.name, 
+          icon: item.icon 
+        };
+        
+        const updatedRedeemed = [...currentItems, newGift];
+
+        // 🌟 核心修复 2：把算好的真实数组，交给大厅状态渲染
         setGlobalStudents(prevList => prevList.map(s => {
           if (s.name === student.name) {
-            const currentItems = s.redeemedItems || [];
-            updatedRedeemed = [...currentItems, { id: 'gift_' + Date.now() + Math.random(), name: item.name, icon: item.icon }];
-            return { ...s, badges: nextBadgeCount, hasOrder: true, redeemedItems: updatedRedeemed };
+            return { 
+              ...s, 
+              badges: nextBadgeCount, 
+              hasOrder: true, 
+              redeemedItems: updatedRedeemed 
+            };
           }
           return s;
         }));
-        await fetchGAS('updateRedeemedItems', { username: student.id, redeemedItems: updatedRedeemed });
+        
+        // 3. 关闭普通商店，展示金色大奖卡牌
         setActiveModal(null);
         setActiveGift(item);
+
+        // 🌟 核心修复 3：把算好的真实数组，精准发送给 Google Sheets 后台！
+        try {
+          await fetchGAS('updateStudentBadges', { username: student.id, badges: nextBadgeCount });
+          await fetchGAS('updateRedeemedItems', { username: student.id, redeemedItems: updatedRedeemed });
+          console.log("✅ 兑换记录已成功同步到云端表单！");
+        } catch (err) { 
+          console.error('兑换云端同步失败:', err); 
+        }
       };
 
       if (!dataLoaded) {
