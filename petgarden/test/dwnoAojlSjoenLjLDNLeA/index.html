@@ -264,8 +264,10 @@
       );
     }
 
-    // 积木 4：兑换小屋弹窗 (ShopModal) - 🚀 核心改造：商品库存更新走 fetchGAS
+// 积木 4：兑换小屋弹窗 (ShopModal) - 🚀 增加防连点保护锁
     function ShopModal({ onClose, badges, onExchangeItem, globalProducts, setGlobalProducts }) {
+      const [processingId, setProcessingId] = useState(null); // ★ 新加：记录正在处理的商品ID，作为智能锁
+
       return (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
@@ -290,27 +292,40 @@
                       </div>
                     </div>
                     <button
-                      disabled={badges < item.cost || item.stock <= 0}
+                      // 🌟 核心拦截 1：如果有正在处理的订单 (processingId 不为空)，直接让所有按钮变成灰色不可按
+                      disabled={badges < item.cost || item.stock <= 0 || processingId !== null}
                       onClick={async () => {
+                        if (processingId !== null) return; // 🌟 核心拦截 2：双重保险，拒绝多余点击
+                        setProcessingId(item.id); // 🌟 立刻上锁：告诉系统正在处理这个商品
+
                         const newStock = item.stock - 1;
-                        // 先更新前端状态，保证体验流畅
+                        // 先更新前端视觉库存
                         setGlobalProducts(prev => prev.map(p => p.id === item.id ? { ...p, stock: newStock } : p));
                         
-                        // 后台异步扣除库存
                         try {
+                          // 后台异步扣除库存
                           await fetchGAS('updateProductStock', { id: item.id, newStock });
+                          // 触发大厅的扣款和发货逻辑
+                          await onExchangeItem(item); 
                         } catch(err) {
-                          console.error('更新商品库存失败:', err);
+                          console.error('商品兑换同步出错:', err);
+                        } finally {
+                          // 🌟 解锁：如果大厅没关掉这个弹窗（比如出错了），就把锁解开
+                          setProcessingId(null); 
                         }
-                        onExchangeItem(item);
                       }}
                       className={`font-bold py-2 px-4 rounded-xl shadow-md transition-all active:scale-95 ${
-                        badges >= item.cost && item.stock > 0
+                        badges >= item.cost && item.stock > 0 && processingId === null
                           ? 'bg-pink-500 hover:bg-pink-600 text-white'
                           : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                       }`}
                     >
-                      {item.stock <= 0 ? '已售完' : `${item.cost} 🏅 `}
+                      {/* 🌟 核心拦截 3：智能提示按钮状态 */}
+                      {processingId === item.id 
+                        ? '打包中...' 
+                        : item.stock <= 0 
+                          ? '已售完' 
+                          : `${item.cost} 🏅 `}
                     </button>
                   </div>
                 ))
