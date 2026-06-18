@@ -21,10 +21,9 @@
             /* 魔法变色背景设定 */
             background: linear-gradient(45deg, #FFE5F1, #E0F7FA, #FFF9C4, #E8F5E9);
             background-size: 400% 400%;
-            animation: gradientBG 12s ease infinite; /* 12秒完成一次颜色循环 */
+            animation: gradientBG 12s ease infinite; 
         }
 
-        /* 控制背景变色的动画关键帧 */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -32,7 +31,7 @@
         }
 
         #quiz-container {
-            background-color: rgba(255, 255, 255, 0.95); /* 稍微变半透明一点，透出后面的彩虹色 */
+            background-color: rgba(255, 255, 255, 0.95); 
             border-radius: 25px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             padding: 20px;
@@ -46,7 +45,8 @@
             flex-direction: column;
         }
 
-        #student-info-screen, #result-screen {
+        /* 新增：已完成拦截页面的样式 */
+        #already-done-screen, #student-info-screen, #result-screen {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -85,7 +85,6 @@
             margin-bottom: 10px;
         }
 
-        /* 选项按钮基础形态 */
         .option-btn {
             width: 100%;
             padding: 15px 5px; 
@@ -105,25 +104,15 @@
         .option-btn:active {
             transform: translateY(6px); 
         }
-
-        /* 🔥 分配四种不同的专属颜色 🔥 */
         
-        /* 选项1: 西瓜红 */
         .option-btn:nth-child(1) { background-color: #FF6B6B; box-shadow: 0 6px 0 #C0392B; }
         .option-btn:nth-child(1):active { box-shadow: 0 0px 0 #C0392B; }
-
-        /* 选项2: 晴空蓝 */
         .option-btn:nth-child(2) { background-color: #4DABF7; box-shadow: 0 6px 0 #228BE6; }
         .option-btn:nth-child(2):active { box-shadow: 0 0px 0 #228BE6; }
-        
-        /* 选项3: 草地绿 */
         .option-btn:nth-child(3) { background-color: #51CF66; box-shadow: 0 6px 0 #2B8A3E; }
         .option-btn:nth-child(3):active { box-shadow: 0 0px 0 #2B8A3E; }
-
-        /* 选项4: 活力橙 */
         .option-btn:nth-child(4) { background-color: #FF922B; box-shadow: 0 6px 0 #D9480F; }
         .option-btn:nth-child(4):active { box-shadow: 0 0px 0 #D9480F; }
-
 
         input[type="text"] {
             width: 90%;
@@ -152,6 +141,13 @@
     <audio id="sound-cheer" src="你的欢呼音效链接.mp3"></audio>
 
     <div id="quiz-container">
+        
+        <div id="already-done-screen" class="hidden">
+            <h1 style="color: #FF6B6B; font-size: 40px;">🛑 哎呀！</h1>
+            <h2 style="color: #2C3E50; font-size: 26px;">你已经完成过挑战啦！</h2>
+            <p style="font-size: 20px; color: #888;">把机会让给其他小朋友吧~</p>
+        </div>
+
         <div id="student-info-screen">
             <h1 style="color: #FF6B6B; font-size: 36px;">欢迎来到科学大挑战！🚀</h1>
             <input type="text" id="student-name" placeholder="请输入你的名字 (英文/拼音)" required>
@@ -175,7 +171,6 @@
     </div>
 
     <script>
-        // ======= 1. 题库设置 =======
         const originalQuestions = [
             { question: "图中的孩子是应用哪项官能进行观察？", image_url: "./03.png", options: ["嗅觉", "听觉", "触觉", "味觉"], answer: "味觉" },
             { question: "图中物品的味道是什么？", image_url: "./04.png", options: ["甜", "酸", "咸", "苦"], answer: "咸" },
@@ -199,14 +194,20 @@
             { question: "哪两个感觉器官可以确认物体的形状？", image_url: "", options: ["舌头和鼻子", "耳朵和眼睛", "眼睛和皮肤", "鼻子和皮肤"], answer: "眼睛和皮肤" }
         ];
 
-        // ======= 2. 核心逻辑 =======
         let questions = [];
         let currentQuestionIndex = 0;
         let score = 0;
         let studentData = {};
 
-        // 这是你专属的 Google Apps Script 网址
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwpC4b8Ksp0jSOMQBH4gk0s_fB9UyNby_avoJZuuHhttUpcASacafdbrRpAg1ZUZCXy/exec";
+
+        // 【新增逻辑】网页一加载，就检查浏览器里有没有“已完成印章”
+        window.onload = function() {
+            if(localStorage.getItem('kuiz_completed') === 'true') {
+                document.getElementById('student-info-screen').classList.add('hidden');
+                document.getElementById('already-done-screen').classList.remove('hidden');
+            }
+        };
 
         function shuffleArray(array) {
             let shuffled = [...array];
@@ -266,10 +267,7 @@
         function checkAnswer(selected, correct) {
             if(selected === correct) {
                 score += 1;
-                // document.getElementById('sound-correct').play(); 
                 triggerMiniConfetti(); 
-            } else {
-                // document.getElementById('sound-wrong').play(); 
             }
 
             currentQuestionIndex++;
@@ -289,7 +287,8 @@
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('score-display').innerText = `${score} / ${questions.length}`;
             
-            // document.getElementById('sound-cheer').play(); 
+            // 【新增逻辑】答题结束后，给浏览器盖上“已完成印章”
+            localStorage.setItem('kuiz_completed', 'true');
             
             var duration = 3000;
             var end = Date.now() + duration;
