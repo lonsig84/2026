@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>植物的部分连一连 🌟</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* 基础样式与马卡龙渐变背景 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 严禁滚动条 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffebf0 0%, #e6f3ff 50%, #e8f7ed 100%);
+            position: relative;
+        }
+
+        /* 背景漂浮的马卡龙气泡图案 */
+        .bg-bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: float 6s ease-in-out infinite alternate;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        /* 游戏三大主界面容器 */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 2vh;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        /* 统一卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 4vh;
+            box-shadow: 0 12px 32px rgba(150, 150, 150, 0.15);
+            text-align: center;
+            border: 4px solid #fff;
+            max-width: 90%;
+            width: 450px;
+        }
+
+        /* 1. 登录页样式 */
+        h1 { color: #ff7597; font-size: 3.5vh; margin-bottom: 3vh; text-shadow: 1px 1px 2px #fff; }
+        input {
+            width: 100%;
+            padding: 1.5vh 2vh;
+            font-size: 2.2vh;
+            border: 3px solid #bce2ff;
+            border-radius: 16px;
+            outline: none;
+            text-align: center;
+            color: #555;
+            margin-bottom: 3vh;
+            background: #fcfdfe;
+        }
+        input:focus { border-color: #ffb3c6; }
+        .btn {
+            background: linear-gradient(135deg, #ff9ebb, #ff7597);
+            color: white;
+            border: none;
+            padding: 1.5vh 4vh;
+            font-size: 2.2vh;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(255, 117, 151, 0.3);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* 2. 游戏主界面布局 */
+        #game-screen {
+            justify-content: space-between;
+            position: relative;
+        }
+        .game-header {
+            width: 100%;
+            height: 6vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2vh;
+            font-weight: bold;
+            color: #5d6d7e;
+            background: rgba(255,255,255,0.6);
+            border-radius: 12px;
+            z-index: 15;
+        }
+        .game-container {
+            width: 100%;
+            height: 76vh;
+            display: flex;
+            position: relative;
+            z-index: 12;
+            margin: 1vh 0;
+        }
+        /* 左侧题目，右侧选项 */
+        .column-left, .column-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            height: 100%;
+        }
+        /* 题目图片容器 */
+        .q-item {
+            width: 85%;
+            height: 16vh;
+            background: white;
+            border: 3px solid #e1f0fa;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+        }
+        .q-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        /* 选项Item */
+        .a-item {
+            width: 70%;
+            height: 7vh;
+            background: #fff;
+            border: 3px solid #ffe3eb;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5vh;
+            font-weight: bold;
+            color: #616a6b;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+        }
+        /* 连线连结点 */
+        .dot {
+            width: 18px;
+            height: 18px;
+            background-color: #ff9ebb;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 20;
+        }
+        .left-dot { right: -9px; }
+        .right-dot { left: -9px; background-color: #76d7c4; }
+
+        /* 画布层：严密覆盖游戏区域 */
+        #line-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 11;
+            pointer-events: none;
+        }
+        .game-footer {
+            width: 100%;
+            height: 8vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+        }
+
+        /* 3. 结果页与荣誉证书样式 */
+        #result-screen .card { width: 500px; max-width: 95%; background: #fff; padding: 3vh;}
+        .score-box { font-size: 4vh; font-weight: bold; color: #ff527b; margin: 1vh 0; }
+        
+        .certificate-wrapper {
+            background: linear-gradient(135deg, #fff9e6 0%, #fffbf2 100%);
+            border: 10px double #f1c40f;
+            border-radius: 16px;
+            padding: 3vh;
+            margin: 2vh 0;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(241, 196, 15, 0.2);
+        }
+        .cert-title { font-size: 3vh; color: #b7950b; font-weight: bold; margin-bottom: 1.5vh; letter-spacing: 2px;}
+        .cert-text { font-size: 2vh; color: #5d6d7e; line-height: 1.8; margin-bottom: 1.5vh; text-align: left; padding: 0 10px;}
+        .cert-name { color: #e67e22; font-weight: bold; border-bottom: 2px solid #e67e22; padding: 0 5px; font-size: 2.4vh;}
+        .cert-score { color: #dc7633; font-weight: bold; font-size: 2.2vh; }
+        .cert-footer { display: flex; justify-content: space-between; font-size: 1.6vh; color: #7f8c8d; margin-top: 2vh; border-top: 1px dashed #ddd; padding-top: 1vh;}
+
+        .btn-group { display: flex; gap: 15px; justify-content: center; }
+        .btn-secondary { background: linear-gradient(135deg, #76d7c4, #48c9b0); box-shadow: 0 6px 12px rgba(72, 201, 176, 0.3);}
+    </style>
+</head>
+<body>
+
+    <div class="bg-bubbles" id="bubbles-container"></div>
+
+    <div class="screen" id="login-screen">
+        <div class="card">
+            <h1>植物的部分 连一连 🍃</h1>
+            <input type="text" id="username" placeholder="小朋友，请输入你的名字" maxlength="10" autocomplete="off">
+            <button class="btn" id="start-btn">开始挑战 🚀</button>
+        </div>
+    </div>
+
+    <div class="screen hidden" id="game-screen">
+        <div class="game-header">
+            🌟 观察图片中的 X，把它们连到正确的名称上吧！
+        </div>
+
+        <div class="game-container" id="game-container">
+            <canvas id="line-canvas"></canvas>
+
+            <div class="column-left">
+                <div class="q-item" id="q1">
+                    <img src="q1.png" alt="第一题">
+                    <div class="dot left-dot" data-id="q1"></div>
+                </div>
+                <div class="q-item" id="q2">
+                    <img src="q2.png" alt="第二题">
+                    <div class="dot left-dot" data-id="q2"></div>
+                </div>
+                <div class="q-item" id="q3">
+                    <img src="q3.png" alt="第三题">
+                    <div class="dot left-dot" data-id="q3"></div>
+                </div>
+                <div class="q-item" id="q4">
+                    <img src="q4.png" alt="第四题">
+                    <div class="dot left-dot" data-id="q4"></div>
+                </div>
+            </div>
+
+            <div class="column-right" id="column-right">
+                <div class="a-item" id="a-gen">根<div class="dot right-dot" data-id="a-gen"></div></div>
+                <div class="a-item" id="a-ye">叶子<div class="dot right-dot" data-id="a-ye"></div></div>
+                <div class="a-item" id="a-hua">花<div class="dot right-dot" data-id="a-hua"></div></div>
+                <div class="a-item" id="a-jing">茎<div class="dot right-dot" data-id="a-jing"></div></div>
+            </div>
+        </div>
+
+        <div class="game-footer">
+            <button class="btn" id="submit-btn">交卷给老师 📝</button>
+        </div>
+    </div>
+
+    <div class="screen hidden" id="result-screen">
+        <div class="card">
+            <h1>挑战结果 🏁</h1>
+            <div class="score-box" id="score-display">0 / 4 分</div>
+            
+            <div class="certificate-wrapper" id="certificate">
+                <div class="cert-title">🌟 荣誉证书 🌟</div>
+                <div class="cert-text">
+                    聪明的 <span class="cert-name" id="cert-user">小朋友</span>：<br>
+                    你在今天的“植物的部分连一连”科学小游戏中表现优异，最终获得了 <span class="cert-score" id="cert-score-text">4/4全对</span> 的优异成绩！特发此证，以资鼓励！🏆
+                </div>
+                <div class="cert-footer">
+                    <span>认证单位: 科学小课堂</span>
+                    <span id="cert-date">2026年06月20日</span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="download-btn">💾 下载奖状图片</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 基础配置
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwT-BsJ4-aG1wqVUYulrAY7cQ5LuV9PunStvdUvrV95IQ4AU8PMRgoXiAfMzXZFpek7/exec"; 
+
+        // 正确答案映射
+        const CORRECT_ANSWERS = {
+            'q1': 'a-gen',  // 大树 -> 根
+            'q2': 'a-ye',   // 仙人掌 -> 叶子
+            'q3': 'a-hua',  // 荷花 -> 花
+            'q4': 'a-jing'  // 竹子 -> 茎
+        };
+
+        const BUBBLE_COLORS = ['#ffb3c6', '#bce2ff', '#c2f0c2', '#fef5d1', '#e8d7ff'];
+        const LINE_COLORS = ['#ff7597', '#3498db', '#2ecc71', '#9b59b6'];
+
+        let studentName = "";
+        let currentConnections = {}; 
+        let activeDot = null;        
+
+        const loginScreen = document.getElementById('login-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const canvas = document.getElementById('line-canvas');
+        const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('game-container');
+        const columnRight = document.getElementById('column-right');
+
+        // 2. 初始化防刷新锁、动态背景以及【选项打乱】
+        window.addEventListener('load', () => {
+            // 🎈 执行洗牌算法，打乱右边选项的DOM结构
+            shuffleOptions();
+
+            // 渲染背景气泡
+            const container = document.getElementById('bubbles-container');
+            for(let i=0; i<15; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 60 + 40;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.backgroundColor = BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)];
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.top = `${Math.random() * 100}%`;
+                bubble.style.animationDelay = `${Math.random() * 4}s`;
+                bubble.style.animationDuration = `${Math.random() * 4 + 4}s`;
+                container.appendChild(bubble);
+            }
+
+            // 防刷新安全锁
+            //if(localStorage.getItem('plant_game_submitted') === 'true') {
+            //    studentName = localStorage.getItem('plant_game_user') || "小朋友";
+            //    const lastScore = localStorage.getItem('plant_game_score') || "0";
+            //    showResult(parseInt(lastScore), true);
+            //}
+            
+            resizeCanvas();
+            bindDotEvents(); // 绑定按钮触摸事件
+        }); 
+
+        // 核心洗牌函数：打乱右侧选项DOM
+        function shuffleOptions() {
+            const items = Array.from(columnRight.children);
+            // 经典洗牌算法
+            for (let i = items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                columnRight.appendChild(items[j]); // 重新追加来改变视觉与布局顺序
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        function resizeCanvas() {
+            canvas.width = gameContainer.clientWidth;
+            canvas.height = gameContainer.clientHeight;
+            drawAllLines();
+        }
+
+        // 3. 登录逻辑
+        document.getElementById('start-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('username').value.trim();
+            if(!nameInput) {
+                alert("👦👧 小朋友，请输入名字再开始哦！");
+                return;
+            }
+            studentName = nameInput;
+            loginScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            // 切页后重新校准画布及圆点坐标，完美契合打乱后的新排布
+            setTimeout(resizeCanvas, 100); 
+        });
+
+        // 4. 多端连线拖拽算法
+        function bindDotEvents() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach(dot => {
+                dot.addEventListener('mousedown', handleStart);
+                dot.addEventListener('touchstart', handleStart, { passive: false });
+            });
+        }
+
+        function handleStart(e) {
+            e.preventDefault();
+            const dot = e.target;
+            const isLeft = dot.classList.contains('left-dot');
+            const id = dot.getAttribute('data-id');
+
+            if(isLeft && currentConnections[id]) {
+                delete currentConnections[id];
+                drawAllLines();
+            }
+            
+            activeDot = {
+                element: dot,
+                id: id,
+                isLeft: isLeft,
+                startX: dot.getBoundingClientRect().left + dot.offsetWidth/2 - gameContainer.getBoundingClientRect().left,
+                startY: dot.getBoundingClientRect().top + dot.offsetHeight/2 - gameContainer.getBoundingClientRect().top,
+                currentX: 0,
+                currentY: 0
+            };
+
+            window.addEventListener('mousemove', handleMove);
+            window.addEventListener('touchmove', handleMove, { passive: false });
+            window.addEventListener('mouseup', handleEnd);
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        function handleMove(e) {
+            if(!activeDot) return;
+            e.preventDefault();
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            activeDot.currentX = clientX - gameContainer.getBoundingClientRect().left;
+            activeDot.currentY = clientY - gameContainer.getBoundingClientRect().top;
+            
+            drawAllLines();
+            ctx.beginPath();
+            ctx.moveTo(activeDot.startX, activeDot.startY);
+            ctx.lineTo(activeDot.currentX, activeDot.currentY);
+            ctx.strokeStyle = '#aaaaaa';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.setLineDash([6, 6]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function handleEnd(e) {
+            window.removeEventListener('mousemove', handleMove);
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('mouseup', handleEnd);
+            window.removeEventListener('touchend', handleEnd);
+
+            if(!activeDot) return;
+
+            const change = e.changedTouches ? e.changedTouches[0] : e;
+            const targetEl = document.elementFromPoint(change.clientX, change.clientY);
+
+            if(targetEl && targetEl.classList.contains('dot')) {
+                const targetIsLeft = targetEl.classList.contains('left-dot');
+                const targetId = targetEl.getAttribute('data-id');
+
+                if(activeDot.isLeft !== targetIsLeft) {
+                    const leftId = activeDot.isLeft ? activeDot.id : targetId;
+                    const rightId = activeDot.isLeft ? targetId : activeDot.id;
+                    currentConnections[leftId] = rightId;
+                }
+            }
+
+            activeDot = null;
+            drawAllLines();
+        }
+
+        function drawAllLines() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let colorIdx = 0;
+
+            for(let leftId in currentConnections) {
+                const rightId = currentConnections[leftId];
+                const leftDotEl = document.querySelector(`.left-dot[data-id="${leftId}"]`);
+                const rightDotEl = document.querySelector(`.right-dot[data-id="${rightId}"]`);
+
+                if(leftDotEl && rightDotEl) {
+                    const x1 = leftDotEl.getBoundingClientRect().left + leftDotEl.offsetWidth/2 - gameContainer.getBoundingClientRect().left;
+                    const y1 = leftDotEl.getBoundingClientRect().top + leftDotEl.offsetHeight/2 - gameContainer.getBoundingClientRect().top;
+                    const x2 = rightDotEl.getBoundingClientRect().left + rightDotEl.offsetWidth/2 - gameContainer.getBoundingClientRect().left;
+                    const y2 = rightDotEl.getBoundingClientRect().top + rightDotEl.offsetHeight/2 - gameContainer.getBoundingClientRect().top;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.strokeStyle = LINE_COLORS[colorIdx % LINE_COLORS.length];
+                    ctx.lineWidth = 5;
+                    ctx.lineCap = 'round';
+                    ctx.stroke();
+                    colorIdx++;
+                }
+            }
+        }
+
+        // 5. 纯前端音频合成
+        function playSound(isPerfect) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioCtx = new AudioContext();
+                if (isPerfect) {
+                    playTone(audioCtx, 523.25, 0.1, 0);     
+                    playTone(audioCtx, 659.25, 0.15, 0.12); 
+                } else {
+                    playTone(audioCtx, 349.23, 0.15, 0);    
+                    playTone(audioCtx, 293.66, 0.25, 0.15); 
+                }
+            } catch(e) { console.log("音频播放暂不受支持"); }
+        }
+        function playTone(ctx, freq, duration, delay) {
+            setTimeout(() => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            }, delay * 1000);
+        }
+
+        // 6. 提交计算分数与数据上报
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const totalLines = Object.keys(currentConnections).length;
+            if(totalLines < 4) {
+                alert("📝 小朋友，还有题目没有连上线哦，再检查一下吧！");
+                return;
+            }
+
+            let score = 0;
+            for(let leftId in CORRECT_ANSWERS) {
+                if(currentConnections[leftId] === CORRECT_ANSWERS[leftId]) {
+                    score++;
+                }
+            }
+
+            localStorage.setItem('plant_game_submitted', 'true');
+            localStorage.setItem('plant_game_user', studentName);
+            localStorage.setItem('plant_game_score', score.toString());
+
+            playSound(score === 4);
+            uploadToGoogleSheet(studentName, score);
+            showResult(score, false);
+        });
+
+        function showResult(score, isRepeatUser) {
+            gameScreen.classList.add('hidden');
+            loginScreen.classList.add('hidden');
+            resultScreen.removeProperty ? resultScreen.removeAttribute('style') : null;
+            resultScreen.classList.remove('hidden');
+
+            document.getElementById('score-display').innerText = `${score} / 4 分`;
+            document.getElementById('cert-user').innerText = studentName;
+            
+            if(score === 4) {
+                document.getElementById('cert-score-text').innerText = "4/4 全对";
+            } else {
+                document.getElementById('cert-score-text').innerText = `${score}/4 分的优良`;
+            }
+
+            const today = new Date();
+            document.getElementById('cert-date').innerText = `${today.getFullYear()}年${String(today.getMonth()+1).padStart(2,'0')}月${String(today.getDate()).padStart(2,'0')}日`;
+
+            if(isRepeatUser) {
+                alert(`👋 ${studentName}，你之前已经提交过答案啦！这是你的上次奖状证书：`);
+            }
+        }
+
+        function uploadToGoogleSheet(name, score) {
+            if(GOOGLE_SHEET_URL.includes("XXXXX")) return; 
+            const urlWithParams = `${GOOGLE_SHEET_URL}?name=${encodeURIComponent(name)}&score=${score}&date=${encodeURIComponent(new Date().toLocaleString())}`;
+            fetch(urlWithParams, { mode: 'no-cors' }).catch(err => console.error(err));
+        }
+
+        // 7. 下载奖状
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const certElement = document.getElementById('certificate');
+            html2canvas(certElement, {
+                scale: 2, 
+                backgroundColor: null,
+                useCORS: true
+            }).then(canvas => {
+                const imageURI = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = `${studentName}的荣誉证书.png`;
+                link.href = imageURI;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+    </script>
+</body>
+</html>
