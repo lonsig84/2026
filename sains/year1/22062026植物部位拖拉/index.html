@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>植物的各部分 - 互动小游戏</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 彻底禁用滚动条，防止手势冲突 */
+            /* 换成活力充满生机的森林绿马卡龙渐变背景 */
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+            position: relative;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            z-index: 1;
+        }
+
+        /* 🍀 背景微动装饰图案 (纯CSS实现，无需额外图) */
+        .bg-deco {
+            position: absolute;
+            font-size: 28px;
+            opacity: 0.35;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* 浮动动画 1：上下漂浮 */
+        @keyframes floatY {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(10deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        /* 浮动动画 2：左右摇摆 */
+        @keyframes floatX {
+            0% { transform: translateX(0px) rotate(0deg); }
+            50% { transform: translateX(15px) rotate(-15px); }
+            100% { transform: translateX(0px) rotate(0deg); }
+        }
+        .deco-1 { top: 10%; left: 8%; animation: floatY 6s ease-in-out infinite; font-size: 45px; }
+        .deco-2 { top: 15%; right: 10%; animation: floatX 7s ease-in-out infinite; font-size: 40px; }
+        .deco-3 { bottom: 15%; left: 12%; animation: floatX 5s ease-in-out infinite; font-size: 35px; }
+        .deco-4 { bottom: 12%; right: 8%; animation: floatY 8s ease-in-out infinite; font-size: 50px; }
+
+        .container {
+            background: rgba(255, 255, 255, 0.93); /* 微透明毛玻璃感，能透出背景的彩色 */
+            backdrop-filter: blur(5px);
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 100%; 
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(46, 125, 50, 0.15);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            text-align: center;
+            z-index: 2;
+            border: 3px solid #ffcc00; /* 金黄色童趣边框 */
+        }
+        
+        h1 {
+            color: #2e7d32; /* 深森林绿 */
+            font-size: 3.6vh; 
+            text-shadow: 1px 1px 0px #fff;
+            margin-bottom: 2px;
+        }
+        p.subtitle {
+            color: #558b2f;
+            font-size: 2vh;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        /* 1. 登录表单居中 */
+        #login-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .input-group { 
+            margin-bottom: 25px; 
+        }
+        input[type="text"] {
+            padding: 14px 20px;
+            width: 280px;
+            font-size: 18px;
+            border: 3px solid #a5d6a7;
+            border-radius: 50px; /* 圆角输入框 */
+            outline: none;
+            text-align: center;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #4caf50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+        }
+
+        /* 2. 游戏主画面布局 */
+        #game-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 可拖拽选项区 */
+        .options-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            background: #f1f8e9;
+            padding: 10px;
+            border-radius: 12px;
+            min-height: 50px;
+            align-items: center;
+            border: 2px dashed #81c784;
+        }
+        .draggable {
+            background: linear-gradient(135deg, #ffb74d 0%, #ff9800 100%); /* 橘黄色活力按钮 */
+            color: white;
+            padding: 8px 22px;
+            border-radius: 50px;
+            cursor: grab;
+            font-weight: bold;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+            font-size: 2.4vh; 
+            border: 2px solid #fff;
+            touch-action: none;
+        }
+        .draggable:active { cursor: grabbing; }
+        .draggable.dragging { opacity: 0.4; }
+
+        /* 核心绘图区 */
+        .quiz-area {
+            position: relative;
+            height: 56vh; 
+            width: auto;
+            margin: 5px auto;
+            display: inline-block;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 4px;
+        }
+        .plant-img {
+            height: 100%; 
+            width: auto;  
+            display: block;
+            border-radius: 8px;
+        }
+
+        /* 放置目标框 */
+        .drop-zone {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.88);
+            border: 2.5px dashed #4caf50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 2vh;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        .drop-zone.hovered {
+            background: rgba(139, 195, 74, 0.25);
+            border-color: #8bc34a;
+            transform: scale(1.03);
+        }
+        .drop-zone.filled {
+            border-style: solid;
+            border-color: #ff9800;
+            background: #fffdf7;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        /* 方框位置百分比 (可根据需要微调) */
+        #zone-1 { top: 29%; left: 9%; width: 25%; height: 8%; }    
+        #zone-2 { top: 42.5%; left: 71%; width: 25%; height: 8%; }  
+        #zone-3 { top: 71.5%; left: 9%; width: 25%; height: 8%; }   
+        #zone-4 { top: 86.5%; left: 71%; width: 25%; height: 8%; }  
+
+        /* 底部动作区域按钮 */
+        .action-box { margin-top: 2px; }
+        button {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 2.4vh;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            border: 2px solid #fff;
+            transition: transform 0.1s;
+        }
+        button:hover { background: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%); }
+        button:active { transform: scale(0.98); }
+
+        /* 结果与限制屏 */
+        #result-screen, #limit-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .score-display {
+            font-size: 9vh;
+            font-weight: bold;
+            color: #ff9800;
+            margin: 10px 0;
+            text-shadow: 2px 2px 0px #fff, 3px 3px 0px #c8e6c9;
+        }
+        .btn-group { margin-top: 15px; }
+        .btn-blue { background: linear-gradient(135deg, #29b6f6 0%, #0288d1 100%); box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3); }
+        .btn-blue:hover { background: linear-gradient(135deg, #4fc3f7 0%, #039be5 100%); }
+    </style>
+</head>
+<body>
+
+<div class="bg-deco deco-1">🌻</div>
+<div class="bg-deco deco-2">🍃</div>
+<div class="bg-deco deco-3">🌱</div>
+<div class="bg-deco deco-4">☀️</div>
+
+<div class="container">
+    <div id="limit-screen" style="display:none;">
+        <h2>⚠️ 您已经参与过本次测试</h2>
+        <p style="margin-top:15px; color:#558b2f; font-weight:bold;">本项练习每位同学只能提交作答一次，系统已记录您的成绩。</p>
+    </div>
+
+    <div id="login-screen">
+        <h1>🌿 植物的各部分 互动测试 🌿</h1>
+        <p class="subtitle">小朋友，请输入你的真实姓名开始挑战吧！</p>
+        <div class="input-group">
+            <input type="text" id="student-name" placeholder="✍️ 在这里输入名字..." autocomplete="off">
+        </div>
+        <button id="start-btn">🚀 开始挑战</button>
+    </div>
+
+    <div id="game-screen" style="display:none;">
+        <div>
+            <h1>植物的各部分</h1>
+            <p class="subtitle">💡 请把上方的词汇卡片，拖拽到图中对应的正确方框内吧！</p>
+        </div>
+        
+        <div class="options-container" id="options-bank">
+            <div class="draggable" draggable="true" data-word="叶子">叶子</div>
+            <div class="draggable" draggable="true" data-word="花">花</div>
+            <div class="draggable" draggable="true" data-word="茎">茎</div>
+            <div class="draggable" draggable="true" data-word="根">根</div>
+        </div>
+
+        <div class="quiz-area">
+            <img src="plant.png" id="plant-bg" class="plant-img" alt="Plant Structure">
+            
+            <div class="drop-zone" id="zone-1" data-correct="花">① 拖至此处</div>
+            <div class="drop-zone" id="zone-2" data-correct="叶子">② 拖至此处</div>
+            <div class="drop-zone" id="zone-3" data-correct="茎">③ 拖至此处</div>
+            <div class="drop-zone" id="zone-4" data-correct="根">④ 拖至此处</div>
+        </div>
+
+        <div class="action-box">
+            <button id="submit-btn">✔️ 确认提交分数</button>
+        </div>
+    </div>
+
+    <div id="result-screen" style="display:none;">
+        <h2>🎉 太棒了！挑战完成！</h2>
+        <p id="student-greeting" style="margin-top: 10px; font-size: 2.6vh; color: #2e7d32; font-weight: bold;"></p>
+        <div class="score-display" id="final-score">0 / 4</div>
+        <p style="color:#558b2f; font-weight: bold;">💯 你的分数已经安全传送给老师啦！</p>
+        <div class="btn-group">
+            <button id="download-cert-btn" class="btn-blue">📜 下载你的荣誉文凭</button>
+        </div>
+    </div>
+</div>
+
+<canvas id="certCanvas" width="800" height="560" style="display:none;"></canvas>
+
+<script>
+    // 🔗【配置：填入您的 Google Apps Script Web App 链接】
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykWhoSkFc9NPt1Ek9FspP1CLiUcNWaQWHIV-d52tDio_hYj0HXFrXLNEkwe3hJwkGf-g/exec';
+
+    const soundClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav');
+    const soundSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-84.wav');
+    const soundFail = new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-84.wav');
+
+    let studentName = "";
+    let score = 0;
+
+    // 🔒【防作弊状态检测】测试期间已用 // 注释。准备正式上线给学生时请把下面4行的 // 删掉。
+    // if (localStorage.getItem('plant_quiz_done') === 'true') {
+    //     document.getElementById('login-screen').style.display = 'none';
+    //     document.getElementById('limit-screen').style.display = 'block';
+    // }
+
+    document.getElementById('start-btn').addEventListener('click', () => {
+        const nameInput = document.getElementById('student-name').value.trim();
+        if (!nameInput) {
+            alert('要先输入名字，老师才知道你是谁哦！✍️');
+            return;
+        }
+        studentName = nameInput;
+        soundClick.play();
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'flex';
+    });
+
+    const draggables = document.querySelectorAll('.draggable');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const optionsBank = document.getElementById('options-bank');
+
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            draggable.classList.add('dragging');
+            soundClick.play();
+        });
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
+        });
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('hovered');
+        });
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('hovered');
+        });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('hovered');
+            const draggingEl = document.querySelector('.dragging');
+            if (!draggingEl) return;
+
+            const existingChild = zone.querySelector('.draggable');
+            if (existingChild) {
+                optionsBank.appendChild(existingChild);
+            }
+
+            zone.appendChild(draggingEl);
+            zone.classList.add('filled');
+            soundClick.play();
+        });
+    });
+
+    optionsBank.addEventListener('dragover', (e) => { e.preventDefault(); });
+    optionsBank.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const draggingEl = document.querySelector('.dragging');
+        if (draggingEl) {
+            optionsBank.appendChild(draggingEl);
+            soundClick.play();
+        }
+    });
+
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+        score = 0;
+        let allAnswered = true;
+
+        dropZones.forEach(zone => {
+            const placedWord = zone.querySelector('.draggable');
+            if (!placedWord) {
+                allAnswered = false;
+            } else {
+                if (placedWord.dataset.word === zone.dataset.correct) {
+                    score++;
+                }
+            }
+        });
+
+        if (!allAnswered) {
+            if (!confirm('还有空格子没填好，确定现在就交卷吗？')) {
+                return;
+            }
+        }
+
+        if (score === 4) {
+            soundSuccess.play();
+        } else {
+            soundFail.play();
+        }
+
+        // 🔒【限制只能提交一次】准备上线给学生时请把下面一行的 // 删掉。
+        // localStorage.setItem('plant_quiz_done', 'true');
+
+        document.getElementById('game-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'flex';
+        document.getElementById('student-greeting').innerText = `🌟 ${studentName} 同学，你的最终得分：`;
+        document.getElementById('final-score').innerText = `${score} / 4`;
+
+        if(GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: studentName, score: score })
+                });
+            } catch (err) {
+                console.error("Sheet上传出错: ", err);
+            }
+        }
+    });
+
+    document.getElementById('download-cert-btn').addEventListener('click', () => {
+        soundClick.play();
+        const canvas = document.getElementById('certCanvas');
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#fdfaf2';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 10;
+        ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+        
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(32, 32, canvas.width - 64, canvas.height - 64);
+
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = 'bold 36px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('荣 誉 证 书', canvas.width / 2, 110);
+
+        ctx.fillStyle = '#333';
+        ctx.font = '24px Arial, sans-serif';
+        ctx.fillText(`恭喜 ${studentName} 同学：`, canvas.width / 2, 200);
+        
+        ctx.font = '20px Arial, sans-serif';
+        ctx.fillText('在《科学课：植物的各部分》互动趣味测试中', canvas.width / 2, 260);
+        ctx.fillText('表现优异，特发此证，以资鼓励！', canvas.width / 2, 310);
+
+        ctx.fillStyle = '#e67e22';
+        ctx.font = 'bold 28px Arial';
+        ctx.fillText(`最终得分: ${score} / 4 分`, canvas.width / 2, 390);
+
+        const today = new Date().toLocaleDateString('zh-CN');
+        ctx.fillStyle = '#7f8c8d';
+        ctx.font = '16px Arial';
+        ctx.fillText(`签发日期: ${today}`, canvas.width / 2, 470);
+
+        const imageURI = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `${studentName}_植物部分测试文凭.png`;
+        link.href = imageURI;
+        link.click();
+    });
+</script>
+</body>
+</html>
