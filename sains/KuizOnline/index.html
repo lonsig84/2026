@@ -45,7 +45,7 @@
             flex-direction: column;
         }
 
-        /* 新增：已完成拦截页面的样式 */
+        /* 已完成拦截页面、信息页面和结果页面的样式 */
         #already-done-screen, #student-info-screen, #result-screen {
             flex: 1;
             display: flex;
@@ -114,15 +114,21 @@
         .option-btn:nth-child(4) { background-color: #FF922B; box-shadow: 0 6px 0 #D9480F; }
         .option-btn:nth-child(4):active { box-shadow: 0 0px 0 #D9480F; }
 
-        input[type="text"] {
+        /* 优化后的下拉菜单选择器样式，超大字体适合一年级 */
+        select {
             width: 90%;
             padding: 15px;
             font-size: 24px;
+            font-weight: bold;
+            color: #333;
             margin-bottom: 20px;
             border: 3px solid #4DABF7;
             border-radius: 15px;
             text-align: center;
+            text-align-last: center;
             box-sizing: border-box;
+            background-color: #F8F9FA;
+            cursor: pointer;
         }
 
         #score-display {
@@ -150,9 +156,17 @@
 
         <div id="student-info-screen">
             <h1 style="color: #FF6B6B; font-size: 36px;">欢迎来到科学大挑战！🚀</h1>
-            <input type="text" id="student-name" placeholder="请输入你的名字 (英文/拼音)" required>
-            <input type="text" id="student-class" placeholder="请输入你的班级 (例如: 1M)" required>
-            <button class="option-btn" style="background-color: #FFD700; color: #D35400; box-shadow: 0 6px 0 #F39C12;" onclick="startQuiz()">开始挑战！</button>
+            
+            <select id="student-class" onchange="updateNameDropdown()">
+                <option value="">-- 请选择你的班级 --</option>
+                <option value="1M">1M 班</option>
+            </select>
+
+            <select id="student-name">
+                <option value="">-- 请先选择班级 --</option>
+            </select>
+
+            <button class="option-btn" style="background-color: #FFD700; color: #D35400; box-shadow: 0 6px 0 #F39C12; margin-top: 10px; width: 90%;" onclick="startQuiz()">开始挑战！</button>
         </div>
 
         <div id="question-screen" class="hidden">
@@ -171,6 +185,15 @@
     </div>
 
     <script>
+        // 核心学生名单数据库 (支持未来的多班级扩展)
+        const classStudents = {
+            "1M": [
+                "陈愷熠", "李蒿芋", "李仲", "梁添杰", "廖思彤", 
+                "吴宏泽", "彭芯湉", "王婉灵", "希娃", "徐义恒", 
+                "颜嘉丞", "伊娜拉", "余淽颖", "周丽思", "周宇晗", "周宇婧"
+            ]
+        };
+
         const originalQuestions = [
             { question: "图中的孩子是应用哪项官能进行观察？", image_url: "./03.png", options: ["嗅觉", "听觉", "触觉", "味觉"], answer: "味觉" },
             { question: "图中物品的味道是什么？", image_url: "./04.png", options: ["甜", "酸", "咸", "苦"], answer: "咸" },
@@ -201,13 +224,46 @@
 
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwpC4b8Ksp0jSOMQBH4gk0s_fB9UyNby_avoJZuuHhttUpcASacafdbrRpAg1ZUZCXy/exec";
 
-        // 【新增逻辑】网页一加载，就检查浏览器里有没有“已完成印章”
+        // 网页加载时：检查 localStorage 是否已经完成过
         window.onload = function() {
             if(localStorage.getItem('kuiz_completed') === 'true') {
                 document.getElementById('student-info-screen').classList.add('hidden');
                 document.getElementById('already-done-screen').classList.remove('hidden');
             }
         };
+
+        // 核心联动：根据选择的班级，更新名字下拉菜单的内容
+        function updateNameDropdown() {
+            const classSelect = document.getElementById('student-class');
+            const nameSelect = document.getElementById('student-name');
+            const selectedClass = classSelect.value;
+
+            nameSelect.innerHTML = ''; // 清空旧的名字
+
+            if (!selectedClass) {
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = "";
+                defaultOpt.innerText = "-- 请先选择班级 --";
+                nameSelect.appendChild(defaultOpt);
+                return;
+            }
+
+            // 获取该班级的学生名单并生成选项
+            const students = classStudents[selectedClass] || [];
+            
+            // 先加一个提示项
+            const hintOpt = document.createElement('option');
+            hintOpt.value = "";
+            hintOpt.innerText = "👇 点击选择你的名字 👇";
+            nameSelect.appendChild(hintOpt);
+
+            students.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.innerText = name;
+                nameSelect.appendChild(opt);
+            });
+        }
 
         function shuffleArray(array) {
             let shuffled = [...array];
@@ -219,11 +275,11 @@
         }
 
         function startQuiz() {
-            const name = document.getElementById('student-name').value.trim();
-            const cls = document.getElementById('student-class').value.trim();
+            const cls = document.getElementById('student-class').value;
+            const name = document.getElementById('student-name').value;
             
-            if(!name || !cls) {
-                alert("小朋友，要填好名字和班级才能开始哦！");
+            if(!cls || !name) {
+                alert("小朋友，要选好班级和名字才能开始哦！");
                 return;
             }
 
@@ -287,7 +343,7 @@
             document.getElementById('result-screen').classList.remove('hidden');
             document.getElementById('score-display').innerText = `${score} / ${questions.length}`;
             
-            // 【新增逻辑】答题结束后，给浏览器盖上“已完成印章”
+            // 答题结束：立刻给当前浏览器盖章锁死，防止二次进入
             localStorage.setItem('kuiz_completed', 'true');
             
             var duration = 3000;
