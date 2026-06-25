@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>学生作业管理系统</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
+  <style>
+    /* 简单的入场动画 */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ==========================================
+    // ⚠️ 请在这里填入你部署 GAS 后拿到的 Web App URL
+    // ==========================================
+    const API_URL = "https://script.google.com/macros/s/填写你的专属ID/exec"; 
+    
+    // 系统的访问密码
+    const SYSTEM_PASSWORD = "8888"; 
+
+    function App() {
+      // 登录状态
+      const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [passwordInput, setPasswordInput] = useState('');
+
+      const [subjectMap, setSubjectMap] = useState(null); 
+      const [currentTab, setCurrentTab] = useState('');
+      const [allStudents, setAllStudents] = useState([]);
+      const [pendingRecords, setPendingRecords] = useState([]);
+      
+      const todayYYYYMMDD = new Date().toLocaleDateString('en-CA'); 
+      const [recordDate, setRecordDate] = useState(todayYYYYMMDD);
+      const [homeworkName, setHomeworkName] = useState('');
+      const [selectedStudents, setSelectedStudents] = useState({});
+      const [activeStudentInput, setActiveStudentInput] = useState(null);
+
+      const [loading, setLoading] = useState(false);
+      const [toast, setToast] = useState(null);
+
+      const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+      const [tempSubjects, setTempSubjects] = useState([]);
+
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      // 封装 API 请求工具函数
+      const fetchAPI = async (action = null, payload = null) => {
+        try {
+          let res;
+          if (!action) {
+            // GET 请求 (获取初始数据)
+            res = await fetch(API_URL);
+          } else {
+            // POST 请求 (修改数据)
+            // 使用 text/plain 避免触发繁琐的 CORS 预检
+            res = await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action, payload })
+            });
+          }
+          return await res.json();
+        } catch (error) {
+          console.error("API Error:", error);
+          showToast('❌ 网络请求失败，请检查网络或 API URL');
+          return null;
+        }
+      };
+
+      // 处理登录
+      const handleLogin = (e) => {
+        e.preventDefault();
+        if (passwordInput === SYSTEM_PASSWORD) {
+          setIsAuthenticated(true);
+          loadInitialData();
+        } else {
+          showToast('❌ 密码错误，请重试');
+          setPasswordInput('');
+        }
+      };
+
+      // 获取初始数据
+      const loadInitialData = async () => {
+        setLoading(true);
+        const data = await fetchAPI();
+        if (data) {
+          setSubjectMap(data.subjectMap || {});
+          setAllStudents(data.students || []);
+          setPendingRecords(data.pendingRecords || []);
+          const subjects = Object.keys(data.subjectMap || {});
+          if (subjects.length > 0) setCurrentTab(subjects[0]);
+        }
+        setLoading(false);
+      };
+
+      // ================== 登录界面 ==================
+      if (!isAuthenticated) {
+        return (
+          <div className="flex justify-center items-center h-screen px-4 bg-slate-100">
+            {toast && <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-red-600 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-2xl z-[110] animate-bounce">{toast}</div>}
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm animate-fade-in text-center border border-slate-200">
+              <div className="text-5xl mb-4">🔐</div>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">系统访问验证</h2>
+              <p className="text-xs text-slate-500 mb-6">请输入管理员密码以进入作业管理系统</p>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input 
+                  type="password" 
+                  value={passwordInput} 
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  className="w-full px-4 py-3 text-center tracking-widest text-lg border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none"
+                  placeholder="••••"
+                  autoFocus
+                />
+                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
+                  进入系统
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      // 等待配置加载
+      if (!subjectMap) {
+        return <div className="flex justify-center items-center h-screen"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div></div>;
+      }
+
+      const subjectList = Object.keys(subjectMap);
+      const currentStudents = allStudents.filter(s => s.subject === currentTab);
+      const currentPending = pendingRecords.filter(r => r.subject === currentTab);
+
+      // --- 核心业务功能 ---
+      const handleToggleStudent = (studentName) => {
+        if (selectedStudents.hasOwnProperty(studentName)) {
+          const updated = { ...selectedStudents };
+          delete updated[studentName];
+          setSelectedStudents(updated);
+          if (activeStudentInput === studentName) setActiveStudentInput(null);
+        } else {
+          setSelectedStudents({ ...selectedStudents, [studentName]: '没做' });
+          setActiveStudentInput(studentName);
+        }
+      };
+
+      const handleReasonChange = (studentName, reason) => {
+        setSelectedStudents({ ...selectedStudents, [studentName]: reason });
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!recordDate) return showToast('⚠️ 请选择日期！');
+        if (!homeworkName.trim()) return showToast('⚠️ 请先输入功课名称！');
+        const studentKeys = Object.keys(selectedStudents);
+        if (studentKeys.length === 0) return showToast('⚠️ 请至少选择一位未交功课的学生！');
+
+        setLoading(true);
+        const [year, month, day] = recordDate.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+
+        const recordsToSubmit = studentKeys.map(name => ({
+          date: formattedDate, subject: currentTab, homework: homeworkName, student: name, reason: selectedStudents[name]
+        }));
+
+        const data = await fetchAPI('addRecords', recordsToSubmit);
+        if (data) {
+          setPendingRecords(data.pendingRecords || []);
+          setHomeworkName('');
+          setSelectedStudents({});
+          setActiveStudentInput(null);
+          showToast('✅ 成功录入未交记录！');
+        }
+        setLoading(false);
+      };
+
+      const handleResolve = async (recordId) => {
+        setLoading(true);
+        const data = await fetchAPI('markAsResolved', recordId);
+        if (data) {
+          setPendingRecords(data.pendingRecords || []);
+          showToast('✅ 已补交！');
+        }
+        setLoading(false);
+      };
+
+      const handleGenerateMessage = () => {
+        const todayStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+        const subInfo = subjectMap[currentTab] || { zh: currentTab, ms: currentTab };
+
+        if (currentPending.length === 0) {
+          const praiseMsg = `📅 日期 / Tarikh Semasa: ${todayStr}\n\n今日【${subInfo.zh} ${currentTab}】功课全班皆已安全完成，感谢各位家长的悉心督促！\nSemua murid telah menyiapkan kerja sekolah bagi mata pelajaran 【${subInfo.ms}】. Terima kasih atas kerjasama ibu bapa! ❤️`;
+          navigator.clipboard.writeText(praiseMsg).then(() => showToast('📋 全班齐交！赞美信息已复制'));
+          return;
+        }
+
+        const grouped = {};
+        currentPending.forEach(r => {
+          if (!grouped[r.student]) grouped[r.student] = [];
+          grouped[r.student].push(r);
+        });
+
+        let msg = `📅 日期 / Tarikh Semasa: ${todayStr}\n\n各位家长好，以下是【${subInfo.zh} ${currentTab}】尚未完成功课的学生名单，请家长多加关注及督促孩子的学习，谢谢配合。\nSalam sejahtera ibu bapa, berikut adalah senarai murid yang belum menyiapkan kerja sekolah bagi mata pelajaran 【${subInfo.ms}】. Mohon kerjasama ibu bapa untuk memantau pembelajaran anak anda. Terima kasih.\n\n`;
+
+        Object.keys(grouped).forEach((student, index) => {
+          msg += `👤 ${index + 1}. ${student}\n`;
+          grouped[student].forEach(r => { msg += `   - ${r.homework} (欠交日期: ${r.date}, 原因: ${r.reason})\n`; });
+          msg += `\n`;
+        });
+
+        navigator.clipboard.writeText(msg.trim()).then(() => showToast('📋 催交信息已复制，快去 WhatsApp 粘贴吧！')).catch(() => showToast('❌ 复制失败，请手动全选复制。'));
+      };
+
+      // --- 科目管理相关功能 ---
+      const openSettings = () => {
+        const currentArr = Object.keys(subjectMap).map(key => ({ code: key, zh: subjectMap[key].zh, ms: subjectMap[key].ms }));
+        setTempSubjects(currentArr);
+        setIsSettingsOpen(true);
+      };
+
+      const handleSubjectChange = (index, field, value) => {
+        const newSubjects = [...tempSubjects];
+        newSubjects[index][field] = value;
+        setTempSubjects(newSubjects);
+      };
+
+      const saveSettings = async () => {
+        const invalid = tempSubjects.some(s => !s.code.trim());
+        if (invalid) return showToast('⚠️ 科目代号不能为空！');
+
+        setLoading(true);
+        const data = await fetchAPI('updateSubjects', tempSubjects);
+        if (data) {
+          setSubjectMap(data.subjectMap || {});
+          const subjects = Object.keys(data.subjectMap || {});
+          if (!subjects.includes(currentTab) && subjects.length > 0) setCurrentTab(subjects[0]);
+          setIsSettingsOpen(false);
+          showToast('✅ 科目更新成功！');
+        }
+        setLoading(false);
+      };
+
+      // ================== 主界面渲染 ==================
+      return (
+        <div className="max-w-4xl mx-auto p-4 md:p-6 pb-24 relative animate-fade-in">
+          <header className="mb-6 text-center">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-wide">📝 学生作业跟踪管理系统</h1>
+          </header>
+
+          {loading && (
+            <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[100]">
+              <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3">
+                <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-slate-700 font-medium text-sm">正在同步云端数据...</span>
+              </div>
+            </div>
+          )}
+
+          {toast && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-2xl z-[110] animate-bounce">{toast}</div>
+          )}
+
+          <div className="flex items-center space-x-2 bg-slate-200 p-1.5 rounded-xl mb-6 shadow-sm overflow-x-auto">
+            {subjectList.map(tab => (
+              <button key={tab} type="button" onClick={() => { setCurrentTab(tab); setSelectedStudents({}); setActiveStudentInput(null); }} className={`flex-1 min-w-[90px] py-3 px-2 text-center text-sm sm:text-base font-bold rounded-lg transition-all duration-200 ${currentTab === tab ? 'bg-white text-indigo-600 shadow-md scale-[1.02]' : 'text-slate-600 hover:bg-white/50'}`}>
+                {tab} ({subjectMap[tab].zh})
+              </button>
+            ))}
+            <button onClick={openSettings} className="min-w-[48px] h-[48px] flex items-center justify-center bg-slate-300 hover:bg-indigo-100 text-slate-600 hover:text-indigo-600 rounded-lg transition-colors ml-1" title="管理科目">⚙️</button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+              <h2 className="text-base font-bold text-slate-700 mb-4 flex items-center"><span className="w-2.5 h-2.5 bg-amber-500 rounded-full mr-2"></span>新增未交作业</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">1. 选择日期</label>
+                    <input type="date" value={recordDate} onChange={(e) => setRecordDate(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 text-sm transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">2. 输入功课名称</label>
+                    <input type="text" placeholder="例如: 活动本下册 M/S 14" value={homeworkName} onChange={(e) => setHomeworkName(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 text-sm transition-all" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 mt-2">3. 点击未完成的学生名字 ({currentStudents.length} 人)</label>
+                  {currentStudents.length === 0 ? (
+                    <p className="text-xs text-amber-600 bg-amber-50 p-3 rounded-xl border border-dashed border-amber-300">💡 请先在 Google Sheets 的 Students 工作表里添加该科目的学生名单。</p>
+                  ) : (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                      {currentStudents.map(student => {
+                        const isSelected = selectedStudents.hasOwnProperty(student.name);
+                        return (
+                          <button type="button" key={student.name} onClick={() => handleToggleStudent(student.name)} className={`py-2 px-3 text-xs font-medium rounded-xl border transition-all duration-150 ${isSelected ? 'bg-red-50 text-red-600 border-red-300 ring-2 ring-red-100 font-bold' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
+                            {student.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {Object.keys(selectedStudents).length > 0 && (
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">4. 快速配置欠交原因</label>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {Object.keys(selectedStudents).map(name => (
+                        <button type="button" key={name} onClick={() => setActiveStudentInput(name)} className={`px-3 py-1.5 text-xs rounded-lg transition-all ${activeStudentInput === name ? 'bg-indigo-600 text-white font-bold shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'}`}>
+                          {name}: {selectedStudents[name]}
+                        </button>
+                      ))}
+                    </div>
+                    {activeStudentInput && selectedStudents.hasOwnProperty(activeStudentInput) && (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-white p-3 rounded-lg border border-slate-300 shadow-sm">
+                        <span className="text-xs font-bold text-slate-600 whitespace-nowrap">为 【{activeStudentInput}】 修改:</span>
+                        <input type="text" value={selectedStudents[activeStudentInput]} onChange={(e) => handleReasonChange(activeStudentInput, e.target.value)} className="w-full sm:flex-1 px-3 py-1.5 rounded border border-slate-300 text-xs focus:outline-none focus:border-indigo-500" />
+                        <div className="flex gap-1.5 flex-wrap">
+                          {['没做', '没带', '不完整', '不认真重做'].map(text => (
+                            <button type="button" key={text} onClick={() => handleReasonChange(activeStudentInput, text)} className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] rounded font-medium border border-slate-200">{text}</button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md active:scale-[0.99]">📥 提交到未交排行榜</button>
+              </form>
+            </section>
+
+            <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 mb-4 gap-3">
+                <h2 className="text-base font-bold text-slate-700 flex items-center"><span className="w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2"></span>【{currentTab}】未交作业追踪榜 ({currentPending.length} 项)</h2>
+                <button type="button" onClick={handleGenerateMessage} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md active:scale-[0.98]">📋 复制本堂催交双语信息</button>
+              </div>
+              {currentPending.length === 0 ? (
+                <div className="text-center py-10"><span className="text-4xl inline-block mb-3">🎉</span><p className="text-sm text-slate-500 font-medium">太棒了！当前没有任何未交作业旧账。</p></div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(currentPending.reduce((acc, cur) => { if (!acc[cur.student]) acc[cur.student] = []; acc[cur.student].push(cur); return acc; }, {})).map(([studentName, records]) => (
+                    <div key={studentName} className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                      <div className="text-sm font-bold text-slate-800 mb-3 flex items-center">
+                        <span className="mr-1.5">👤</span> {studentName} <span className="ml-2 text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-200 font-bold">欠 {records.length} 项</span>
+                      </div>
+                      <div className="divide-y divide-slate-200/60">
+                        {records.map(record => (
+                          <div key={record.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                            <div className="space-y-1.5 flex-1">
+                              <span className="font-semibold text-indigo-900 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded mr-2 text-[12px] inline-block">{record.homework}</span>
+                              <span className="text-slate-500 font-medium">({record.date})</span>
+                              {record.reason && <p className="text-slate-600 bg-white inline-block px-2 py-0.5 rounded border border-slate-100 ml-0 sm:ml-2 mt-1 sm:mt-0">原因: {record.reason}</p>}
+                            </div>
+                            <button type="button" onClick={() => handleResolve(record.id)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-4 py-2 rounded-lg border border-emerald-300 transition-colors shrink-0">✓ 已补交</button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* 设置弹窗 */}
+          {isSettingsOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+              <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <h3 className="text-lg font-bold text-slate-800">⚙️ 管理科目配置</h3>
+                  <button onClick={() => setIsSettingsOpen(false)} className="text-slate-400 hover:text-red-500 text-xl font-bold px-2">&times;</button>
+                </div>
+                <div className="p-6 overflow-y-auto bg-slate-50/50">
+                  <div className="space-y-3">
+                    {tempSubjects.map((sub, idx) => (
+                      <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-3 sm:p-1 border border-slate-200 sm:border-none rounded-xl sm:rounded-none relative">
+                        <div className="sm:col-span-3"><input type="text" placeholder="代号" value={sub.code} onChange={(e) => handleSubjectChange(idx, 'code', e.target.value.toUpperCase())} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg uppercase font-bold" /></div>
+                        <div className="sm:col-span-4"><input type="text" placeholder="中文" value={sub.zh} onChange={(e) => handleSubjectChange(idx, 'zh', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
+                        <div className="sm:col-span-4"><input type="text" placeholder="国文" value={sub.ms} onChange={(e) => handleSubjectChange(idx, 'ms', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg" /></div>
+                        <div className="sm:col-span-1 flex justify-end items-center absolute top-2 right-2 sm:relative sm:top-0 sm:right-0">
+                          <button type="button" onClick={() => { const ns = [...tempSubjects]; ns.splice(idx,1); setTempSubjects(ns); }} className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg">🗑️</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => setTempSubjects([...tempSubjects, {code:'', zh:'', ms:''}])} className="mt-4 w-full py-3 border-2 border-dashed border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-sm">➕ 新增一行科目</button>
+                </div>
+                <div className="px-6 py-4 bg-white border-t border-slate-100 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setIsSettingsOpen(false)} className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl">取消</button>
+                  <button type="button" onClick={saveSettings} className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md">💾 确认保存</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const reactRoot = ReactDOM.createRoot(rootElement);
+    reactRoot.render(<App />);
+  </script>
+</body>
+</html>
