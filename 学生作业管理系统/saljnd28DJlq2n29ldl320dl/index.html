@@ -9,7 +9,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
   <style>
-    /* 简单的入场动画 */
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
   </style>
@@ -61,11 +60,8 @@
         try {
           let res;
           if (!action) {
-            // GET 请求 (获取初始数据)
             res = await fetch(API_URL);
           } else {
-            // POST 请求 (修改数据)
-            // 使用 text/plain 避免触发繁琐的 CORS 预检
             res = await fetch(API_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -75,7 +71,6 @@
           return await res.json();
         } catch (error) {
           console.error("API Error:", error);
-          showToast('❌ 网络请求失败，请检查网络或 API URL');
           return null;
         }
       };
@@ -102,6 +97,8 @@
           setPendingRecords(data.pendingRecords || []);
           const subjects = Object.keys(data.subjectMap || {});
           if (subjects.length > 0) setCurrentTab(subjects[0]);
+        } else {
+          showToast('❌ 无法连接到云端数据库');
         }
         setLoading(false);
       };
@@ -133,7 +130,6 @@
         );
       }
 
-      // 等待配置加载
       if (!subjectMap) {
         return <div className="flex justify-center items-center h-screen"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div></div>;
       }
@@ -181,18 +177,30 @@
           setSelectedStudents({});
           setActiveStudentInput(null);
           showToast('✅ 成功录入未交记录！');
+        } else {
+          showToast('❌ 录入失败，请重试');
         }
         setLoading(false);
       };
 
+      // 🚀 【核心优化：乐观更新】
       const handleResolve = async (recordId) => {
-        setLoading(true);
+        // 1. 先斩后奏：备份旧数据，然后立刻把界面上的这条记录移除，做到“零延迟”无感体验
+        const backupRecords = [...pendingRecords]; 
+        setPendingRecords(pendingRecords.filter(r => r.id !== recordId));
+        showToast('🚀 已标补交，正在同步云端...');
+
+        // 2. 默默在后台同步，不再用黑幕锁死网页屏幕
         const data = await fetchAPI('markAsResolved', recordId);
+        
         if (data) {
+          // 同步成功，用后端传回的数据确保完全对齐
           setPendingRecords(data.pendingRecords || []);
-          showToast('✅ 已补交！');
+        } else {
+          // 万一断网了或同步失败，自动把记录弹回来，确保数据准确
+          setPendingRecords(backupRecords);
+          showToast('❌ 同步失败，已自动恢复记录！');
         }
-        setLoading(false);
       };
 
       const handleGenerateMessage = () => {
@@ -219,7 +227,7 @@
           msg += `\n`;
         });
 
-        navigator.clipboard.writeText(msg.trim()).then(() => showToast('📋 催交信息已复制，快去 WhatsApp 粘贴吧！')).catch(() => showToast('❌ 复制失败，请手动全选复制。'));
+        navigator.clipboard.writeText(msg.trim()).then(() => showToast('📋 催交信息已复制，快去 WhatsApp 粘贴吧！')).catch(() => showToast('❌ 复制失败。'));
       };
 
       // --- 科目管理相关功能 ---
@@ -251,7 +259,6 @@
         setLoading(false);
       };
 
-      // ================== 主界面渲染 ==================
       return (
         <div className="max-w-4xl mx-auto p-4 md:p-6 pb-24 relative animate-fade-in">
           <header className="mb-6 text-center">
@@ -268,7 +275,7 @@
           )}
 
           {toast && (
-            <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-2xl z-[110] animate-bounce">{toast}</div>
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-2xl z-[110]">{toast}</div>
           )}
 
           <div className="flex items-center space-x-2 bg-slate-200 p-1.5 rounded-xl mb-6 shadow-sm overflow-x-auto">
