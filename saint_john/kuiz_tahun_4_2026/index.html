@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabaran Pengetahuan St. John Ambulans (Dalam Talian)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Confetti JS -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            /* Tema Aurora Glow Background */
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            background-attachment: fixed;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+        
+        /* Glassmorphism Effect untuk kad */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .header-glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            border-bottom: 4px solid #6366f1; /* Indigo Accent */
+        }
+
+        .required-star { color: #ef4444; margin-left: 0.25rem; }
+        
+        /* Styling Radio Button Moden */
+        .radio-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255,255,255, 0.6);
+            transition: all 0.2s ease;
+        }
+        .radio-label:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #818cf8;
+        }
+        .radio-label input[type="radio"] {
+            margin-right: 1rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #6366f1;
+            cursor: pointer;
+        }
+
+        .correct-ans {
+            background-color: #d1fae5 !important;
+            border-color: #10b981 !important;
+            color: #065f46;
+            font-weight: 500;
+        }
+        .wrong-ans {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 text-gray-800">
+
+    <div class="max-w-3xl mx-auto">
+        
+        <!-- Bahagian Log Masuk Kata Laluan -->
+        <div id="loginSection" class="glass-card text-center mt-12 fade-in-up">
+            <h2 class="text-3xl font-semibold mb-3 text-indigo-900">Cabaran SJAM (Kategori A)</h2>
+            <p class="mb-6 text-indigo-700/80">Sila masukkan kata laluan untuk mula.</p>
+            <div class="max-w-sm mx-auto">
+                <input type="password" id="quizPassword" placeholder="Kata Laluan" class="w-full bg-white/70 border border-indigo-200 p-3 mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white text-center text-xl tracking-widest rounded-xl transition-all shadow-inner" onkeypress="handlePasswordKeyPress(event)">
+                <button id="verifyBtn" type="button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg transition duration-300 flex justify-center items-center">
+                    <span id="verifyText">Log Masuk</span>
+                    <div id="verifyLoader" class="loader ml-2 hidden"></div>
+                </button>
+                <p id="loginMsg" class="mt-4 text-red-500 font-medium hidden"></p>
+            </div>
+        </div>
+
+        <!-- Bahagian Utama Kuiz -->
+        <div id="mainQuizSection" class="hidden relative fade-in-up">
+            
+            <!-- Pengepala Sticky -->
+            <div class="sticky top-2 z-50 header-glass rounded-2xl p-5 mb-6 shadow-lg flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div>
+                    <h1 class="text-2xl font-semibold text-indigo-900 mb-1">Soalan Cabaran</h1>
+                    <p class="text-indigo-700/70 text-sm font-medium">Sila jawab semua soalan dengan teliti.</p>
+                </div>
+                <div class="flex items-center text-indigo-800 font-semibold text-sm bg-indigo-100/80 py-2 px-4 rounded-full border border-indigo-200 shadow-sm">
+                    ⏱️ Masa Direkodkan
+                </div>
+            </div>
+
+            <!-- Keputusan Kuiz -->
+            <div id="resultSection" class="hidden glass-card !border-t-4 !border-t-emerald-500 text-center">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Keputusan Rasmi</h2>
+                <div id="resultText" class="mt-4"></div>
+            </div>
+
+            <form id="quizForm">
+                <!-- Maklumat Peserta -->
+                <div class="glass-card">
+                    <h2 class="text-xl font-semibold mb-5 text-indigo-900 border-b border-indigo-100 pb-2">Maklumat Diri</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700">Nama Penuh <span class="required-star">*</span></label>
+                            <input type="text" id="studentName" required class="w-full bg-white/70 border border-gray-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700">No. MyKid / Kelas <span class="required-star">*</span></label>
+                            <input type="text" id="myKidNo" required class="w-full bg-white/70 border border-gray-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700">Nama Sekolah <span class="required-star">*</span></label>
+                            <input type="text" id="schoolName" required class="w-full bg-white/70 border border-gray-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700">Kod Sekolah <span class="required-star">*</span></label>
+                            <input type="text" id="schoolCode" required class="w-full bg-white/70 border border-gray-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bekas Soalan -->
+                <div id="questionsContainer"></div>
+
+                <!-- Butang Tindakan -->
+                <div class="flex justify-between items-center mt-6 py-4" id="actionButtons">
+                    <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex items-center">
+                        <span id="submitText">Hantar Jawapan</span>
+                        <div id="submitLoader" class="loader ml-3 hidden"></div>
+                    </button>
+                </div>
+                
+                <p id="submitError" class="text-red-500 font-semibold mt-2 hidden text-center bg-red-50 p-3 rounded-lg border border-red-200"></p>
+
+            </form>
+        </div>
+    </div> 
+
+    <script>
+        // =========================================================================
+        // MASUKKAN URL GOOGLE APPS SCRIPT (WEB APP) ANDA DI SINI
+        // =========================================================================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbx7VVZhnUTPDMrI9gwWocUB8OLlNnlIdk_hh9_kikfdOCM0EWIH6KEmd6sNcpjsh4e4rA/exec";
+
+        window.quizData = [];
+        let startTime = 0;
+
+        function handlePasswordKeyPress(event) {
+            if (event.key === "Enter") {
+                document.getElementById('verifyBtn').click();
+            }
+        }
+
+        // ALGORITMA FISHER-YATES UNTUK MENGOCAK ARRAY (RANDOMIZE)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        document.getElementById('verifyBtn').addEventListener('click', function() {
+            const password = document.getElementById('quizPassword').value;
+            const msgEl = document.getElementById('loginMsg');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const verifyText = document.getElementById('verifyText');
+            const verifyLoader = document.getElementById('verifyLoader');
+
+            if (!password) {
+                msgEl.textContent = "Sila masukkan kata laluan!";
+                msgEl.classList.remove('hidden');
+                return;
+            }
+
+            msgEl.classList.add('hidden');
+            verifyBtn.disabled = true;
+            verifyBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            verifyText.textContent = "Memuat turun soalan...";
+            verifyLoader.classList.remove('hidden');
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'verifyPassword');
+            formData.append('password', password);
+
+            fetch(GAS_URL, { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "CORRECT") {
+                    
+                    // PROSES MENGOCAK SOALAN & PILIHAN JAWAPAN (DOUBLE RANDOMIZATION)
+                    let processedData = data.data.map(q => {
+                        // Kenal pasti teks jawapan sebenar sebelum dirombak
+                        let originalCorrectAnswerText = q.options[q.answer - 1]; 
+                        
+                        // Buat salinan options dan kocak kedudukannya
+                        let shuffledOptions = shuffleArray([...q.options]);
+                        
+                        // Cari balik indeks jawapan yang betul dalam array yang telah dikocak (1-based index)
+                        let newAnswerIndex = shuffledOptions.indexOf(originalCorrectAnswerText) + 1;
+                        
+                        return {
+                            q: q.q,
+                            img: q.img,
+                            options: shuffledOptions,
+                            answer: newAnswerIndex
+                        };
+                    });
+
+                    // Kocak kedudukan soalan pula
+                    window.quizData = shuffleArray(processedData);
+                    
+                    mulakanKuiz();
+                } else {
+                    tunjukRalat("Kata laluan salah!");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                tunjukRalat("Ralat rangkaian. Sila semak URL GAS anda.");
+            });
+            
+            function tunjukRalat(teks) {
+                msgEl.textContent = teks;
+                msgEl.classList.remove('hidden');
+                verifyBtn.disabled = false;
+                verifyBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                verifyText.textContent = "Log Masuk";
+                verifyLoader.classList.add('hidden');
+            }
+        });
+
+        function mulakanKuiz() {
+            renderQuestions(window.quizData);
+            startTime = Date.now();
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainQuizSection').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderQuestions(questions) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = ''; 
+            
+            questions.forEach((q, index) => {
+                const qNum = index + 1;
+                let optionsHtml = '';
+                
+                q.options.forEach((opt, oIndex) => {
+                    if(opt && opt.trim() !== "") {
+                        let displayContent = `<span class="text-gray-800 leading-relaxed">${opt}</span>`;
+                        optionsHtml += `
+                            <label class="radio-label">
+                                <input type="radio" name="q${qNum}" value="${oIndex + 1}" required> 
+                                ${displayContent}
+                            </label>
+                        `;
+                    }
+                });
+
+                let imageHtml = '';
+                if (q.img && q.img.trim() !== "") {
+                    // Kalau text [Gambar...] kita jadikan ia tag rujukan menarik
+                    if(q.img.includes('[')) {
+                        imageHtml = `<div class="bg-indigo-50 text-indigo-600 text-sm font-medium py-3 px-4 rounded-lg my-3 border border-indigo-100 flex items-center justify-center">📷 Rujukan: ${q.img}</div>`;
+                    } else {
+                        imageHtml = `<img src="${q.img}" class="max-w-full h-auto mx-auto my-4 rounded shadow max-h-64 object-contain">`;
+                    }
+                }
+
+                let questionText = q.q.replace(/\n/g, '<br>');
+
+                container.innerHTML += `
+                    <div class="glass-card" id="card-q${qNum}">
+                        <div class="flex items-start mb-3">
+                            <span class="bg-indigo-600 text-white w-7 h-7 flex items-center justify-center rounded-full font-bold mr-3 shrink-0">${qNum}</span>
+                            <p class="text-[1.05rem] text-gray-900 font-medium">${questionText} <span class="required-star">*</span></p>
+                        </div>
+                        ${imageHtml}
+                        <div class="space-y-1 mt-4 ml-10">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            let endTime = Date.now();
+            let timeTakenMs = endTime - startTime;
+            let minutes = Math.floor(timeTakenMs / 60000);
+            let seconds = Math.floor((timeTakenMs % 60000) / 1000);
+            let durationStr = `${minutes} minit ${seconds} saat`;
+
+            let score = 0;
+            let totalQuestions = window.quizData.length;
+            let answeredAll = true;
+
+            const submitError = document.getElementById('submitError');
+            submitError.classList.add('hidden');
+
+            window.quizData.forEach((q, index) => {
+                const qNum = index + 1;
+                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
+                const card = document.getElementById(`card-q${qNum}`);
+                
+                if (!selectedOption) {
+                    answeredAll = false;
+                    card.classList.add('border-red-400', 'ring-2', 'ring-red-200');
+                } else {
+                    card.classList.remove('border-red-400', 'ring-2', 'ring-red-200');
+                }
+            });
+
+            if (!answeredAll) {
+                submitError.innerHTML = "⚠️ Terdapat soalan yang belum dijawab. Sila semak kotak yang ditandakan merah.";
+                submitError.classList.remove('hidden');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitLoader = document.getElementById('submitLoader');
+            
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            submitText.textContent = "Menghantar...";
+            submitLoader.classList.remove('hidden');
+
+            window.quizData.forEach((q, index) => {
+                const qNum = index + 1;
+                const selectedOption = document.querySelector(`input[name="q${qNum}"]:checked`);
+                const allOptions = document.querySelectorAll(`input[name="q${qNum}"]`);
+                const correctValue = q.answer.toString();
+
+                allOptions.forEach(opt => opt.disabled = true);
+
+                if (selectedOption) {
+                    if (selectedOption.value === correctValue) {
+                        score++;
+                        selectedOption.parentElement.classList.add('correct-ans');
+                        selectedOption.parentElement.innerHTML += '<span class="ml-auto text-xl">✅</span>';
+                    } else {
+                        selectedOption.parentElement.classList.add('wrong-ans');
+                        selectedOption.parentElement.innerHTML += '<span class="ml-auto text-xl">❌</span>';
+                        
+                        const correctLabel = document.querySelector(`input[name="q${qNum}"][value="${correctValue}"]`);
+                        if(correctLabel) {
+                            correctLabel.parentElement.classList.add('correct-ans');
+                            correctLabel.parentElement.innerHTML += ' <span class="ml-auto text-sm bg-green-100 text-green-800 px-2 py-1 rounded font-semibold">Jawapan Sebenar</span>';
+                        }
+                    }
+                }
+            });
+
+            const name = document.getElementById('studentName').value;
+            const myKid = document.getElementById('myKidNo').value;
+            const school = document.getElementById('schoolName').value;
+            const code = document.getElementById('schoolCode').value;
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'submitScore');
+            formData.append('name', name);
+            formData.append('mykid', myKid);
+            formData.append('schoolName', school);
+            formData.append('schoolCode', code);
+            formData.append('score', score + " / " + totalQuestions);
+            formData.append('duration', durationStr);
+
+            fetch(GAS_URL, { method: 'POST', body: formData })
+            .then(response => response.text())
+            .then(result => {
+                showResults(name, myKid, school, code, score, totalQuestions, durationStr);
+            })
+            .catch(error => {
+                showResults(name, myKid, school, code, score, totalQuestions, durationStr);
+            });
+        });
+
+        function showResults(name, myKid, school, code, score, totalQuestions, durationStr) {
+            const resultSection = document.getElementById('resultSection');
+            const resultText = document.getElementById('resultText');
+            
+            let percentage = (score / totalQuestions) * 100;
+            let grade = "";
+            
+            // Logik Confetti (Tembak kertas warna jika markah > 50%)
+            if(percentage >= 50) {
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            }
+
+            if(percentage >= 80) grade = "Cemerlang! 🎉 Teruskan kecemerlangan anda.";
+            else if(percentage >= 50) grade = "Syabas! 👍 Anda telah mencuba yang terbaik.";
+            else grade = "Jangan putus asa, cuba lagi! 💪";
+
+            resultText.innerHTML = `
+                <div class="bg-white/60 p-5 rounded-xl border border-white mb-5 shadow-sm text-left inline-block w-full">
+                    <p class="mb-1 text-sm text-indigo-400 font-semibold uppercase tracking-wider">Profil Peserta</p>
+                    <p class="font-bold text-gray-800 text-lg mb-2">${name} <span class="text-xs font-normal text-indigo-700 bg-indigo-100 px-2 py-1 rounded-full ml-2">${myKid}</span></p>
+                    <p class="text-gray-600 font-medium">${school} (${code})</p>
+                </div>
+                
+                <div class="py-4">
+                    <div class="inline-flex items-end justify-center mb-2">
+                        <span class="text-6xl font-bold text-indigo-900">${score}</span>
+                        <span class="text-2xl font-medium text-gray-500 mb-2 ml-1">/ ${totalQuestions}</span>
+                    </div>
+                    <p class="text-lg font-semibold text-emerald-600 mb-5">${grade}</p>
+                    <div class="inline-block text-sm font-medium text-indigo-700 bg-white/80 border border-indigo-200 px-5 py-2.5 rounded-full shadow-sm">
+                        Masa Diambil: ⏱️ ${durationStr}
+                    </div>
+                </div>
+            `;
+            
+            resultSection.classList.remove('hidden');
+            document.getElementById('actionButtons').classList.add('hidden'); 
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
