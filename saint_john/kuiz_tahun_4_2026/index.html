@@ -234,8 +234,8 @@
             .then(data => {
                 if (data.status === "CORRECT") {
                     
-                    // PROSES MENGOCAK SOALAN & PILIHAN JAWAPAN (DOUBLE RANDOMIZATION)
-                    let processedData = data.data.map(q => {
+                    // PROSES MENGOCAK SOALAN & PILIHAN JAWAPAN (DOUBLE RANDOMIZATION) 打乱题目和选项的
+                  /*  let processedData = data.data.map(q => {
                         // Kenal pasti teks jawapan sebenar sebelum dirombak
                         let originalCorrectAnswerText = q.options[q.answer - 1]; 
                         
@@ -252,9 +252,11 @@
                             answer: newAnswerIndex
                         };
                     });
-
+                     */
                     // Kocak kedudukan soalan pula
-                    window.quizData = shuffleArray(processedData);
+                   // window.quizData = shuffleArray(processedData);
+                    // --- 修改为以下代码（保持原样）： ---
+                    window.quizData = data.data; // 直接赋值，不经过任何 shuffle 变换 <---过后要去掉
                     
                     mulakanKuiz();
                 } else {
