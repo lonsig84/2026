@@ -26,6 +26,7 @@
 
 <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg relative pb-20">
     
+    <!-- 密码输入弹窗 -->
     <div v-if="authModal.show" class="fixed inset-0 bg-black/80 z-[100] flex justify-center items-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl text-center relative">
             <button @click="cancelAuth" class="absolute top-3 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -38,6 +39,7 @@
         </div>
     </div>
 
+    <!-- 导航栏 -->
     <div class="bg-gray-900 text-white flex flex-wrap justify-around text-[10px] sm:text-xs p-1 sticky top-0 z-50 shadow-md">
         <button @click="requestRole('parent')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'parent'}" class="p-2 transition-colors"><i class="fa-solid fa-users"></i> 家长 Ibu Bapa</button>
         <button @click="requestRole('pengurus')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pengurus'}" class="p-2 transition-colors"><i class="fa-solid fa-walkie-talkie"></i> 控制 Pengurus</button>
@@ -47,12 +49,15 @@
 
     <div v-if="isSyncingInBackground" class="fixed top-0 left-0 h-1 bg-blue-500 z-50 animate-pulse" style="width: 100%;"></div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍👩‍👧‍👦 1. 家长端 (Ibu Bapa) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'parent'" class="p-4">
         <div class="text-center mb-3 mt-2">
             <img src="https://lh3.googleusercontent.com/d/1OBk9JZz-KyOwRoycmCSGzAXkd32vM6h5" alt="Logo Sekolah" class="h-20 mx-auto object-contain drop-shadow-sm">
         </div>
         
-        <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 运动会 Sukan Tahunan</h1>
+        <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 义乐新村华小常年运动会<br>Sukan Tahunan SJCK Kg Baru Gedok</h1>
         
         <div class="rounded-xl p-4 mb-5 mt-4 text-white shadow-md relative overflow-hidden transition-colors duration-300" :class="statusColor(serverData.currentEvent.id, serverData.currentEvent.status)">
             <h2 class="text-xs font-bold opacity-90 mb-1">当前赛况 Acara Semasa</h2>
@@ -82,7 +87,7 @@
 
         <div class="mb-5 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <button @click="showPadang = !showPadang" class="w-full p-3 flex justify-between items-center bg-blue-50 text-blue-900 font-bold text-xs active:bg-blue-100 transition-colors">
-                <span><i class="fa-solid fa-person-running text-blue-600 mr-2"></i> 赛前田赛成绩 Keputusan Acara Padang</span>
+                <span><i class="fa-solid fa-person-running text-blue-600 mr-2"></i> 田径比赛成绩 Keputusan Acara Padang</span>
                 <i class="fa-solid transition-transform duration-300" :class="showPadang ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
             </button>
             
@@ -105,6 +110,7 @@
             </div>
         </div>
 
+        <!-- 赛程项目 -->
         <h3 class="font-bold text-gray-700 mb-2 text-sm"><i class="fa-solid fa-list-ul mr-1"></i> 赛程项目 Senarai Acara</h3>
         <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
             <ul class="divide-y divide-gray-100">
@@ -137,9 +143,10 @@
                                     <div class="mt-1 pl-2 space-y-1">
                                         <div v-for="res in getBatalOnly(serverData.eventResults[item.id])" :key="res.pasukan + res.namaMurid" class="flex items-start gap-1">
                                             <div class="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div>
-                                            <span class="text-gray-500 opacity-80 flex-1 leading-tight">
-                                                <span class="line-through">{{ res.namaMurid }}</span>
-                                                <template v-if="res.tahun"><span class="text-gray-400 font-normal text-[9px] ml-0.5 line-through">({{ res.tahun }})</span></template>
+                                            <!-- 🌟 移除了 line-through 删除线，单纯保留浅灰色名字 🌟 -->
+                                            <span class="text-gray-500 opacity-90 flex-1 leading-tight">
+                                                <span class="font-semibold">{{ res.namaMurid }}</span>
+                                                <template v-if="res.tahun"><span class="text-gray-400 font-normal text-[9px] ml-0.5">({{ res.tahun }})</span></template>
                                                 <span class="text-red-500 font-bold ml-1 break-words"><br>❌ {{ res.catatan }}</span>
                                             </span>
                                         </div>
@@ -153,6 +160,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍✈️ 2. 赛事控制 (Pengurus) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'pengurus'" class="p-4 bg-orange-50 min-h-screen">
         <h2 class="text-lg font-bold text-orange-900 mb-4 border-b border-orange-200 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
         <div class="space-y-3">
@@ -168,6 +178,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- ⏱️ 3. 成绩录入 (Pencatat) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'pencatat'" class="p-4 bg-blue-50 min-h-screen">
         <h2 class="text-lg font-bold text-blue-900 mb-4 border-b border-blue-200 pb-2">⏱️ 录入成绩 Pencatat</h2>
         
@@ -190,22 +203,22 @@
                             
                             <div class="pl-2 flex items-start gap-2">
                                 <div class="flex-1 flex flex-col gap-1.5">
-                                    <input type="text" :id="`tahun_${item.id}_${team}_${num}`" :value="getPesertaTahun(item.id, team, num)" placeholder="Tahun (年级)" class="w-full text-[10px] p-1.5 border border-gray-200 rounded bg-gray-50 text-gray-700 focus:outline-blue-400">
-                                    <textarea :id="`nama_${item.id}_${team}_${num}`" :value="getPesertaName(item.id, team, num)" placeholder="姓名 Nama" rows="2" class="w-full text-[11px] p-1.5 border border-gray-200 rounded bg-blue-50/30 text-blue-900 font-bold resize-y min-h-[50px] leading-tight focus:outline-blue-400"></textarea>
+                                    <input type="text" :custom-id="`tahun_${item.id}_${team}_${num}`" :id="`tahun_${item.id}_${team}_${num}`" :value="getPesertaTahun(item.id, team, num)" placeholder="Tahun (年级)" class="w-full text-[10px] p-1.5 border border-gray-200 rounded bg-gray-50 text-gray-700 focus:outline-blue-400">
+                                    <textarea :custom-id="`nama_${item.id}_${team}_${num}`" :id="`nama_${item.id}_${team}_${num}`" :value="getPesertaName(item.id, team, num)" placeholder="姓名 Nama" rows="2" class="w-full text-[11px] p-1.5 border border-gray-200 rounded bg-blue-50/30 text-blue-900 font-bold resize-y min-h-[50px] leading-tight focus:outline-blue-400"></textarea>
                                 </div>
                                 
-                                <select :id="`pingat_${item.id}_${team}_${num}`" class="w-24 flex-shrink-0 text-[10px] font-bold p-1.5 border border-gray-200 rounded bg-white shadow-sm focus:outline-blue-400">
+                                <select :custom-id="`pingat_${item.id}_${team}_${num}`" :id="`pingat_${item.id}_${team}_${num}`" class="w-24 flex-shrink-0 text-[10px] font-bold p-1.5 border border-gray-200 rounded bg-white shadow-sm focus:outline-blue-400">
                                     <option value="-">- Tiada -</option>
                                     <option value="Emas">🥇 Emas 金</option>
                                     <option value="Perak">🥈 Perak 银</option>
                                     <option value="Gangsa">🥉 Gangsa 筒</option>
                                     <option value="Keempat">🎖️ Keempat 第四名</option>
                                     <option value="Kelima">🏅 Kelima 第五名</option>
-                                    <option value="Batal">❌ Batal 取消</option>
+                                    <option value="Batal">❌ Batal</option>
                                 </select>
                             </div>
                             <div class="pl-2 mt-1.5">
-                                <input type="text" :id="`catatan_${item.id}_${team}_${num}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-[10px] p-1.5 border border-red-100 rounded bg-red-50/30 text-red-600 placeholder-red-300 focus:outline-red-400">
+                                <input type="text" :custom-id="`catatan_${item.id}_${team}_${num}`" :id="`catatan_${item.id}_${team}_${num}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-[10px] p-1.5 border border-red-100 rounded bg-red-50/30 text-red-600 placeholder-red-300 focus:outline-red-400">
                             </div>
                         </div>
                     </template>
@@ -219,9 +232,12 @@
         <div v-if="!serverData.timeline.some(i => i.status === 'Sedang Dijalankan')" class="text-center text-gray-400 py-10 text-xs">Tiada acara sedang dijalankan.</div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍💼 4. GPK 审核 (Semakan) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'gpk'" class="p-4 bg-purple-50 min-h-screen">
         <h2 class="text-lg font-bold text-purple-900 mb-4 border-b border-purple-200 pb-2 flex justify-between items-center">
-            <span>👨‍💼 成绩核准</span>
+            <span>👨‍💼 成绩核准 Pengesahan Keputusan</span>
             <button @click="exportCSV" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] px-3 py-1.5 rounded shadow flex items-center gap-1 active:scale-95">
                 <i class="fa-solid fa-download"></i> Muat Turun
             </button>
@@ -260,7 +276,7 @@
     createApp({
         setup() {
             const currentRole = ref('parent');
-            const gasUrl = ref('https://script.google.com/macros/s/AKfycbzATXXWupG4wi_AGadgH1xWQvUy2VF0JssPQ2NC_P0dsz2wLIC5hVkTddQVi3j9Izx_NQ/exec');
+            const gasUrl = ref('https://script.google.com/macros/s/AKfycbw1zYvt7L_Jp2mskZucrjbgRuUDd7h1Fu3w3aRnAYFlvDacV3ab_uTNI4uwnvursV0C/exec');
             const isSyncingInBackground = ref(false);
             const authModal = ref({ show: false, target: '', password: '', error: false });
             const showPadang = ref(false); 
@@ -326,7 +342,6 @@
                 postActionSilent('updateStatus', { eventId: eventId, status: status }, false);
             };
 
-            // 🌟 获取表格动态人数 (保底给出 1 张空白卡片备用)
             const getPesertaCount = (eventId, team) => {
                 if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
                     const list = serverData.value.peserta[eventId][team];
