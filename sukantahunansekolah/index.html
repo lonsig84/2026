@@ -169,9 +169,9 @@
             <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-white rounded-xl shadow-sm p-3 border border-orange-100">
                 <div class="font-bold text-orange-900 text-sm mb-2">{{ item.name }}</div>
                 <div v-if="item.status !== 'Selesai' && !item.status.includes('Menunggu')" class="flex gap-2">
-                    <button @click="instantStatusUpdate(item.id, 'Belum Mula')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Belum Mula' ? 'bg-gray-300 text-gray-800' : 'bg-gray-100 text-gray-500 border border-gray-200'">未开始</button>
-                    <button @click="instantStatusUpdate(item.id, 'Sedang Dijalankan')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200'">进行中</button>
-                    <button @click="instantStatusUpdate(item.id, 'Tangguh')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Tangguh' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 border border-gray-200'">暂停</button>
+                    <button @click="instantStatusUpdate(item.id, 'Belum Mula')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Belum Mula' ? 'bg-gray-300 text-gray-800' : 'bg-gray-100 text-gray-500 border border-gray-200'">未开始<br>Belum Mula</button>
+                    <button @click="instantStatusUpdate(item.id, 'Sedang Dijalankan')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200'">进行中<br>Sedang Dijalankan</button>
+                    <button @click="instantStatusUpdate(item.id, 'Tangguh')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Tangguh' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 border border-gray-200'">暂停<br>Tangguh</button>
                 </div>
                 <div v-else class="text-xs text-gray-500 font-semibold italic bg-gray-50 p-2 rounded">Status: {{ translateStatus(item.status) }}</div>
             </div>
