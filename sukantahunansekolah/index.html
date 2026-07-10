@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         .bg-team-Merah { background-color: #ef4444; }
         .bg-team-Biru { background-color: #3b82f6; }
@@ -16,37 +15,41 @@
         .medal-perak { color: #9ca3af; }
         .medal-gangsa { color: #b45309; }
         * { -webkit-tap-highlight-color: transparent; }
-        
-        /* 折叠动画过渡 */
         .slide-fade-enter-active { transition: all 0.3s ease-out; }
         .slide-fade-leave-active { transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1); }
         .slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(-10px); opacity: 0; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
 
 <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg relative pb-20">
     
-    <!-- 角色导航栏 -->
-    <div class="bg-gray-900 text-white flex flex-wrap justify-around text-[10px] sm:text-xs p-1 sticky top-0 z-50 shadow-md">
-        <button @click="setRole('parent')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'parent'}" class="p-2 transition-colors"><i class="fa-solid fa-users"></i> 家长 Ibu Bapa</button>
-        <button @click="setRole('pengurus')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pengurus'}" class="p-2 transition-colors"><i class="fa-solid fa-walkie-talkie"></i> 控制 Pengurus</button>
-        <button @click="setRole('pencatat')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pencatat'}" class="p-2 transition-colors"><i class="fa-solid fa-pen-clip"></i> 录入 Pencatat</button>
-        <button @click="setRole('gpk')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'gpk'}" class="p-2 transition-colors"><i class="fa-solid fa-stamp"></i> 审核 Semakan</button>
+    <div v-if="authModal.show" class="fixed inset-0 bg-black/80 z-[100] flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl text-center relative">
+            <button @click="cancelAuth" class="absolute top-3 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <i class="fa-solid fa-lock text-3xl text-yellow-500 mb-3"></i>
+            <h3 class="font-bold text-gray-800 mb-1">Pengesahan Kata Laluan</h3>
+            <p class="text-xs text-gray-500 mb-4">Sila masukkan kata laluan untuk <b>{{ authModal.target.toUpperCase() }}</b></p>
+            <input type="password" v-model="authModal.password" placeholder="Kata Laluan" class="w-full text-center p-3 border-2 border-gray-200 rounded-lg mb-4 text-lg tracking-widest focus:border-blue-500 focus:outline-none">
+            <button @click="verifyPassword" class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg shadow-md active:scale-95 transition-transform">Masuk / 登入</button>
+            <p v-if="authModal.error" class="text-xs text-red-500 mt-3 font-bold animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> Kata laluan salah!</p>
+        </div>
     </div>
 
-    <!-- 顶部静默同步进度条 -->
+    <div class="bg-gray-900 text-white flex flex-wrap justify-around text-[10px] sm:text-xs p-1 sticky top-0 z-50 shadow-md">
+        <button @click="requestRole('parent')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'parent'}" class="p-2 transition-colors"><i class="fa-solid fa-users"></i> 家长 Ibu Bapa</button>
+        <button @click="requestRole('pengurus')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pengurus'}" class="p-2 transition-colors"><i class="fa-solid fa-walkie-talkie"></i> 控制 Pengurus</button>
+        <button @click="requestRole('pencatat')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pencatat'}" class="p-2 transition-colors"><i class="fa-solid fa-pen-clip"></i> 录入 Pencatat</button>
+        <button @click="requestRole('gpk')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'gpk'}" class="p-2 transition-colors"><i class="fa-solid fa-stamp"></i> 审核 Semakan</button>
+    </div>
+
     <div v-if="isSyncingInBackground" class="fixed top-0 left-0 h-1 bg-blue-500 z-50 animate-pulse" style="width: 100%;"></div>
 
-    <!-- ========================================== -->
-    <!-- 👨‍👩‍👧‍👦 1. 家长端 (Ibu Bapa) -->
-    <!-- ========================================== -->
     <div v-show="currentRole === 'parent'" class="p-4">
-        
-        <!-- 校徽位置 -->
         <div class="text-center mb-3 mt-2">
-            <!-- ⚠️ 请把 src 里面的文字替换成你的校徽图片链接 -->
-            <img src="你的图片Link放这里" alt="Logo Sekolah" class="h-20 mx-auto object-contain drop-shadow-sm">
+            <img src="https://lh3.googleusercontent.com/d/1OBk9JZz-KyOwRoycmCSGzAXkd32vM6h5" alt="Logo Sekolah" class="h-20 mx-auto object-contain drop-shadow-sm">
         </div>
         
         <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 运动会 Sukan Tahunan</h1>
@@ -59,17 +62,16 @@
             </div>
         </div>
 
-        <!-- 动态排序的奖牌榜 -->
         <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fa-solid fa-medal mr-1 text-yellow-500"></i> 奖牌总榜 Kedudukan Pingat</h3>
         <div class="flex flex-col gap-2 mb-6 relative">
             <transition-group name="slide-fade">
                 <div v-for="(team, index) in sortedMedals" :key="team.pasukan" class="bg-white border rounded-lg p-2 shadow-sm flex items-center justify-between transition-all duration-500">
-                    <div class="flex items-center gap-2 w-1/2">
+                    <div class="flex items-center gap-2 w-1/3">
                         <span class="text-[10px] font-bold text-gray-400 w-3">{{ index + 1 }}</span>
                         <div class="w-4 h-4 rounded-full flex-shrink-0" :class="'bg-team-' + team.pasukan"></div>
                         <span class="font-bold text-sm text-gray-700">{{ getBilingualTeam(team.pasukan) }}</span>
                     </div>
-                    <div class="flex gap-4 w-1/2 justify-end text-sm font-bold">
+                    <div class="flex gap-4 w-2/3 justify-end text-sm font-bold">
                         <div class="text-center w-8"><i class="fa-solid fa-medal medal-emas block text-lg"></i>{{ team.emas }}</div>
                         <div class="text-center w-8"><i class="fa-solid fa-medal medal-perak block text-lg"></i>{{ team.perak }}</div>
                         <div class="text-center w-8"><i class="fa-solid fa-medal medal-gangsa block text-lg"></i>{{ team.gangsa }}</div>
@@ -78,29 +80,6 @@
             </transition-group>
         </div>
 
-        <!-- 赛前田赛成绩折叠面板 -->
-        <div class="mb-5 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <button @click="showPadang = !showPadang" class="w-full p-3 flex justify-between items-center bg-blue-50 text-blue-900 font-bold text-xs active:bg-blue-100 transition-colors">
-                <span><i class="fa-solid fa-person-running text-blue-600 mr-2"></i> 赛前田赛成绩 Keputusan Acara Padang</span>
-                <i class="fa-solid transition-transform duration-300" :class="showPadang ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </button>
-            
-            <div v-show="showPadang" class="p-3 border-t border-gray-100 bg-gray-50/50">
-                <div v-for="padang in serverData.acaraPadang" :key="padang.acara" class="mb-3 last:mb-0 border-b border-gray-200 pb-3 last:border-0 last:pb-0">
-                    <div class="font-bold text-xs mb-1.5 text-gray-800">{{ padang.acara }}</div>
-                    <div class="text-[11px] grid grid-cols-1 gap-1 pl-1">
-                        <div class="flex items-start"><span class="w-5">🥇</span> <span class="font-bold text-yellow-600 whitespace-pre-line">{{ padang.emas || '-' }}</span></div>
-                        <div class="flex items-start"><span class="w-5">🥈</span> <span class="font-bold text-gray-500 whitespace-pre-line">{{ padang.perak || '-' }}</span></div>
-                        <div class="flex items-start"><span class="w-5">🥉</span> <span class="font-bold text-amber-700 whitespace-pre-line">{{ padang.gangsa || '-' }}</span></div>
-                    </div>
-                </div>
-                <div v-if="!serverData.acaraPadang || serverData.acaraPadang.length === 0" class="text-center text-xs text-gray-400 py-2">
-                    暂无成绩 Tiada rekod setakat ini.
-                </div>
-            </div>
-        </div>
-
-        <!-- 赛程流水线 -->
         <h3 class="font-bold text-gray-700 mb-2 text-sm"><i class="fa-solid fa-list-ul mr-1"></i> 赛程流水线 Senarai Acara</h3>
         <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
             <ul class="divide-y divide-gray-100">
@@ -115,13 +94,9 @@
                         <div :class="{'text-gray-700 font-bold': item.status === 'Selesai', 'font-bold text-orange-600': item.status === 'Sedang Dijalankan', 'text-gray-600': item.status === 'Belum Mula'}">
                             {{ item.name }}
                         </div>
-                        <div class="text-[10px] mt-1 font-semibold" :class="{'text-green-600': item.status === 'Selesai', 'text-gray-400': item.status === 'Belum Mula', 'text-yellow-600': item.status.includes('Menunggu')}">
-                            Status: {{ translateStatus(item.status) }}
-                        </div>
-
-                        <!-- 成绩公布板 -->
+                        
                         <div v-if="item.status === 'Selesai' && serverData.eventResults && serverData.eventResults[item.id]" class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">
-                            <div v-for="res in sortPingat(serverData.eventResults[item.id])" :key="res.pasukan" class="flex items-start gap-2 mb-1.5 last:mb-0 pt-0.5">
+                            <div v-for="res in filterParentDisplay(serverData.eventResults[item.id])" :key="res.pasukan" class="flex items-start gap-2 mb-1.5 last:mb-0 pt-0.5">
                                 <span class="w-5 text-center flex-shrink-0">
                                     <span v-if="res.pingat === 'Emas'">🥇</span>
                                     <span v-else-if="res.pingat === 'Perak'">🥈</span>
@@ -130,6 +105,23 @@
                                 <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-0.5" :class="'bg-team-' + res.pasukan"></div>
                                 <span class="font-bold text-gray-700 text-[11px] leading-tight flex-1 whitespace-pre-line">{{ res.namaMurid }}</span>
                             </div>
+
+                            <div v-if="hasBatal(serverData.eventResults[item.id])" class="mt-2 border-t border-gray-200 pt-1">
+                                <details class="text-[10px]">
+                                    <summary class="cursor-pointer text-gray-400 hover:text-red-500 font-semibold inline-flex items-center gap-1 active:scale-95">
+                                        <i class="fa-solid fa-caret-down"></i> <i class="fa-solid fa-circle-info"></i> {{ countBatal(serverData.eventResults[item.id]) }} Catatan
+                                    </summary>
+                                    <div class="mt-1 pl-2 space-y-1">
+                                        <div v-for="res in getBatalOnly(serverData.eventResults[item.id])" :key="res.pasukan" class="flex items-start gap-1">
+                                            <div class="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div>
+                                            <span class="text-gray-500 opacity-80 flex-1 leading-tight">
+                                                <span class="line-through">{{ res.namaMurid }}</span> 
+                                                <span class="text-red-500 font-bold ml-1 break-words"><br>❌ {{ res.catatan }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
                         </div>
                     </div>
                 </li>
@@ -137,40 +129,34 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 👨‍✈️ 2. 赛事控制 (Pengurus) -->
-    <!-- ========================================== -->
-    <div v-show="currentRole === 'pengurus'" class="p-4 bg-gray-800 min-h-screen">
-        <h2 class="text-lg font-bold text-white mb-4 border-b border-gray-600 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
+    <div v-show="currentRole === 'pengurus'" class="p-4 bg-orange-50 min-h-screen">
+        <h2 class="text-lg font-bold text-orange-900 mb-4 border-b border-orange-200 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
         
         <div class="space-y-3">
-            <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-gray-700 rounded p-3 border border-gray-600 transition-all duration-300">
-                <div class="font-bold text-white text-sm mb-2">{{ item.name }}</div>
+            <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-white rounded-xl shadow-sm p-4 border border-orange-100 transition-all duration-300">
+                <div class="font-bold text-orange-900 text-sm mb-3">{{ item.name }}</div>
                 
                 <div v-if="item.status !== 'Selesai' && !item.status.includes('Menunggu')" class="flex gap-2">
                     <button @click="instantStatusUpdate(item.id, 'Belum Mula')" 
-                            class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Belum Mula' ? 'bg-gray-500 text-white' : 'bg-gray-800 text-gray-400'">
+                            class="flex-1 py-2 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Belum Mula' ? 'bg-gray-300 text-gray-800' : 'bg-gray-100 text-gray-500 border border-gray-200'">
                         未开始
                     </button>
                     <button @click="instantStatusUpdate(item.id, 'Sedang Dijalankan')" 
-                            class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-500 text-white shadow-[0_0_10px_rgba(249,115,22,0.6)]' : 'bg-gray-800 text-gray-400'">
+                            class="flex-1 py-2 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-500 text-white shadow-[0_4px_10px_rgba(249,115,22,0.3)]' : 'bg-gray-100 text-gray-500 border border-gray-200'">
                         <i class="fa-solid fa-fire"></i> 进行中
                     </button>
                     <button @click="instantStatusUpdate(item.id, 'Tangguh')" 
-                            class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Tangguh' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-400'">
+                            class="flex-1 py-2 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Tangguh' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 border border-gray-200'">
                         <i class="fa-solid fa-pause"></i> 暂停
                     </button>
                 </div>
-                <div v-else class="text-xs text-gray-400 italic">
+                <div v-else class="text-xs text-gray-500 font-semibold italic bg-gray-50 p-2 rounded">
                     Status: {{ translateStatus(item.status) }}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- ⏱️ 3. 成绩录入 (Pencatat) -->
-    <!-- ========================================== -->
     <div v-show="currentRole === 'pencatat'" class="p-4 bg-blue-50 min-h-screen">
         <h2 class="text-lg font-bold text-blue-900 mb-4 border-b border-blue-200 pb-2">⏱️ 录入成绩 Pencatat</h2>
         
@@ -183,67 +169,70 @@
                         <div class="flex items-start gap-2 pt-1">
                             <div class="w-4 h-4 rounded-full mt-1 flex-shrink-0" :class="'bg-team-' + team"></div>
                             
-                            <!-- 🌟 升级优化：改为 rows="4"，并加入 resize-y 和最小高度，防止名字被折叠遮挡 🌟 -->
-                            <textarea :id="`nama_${item.id}_${team}`" :value="getPesertaName(item.id, team)" placeholder="姓名 Nama" rows="4" class="flex-1 text-[11px] p-1.5 border rounded bg-blue-50 text-blue-900 font-bold resize-y min-h-[80px] leading-tight"></textarea>
+                            <div class="flex-1 flex flex-col gap-1">
+                                <input type="text" :id="`tahun_${item.id}_${team}`" :value="getPesertaTahun(item.id, team)" placeholder="Tahun (年级)" class="w-full text-[10px] p-1 border border-blue-200 rounded bg-white text-gray-600">
+                                <textarea :id="`nama_${item.id}_${team}`" :value="getPesertaName(item.id, team)" placeholder="姓名 Nama" rows="4" class="w-full text-[11px] p-1.5 border rounded bg-blue-50 text-blue-900 font-bold resize-y min-h-[80px] leading-tight"></textarea>
+                            </div>
                             
-                            <select :id="`pingat_${item.id}_${team}`" class="w-1/3 text-xs p-1.5 border rounded bg-white mt-0.5">
+                            <select :id="`pingat_${item.id}_${team}`" class="w-28 flex-shrink-0 text-[10px] font-bold p-1.5 border rounded bg-white shadow-sm">
                                 <option value="-">- Tiada -</option>
                                 <option value="Emas">🥇 Emas</option>
                                 <option value="Perak">🥈 Perak</option>
                                 <option value="Gangsa">🥉 Gangsa</option>
+                                <option value="Keempat">🎖️ Keempat (4)</option>
+                                <option value="Kelima">🏅 Kelima (5)</option>
                                 <option value="Batal">❌ Batal</option>
                             </select>
                         </div>
-                        <input type="text" :id="`catatan_${item.id}_${team}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-xs p-1.5 border rounded bg-white text-gray-600 mt-1">
+                        <input type="text" :id="`catatan_${item.id}_${team}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-[10px] p-1.5 border rounded bg-white text-red-600 mt-1 placeholder-gray-400">
                     </div>
                 </div>
-                <button @click="submitScore(item.id)" class="w-full bg-blue-600 text-white font-bold py-2 rounded text-sm shadow active:scale-95 transition-transform">
-                    <i class="fa-solid fa-paper-plane"></i> 提交给 GPK Hantar
+                <button @click="submitScore(item.id)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow-md active:scale-95 transition-transform">
+                    <i class="fa-solid fa-paper-plane"></i> 提交 Hantar
                 </button>
             </div>
         </div>
         
         <div v-if="!serverData.timeline.some(i => i.status === 'Sedang Dijalankan')" class="text-center text-gray-400 py-10 text-xs">
-            目前没有正在进行的比赛。Tiada acara sedang dijalankan.
+            Tiada acara sedang dijalankan.
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 👨‍💼 4. GPK 审核 (Semakan) -->
-    <!-- ========================================== -->
     <div v-show="currentRole === 'gpk'" class="p-4 bg-purple-50 min-h-screen">
-        <h2 class="text-lg font-bold text-purple-900 mb-4 border-b border-purple-200 pb-2">👨‍💼 成绩核准 Semakan GPK</h2>
+        <h2 class="text-lg font-bold text-purple-900 mb-4 border-b border-purple-200 pb-2 flex justify-between items-center">
+            <span>👨‍💼 成绩核准</span>
+            <button @click="exportCSV" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] px-3 py-1.5 rounded shadow flex items-center gap-1 active:scale-95">
+                <i class="fa-solid fa-download"></i> Muat Turun
+            </button>
+        </h2>
         
         <div v-for="(results, eventId) in serverData.pendingApprovals" :key="'gpk_'+eventId" class="bg-white rounded-xl shadow-md border border-purple-200 overflow-hidden mb-4">
-            <div class="bg-purple-600 text-white p-2 text-sm font-bold">
-                {{ getEventName(eventId) }}
+            <div class="bg-purple-600 text-white p-2 text-[11px] font-bold">
+                [{{ getEventKategori(eventId) }}] {{ getEventName(eventId) }}
             </div>
             <div class="p-3">
                 <table class="w-full text-xs text-left mb-3">
-                    <tr v-for="res in results" :key="res.pasukan" class="border-b">
+                    <tr v-for="res in results" :key="res.pasukan" class="border-b last:border-0">
                         <td class="py-2 align-top"><div class="w-3 h-3 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div></td>
                         <td class="py-2 pl-1 pr-2">
                             <div class="font-bold text-[11px] leading-tight whitespace-pre-line break-words">{{ res.namaMurid }}</div>
+                            <div class="text-[9px] text-gray-400 mt-0.5">{{ res.tahun }}</div>
                             <div v-if="res.catatan" class="text-[10px] text-red-500 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> {{ res.catatan }}</div>
                         </td>
-                        <td class="py-2 font-bold text-right align-top w-16" 
-                            :class="{'medal-emas': res.pingat==='Emas', 'medal-perak': res.pingat==='Perak', 'medal-gangsa': res.pingat==='Gangsa', 'text-red-600': res.pingat==='Batal'}">
-                            {{ res.pingat === 'Batal' ? '❌ Batal' : res.pingat }}
+                        <td class="py-2 font-bold text-right align-top w-20" 
+                            :class="{'medal-emas': res.pingat==='Emas', 'medal-perak': res.pingat==='Perak', 'medal-gangsa': res.pingat==='Gangsa', 'text-gray-600': res.pingat==='Keempat' || res.pingat==='Kelima', 'text-red-600': res.pingat==='Batal'}">
+                            {{ formatPingatGPK(res.pingat) }}
                         </td>
                     </tr>
                 </table>
                 <div class="flex gap-2">
-                    <button @click="gpkAction('approveResult', eventId)" class="flex-1 bg-green-500 text-white font-bold py-2 rounded text-xs shadow-sm active:scale-95 transition-transform">
-                        ✅ Sahkan (核准)
-                    </button>
-                    <button @click="gpkAction('rejectResult', eventId)" class="bg-red-100 text-red-600 font-bold py-2 px-3 rounded text-xs active:scale-95 transition-transform">
-                        Tolak
-                    </button>
+                    <button @click="gpkAction('approveResult', eventId)" class="flex-1 bg-green-500 text-white font-bold py-2 rounded text-xs shadow-sm active:scale-95 transition-transform">✅ Sahkan</button>
+                    <button @click="gpkAction('rejectResult', eventId)" class="bg-red-100 text-red-600 font-bold py-2 px-3 rounded text-xs active:scale-95 transition-transform">Tolak</button>
                 </div>
             </div>
         </div>
         <div v-if="Object.keys(serverData.pendingApprovals || {}).length === 0" class="text-center text-gray-400 py-10 text-xs">
-            目前没有待审核的成绩。Tiada semakan baru.
+            Tiada semakan baru.
         </div>
     </div>
 
@@ -255,24 +244,35 @@
     createApp({
         setup() {
             const currentRole = ref('parent');
-            
-            // ⚠️ 记得换成你自己的 GAS 链接
             const gasUrl = ref('https://script.google.com/macros/s/AKfycbzATXXWupG4wi_AGadgH1xWQvUy2VF0JssPQ2NC_P0dsz2wLIC5hVkTddQVi3j9Izx_NQ/exec');
-            
             const isSyncingInBackground = ref(false);
-            const showPadang = ref(false); 
+            const authModal = ref({ show: false, target: '', password: '', error: false });
             
             const serverData = ref({
                 currentEvent: { name: 'Sila tunggu...', status: 'Belum Mula' },
-                timeline: [],
-                medals: [],
-                pendingApprovals: {},
-                peserta: {},
-                eventResults: {},
-                acaraPadang: []
+                timeline: [], medals: [], pendingApprovals: {}, peserta: {}, eventResults: {}, acaraPadang: [], passwords: {}
             });
 
-            // 动态排序奖牌榜
+            const requestRole = (role) => {
+                if (role === 'parent') { currentRole.value = 'parent'; return; }
+                if (localStorage.getItem('auth_' + role) === serverData.value.passwords[role]) {
+                    currentRole.value = role;
+                } else {
+                    authModal.value = { show: true, target: role, password: '', error: false };
+                }
+            };
+            const verifyPassword = () => {
+                const target = authModal.value.target;
+                if (authModal.value.password === serverData.value.passwords[target]) {
+                    localStorage.setItem('auth_' + target, authModal.value.password);
+                    currentRole.value = target;
+                    authModal.value.show = false;
+                } else {
+                    authModal.value.error = true;
+                }
+            };
+            const cancelAuth = () => { authModal.value.show = false; };
+
             const sortedMedals = computed(() => {
                 if (!serverData.value.medals) return [];
                 return [...serverData.value.medals].sort((a, b) => {
@@ -282,46 +282,26 @@
                 });
             });
 
-            const setRole = (role) => { currentRole.value = role; };
-
             const fetchData = () => {
                 if (!gasUrl.value || gasUrl.value.includes('AKfycb...')) return; 
-                fetch(gasUrl.value)
-                    .then(res => res.json())
-                    .then(data => {
-                        serverData.value = data;
-                    })
-                    .catch(err => console.error("Fetch Data Error:", err));
+                fetch(gasUrl.value).then(res => res.json()).then(data => { serverData.value = data; }).catch(e => console.log(e));
             };
 
             const postActionSilent = (action, payload, shouldRefetch = false) => {
-                if (!gasUrl.value || gasUrl.value.includes('AKfycb...')) {
-                    alert("请先配置 GAS URL！"); return;
-                }
                 isSyncingInBackground.value = true;
                 payload.action = action;
-                
                 fetch(gasUrl.value, { method: 'POST', body: JSON.stringify(payload) })
                 .then(res => res.json())
-                .then(data => {
-                    if(!data.success) console.error("Error: " + data.message);
-                    if (shouldRefetch) fetchData(); 
-                })
-                .catch(err => console.error("网络错误"))
-                .finally(() => {
-                    isSyncingInBackground.value = false;
-                });
+                .then(data => { if (shouldRefetch) fetchData(); })
+                .finally(() => { isSyncingInBackground.value = false; });
             };
 
             const instantStatusUpdate = (eventId, status) => {
                 const ev = serverData.value.timeline.find(i => i.id === eventId);
                 if (ev) {
                     ev.status = status;
-                    if (status === 'Sedang Dijalankan' || status === 'Tangguh') {
-                        serverData.value.currentEvent = { name: ev.name, status: status };
-                    } else if (status === 'Belum Mula' && serverData.value.currentEvent.name === ev.name) {
-                        serverData.value.currentEvent = { name: 'Sila tunggu...', status: 'Belum Mula' };
-                    }
+                    if (status === 'Sedang Dijalankan' || status === 'Tangguh') serverData.value.currentEvent = { name: ev.name, status: status };
+                    else if (status === 'Belum Mula' && serverData.value.currentEvent.name === ev.name) serverData.value.currentEvent = { name: 'Sila tunggu...', status: 'Belum Mula' };
                 }
                 postActionSilent('updateStatus', { eventId: eventId, status: status }, false);
             };
@@ -330,12 +310,12 @@
                 const results = [];
                 ['Merah', 'Biru', 'Hijau'].forEach(team => {
                     const nama = document.getElementById(`nama_${eventId}_${team}`).value;
+                    const tahun = document.getElementById(`tahun_${eventId}_${team}`).value;
                     const pingat = document.getElementById(`pingat_${eventId}_${team}`).value;
                     const catatan = document.getElementById(`catatan_${eventId}_${team}`).value;
-                    results.push({ pasukan: team, nama: nama, pingat: pingat, catatan: catatan });
+                    results.push({ pasukan: team, nama: nama, tahun: tahun, pingat: pingat, catatan: catatan });
                 });
-                
-                if (confirm("Adakah anda pasti hantar ke GPK?")) {
+                if (confirm("Hantar ke GPK?")) {
                     const ev = serverData.value.timeline.find(i => i.id === eventId);
                     if (ev) ev.status = 'Menunggu Pengesahan GPK';
                     postActionSilent('submitResult', { eventId: eventId, results: results }, true);
@@ -347,62 +327,111 @@
                 postActionSilent(action, { eventId: eventId }, true);
             };
 
-            const getEventName = (id) => {
-                const ev = serverData.value.timeline.find(i => i.id === id);
-                return ev ? ev.name : id;
-            };
-            
-            const getBilingualTeam = (pasukan) => {
-                const map = {
-                    'Merah': 'Merah 红队',
-                    'Biru': 'Biru 蓝队',
-                    'Hijau': 'Hijau 绿队'
+            // 🌟 核心升级：基于 Alt+Enter 换行的智能合并拆分导出算法 🌟
+            const exportCSV = () => {
+                let report = {}; // 格式: { "Tahun|Kategori|Pasukan|Nama": ["项目(名次)", ...] }
+                
+                // 辅助提取器：处理带有 Alt+Enter(\n) 的多行文本
+                const parseAndBuildReport = (rawNama, defaultTahun, kategori, pasukan, achievementStr) => {
+                    if (!rawNama) return;
+                    
+                    // 用换行符拆分多行名字（Alt+Enter 的产物）
+                    let lines = rawNama.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    
+                    lines.forEach(line => {
+                        // 正则表达式：同时兼容英文()和中文（）括号
+                        let match = line.match(/[(（]([^)）]+)[)）]/);
+                        let finalTahun = defaultTahun || 'Tiada';
+                        let cleanName = line;
+                        
+                        if (match) {
+                            finalTahun = match[1].trim(); // 提取出括号里的班级/年级
+                            cleanName = line.replace(/[(（][^)）]+[)）]/, '').trim(); // 净化名字，去掉括号
+                        }
+                        
+                        let key = `${finalTahun}|${kategori || '-'} |${pasukan}|${cleanName}`;
+                        if (!report[key]) report[key] = [];
+                        report[key].push(achievementStr);
+                    });
                 };
-                return map[pasukan] || pasukan;
+
+                // 1. 自动抽取塞跑项目（Balapan）
+                Object.keys(serverData.value.eventResults).forEach(eventId => {
+                    let eventArray = serverData.value.eventResults[eventId];
+                    let evName = getEventName(eventId);
+                    eventArray.forEach(res => {
+                        let award = `${evName} (${res.pingat === 'Batal' ? 'Catatan: ' + res.catatan : res.pingat})`;
+                        parseAndBuildReport(res.namaMurid, res.tahun, res.kategori, res.pasukan, award);
+                    });
+                });
+
+                // 2. 自动抽取田赛项目（Padang）
+                serverData.value.acaraPadang.forEach(res => {
+                    let award = `${res.acara} (${res.pingat})`;
+                    parseAndBuildReport(res.namaMurid, res.tahun, res.kategori, res.pasukan, award);
+                });
+
+                // 3. 构建 CSV 文本
+                let csvContent = "Tahun,Kategori,Pasukan,Nama Murid,Pencapaian\n";
+                
+                // 智能多重排序：优先按 Tahun 班级字面排序，让老师能按班级一刀切
+                let sortedKeys = Object.keys(report).sort((a, b) => a.localeCompare(b));
+                
+                sortedKeys.forEach(key => {
+                    let parts = key.split('|');
+                    let pencapaian = report[key].join('; ');
+                    csvContent += `${parts[0]},${parts[1]},${parts[2]},"${parts[3]}","${pencapaian}"\n`;
+                });
+
+                // 触发无损下载
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", "Senarai_Pemenang_Sukan_Tahunan_2026.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             };
 
-            const translateStatus = (status) => {
-                const map = {
-                    'Belum Mula': 'Belum Mula',
-                    'Sedang Dijalankan': 'Sedang Dijalankan',
-                    'Tangguh': 'Tangguh',
-                    'Selesai': 'Selesai',
-                    'Menunggu Pengesahan GPK': 'Menunggu GPK...'
-                };
-                return map[status] || status;
-            };
-            
+            const getEventName = (id) => { const ev = serverData.value.timeline.find(i => i.id === id); return ev ? ev.name : id; };
+            const getEventKategori = (id) => { const ev = serverData.value.timeline.find(i => i.id === id); return ev ? ev.kategori : ''; };
+            const getBilingualTeam = (pasukan) => { const map = { 'Merah': 'Merah 红队', 'Biru': 'Biru 蓝队', 'Hijau': 'Hijau 绿队' }; return map[pasukan] || pasukan; };
+            const translateStatus = (status) => { const map = { 'Belum Mula': 'Belum Mula', 'Sedang Dijalankan': 'Sedang Dijalankan', 'Tangguh': 'Tangguh', 'Selesai': 'Selesai', 'Menunggu Pengesahan GPK': 'Menunggu GPK...' }; return map[status] || status; };
             const statusColor = (status) => {
                 if (status === 'Sedang Dijalankan') return 'bg-gradient-to-r from-orange-500 to-red-500 shadow-[0_4px_15px_rgba(249,115,22,0.4)]';
                 if (status === 'Tangguh') return 'bg-red-600 animate-pulse';
                 return 'bg-gradient-to-r from-gray-700 to-gray-900';
             };
+            const getPesertaName = (eventId, team) => { return (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) ? serverData.value.peserta[eventId][team].nama : ""; };
+            const getPesertaTahun = (eventId, team) => { return (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) ? serverData.value.peserta[eventId][team].tahun : ""; };
 
-            const getPesertaName = (eventId, team) => {
-                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
-                    return serverData.value.peserta[eventId][team];
-                }
-                return "";
+            const filterParentDisplay = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Emas' || r.pingat === 'Perak' || r.pingat === 'Gangsa'); };
+            const hasBatal = (resultsArray) => { return resultsArray.some(r => r.pingat === 'Batal'); };
+            const countBatal = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Batal').length; };
+            const getBatalOnly = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Batal'); };
+
+            const formatPingatGPK = (pingat) => {
+                const pMap = { "Emas": "🥇 Emas", "Perak": "🥈 Perak", "Gangsa": "🥉 Gangsa", "Keempat": "4️⃣ Keempat", "Kelima": "5️⃣ Kelima", "Batal": "❌ Batal" };
+                return pMap[pingat] || pingat;
             };
 
             const sortPingat = (resultsArray) => {
-                const order = { "Emas": 1, "Perak": 2, "Gangsa": 3 };
+                const order = { "Emas": 1, "Perak": 2, "Gangsa": 3, "Keempat": 4, "Kelima": 5, "Batal": 6 };
                 return [...resultsArray].sort((a, b) => order[a.pingat] - order[b.pingat]);
             };
 
             onMounted(() => {
                 if (gasUrl.value && !gasUrl.value.includes('AKfycb...')) fetchData();
-                
                 setInterval(() => {
-                    if (gasUrl.value && !gasUrl.value.includes('AKfycb...') && (currentRole.value === 'parent' || currentRole.value === 'gpk')) {
-                        fetchData();
-                    }
+                    if (gasUrl.value && !gasUrl.value.includes('AKfycb...') && (currentRole.value === 'parent' || currentRole.value === 'gpk')) fetchData();
                 }, 5000); 
             });
 
             return {
-                currentRole, isSyncingInBackground, serverData, showPadang, sortedMedals,
-                setRole, instantStatusUpdate, submitScore, gpkAction, getEventName, getBilingualTeam, translateStatus, statusColor, getPesertaName, sortPingat
+                currentRole, isSyncingInBackground, serverData, sortedMedals, authModal, requestRole, verifyPassword, cancelAuth,
+                instantStatusUpdate, submitScore, gpkAction, exportCSV, getEventName, getEventKategori, getBilingualTeam, translateStatus, 
+                statusColor, getPesertaName, getPesertaTahun, filterParentDisplay, hasBatal, countBatal, getBatalOnly, formatPingatGPK, sortPingat
             };
         }
     }).mount('#app');
