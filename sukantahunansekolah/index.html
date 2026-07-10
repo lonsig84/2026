@@ -61,20 +61,35 @@
         <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
             <ul class="divide-y divide-gray-100">
                 <li v-for="item in serverData.timeline" :key="item.id" class="p-3 text-xs flex items-start gap-2 transition-colors duration-300" :class="{'bg-orange-50': item.status === 'Sedang Dijalankan'}">
-                    <div class="mt-0.5">
+                    
+                    <div class="mt-0.5 w-4 text-center">
                         <i v-if="item.status === 'Selesai'" class="fa-solid fa-circle-check text-green-500"></i>
                         <i v-else-if="item.status === 'Sedang Dijalankan'" class="fa-solid fa-fire text-orange-500 animate-pulse"></i>
                         <i v-else-if="item.status === 'Tangguh'" class="fa-solid fa-triangle-exclamation text-red-500"></i>
                         <i v-else class="fa-regular fa-circle text-gray-300"></i>
                     </div>
-                    <div>
-                        <div :class="{'text-gray-400 line-through': item.status === 'Selesai', 'font-bold text-orange-600': item.status === 'Sedang Dijalankan'}">
+
+                    <div class="flex-1 pb-1">
+                        <div :class="{'text-gray-700 font-bold': item.status === 'Selesai', 'font-bold text-orange-600': item.status === 'Sedang Dijalankan', 'text-gray-600': item.status === 'Belum Mula'}">
                             {{ item.name }}
                         </div>
-                        <div v-if="item.status.includes('Menunggu')" class="text-[10px] text-yellow-600 font-bold mt-1">
-                            <i class="fa-solid fa-clock"></i> GPK 审核中 Semakan GPK...
+                        
+                        <div class="text-[10px] mt-1 font-semibold" :class="{'text-green-600': item.status === 'Selesai', 'text-gray-400': item.status === 'Belum Mula', 'text-yellow-600': item.status.includes('Menunggu')}">
+                            Status: {{ translateStatus(item.status) }}
                         </div>
-                    </div>
+
+                        <div v-if="item.status === 'Selesai' && serverData.eventResults && serverData.eventResults[item.id]" class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">
+                            <div v-for="res in sortPingat(serverData.eventResults[item.id])" :key="res.pasukan" class="flex items-center gap-2 mb-1.5 last:mb-0">
+                                <span class="w-5 text-center">
+                                    <span v-if="res.pingat === 'Emas'">🥇</span>
+                                    <span v-else-if="res.pingat === 'Perak'">🥈</span>
+                                    <span v-else-if="res.pingat === 'Gangsa'">🥉</span>
+                                </span>
+                                <div class="w-2.5 h-2.5 rounded-full" :class="'bg-team-' + res.pasukan"></div>
+                                <span class="font-bold text-gray-700">{{ res.namaMurid }}</span>
+                            </div>
+                        </div>
+                        </div>
                 </li>
             </ul>
         </div>
@@ -82,7 +97,6 @@
 
     <div v-show="currentRole === 'pengurus'" class="p-4 bg-gray-800 min-h-screen">
         <h2 class="text-lg font-bold text-white mb-4 border-b border-gray-600 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
-        <p class="text-[10px] text-gray-400 mb-3">✅ 操作将瞬间生效，并在后台静默同步。</p>
         
         <div class="space-y-3">
             <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-gray-700 rounded p-3 border border-gray-600 transition-all duration-300">
@@ -103,7 +117,7 @@
                     </button>
                 </div>
                 <div v-else class="text-xs text-gray-400 italic">
-                    Status: {{ item.status }}
+                    Status: {{ translateStatus(item.status) }}
                 </div>
             </div>
         </div>
@@ -191,14 +205,15 @@
             // ⚠️ 记得换成你自己的 GAS 链接
             const gasUrl = ref('https://script.google.com/macros/s/AKfycbzATXXWupG4wi_AGadgH1xWQvUy2VF0JssPQ2NC_P0dsz2wLIC5hVkTddQVi3j9Izx_NQ/exec');
             
-            const isSyncingInBackground = ref(false); // 细小的静默进度条
+            const isSyncingInBackground = ref(false);
             
             const serverData = ref({
                 currentEvent: { name: 'Sila tunggu...', status: 'Belum Mula' },
                 timeline: [],
                 medals: [],
                 pendingApprovals: {},
-                peserta: {} 
+                peserta: {},
+                eventResults: {} 
             });
 
             const setRole = (role) => { currentRole.value = role; };
@@ -213,7 +228,6 @@
                     .catch(err => console.error("Fetch Data Error:", err));
             };
 
-            // 🚀 核心优化1：底层发送器 (静默发送，不阻挡画面)
             const postActionSilent = (action, payload, shouldRefetch = false) => {
                 if (!gasUrl.value || gasUrl.value.includes('AKfycb...')) {
                     alert("请先配置 GAS URL！"); return;
@@ -225,7 +239,7 @@
                 .then(res => res.json())
                 .then(data => {
                     if(!data.success) console.error("Error: " + data.message);
-                    if (shouldRefetch) fetchData(); // 只有像核准成绩这种需要后台算分的，才重新拉取最新数据
+                    if (shouldRefetch) fetchData(); 
                 })
                 .catch(err => console.error("网络错误"))
                 .finally(() => {
@@ -233,9 +247,7 @@
                 });
             };
 
-            // 🚀 核心优化2：Pengurus 瞬间改状态 (Optimistic UI)
             const instantStatusUpdate = (eventId, status) => {
-                // 1. 瞬间改写前端本地数据，用户立刻看到变化！
                 const ev = serverData.value.timeline.find(i => i.id === eventId);
                 if (ev) {
                     ev.status = status;
@@ -245,11 +257,9 @@
                         serverData.value.currentEvent = { name: 'Sila tunggu...', status: 'Belum Mula' };
                     }
                 }
-                // 2. 在背景默默发给 GAS
                 postActionSilent('updateStatus', { eventId: eventId, status: status }, false);
             };
 
-            // 🚀 核心优化3：Pencatat 提交瞬间清屏
             const submitScore = (eventId) => {
                 const results = [];
                 ['Merah', 'Biru', 'Hijau'].forEach(team => {
@@ -260,24 +270,19 @@
                 });
                 
                 if (confirm("Adakah anda pasti hantar ke GPK?")) {
-                    // 瞬间把状态改成等待审核，让输入框立刻消失
                     const ev = serverData.value.timeline.find(i => i.id === eventId);
                     if (ev) ev.status = 'Menunggu Pengesahan GPK';
                     
-                    postActionSilent('submitResult', { eventId: eventId, results: results }, false);
+                    // 确保提交后立刻去服务器拿新的状态，让GPK能看到
+                    postActionSilent('submitResult', { eventId: eventId, results: results }, true);
                 }
             };
 
-            // 🚀 核心优化4：GPK 核准瞬间清屏，然后拉取新奖牌榜
             const gpkAction = (action, eventId) => {
-                // 先把该卡片从界面上瞬间删掉，让 GPK 可以继续批改下一个
                 delete serverData.value.pendingApprovals[eventId];
-                
-                // 发送给后台，并要求后台完成后刷新一下页面 (为了拿最新的奖牌数量)
                 postActionSilent(action, { eventId: eventId }, true);
             };
 
-            // 辅助函数
             const getEventName = (id) => {
                 const ev = serverData.value.timeline.find(i => i.id === id);
                 return ev ? ev.name : id;
@@ -285,11 +290,11 @@
 
             const translateStatus = (status) => {
                 const map = {
-                    'Belum Mula': '⏳ 未开始 Belum Mula',
-                    'Sedang Dijalankan': '🔥 进行中 Sedang Dijalankan',
-                    'Tangguh': '⚠️ 紧急暂停 Tangguh',
-                    'Selesai': '✅ 已结束 Selesai',
-                    'Menunggu Pengesahan GPK': 'Menunggu Semakan GPK...'
+                    'Belum Mula': 'Belum Mula',
+                    'Sedang Dijalankan': 'Sedang Dijalankan',
+                    'Tangguh': 'Tangguh',
+                    'Selesai': 'Selesai',
+                    'Menunggu Pengesahan GPK': 'Menunggu GPK...'
                 };
                 return map[status] || status;
             };
@@ -307,20 +312,26 @@
                 return "";
             };
 
+            // 按照金银铜的顺序给成绩排序，方便展示
+            const sortPingat = (resultsArray) => {
+                const order = { "Emas": 1, "Perak": 2, "Gangsa": 3 };
+                return [...resultsArray].sort((a, b) => order[a.pingat] - order[b.pingat]);
+            };
+
             onMounted(() => {
                 if (gasUrl.value && !gasUrl.value.includes('AKfycb...')) fetchData();
                 
-                // 前台家长每 15 秒更新一次即可
+                // 🚀 将 15 秒更新缩短为 5 秒极速更新
                 setInterval(() => {
                     if (gasUrl.value && !gasUrl.value.includes('AKfycb...') && (currentRole.value === 'parent' || currentRole.value === 'gpk')) {
                         fetchData();
                     }
-                }, 15000);
+                }, 5000); 
             });
 
             return {
                 currentRole, isSyncingInBackground, serverData,
-                setRole, instantStatusUpdate, submitScore, gpkAction, getEventName, translateStatus, statusColor, getPesertaName
+                setRole, instantStatusUpdate, submitScore, gpkAction, getEventName, translateStatus, statusColor, getPesertaName, sortPingat
             };
         }
     }).mount('#app');
