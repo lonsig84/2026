@@ -20,6 +20,14 @@
         .slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(-10px); opacity: 0; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
+        .glow-active {
+            animation: breath-glow 2s infinite;
+        }
+        @keyframes breath-glow {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+            50% { transform: scale(1.02); box-shadow: 0 0 25px rgba(255,255,255,0.4); } 
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
@@ -59,11 +67,41 @@
         
         <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 义乐新村华小常年运动会<br>Sukan Tahunan SJCK Kg Baru Gedok</h1>
         
-        <div class="rounded-xl p-4 mb-5 mt-4 text-white shadow-md relative overflow-hidden transition-colors duration-300" :class="statusColor(serverData.currentEvent.id, serverData.currentEvent.status)">
-            <h2 class="text-xs font-bold opacity-90 mb-1">当前赛况 Acara Semasa</h2>
-            <div class="text-lg font-bold leading-tight drop-shadow-md">{{ serverData.currentEvent.name }}</div>
-            <div class="mt-2 text-xs font-bold bg-black/30 inline-block px-2 py-1 rounded-md border border-white/20">
-                {{ translateStatus(serverData.currentEvent.status) }}
+        <!-- ✅ 贴上这段全新的升级版代码 ✅ -->
+        <div class="rounded-2xl p-5 mb-5 mt-4 text-white relative overflow-hidden transition-colors duration-500" 
+             :class="[statusColor(serverData.currentEvent.id, serverData.currentEvent.status), serverData.currentEvent.status === 'Sedang Dijalankan' ? 'glow-active' : 'shadow-md']">
+            
+            <div class="flex justify-between items-start">
+                <div class="flex-1 pr-4">
+                    <!-- 状态标签 (半透明磨砂效果 + 闪烁红点) -->
+                    <span v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="bg-white/30 text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded backdrop-blur-sm border border-white/40 shadow-sm inline-flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> LIVE NOW • 正在进行
+                    </span>
+                    <span v-else class="bg-black/30 text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded border border-white/20 inline-block">
+                        {{ translateStatus(serverData.currentEvent.status) }}
+                    </span>
+                    
+                    <!-- 赛事标题 -->
+                    <h3 class="text-xl font-black mt-3 leading-tight drop-shadow-md">
+                        {{ serverData.currentEvent.name }}
+                    </h3>
+                    
+                    <!-- 情境引导语 -->
+                    <p v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="text-[11px] text-white/90 mt-2 font-medium">
+                        请家长们为孩子加油打气！Diminta ibubapa memberi sokongan kepada anak！
+                    </p>
+                    <p v-else-if="serverData.currentEvent.status === 'Tangguh'" class="text-[11px] text-white/90 mt-2 font-medium">
+                        ⚠️ 赛事由于突发状况暂停。请稍作等待。Pertandingan ditangguhkan, sila tunggu sebentar.
+                    </p>
+                </div>
+                
+                <!-- 弹跳图标 (FontAwesome 图标) -->
+                <div v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="flex-shrink-0 opacity-90 mt-2">
+                    <i class="fa-solid fa-person-running text-4xl animate-bounce drop-shadow-lg"></i>
+                </div>
+                <div v-else-if="serverData.currentEvent.status === 'Tangguh'" class="flex-shrink-0 opacity-90 mt-2">
+                    <i class="fa-solid fa-triangle-exclamation text-4xl animate-pulse text-yellow-300 drop-shadow-lg"></i>
+                </div>
             </div>
         </div>
 
