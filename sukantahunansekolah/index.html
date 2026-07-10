@@ -16,6 +16,11 @@
         .medal-perak { color: #9ca3af; }
         .medal-gangsa { color: #b45309; }
         * { -webkit-tap-highlight-color: transparent; }
+        
+        /* 折叠动画过渡 */
+        .slide-fade-enter-active { transition: all 0.3s ease-out; }
+        .slide-fade-leave-active { transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1); }
+        .slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(-10px); opacity: 0; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
@@ -31,10 +36,20 @@
 
     <div v-if="isSyncingInBackground" class="fixed top-0 left-0 h-1 bg-blue-500 z-50 animate-pulse" style="width: 100%;"></div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍👩‍👧‍👦 1. 家长端 (Ibu Bapa) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'parent'" class="p-4">
+        
+        <!-- 🌟 新增：校徽位置 🌟 -->
+        <div class="text-center mb-3 mt-2">
+            <!-- ⚠️ 请把 src 里面的文字替换成你的校徽图片链接 -->
+            <img src="https://lh3.googleusercontent.com/d/1OBk9JZz-KyOwRoycmCSGzAXkd32vM6h5" alt="Logo Sekolah" class="h-20 mx-auto object-contain drop-shadow-sm">
+        </div>
+        
         <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 运动会 Sukan Tahunan</h1>
         
-        <div class="rounded-xl p-4 mb-5 text-white shadow-md relative overflow-hidden transition-colors duration-300" :class="statusColor(serverData.currentEvent.status)">
+        <div class="rounded-xl p-4 mb-5 mt-4 text-white shadow-md relative overflow-hidden transition-colors duration-300" :class="statusColor(serverData.currentEvent.status)">
             <h2 class="text-xs font-bold opacity-90 mb-1">当前赛况 Acara Semasa</h2>
             <div class="text-lg font-bold leading-tight drop-shadow-md">{{ serverData.currentEvent.name }}</div>
             <div class="mt-2 text-xs font-bold bg-black/30 inline-block px-2 py-1 rounded-md border border-white/20">
@@ -42,42 +57,71 @@
             </div>
         </div>
 
+        <!-- 🌟 新增：动态排序的奖牌榜 🌟 -->
         <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fa-solid fa-medal mr-1 text-yellow-500"></i> 奖牌总榜 Kedudukan Pingat</h3>
-        <div class="flex flex-col gap-2 mb-6">
-            <div v-for="team in serverData.medals" :key="team.pasukan" class="bg-white border rounded-lg p-2 shadow-sm flex items-center justify-between">
-                <div class="flex items-center gap-2 w-1/3">
-                    <div class="w-4 h-4 rounded-full" :class="'bg-team-' + team.pasukan"></div>
-                    <span class="font-bold text-sm text-gray-700 uppercase">{{ team.pasukan }}</span>
+        <div class="flex flex-col gap-2 mb-6 relative">
+            <!-- 使用 Vue 的 transition-group 让排名变化时有动画 -->
+            <transition-group name="slide-fade">
+                <div v-for="(team, index) in sortedMedals" :key="team.pasukan" class="bg-white border rounded-lg p-2 shadow-sm flex items-center justify-between transition-all duration-500">
+                    <div class="flex items-center gap-2 w-1/2">
+                        <!-- 排名数字 -->
+                        <span class="text-[10px] font-bold text-gray-400 w-3">{{ index + 1 }}</span>
+                        <div class="w-4 h-4 rounded-full flex-shrink-0" :class="'bg-team-' + team.pasukan"></div>
+                        <!-- 双语队伍名 -->
+                        <span class="font-bold text-sm text-gray-700">{{ getBilingualTeam(team.pasukan) }}</span>
+                    </div>
+                    <div class="flex gap-4 w-1/2 justify-end text-sm font-bold">
+                        <div class="text-center w-8"><i class="fa-solid fa-medal medal-emas block text-lg"></i>{{ team.emas }}</div>
+                        <div class="text-center w-8"><i class="fa-solid fa-medal medal-perak block text-lg"></i>{{ team.perak }}</div>
+                        <div class="text-center w-8"><i class="fa-solid fa-medal medal-gangsa block text-lg"></i>{{ team.gangsa }}</div>
+                    </div>
                 </div>
-                <div class="flex gap-4 w-2/3 justify-end text-sm font-bold">
-                    <div class="text-center w-8"><i class="fa-solid fa-medal medal-emas block text-lg"></i>{{ team.emas }}</div>
-                    <div class="text-center w-8"><i class="fa-solid fa-medal medal-perak block text-lg"></i>{{ team.perak }}</div>
-                    <div class="text-center w-8"><i class="fa-solid fa-medal medal-gangsa block text-lg"></i>{{ team.gangsa }}</div>
+            </transition-group>
+        </div>
+
+        <!-- 🌟 新增：赛前田赛成绩折叠面板 🌟 -->
+        <div class="mb-5 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <button @click="showPadang = !showPadang" class="w-full p-3 flex justify-between items-center bg-blue-50 text-blue-900 font-bold text-xs active:bg-blue-100 transition-colors">
+                <span><i class="fa-solid fa-person-running text-blue-600 mr-2"></i> 赛前田赛成绩 Keputusan Acara Padang</span>
+                <i class="fa-solid transition-transform duration-300" :class="showPadang ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            
+            <div v-show="showPadang" class="p-3 border-t border-gray-100 bg-gray-50/50">
+                <div v-for="padang in serverData.acaraPadang" :key="padang.acara" class="mb-3 last:mb-0 border-b border-gray-200 pb-3 last:border-0 last:pb-0">
+                    <div class="font-bold text-xs mb-1.5 text-gray-800">{{ padang.acara }}</div>
+                    <div class="text-[11px] grid grid-cols-1 gap-1 pl-1">
+                        <div class="flex items-center"><span class="w-5">🥇</span> <span class="font-bold text-yellow-600">{{ padang.emas || '-' }}</span></div>
+                        <div class="flex items-center"><span class="w-5">🥈</span> <span class="font-bold text-gray-500">{{ padang.perak || '-' }}</span></div>
+                        <div class="flex items-center"><span class="w-5">🥉</span> <span class="font-bold text-amber-700">{{ padang.gangsa || '-' }}</span></div>
+                    </div>
+                </div>
+                <!-- 如果没数据则显示 -->
+                <div v-if="!serverData.acaraPadang || serverData.acaraPadang.length === 0" class="text-center text-xs text-gray-400 py-2">
+                    暂无成绩 Tiada rekod setakat ini.
                 </div>
             </div>
         </div>
 
+        <!-- 赛程流水线 -->
         <h3 class="font-bold text-gray-700 mb-2 text-sm"><i class="fa-solid fa-list-ul mr-1"></i> 赛程流水线 Senarai Acara</h3>
         <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
             <ul class="divide-y divide-gray-100">
                 <li v-for="item in serverData.timeline" :key="item.id" class="p-3 text-xs flex items-start gap-2 transition-colors duration-300" :class="{'bg-orange-50': item.status === 'Sedang Dijalankan'}">
-                    
                     <div class="mt-0.5 w-4 text-center">
                         <i v-if="item.status === 'Selesai'" class="fa-solid fa-circle-check text-green-500"></i>
                         <i v-else-if="item.status === 'Sedang Dijalankan'" class="fa-solid fa-fire text-orange-500 animate-pulse"></i>
                         <i v-else-if="item.status === 'Tangguh'" class="fa-solid fa-triangle-exclamation text-red-500"></i>
                         <i v-else class="fa-regular fa-circle text-gray-300"></i>
                     </div>
-
                     <div class="flex-1 pb-1">
                         <div :class="{'text-gray-700 font-bold': item.status === 'Selesai', 'font-bold text-orange-600': item.status === 'Sedang Dijalankan', 'text-gray-600': item.status === 'Belum Mula'}">
                             {{ item.name }}
                         </div>
-                        
                         <div class="text-[10px] mt-1 font-semibold" :class="{'text-green-600': item.status === 'Selesai', 'text-gray-400': item.status === 'Belum Mula', 'text-yellow-600': item.status.includes('Menunggu')}">
                             Status: {{ translateStatus(item.status) }}
                         </div>
 
+                        <!-- 成绩公布板 -->
                         <div v-if="item.status === 'Selesai' && serverData.eventResults && serverData.eventResults[item.id]" class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">
                             <div v-for="res in sortPingat(serverData.eventResults[item.id])" :key="res.pasukan" class="flex items-center gap-2 mb-1.5 last:mb-0">
                                 <span class="w-5 text-center">
@@ -89,12 +133,15 @@
                                 <span class="font-bold text-gray-700">{{ res.namaMurid }}</span>
                             </div>
                         </div>
-                        </div>
+                    </div>
                 </li>
             </ul>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍✈️ 2. 赛事控制 (Pengurus) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'pengurus'" class="p-4 bg-gray-800 min-h-screen">
         <h2 class="text-lg font-bold text-white mb-4 border-b border-gray-600 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
         
@@ -123,6 +170,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- ⏱️ 3. 成绩录入 (Pencatat) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'pencatat'" class="p-4 bg-blue-50 min-h-screen">
         <h2 class="text-lg font-bold text-blue-900 mb-4 border-b border-blue-200 pb-2">⏱️ 录入成绩 Pencatat</h2>
         
@@ -157,6 +207,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍💼 4. GPK 审核 (Semakan) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'gpk'" class="p-4 bg-purple-50 min-h-screen">
         <h2 class="text-lg font-bold text-purple-900 mb-4 border-b border-purple-200 pb-2">👨‍💼 成绩核准 Semakan GPK</h2>
         
@@ -196,7 +249,7 @@
 </div>
 
 <script>
-    const { createApp, ref, onMounted } = Vue;
+    const { createApp, ref, computed, onMounted } = Vue;
 
     createApp({
         setup() {
@@ -206,6 +259,7 @@
             const gasUrl = ref('https://script.google.com/macros/s/AKfycbzATXXWupG4wi_AGadgH1xWQvUy2VF0JssPQ2NC_P0dsz2wLIC5hVkTddQVi3j9Izx_NQ/exec');
             
             const isSyncingInBackground = ref(false);
+            const showPadang = ref(false); // 控制田赛成绩折叠
             
             const serverData = ref({
                 currentEvent: { name: 'Sila tunggu...', status: 'Belum Mula' },
@@ -213,7 +267,21 @@
                 medals: [],
                 pendingApprovals: {},
                 peserta: {},
-                eventResults: {} 
+                eventResults: {},
+                acaraPadang: []
+            });
+
+            // 🌟 核心升级：动态排序奖牌榜
+            const sortedMedals = computed(() => {
+                if (!serverData.value.medals) return [];
+                return [...serverData.value.medals].sort((a, b) => {
+                    // 金牌数量不同，按金牌排
+                    if (b.emas !== a.emas) return b.emas - a.emas;
+                    // 金牌一样，按银牌排
+                    if (b.perak !== a.perak) return b.perak - a.perak;
+                    // 银牌一样，按铜牌排
+                    return b.gangsa - a.gangsa;
+                });
             });
 
             const setRole = (role) => { currentRole.value = role; };
@@ -273,7 +341,6 @@
                     const ev = serverData.value.timeline.find(i => i.id === eventId);
                     if (ev) ev.status = 'Menunggu Pengesahan GPK';
                     
-                    // 确保提交后立刻去服务器拿新的状态，让GPK能看到
                     postActionSilent('submitResult', { eventId: eventId, results: results }, true);
                 }
             };
@@ -283,9 +350,20 @@
                 postActionSilent(action, { eventId: eventId }, true);
             };
 
+            // 辅助函数
             const getEventName = (id) => {
                 const ev = serverData.value.timeline.find(i => i.id === id);
                 return ev ? ev.name : id;
+            };
+            
+            // 🌟 辅助函数：队伍双语翻译
+            const getBilingualTeam = (pasukan) => {
+                const map = {
+                    'Merah': 'Merah 红队',
+                    'Biru': 'Biru 蓝队',
+                    'Hijau': 'Hijau 绿队'
+                };
+                return map[pasukan] || pasukan;
             };
 
             const translateStatus = (status) => {
@@ -312,7 +390,6 @@
                 return "";
             };
 
-            // 按照金银铜的顺序给成绩排序，方便展示
             const sortPingat = (resultsArray) => {
                 const order = { "Emas": 1, "Perak": 2, "Gangsa": 3 };
                 return [...resultsArray].sort((a, b) => order[a.pingat] - order[b.pingat]);
@@ -321,7 +398,6 @@
             onMounted(() => {
                 if (gasUrl.value && !gasUrl.value.includes('AKfycb...')) fetchData();
                 
-                // 🚀 将 15 秒更新缩短为 5 秒极速更新
                 setInterval(() => {
                     if (gasUrl.value && !gasUrl.value.includes('AKfycb...') && (currentRole.value === 'parent' || currentRole.value === 'gpk')) {
                         fetchData();
@@ -330,8 +406,8 @@
             });
 
             return {
-                currentRole, isSyncingInBackground, serverData,
-                setRole, instantStatusUpdate, submitScore, gpkAction, getEventName, translateStatus, statusColor, getPesertaName, sortPingat
+                currentRole, isSyncingInBackground, serverData, showPadang, sortedMedals,
+                setRole, instantStatusUpdate, submitScore, gpkAction, getEventName, getBilingualTeam, translateStatus, statusColor, getPesertaName, sortPingat
             };
         }
     }).mount('#app');
