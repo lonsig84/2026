@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 运动会实时看板 (Sistem Sukan 2026)</title>
+    <!-- 引入 Tailwind CSS 和 Vue 3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,6 +23,7 @@
 
 <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg relative pb-20">
     
+    <!-- 角色导航栏 (Navigasi) -->
     <div class="bg-gray-900 text-white flex flex-wrap justify-around text-[10px] sm:text-xs p-1 sticky top-0 z-50 shadow-md">
         <button @click="setRole('parent')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'parent'}" class="p-2 transition-colors"><i class="fa-solid fa-users"></i> 家长 Ibu Bapa</button>
         <button @click="setRole('pengurus')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pengurus'}" class="p-2 transition-colors"><i class="fa-solid fa-walkie-talkie"></i> 控制 Pengurus</button>
@@ -29,13 +31,18 @@
         <button @click="setRole('gpk')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'gpk'}" class="p-2 transition-colors"><i class="fa-solid fa-stamp"></i> 审核 Semakan</button>
     </div>
 
+    <!-- 全局加载指示器 -->
     <div v-if="isLoading" class="fixed top-12 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full z-50 animate-pulse">
         <i class="fa-solid fa-spinner fa-spin"></i> 同步中...
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍👩‍👧‍👦 1. 家长端 (Ibu Bapa) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'parent'" class="p-4">
         <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 运动会 Sukan Tahunan</h1>
         
+        <!-- 当前赛况 -->
         <div class="rounded-xl p-4 mb-5 text-white shadow-md relative overflow-hidden" :class="statusColor(serverData.currentEvent.status)">
             <h2 class="text-xs font-bold opacity-90 mb-1">当前赛况 Acara Semasa</h2>
             <div class="text-lg font-bold leading-tight drop-shadow-md">{{ serverData.currentEvent.name }}</div>
@@ -44,6 +51,7 @@
             </div>
         </div>
 
+        <!-- 奖牌榜 (Kedudukan Pingat) -->
         <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fa-solid fa-medal mr-1 text-yellow-500"></i> 奖牌总榜 Kedudukan Pingat</h3>
         <div class="flex flex-col gap-2 mb-6">
             <div v-for="team in serverData.medals" :key="team.pasukan" class="bg-white border rounded-lg p-2 shadow-sm flex items-center justify-between">
@@ -59,6 +67,7 @@
             </div>
         </div>
 
+        <!-- 赛程列表 -->
         <h3 class="font-bold text-gray-700 mb-2 text-sm"><i class="fa-solid fa-list-ul mr-1"></i> 赛程流水线 Senarai Acara</h3>
         <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
             <ul class="divide-y divide-gray-100">
@@ -82,12 +91,16 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍✈️ 2. 赛事控制 (Pengurus) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'pengurus'" class="p-4 bg-gray-800 min-h-screen">
         <h2 class="text-lg font-bold text-white mb-4 border-b border-gray-600 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
         
         <div class="space-y-3">
             <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-gray-700 rounded p-3 border border-gray-600">
                 <div class="font-bold text-white text-sm mb-2">{{ item.name }}</div>
+                <!-- 只有还没结束的项目才可以控制 -->
                 <div v-if="item.status !== 'Selesai' && !item.status.includes('Menunggu')" class="flex gap-2">
                     <button @click="postAction('updateStatus', {eventId: item.id, status: 'Belum Mula'})" 
                             class="flex-1 py-1.5 rounded text-[10px] font-bold" :class="item.status === 'Belum Mula' ? 'bg-gray-500 text-white' : 'bg-gray-800 text-gray-400'">
@@ -109,6 +122,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- ⏱️ 3. 成绩录入 (Pencatat) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'pencatat'" class="p-4 bg-blue-50 min-h-screen">
         <h2 class="text-lg font-bold text-blue-900 mb-4 border-b border-blue-200 pb-2">⏱️ 录入成绩 Pencatat</h2>
         <p class="text-xs text-blue-600 mb-3"><i class="fa-solid fa-circle-info"></i> 只有“进行中”的项目可录入成绩。Hanya acara 'Sedang Dijalankan' dipaparkan.</p>
@@ -117,11 +133,13 @@
             <div v-if="item.status === 'Sedang Dijalankan'" class="bg-white rounded-xl shadow-md border border-blue-100 p-4 mb-4">
                 <div class="font-bold text-blue-800 mb-3">{{ item.name }}</div>
                 
+                <!-- 录入表单 (包含参赛者自动填入和 Catatan 备注) -->
                 <div class="space-y-2 mb-4">
                     <div v-for="team in ['Merah', 'Biru', 'Hijau']" :key="team" class="bg-gray-50 p-2 rounded border flex flex-col gap-1">
                         <div class="flex items-center gap-2">
                             <div class="w-4 h-4 rounded-full" :class="'bg-team-' + team"></div>
-                            <input type="text" :id="`nama_${item.id}_${team}`" placeholder="姓名 Nama" class="flex-1 text-xs p-1.5 border rounded">
+                            <!-- 自动读取参赛者名单，加入了蓝底加粗样式提醒 -->
+                            <input type="text" :id="`nama_${item.id}_${team}`" :value="getPesertaName(item.id, team)" placeholder="姓名 Nama" class="flex-1 text-xs p-1.5 border rounded bg-blue-50 text-blue-900 font-bold">
                             <select :id="`pingat_${item.id}_${team}`" class="w-1/3 text-xs p-1.5 border rounded bg-white">
                                 <option value="-">- Tiada -</option>
                                 <option value="Emas">🥇 Emas</option>
@@ -130,6 +148,7 @@
                                 <option value="Batal">❌ Batal</option>
                             </select>
                         </div>
+                        <!-- Catatan 备注输入框 -->
                         <input type="text" :id="`catatan_${item.id}_${team}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-xs p-1.5 border rounded bg-white text-gray-600 mt-1">
                     </div>
                 </div>
@@ -138,11 +157,15 @@
                 </button>
             </div>
         </div>
+        <!-- 如果没有进行中的项目 -->
         <div v-if="!serverData.timeline.some(i => i.status === 'Sedang Dijalankan')" class="text-center text-gray-400 py-10 text-xs">
             目前没有正在进行的比赛。Tiada acara sedang dijalankan.
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 👨‍💼 4. GPK 审核 (Semakan) -->
+    <!-- ========================================== -->
     <div v-show="currentRole === 'gpk'" class="p-4 bg-purple-50 min-h-screen">
         <h2 class="text-lg font-bold text-purple-900 mb-4 border-b border-purple-200 pb-2">👨‍💼 成绩核准 Semakan GPK</h2>
         
@@ -156,6 +179,7 @@
                         <td class="py-1.5 align-top"><div class="w-3 h-3 rounded-full mt-1" :class="'bg-team-' + res.pasukan"></div></td>
                         <td class="py-1.5">
                             <div class="font-bold">{{ res.namaMurid }}</div>
+                            <!-- 显示 Catatan 备注 -->
                             <div v-if="res.catatan" class="text-[10px] text-red-500 mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i> {{ res.catatan }}</div>
                         </td>
                         <td class="py-1.5 font-bold text-right align-top" 
@@ -197,7 +221,8 @@
                 currentEvent: { name: 'Sila tunggu...', status: 'Belum Mula' },
                 timeline: [],
                 medals: [],
-                pendingApprovals: {}
+                pendingApprovals: {},
+                peserta: {} // 预设名单数据
             });
 
             // 切换角色
@@ -205,7 +230,7 @@
 
             // 获取数据 (GET)
             const fetchData = () => {
-                if (!gasUrl.value || gasUrl.value.includes('AKfycb...')) return; // 防止空链接报错
+                if (!gasUrl.value || gasUrl.value.includes('AKfycb...')) return; 
                 isLoading.value = true;
                 fetch(gasUrl.value)
                     .then(res => res.json())
@@ -286,6 +311,14 @@
                 return 'bg-gradient-to-r from-gray-700 to-gray-900';
             };
 
+            // 自动获取预设的参赛者姓名
+            const getPesertaName = (eventId, team) => {
+                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
+                    return serverData.value.peserta[eventId][team];
+                }
+                return ""; // 若无数据留空
+            };
+
             // 初始化
             onMounted(() => {
                 if (gasUrl.value && !gasUrl.value.includes('AKfycb...')) {
@@ -302,7 +335,7 @@
 
             return {
                 currentRole, isLoading, serverData,
-                setRole, postAction, submitScore, getEventName, translateStatus, statusColor
+                setRole, postAction, submitScore, getEventName, translateStatus, statusColor, getPesertaName
             };
         }
     }).mount('#app');
