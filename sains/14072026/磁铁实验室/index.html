@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 磁铁互动实验室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #f0f4f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        #ui-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+        .control-group { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+        label { font-weight: 600; color: #333; font-size: 16px; white-space: nowrap; }
+        select, button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-size: 15px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+        select:hover, button:hover { border-color: #1a73e8; background: #f8faff; }
+        button.active { background: #1a73e8; color: white; border-color: #1a73e8; }
+        input[type="range"] {
+            flex-grow: 1;
+            height: 6px;
+            background: #ddd;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1a73e8;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #status-text {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    
+    <div id="status-text">同极相斥！</div>
+
+    <div id="ui-panel">
+        <div class="control-group">
+            <label>选择活动：</label>
+            <select id="activity-select">
+                <option value="truck">活动六：移动小卡车 (相吸/相斥)</option>
+                <option value="paperclip">活动三：吸力距离测试 (回形针)</option>
+            </select>
+        </div>
+        
+        <div class="control-group" id="pole-control">
+            <label>手持磁铁极向：</label>
+            <button id="btn-repel" class="active">N 极对准 (同极相斥)</button>
+            <button id="btn-attract">S 极对准 (异极相吸)</button>
+        </div>
+
+        <div class="control-group">
+            <label>移动磁铁：</label>
+            <input type="range" id="distance-slider" min="0" max="100" value="0">
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const activitySelect = document.getElementById('activity-select');
+        const btnRepel = document.getElementById('btn-repel');
+        const btnAttract = document.getElementById('btn-attract');
+        const distanceSlider = document.getElementById('distance-slider');
+        const statusText = document.getElementById('status-text');
+        const poleControl = document.getElementById('pole-control');
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f4f9);
+        scene.fog = new THREE.Fog(0xf0f4f9, 50, 150);
+
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 30, 60);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.maxPolarAngle = Math.PI / 2 - 0.05; // Don't go below ground
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 40, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.top = 30;
+        dirLight.shadow.camera.bottom = -30;
+        dirLight.shadow.camera.left = -30;
+        dirLight.shadow.camera.right = 30;
+        scene.add(dirLight);
+
+        // Ground
+        const groundGeo = new THREE.PlaneGeometry(200, 200);
+        const groundMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.8 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Grid
+        const grid = new THREE.GridHelper(100, 20, 0x000000, 0x000000);
+        grid.material.opacity = 0.1;
+        grid.material.transparent = true;
+        scene.add(grid);
+
+        const matN = new THREE.MeshStandardMaterial({ color: 0xD32F2F, roughness: 0.3 }); // Red
+        const matS = new THREE.MeshStandardMaterial({ color: 0x1976D2, roughness: 0.3 }); // Blue
+        const matWood = new THREE.MeshStandardMaterial({ color: 0xD4A373, roughness: 0.9 }); // Ruler
+        const matMetal = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.8, roughness: 0.2 }); // Paperclip
+        const matTruckBody = new THREE.MeshStandardMaterial({ color: 0x4CAF50, roughness: 0.4 });
+        const matTruckCabin = new THREE.MeshStandardMaterial({ color: 0xEEEEEE, roughness: 0.2 });
+        const matTire = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
+
+        // Function to create a bar magnet with N/S labels
+        function createBarMagnet(width, height, depth) {
+            const group = new THREE.Group();
+            const halfW = width / 2;
+            
+            const nGeo = new THREE.BoxGeometry(halfW, height, depth);
+            const sGeo = new THREE.BoxGeometry(halfW, height, depth);
+            
+            const meshN = new THREE.Mesh(nGeo, matN);
+            meshN.position.x = -halfW / 2;
+            meshN.castShadow = true;
+            
+            const meshS = new THREE.Mesh(sGeo, matS);
+            meshS.position.x = halfW / 2;
+            meshS.castShadow = true;
+
+            // Simple text labels using basic geometry for N and S
+            // Creating an 'N' shape
+            const nShapeMat = new THREE.MeshBasicMaterial({color: 0xffffff});
+            const nP1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3, 0.1), nShapeMat); nP1.position.set(-1.5, 0, depth/2 + 0.01);
+            const nP2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.5, 0.1), nShapeMat); nP2.position.set(-0.5, 0, depth/2 + 0.01); nP2.rotation.z = -Math.PI/6;
+            const nP3 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3, 0.1), nShapeMat); nP3.position.set(0.5, 0, depth/2 + 0.01);
+            const nLetter = new THREE.Group(); nLetter.add(nP1, nP2, nP3);
+            meshN.add(nLetter);
+
+            // Creating an 'S' shape roughly
+            const sP1 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.1), nShapeMat); sP1.position.set(0, 1.25, depth/2 + 0.01);
+            const sP2 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.1), nShapeMat); sP2.position.set(0, 0, depth/2 + 0.01);
+            const sP3 = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.1), nShapeMat); sP3.position.set(0, -1.25, depth/2 + 0.01);
+            const sP4 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.5, 0.1), nShapeMat); sP4.position.set(-0.75, 0.75, depth/2 + 0.01);
+            const sP5 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.5, 0.1), nShapeMat); sP5.position.set(0.75, -0.75, depth/2 + 0.01);
+            const sLetter = new THREE.Group(); sLetter.add(sP1, sP2, sP3, sP4, sP5);
+            meshS.add(sLetter);
+
+            group.add(meshN, meshS);
+            return group;
+        }
+
+        const sceneTruck = new THREE.Group();
+        scene.add(sceneTruck);
+
+        // Create Truck
+        const truck = new THREE.Group();
+        const tBody = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 6), matTruckBody);
+        tBody.position.y = 3; tBody.castShadow = true;
+        const tCabin = new THREE.Mesh(new THREE.BoxGeometry(5, 4, 6), matTruckCabin);
+        tCabin.position.set(-3.5, 7, 0); tCabin.castShadow = true;
+        
+        // Wheels
+        const wheelGeo = new THREE.CylinderGeometry(1.5, 1.5, 1, 16);
+        wheelGeo.rotateX(Math.PI/2);
+        const wPositions = [[4, 1.5, 3.5], [4, 1.5, -3.5], [-4, 1.5, 3.5], [-4, 1.5, -3.5]];
+        const wheels = [];
+        wPositions.forEach(pos => {
+            const w = new THREE.Mesh(wheelGeo, matTire);
+            w.position.set(...pos); w.castShadow = true;
+            truck.add(w);
+            wheels.push(w);
+        });
+
+        // Magnet on Truck
+        const truckMagnet = createBarMagnet(10, 3, 3);
+        truckMagnet.position.set(3, 6.5, 0);
+        truck.add(tBody, tCabin, truckMagnet);
+        sceneTruck.add(truck);
+
+        // Hand Magnet (Controlled by user)
+        const handMagnetTruck = createBarMagnet(12, 4, 4);
+        handMagnetTruck.position.set(30, 6.5, 0);
+        sceneTruck.add(handMagnetTruck);
+
+        // Track lines for truck
+        const trackGeo = new THREE.PlaneGeometry(100, 8);
+        const trackMat = new THREE.MeshBasicMaterial({ color: 0x81C784, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+        const track = new THREE.Mesh(trackGeo, trackMat);
+        track.rotation.x = -Math.PI/2;
+        track.position.y = 0.1;
+        sceneTruck.add(track);
+
+
+        const scenePaperclip = new THREE.Group();
+        scenePaperclip.visible = false;
+        scene.add(scenePaperclip);
+
+        // Ruler
+        const ruler = new THREE.Mesh(new THREE.BoxGeometry(40, 0.5, 4), matWood);
+        ruler.position.set(0, 0.25, 0);
+        ruler.castShadow = true; ruler.receiveShadow = true;
+        scenePaperclip.add(ruler);
+
+        // Ruler Markings
+        const markGeo = new THREE.BoxGeometry(0.2, 0.6, 2);
+        const markMat = new THREE.MeshBasicMaterial({color: 0x000000});
+        for(let i=-19; i<=19; i+=2) {
+            const mark = new THREE.Mesh(markGeo, markMat);
+            mark.position.set(i, 0.25, 1);
+            scenePaperclip.add(mark);
+        }
+
+        // Paperclip
+        const paperclip = new THREE.Group();
+        // A simple capsule representation for a paperclip
+        const pcMat = new THREE.MeshStandardMaterial({color: 0xcccccc, metalness: 0.9, roughness: 0.1});
+        const pcGeo1 = new THREE.CapsuleGeometry(0.3, 4, 4, 8);
+        pcGeo1.rotateZ(Math.PI/2);
+        const pcMesh = new THREE.Mesh(pcGeo1, pcMat);
+        pcMesh.castShadow = true;
+        paperclip.add(pcMesh);
+        paperclip.position.set(-18, 0.6, -5); // Start far left, offset in Z
+        scenePaperclip.add(paperclip);
+
+        // Hand Magnet for Paperclip
+        const handMagnetPC = createBarMagnet(12, 4, 4);
+        handMagnetPC.position.set(30, 2, -5);
+        scenePaperclip.add(handMagnetPC);
+
+
+        let currentActivity = 'truck';
+        let handMode = 'repel'; // repel (N-N) or attract (S-N)
+        let sliderValue = 0; // 0 to 100
+
+        // Reset positions
+        function resetPositions() {
+            truck.position.set(0, 0, 0);
+            paperclip.position.set(-18, 0.6, -5);
+            hideStatus();
+        }
+
+        function showStatus(text, color) {
+            statusText.innerText = text;
+            statusText.style.background = color;
+            statusText.style.opacity = 1;
+        }
+        function hideStatus() {
+            statusText.style.opacity = 0;
+        }
+
+        activitySelect.addEventListener('change', (e) => {
+            currentActivity = e.target.value;
+            sceneTruck.visible = (currentActivity === 'truck');
+            scenePaperclip.visible = (currentActivity === 'paperclip');
+            
+            // Toggle UI elements
+            poleControl.style.display = (currentActivity === 'truck') ? 'flex' : 'none';
+            
+            distanceSlider.value = 0;
+            sliderValue = 0;
+            resetPositions();
+            camera.position.set(0, 30, 60); // Reset camera
+            controls.target.set(0,0,0);
+        });
+
+        btnRepel.addEventListener('click', () => {
+            handMode = 'repel';
+            btnRepel.classList.add('active');
+            btnAttract.classList.remove('active');
+            distanceSlider.value = 0;
+            sliderValue = 0;
+            resetPositions();
+        });
+
+        btnAttract.addEventListener('click', () => {
+            handMode = 'attract';
+            btnAttract.classList.add('active');
+            btnRepel.classList.remove('active');
+            distanceSlider.value = 0;
+            sliderValue = 0;
+            resetPositions();
+        });
+
+        distanceSlider.addEventListener('input', (e) => {
+            sliderValue = parseInt(e.target.value);
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Calculate hand magnet target position based on slider
+            // Slider 0 = Far right (X=30), Slider 100 = Center left (X= -10)
+            const targetHandX = 30 - (sliderValue / 100) * 40;
+
+            if (currentActivity === 'truck') {
+                // Determine rotation of hand magnet based on mode
+                // Truck magnet has N on left (-x), S on right (+x)
+                if (handMode === 'repel') {
+                    // Hand N (-x) faces Truck N (-x) -> Needs 180 deg rotation so Hand N (+x local) faces Truck N (-x)
+                    // Actually, base magnet: N is left (-X).
+                    // If we want N to face N, hand magnet needs N on its left. So it moves from right to left.
+                    // Truck N is at -X, S is at +X. 
+                    // Hand approaching from right (+X). Its left side (-X) is N. So Hand N faces Truck S! That's Attract.
+                    // Let's adjust rotation.
+                    handMagnetTruck.rotation.y = Math.PI; // Flipped. N is now on +X (right), S is on -X (left). Wait.
+                    // Default: N is at -X. Rotation PI makes N at +X.
+                    // Hand is at Right. We want N facing truck. So N must be on Left (-X).
+                    // So Default Rotation (0) -> N is on Left. Hand N faces Truck S (Right side of truck). -> Attract.
+                    // If Rotation is PI -> S is on Left. Hand S faces Truck S. -> Repel.
+                    handMagnetTruck.rotation.y = Math.PI; // Repel S-S
+                } else {
+                    handMagnetTruck.rotation.y = 0; // Attract N-S
+                }
+
+                // Smoothly move hand magnet
+                handMagnetTruck.position.x += (targetHandX - handMagnetTruck.position.x) * 0.1;
+
+                // Physics logic for truck
+                const dist = handMagnetTruck.position.x - truck.position.x;
+                
+                if (handMode === 'repel') {
+                    // Repulsion distance threshold
+                    const pushDist = 15;
+                    if (dist < pushDist && dist > 0) {
+                        truck.position.x = handMagnetTruck.position.x - pushDist;
+                        showStatus("同极相斥！小车被推开", "rgba(211, 47, 47, 0.9)");
+                        // Rotate wheels based on movement
+                        wheels.forEach(w => w.rotation.z += 0.1);
+                    } else if (sliderValue < 10) {
+                        hideStatus();
+                    }
+                } else {
+                    // Attraction distance threshold
+                    const pullDist = 12;
+                    if (dist < pullDist && dist > 5) { // Snaps when close enough
+                        // Snap together
+                        truck.position.x += ( (handMagnetTruck.position.x - 10) - truck.position.x ) * 0.2;
+                        showStatus("异极相吸！小车被吸住", "rgba(25, 118, 210, 0.9)");
+                        wheels.forEach(w => w.rotation.z -= 0.1);
+                    } else if (dist <= 5) {
+                        truck.position.x = handMagnetTruck.position.x - 10;
+                    } else {
+                        hideStatus();
+                    }
+                }
+            } 
+            else if (currentActivity === 'paperclip') {
+                handMagnetPC.position.x += (targetHandX - handMagnetPC.position.x) * 0.1;
+                
+                // Paperclip snaps when magnet gets close
+                const dist = handMagnetPC.position.x - paperclip.position.x;
+                const magneticStrengthDist = 18; // Distance at which it jumps
+                
+                if (dist < magneticStrengthDist && dist > 0) {
+                    // Snap paperclip to magnet edge
+                    paperclip.position.x += ( (handMagnetPC.position.x - 6) - paperclip.position.x ) * 0.3;
+                    showStatus("磁力生效！回形针被远距离吸附", "rgba(76, 175, 80, 0.9)");
+                } else if (sliderValue < 10) {
+                    hideStatus();
+                    // Optional: reset paperclip position if magnet moves far away (to allow re-testing)
+                    paperclip.position.x += ( -18 - paperclip.position.x ) * 0.1; 
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
