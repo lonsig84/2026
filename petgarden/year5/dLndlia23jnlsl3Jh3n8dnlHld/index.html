@@ -3,32 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>错误提示</title>
+    <title>此页存在问题</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa; /* 非常浅的灰色背景，不刺眼 */
+            color: #202124; /* 主文本颜色为深灰/黑色 */
             display: flex;
             justify-content: center;
-            align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f9f9f9;
+            padding-top: 15vh; /* 让内容在偏上一点的位置，符合浏览器报错页面的视觉习惯 */
+            box-sizing: border-box;
         }
-        .error-message {
-            color: #d32f2f; /* 红色字体，适合错误提示 */
+        .error-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 0 24px;
+        }
+        .icon {
+            width: 44px;
+            height: 44px;
+            margin-bottom: 24px;
+        }
+        h1 {
             font-size: 24px;
             font-weight: bold;
-            padding: 20px;
-            border: 1px solid #ffcdd2;
-            background-color: #ffebee;
-            border-radius: 8px;
+            margin: 0 0 16px 0;
+            letter-spacing: 0.5px;
+        }
+        .message {
+            color: #5f6368; /* 辅助说明文字使用次要灰色 */
+            font-size: 14px;
+            margin: 0 0 32px 0;
+        }
+        .options-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 0 12px 0;
+        }
+        ul {
+            color: #5f6368;
+            font-size: 14px;
+            margin: 0 0 48px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .error-code {
+            color: #9aa0a6; /* 底部错误代码使用更浅的灰色 */
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div class="error-message">
-        有问题，something gone wrong
+    <div class="error-container">
+        <!-- 使用 SVG 绘制与图片中一致的感叹号图标 -->
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#202124" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="7" x2="12" y2="13"></line>
+            <circle cx="12" cy="17" r="1" fill="#202124" stroke="none"></circle>
+        </svg>
+
+        <h1>此页存在问题</h1>
+        
+        <p class="message">请稍后再尝试访问。</p>
+        
+        <p class="options-title">你还可以：</p>
+        <ul>
+            <li>打开新标签页</li>
+            <li>刷新此页面</li>
+        </ul>
+        
+        <p class="error-code">错误代码: STATUS_ACCESS_DENIED</p>
     </div>
 
 </body>
