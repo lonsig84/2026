@@ -342,8 +342,9 @@
             <h3 class="font-bold text-gray-800 mb-1">Pengesahan Kata Laluan</h3>
             <p class="text-xs text-gray-500 mb-4">Sila masukkan kata laluan untuk <b>{{ authModal.target.toUpperCase() }}</b></p>
             <input type="password" v-model="authModal.password" placeholder="Kata Laluan" class="w-full text-center p-3 border-2 border-gray-200 rounded-lg mb-4 text-lg tracking-widest focus:border-blue-500 focus:outline-none">
-            <button @click="verifyPassword" class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg shadow-md active:scale-95 transition-transform">Masuk / 登入</button>
-            <p v-if="authModal.error" class="text-xs text-red-500 mt-3 font-bold animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> Kata laluan salah!</p>
+            <button @click="verifyPassword" class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform"
+        >">Masuk / 登入</button>
+            <p v-if="authModal.error" class="text-xs text-red-500 mt-3 font-bold animate-bounce""><i class="fa-solid fa-circle-exclamation"></i> Kata laluan salah!</p>
         </div>
     </div>
 
