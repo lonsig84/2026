@@ -18,7 +18,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     // ==========================================
     // ⚠️ 请在这里填入你部署 GAS 后拿到的 Web App URL
@@ -46,6 +46,11 @@
 
       const [loading, setLoading] = useState(false);
       const [toast, setToast] = useState(null);
+      const [recentFilter, setRecentFilter] = useState('all');
+      const [syncingIds, setSyncingIds] = useState(new Set());
+      const resolveQueueRef = useRef(new Set());
+      const resolveTimerRef = useRef(null);
+      const resolveRetryRef = useRef(0);
 
       const [isSettingsOpen, setIsSettingsOpen] = useState(false);
       const [tempSubjects, setTempSubjects] = useState([]);
@@ -138,6 +143,60 @@
       const currentStudents = allStudents.filter(s => s.subject === currentTab);
       const currentPending = pendingRecords.filter(r => r.subject === currentTab);
 
+      // --- 近5天筛选与后台同步辅助函数 ---
+      const parseDMY = (dateStr) => {
+        if (!dateStr) return null;
+        const [day, month, year] = dateStr.split('/').map(Number);
+        if (!day || !month || !year) return null;
+        return new Date(year, month - 1, day);
+      };
+
+      const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const todayStart = startOfDay(new Date());
+
+      const getDayDiff = (dateStr) => {
+        const d = parseDMY(dateStr);
+        if (!d) return null;
+        return Math.floor((todayStart - startOfDay(d)) / 86400000);
+      };
+
+      const recentPending = currentPending.filter(r => {
+        const diff = getDayDiff(r.date);
+        return diff !== null && diff >= 0 && diff <= 4;
+      });
+
+      const filterOptions = [
+        { key: 'all', label: '总览' },
+        { key: '0', label: '今天' },
+        { key: '1', label: '昨天' },
+        { key: '2', label: '前天' },
+        { key: '3', label: '3天前' },
+        { key: '4', label: '4天前' }
+      ];
+
+      const filteredRecentPending = recentFilter === 'all'
+        ? recentPending
+        : recentPending.filter(r => String(getDayDiff(r.date)) === recentFilter);
+
+      const filteredByStudent = currentStudents
+        .map(student => ({
+          student,
+          records: filteredRecentPending.filter(r => r.student === student.name)
+        }))
+        .filter(group => group.records.length > 0);
+
+      const getUniqueStudentCount = (records) => new Set(records.map(r => r.student)).size;
+      const getFilterCount = (key) => {
+        if (key === 'all') return getUniqueStudentCount(recentPending);
+        return getUniqueStudentCount(recentPending.filter(r => String(getDayDiff(r.date)) === key));
+      };
+
+      const getRelativeDateLabel = (dateStr) => {
+        const diff = getDayDiff(dateStr);
+        return diff === 0 ? '今天' : diff === 1 ? '昨天' : diff === 2 ? '前天' : diff === 3 ? '3天前' : diff === 4 ? '4天前' : dateStr;
+      };
+
+
       // --- 核心业务功能 ---
       const handleToggleStudent = (studentName) => {
         if (selectedStudents.hasOwnProperty(studentName)) {
@@ -183,24 +242,57 @@
         setLoading(false);
       };
 
-      // 🚀 【核心优化：乐观更新】
-      const handleResolve = async (recordId) => {
-        // 1. 先斩后奏：备份旧数据，然后立刻把界面上的这条记录移除，做到“零延迟”无感体验
-        const backupRecords = [...pendingRecords]; 
-        setPendingRecords(pendingRecords.filter(r => r.id !== recordId));
-        showToast('🚀 已标补交，正在同步云端...');
+      // 🚀 即时移除 + 600ms 批量后台同步
+      // 连续点击多项“已补交”时，只发出一次 GAS 请求，大幅减少等待与配额消耗。
+      const flushResolveQueue = async () => {
+        const ids = Array.from(resolveQueueRef.current);
+        if (ids.length === 0) return;
 
-        // 2. 默默在后台同步，不再用黑幕锁死网页屏幕
-        const data = await fetchAPI('markAsResolved', recordId);
-        
-        if (data) {
-          // 同步成功，用后端传回的数据确保完全对齐
-          setPendingRecords(data.pendingRecords || []);
+        resolveQueueRef.current.clear();
+        resolveTimerRef.current = null;
+
+        const data = await fetchAPI('batchResolve', ids);
+        if (!data || data.success === false) {
+          // 网络偶发失败时自动重试一次；不把项目突然弹回页面，避免干扰老师连续处理。
+          if (resolveRetryRef.current < 1) {
+            resolveRetryRef.current += 1;
+            ids.forEach(id => resolveQueueRef.current.add(id));
+            resolveTimerRef.current = setTimeout(flushResolveQueue, 1200);
+            return;
+          }
+          resolveRetryRef.current = 0;
+          showToast(`⚠️ ${ids.length} 项同步失败，请刷新后检查`);
         } else {
-          // 万一断网了或同步失败，自动把记录弹回来，确保数据准确
-          setPendingRecords(backupRecords);
-          showToast('❌ 同步失败，已自动恢复记录！');
+          resolveRetryRef.current = 0;
+          const notFound = data.notFoundIds || [];
+          if (notFound.length > 0) {
+            showToast(`⚠️ ${notFound.length} 项未找到，请刷新检查`);
+          }
         }
+
+        setSyncingIds(prev => {
+          const next = new Set(prev);
+          ids.forEach(id => next.delete(id));
+          return next;
+        });
+      };
+
+      const handleResolve = (recordId) => {
+        if (syncingIds.has(recordId) || resolveQueueRef.current.has(recordId)) return;
+
+        setSyncingIds(prev => {
+          const next = new Set(prev);
+          next.add(recordId);
+          return next;
+        });
+
+        // 画面立即移除，不等待 Google Apps Script。
+        setPendingRecords(prev => prev.filter(r => r.id !== recordId));
+        resolveQueueRef.current.add(recordId);
+
+        // 600ms 内的连续点击合并成一次批量更新。
+        if (resolveTimerRef.current) clearTimeout(resolveTimerRef.current);
+        resolveTimerRef.current = setTimeout(flushResolveQueue, 600);
       };
 
       const handleGenerateMessage = () => {
@@ -280,7 +372,7 @@
 
           <div className="flex items-center space-x-2 bg-slate-200 p-1.5 rounded-xl mb-6 shadow-sm overflow-x-auto">
             {subjectList.map(tab => (
-              <button key={tab} type="button" onClick={() => { setCurrentTab(tab); setSelectedStudents({}); setActiveStudentInput(null); }} className={`flex-1 min-w-[90px] py-3 px-2 text-center text-sm sm:text-base font-bold rounded-lg transition-all duration-200 ${currentTab === tab ? 'bg-white text-indigo-600 shadow-md scale-[1.02]' : 'text-slate-600 hover:bg-white/50'}`}>
+              <button key={tab} type="button" onClick={() => { setCurrentTab(tab); setSelectedStudents({}); setActiveStudentInput(null); setRecentFilter('all'); }} className={`flex-1 min-w-[90px] py-3 px-2 text-center text-sm sm:text-base font-bold rounded-lg transition-all duration-200 ${currentTab === tab ? 'bg-white text-indigo-600 shadow-md scale-[1.02]' : 'text-slate-600 hover:bg-white/50'}`}>
                 {tab} ({subjectMap[tab].zh})
               </button>
             ))}
@@ -345,6 +437,56 @@
                 )}
                 <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md active:scale-[0.99]">📥 提交到未交排行榜</button>
               </form>
+            </section>
+
+            <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+              <div className="border-b border-slate-100 pb-4 mb-4">
+                <h2 className="text-base font-bold text-slate-700 flex items-center mb-3"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full mr-2"></span>📅【{currentTab}】近5天未完成</h2>
+                <div className="flex flex-wrap gap-2">
+                  {filterOptions.map(opt => (
+                    <button key={opt.key} type="button" onClick={() => setRecentFilter(opt.key)} className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${recentFilter === opt.key ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>
+                      {opt.label} {getFilterCount(opt.key)}人
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredByStudent.length === 0 ? (
+                <div className="text-center py-8"><span className="text-3xl inline-block mb-2">🎉</span><p className="text-sm text-slate-500 font-medium">这个范围内没有未完成作业。</p></div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredByStudent.map(({ student, records }) => (
+                    <div key={student.name} className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                      <div className="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between gap-2">
+                        <span><span className="mr-1.5">👤</span>{student.name}</span>
+                        <span className="text-[10px] text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">共 {records.length} 项</span>
+                      </div>
+                      <div className="space-y-2">
+                        {[0,1,2,3,4].map(diff => {
+                          const dayRecords = records.filter(r => getDayDiff(r.date) === diff);
+                          if (dayRecords.length === 0) return null;
+                          return (
+                            <div key={diff} className="border-t first:border-t-0 border-slate-200/70 pt-2 first:pt-0">
+                              <div className="text-[11px] font-bold text-slate-500 mb-1.5">{diff === 0 ? '今天' : diff === 1 ? '昨天' : diff === 2 ? '前天' : diff === 3 ? '3天前' : '4天前'}</div>
+                              <div className="space-y-2">
+                                {dayRecords.map(record => (
+                                  <div key={record.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg p-2.5">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-semibold text-indigo-900 text-xs">{record.homework}</div>
+                                      <div className="text-[11px] text-slate-500 mt-1">{record.date}{record.reason ? ` · 原因: ${record.reason}` : ''}</div>
+                                    </div>
+                                    <button type="button" onClick={() => handleResolve(record.id)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-4 py-2 rounded-lg border border-emerald-300 transition-colors shrink-0">✓ 已补交</button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
