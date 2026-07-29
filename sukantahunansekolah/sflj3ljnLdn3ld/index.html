@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 运动会实时看板 (Sistem Sukan 2026)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sky: #eef6ff;
+            --primary: #0f172a;
+            --primary-2: #1d4ed8;
+            --accent: #38bdf8;
+            --card: rgba(255, 255, 255, 0.88);
+            --border-soft: rgba(148, 163, 184, 0.16);
+            --shadow-soft: 0 14px 40px rgba(15, 23, 42, 0.10);
+            --shadow-deep: 0 20px 60px rgba(15, 23, 42, 0.16);
+        }
+        html { scroll-behavior: smooth; }
+        .bg-team-Merah { background-color: #ef4444; }
+        .bg-team-Biru { background-color: #3b82f6; }
+        .bg-team-Kuning { background-color: #eab308; }
+        .medal-emas { color: #fbbf24; text-shadow: 0 0 5px rgba(251, 191, 36, 0.5); }
+        .medal-perak { color: #9ca3af; }
+        .medal-gangsa { color: #b45309; }
+        * { -webkit-tap-highlight-color: transparent; }
+        .slide-fade-enter-active { transition: all 0.3s ease-out; }
+        .slide-fade-leave-active { transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1); }
+        .slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(-10px); opacity: 0; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        .glow-active { animation: breath-glow 2s infinite; }
+        @keyframes breath-glow {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+            50% { transform: scale(1.02); box-shadow: 0 0 25px rgba(255,255,255,0.4); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+        }
+        .sport-bg {
+            background:
+                radial-gradient(circle at top left, rgba(59,130,246,0.20), transparent 32%),
+                radial-gradient(circle at top right, rgba(34,197,94,0.10), transparent 30%),
+                linear-gradient(180deg, #eef6ff 0%, #f8fbff 38%, #eef2ff 100%);
+        }
+        .app-shell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 220px;
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #38bdf8 100%);
+            z-index: 0;
+        }
+        .app-shell::after {
+            content: '';
+            position: absolute;
+            top: 110px;
+            right: -80px;
+            width: 220px;
+            height: 220px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.12);
+            filter: blur(0px);
+            z-index: 0;
+        }
+        .rolebar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.45rem;
+            background: rgba(255,255,255,0.76);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.75);
+            box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+            border-radius: 1.15rem;
+            padding: 0.45rem;
+        }
+        .role-tab {
+            border-radius: 0.95rem;
+            padding: 0.7rem 0.4rem;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 1.15;
+            text-align: center;
+            transition: all .22s ease;
+        }
+        .role-tab i {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.28rem;
+        }
+        .role-tab-active {
+            color: white;
+            background: linear-gradient(135deg, #0f172a, #2563eb);
+            box-shadow: 0 10px 18px rgba(37, 99, 235, 0.24);
+            transform: translateY(-1px);
+        }
+        .role-tab-inactive {
+            color: #475569;
+            background: rgba(255,255,255,0.7);
+        }
+        .hero-banner {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.75rem;
+            padding: 1.25rem 1rem 1.1rem;
+            background: linear-gradient(145deg, rgba(15,23,42,0.92), rgba(30,64,175,0.88) 62%, rgba(56,189,248,0.82));
+            box-shadow: var(--shadow-deep);
+            color: white;
+        }
+        .hero-banner::before,
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.10);
+        }
+        .hero-banner::before {
+            width: 210px;
+            height: 210px;
+            top: -110px;
+            right: -55px;
+        }
+        .hero-banner::after {
+            width: 130px;
+            height: 130px;
+            left: -40px;
+            bottom: -48px;
+            background: rgba(255,255,255,0.08);
+        }
+        .eyebrow-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-radius: 9999px;
+            padding: 0.36rem 0.78rem;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.16);
+            backdrop-filter: blur(10px);
+        }
+        .info-chip {
+            border-radius: 1rem;
+            padding: 0.85rem 0.7rem;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(255,255,255,0.72);
+            box-shadow: var(--shadow-soft);
+        }
+        .info-chip-label {
+            font-size: 0.60rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .info-chip-value {
+            margin-top: 0.2rem;
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+        .section-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.4rem;
+            padding: 1rem;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.82);
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(12px);
+        }
+        .section-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+        .section-kicker {
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            color: #2563eb;
+            text-transform: uppercase;
+            margin-bottom: 0.15rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            line-height: 1.2;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .section-subtitle {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 0.16rem;
+        }
+        .mini-badge {
+            flex-shrink: 0;
+            border-radius: 9999px;
+            padding: 0.38rem 0.7rem;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 0.64rem;
+            font-weight: 800;
+            border: 1px solid #dbeafe;
+        }
+        .medal-table-head {
+            display: grid;
+            grid-template-columns: 2.2rem minmax(0, 1fr) repeat(4, 2.2rem);
+            gap: 0.25rem;
+            padding: 0 0.1rem 0.45rem;
+            color: #94a3b8;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .medal-row {
+            display: grid;
+            grid-template-columns: 2.2rem minmax(0, 1fr) repeat(4, 2.2rem);
+            gap: 0.25rem;
+            align-items: center;
+            border-radius: 1rem;
+            padding: 0.72rem 0.5rem;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid rgba(226,232,240,0.82);
+            margin-bottom: 0.52rem;
+        }
+        .medal-row.top-rank {
+            background: linear-gradient(90deg, rgba(255,248,220,0.95), rgba(255,255,255,0.98));
+            border-color: rgba(251,191,36,0.32);
+        }
+        .toggle-shell {
+            background: linear-gradient(135deg, #eff6ff, #f8fbff);
+            border: 1px solid #dbeafe;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .result-card {
+            border-radius: 1rem;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid #e5e7eb;
+            padding: 0.72rem;
+        }
+        .timeline-shell {
+            position: relative;
+            margin-left: 0.42rem;
+            padding-left: 1rem;
+            border-left: 2px solid #e2e8f0;
+        }
+        .timeline-row {
+            position: relative;
+            margin-bottom: 0.92rem;
+            padding-bottom: 0.35rem;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -1.48rem;
+            top: 0.1rem;
+            width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            box-shadow: 0 0 0 5px rgba(248,250,252,1);
+        }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-radius: 9999px;
+            padding: 0.24rem 0.55rem;
+            font-size: 0.62rem;
+            font-weight: 800;
+        }
+        .parent-float-nav {
+            position: sticky;
+            bottom: 0.75rem;
+            z-index: 40;
+            margin-top: 1rem;
+            padding: 0 0.2rem;
+        }
+        .parent-float-nav-inner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.45rem;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            background: rgba(15,23,42,0.88);
+            color: white;
+            box-shadow: 0 18px 32px rgba(15,23,42,0.18);
+        }
+        .parent-float-link {
+            border-radius: 0.8rem;
+            padding: 0.55rem 0.2rem;
+            text-align: center;
+            font-size: 0.66rem;
+            font-weight: 800;
+            line-height: 1.15;
+            background: rgba(255,255,255,0.08);
+        }
+        .parent-float-link i {
+            display: block;
+            margin-bottom: 0.22rem;
+            font-size: 0.85rem;
+        }
+        .panel-header {
+            border-radius: 1.3rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: white;
+            box-shadow: var(--shadow-soft);
+        }
+        .panel-header.orange { background: linear-gradient(135deg, #9a3412, #f97316); }
+        .panel-header.blue { background: linear-gradient(135deg, #1d4ed8, #38bdf8); }
+        .panel-header.purple { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+    
+        /* ============================================================
+           TEMA EKSTREM CERIA & COMEL — RESPONSIF TELEFON + KOMPUTER
+           ============================================================ */
+        :root {
+            --pink-hot: #ff2fa8;
+            --pink-soft: #ff8bd8;
+            --purple-pop: #8b5cf6;
+            --blue-pop: #15c8ff;
+            --yellow-pop: #ffd93d;
+            --orange-pop: #ff8a00;
+            --green-pop: #35e07b;
+            --ink: #2f195f;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 8% 10%, rgba(255, 47, 168, .35), transparent 24%),
+                radial-gradient(circle at 92% 8%, rgba(21, 200, 255, .35), transparent 24%),
+                radial-gradient(circle at 16% 88%, rgba(255, 217, 61, .34), transparent 26%),
+                radial-gradient(circle at 86% 88%, rgba(53, 224, 123, .30), transparent 26%),
+                linear-gradient(135deg, #fff0fb 0%, #edfaff 42%, #fff8d7 100%);
+            color: var(--ink);
+        }
+
+        .app-shell {
+            border-left: 6px solid rgba(255,255,255,.7);
+            border-right: 6px solid rgba(255,255,255,.7);
+        }
+
+        .app-shell::before {
+            height: 280px;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255,255,255,.28), transparent 12%),
+                radial-gradient(circle at 80% 12%, rgba(255,255,255,.22), transparent 14%),
+                linear-gradient(115deg, #ff2fa8 0%, #8b5cf6 35%, #15c8ff 68%, #35e07b 100%);
+        }
+
+        .app-shell::after {
+            width: 300px;
+            height: 300px;
+            right: -110px;
+            top: 90px;
+            background: rgba(255, 217, 61, .28);
+            border: 5px dashed rgba(255,255,255,.35);
+        }
+
+        .rolebar {
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            background: rgba(255,255,255,.90);
+            border: 3px solid rgba(255,255,255,.96);
+            box-shadow: 0 14px 32px rgba(139,92,246,.20);
+        }
+
+        .role-tab {
+            min-height: 64px;
+            font-size: .72rem;
+            color: #5b2aa8;
+            background: linear-gradient(180deg, #ffffff, #fff4fb);
+            border: 2px solid #f5d2ff;
+        }
+
+        .role-tab i {
+            font-size: 1.05rem;
+        }
+
+        .role-tab-active {
+            color: white;
+            background: linear-gradient(135deg, #ff2fa8, #8b5cf6 48%, #15c8ff);
+            box-shadow: 0 10px 20px rgba(255,47,168,.32);
+            border-color: rgba(255,255,255,.95);
+            transform: translateY(-2px) rotate(-1deg);
+        }
+
+        .hero-banner {
+            padding: 1.75rem 1.25rem 1.45rem;
+            border: 4px solid rgba(255,255,255,.88);
+            background:
+                radial-gradient(circle at 10% 18%, rgba(255,255,255,.25), transparent 15%),
+                radial-gradient(circle at 90% 15%, rgba(255,217,61,.32), transparent 18%),
+                linear-gradient(135deg, #ff2fa8 0%, #8b5cf6 38%, #15c8ff 72%, #35e07b 100%);
+            box-shadow: 0 24px 55px rgba(255,47,168,.28);
+        }
+
+        .hero-banner h1 {
+            font-size: clamp(1.8rem, 4vw, 3.4rem) !important;
+            line-height: 1.05;
+            text-shadow: 0 4px 0 rgba(70,20,130,.18);
+        }
+
+        .hero-banner p {
+            font-size: clamp(.9rem, 1.7vw, 1.15rem) !important;
+        }
+
+        .eyebrow-pill {
+            background: rgba(255,255,255,.22);
+            border: 2px solid rgba(255,255,255,.42);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+        }
+
+        .info-chip {
+            background: linear-gradient(145deg, #ffffff, #fff3fc);
+            border: 3px solid #fff;
+            box-shadow: 0 12px 25px rgba(139,92,246,.16);
+            transform: rotate(-.5deg);
+        }
+
+        .info-chip:nth-child(2) {
+            background: linear-gradient(145deg, #effaff, #dff8ff);
+            transform: rotate(.7deg);
+        }
+
+        .info-chip:nth-child(3) {
+            background: linear-gradient(145deg, #fffbe2, #fff2a8);
+            transform: rotate(-.4deg);
+        }
+
+        .info-chip-label {
+            color: #a13cf0;
+        }
+
+        .info-chip-value {
+            color: #3b176d;
+        }
+
+        .section-card {
+            border: 3px solid rgba(255,255,255,.95);
+            box-shadow: 0 18px 40px rgba(66,24,140,.14);
+            background:
+                linear-gradient(145deg, rgba(255,255,255,.97), rgba(255,246,253,.94));
+        }
+
+        .section-kicker {
+            color: var(--pink-hot);
+        }
+
+        .section-title {
+            color: #4a197e;
+        }
+
+        .mini-badge {
+            background: linear-gradient(135deg, #fff08b, #ffd93d);
+            color: #7a3c00;
+            border: 2px solid #fff;
+            box-shadow: 0 5px 12px rgba(255,138,0,.22);
+        }
+
+        .medal-row {
+            border: 2px solid #f4dbff;
+            box-shadow: 0 8px 18px rgba(139,92,246,.10);
+        }
+
+        .medal-row.top-rank {
+            background: linear-gradient(90deg, #fff4a8, #fff, #ffe8f6);
+            border: 3px solid #ffd93d;
+            transform: scale(1.01);
+        }
+
+        .toggle-shell {
+            background: linear-gradient(135deg, #e7faff, #fff0fb, #fff9bf);
+            border: 0;
+        }
+
+        .result-card {
+            border: 2px solid #e8d8ff;
+            background: linear-gradient(145deg, #fff, #faf4ff);
+        }
+
+        .timeline-shell {
+            border-left: 4px dashed #ff79c8;
+        }
+
+        .timeline-dot {
+            box-shadow: 0 0 0 6px rgba(255,244,252,1);
+        }
+
+        .panel-header.orange {
+            background: linear-gradient(135deg, #ff7a00, #ff2fa8);
+        }
+
+        .panel-header.blue {
+            background: linear-gradient(135deg, #15c8ff, #2563eb, #8b5cf6);
+        }
+
+        .panel-header.purple {
+            background: linear-gradient(135deg, #8b5cf6, #ff2fa8);
+        }
+
+        .panel-header {
+            border: 4px solid rgba(255,255,255,.9);
+            box-shadow: 0 18px 35px rgba(139,92,246,.22);
+        }
+
+        button {
+            transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+        }
+
+        button:hover {
+            filter: saturate(1.18) brightness(1.03);
+        }
+
+        button:active {
+            transform: scale(.97);
+        }
+
+        .parent-float-nav-inner {
+            background: linear-gradient(135deg, #3c1475, #8b5cf6, #ff2fa8);
+            border: 3px solid rgba(255,255,255,.9);
+        }
+
+        .parent-float-link {
+            background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.22);
+        }
+
+        /* Desktop layout */
+        @media (min-width: 900px) {
+            .app-shell {
+                min-height: 100vh;
+                border-radius: 0 0 2rem 2rem;
+            }
+
+            .sticky.top-0 {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+
+            .rolebar {
+                max-width: 850px;
+                margin: 0 auto;
+            }
+
+            [v-show="currentRole === 'parent'"] {
+                max-width: 1180px;
+                margin: 0 auto;
+            }
+
+            .hero-banner {
+                margin-top: 1.5rem;
+                padding: 2.6rem 2.4rem 2.2rem;
+            }
+
+            .grid.grid-cols-3.gap-2.mb-5 {
+                gap: 1rem;
+            }
+
+            .info-chip {
+                padding: 1.2rem 1rem;
+            }
+
+            section.section-card {
+                padding: 1.5rem;
+            }
+
+            #medals, #padang, #timeline {
+                width: 100%;
+            }
+
+            .parent-float-nav {
+                max-width: 620px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            [v-show="currentRole === 'pengurus'"],
+            [v-show="currentRole === 'pencatat'"],
+            [v-show="currentRole === 'gpk'"] {
+                max-width: 1120px;
+                margin: 0 auto;
+                padding: 2rem;
+            }
+
+            [v-show="currentRole === 'pengurus'"] .space-y-3 {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0,1fr));
+                gap: 1rem;
+            }
+
+            [v-show="currentRole === 'gpk'"] > div[v-for] {
+                max-width: 900px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        /* Phone refinements */
+        @media (max-width: 520px) {
+            .app-shell {
+                border-left: 0;
+                border-right: 0;
+            }
+
+            .rolebar {
+                gap: .28rem;
+                padding: .32rem;
+            }
+
+            .role-tab {
+                min-height: 58px;
+                padding: .52rem .2rem;
+                font-size: .64rem;
+            }
+
+            .hero-banner {
+                border-radius: 1.4rem;
+            }
+
+            .hero-banner h1 {
+                font-size: 1.65rem !important;
+            }
+
+            .info-chip {
+                padding: .75rem .35rem;
+            }
+
+            .info-chip-value {
+                font-size: .72rem;
+            }
+
+            .section-card {
+                border-radius: 1.2rem;
+            }
+
+            .panel-header {
+                border-radius: 1.2rem;
+            }
+        }
+
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.esm-browser.prod.js",
+          "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+          "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+        }
+      }
+    </script>
+</head>
+<body class="sport-bg font-sans antialiased text-slate-800">
+
+<div id="app" class="app-shell w-full max-w-7xl mx-auto min-h-screen relative pb-24 overflow-hidden bg-white/80 backdrop-blur-xl shadow-[0_20px_70px_rgba(15,23,42,0.18)]">
+    
+    <div v-if="authModal.show"
+     class="fixed inset-0 bg-black/80 z-[100] flex justify-center px-4 backdrop-blur-sm overflow-y-auto"
+     style="align-items: flex-start; padding-top: 24px;">
+
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center relative">
+
+        <button @click="cancelAuth"
+                class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+
+        <i class="fa-solid fa-lock text-3xl text-yellow-500 mb-3"></i>
+
+        <h3 class="font-bold text-gray-800 mb-1 text-xl">
+            Pengesahan Kata Laluan
+        </h3>
+
+        <p class="text-sm text-gray-500 mb-4">
+            Sila masukkan kata laluan untuk
+            <b>{{ authModal.target.toUpperCase() }}</b>
+        </p>
+
+        <input
+            type="password"
+            v-model="authModal.password"
+            placeholder="Kata Laluan"
+            class="w-full text-center p-3 border-2 border-gray-200 rounded-xl mb-4 text-lg tracking-widest focus:border-blue-500 focus:outline-none"
+        >
+
+        <button
+            @click="verifyPassword"
+            class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform"
+        >
+            Masuk / 登入
+        </button>
+
+        <p v-if="authModal.error"
+           class="text-xs text-red-500 mt-3 font-bold animate-bounce">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            Kata laluan salah!
+        </p>
+
+    </div>
+</div>
+
+    <div class="sticky top-0 z-50 px-3 pt-3 pb-2 backdrop-blur-xl bg-white/55 border-b border-white/50">
+        <div class="rolebar">
+            <button @click="requestRole('parent')" class="role-tab" :class="currentRole === 'parent' ? 'role-tab-active' : 'role-tab-inactive'"><i class="fa-solid fa-users"></i>家长<br>Ibu Bapa</button>
+            <button @click="requestRole('pengurus')" class="role-tab" :class="currentRole === 'pengurus' ? 'role-tab-active' : 'role-tab-inactive'"><i class="fa-solid fa-walkie-talkie"></i>控制<br>Pengurus</button>
+            <button @click="requestRole('pencatat')" class="role-tab" :class="currentRole === 'pencatat' ? 'role-tab-active' : 'role-tab-inactive'"><i class="fa-solid fa-pen-clip"></i>录入<br>Pencatat</button>
+            <button @click="requestRole('gpk')" class="role-tab" :class="currentRole === 'gpk' ? 'role-tab-active' : 'role-tab-inactive'"><i class="fa-solid fa-stamp"></i>审核<br>Semakan</button>
+        </div>
+    </div>
+
+    <div v-if="isSyncingInBackground" class="fixed top-0 left-0 h-1 bg-blue-500 z-50 animate-pulse" style="width: 100%;"></div>
+
+    <div v-show="currentRole === 'parent'" class="px-4 pb-6 relative z-10">
+        <div class="hero-banner mt-3 mb-4">
+            <div class="relative z-10 text-center">
+                <div class="eyebrow-pill mb-3"><i class="fa-solid fa-trophy"></i> Sports Day 2026 • 实时看板</div>
+                <img src="https://lh3.googleusercontent.com/d/1OBk9JZz-KyOwRoycmCSGzAXkd32vM6h5" alt="Logo Sekolah" class="h-20 mx-auto object-contain drop-shadow-sm mb-3">
+                <h1 class="text-[1.35rem] leading-tight font-black tracking-tight">义乐新村华小常年运动会</h1>
+                <p class="text-[0.8rem] text-white/90 font-semibold mt-1">Sukan Tahunan SJKC Kg Baru Gedok</p>
+                <div class="mt-3 inline-flex flex-wrap justify-center gap-2 text-[11px]">
+                    <span class="px-3 py-1 rounded-full bg-white/14 border border-white/15 font-bold">📅 9.8.2026</span>
+                    <span class="px-3 py-1 rounded-full bg-white/14 border border-white/15 font-bold">🏫 SJKC Kg Baru Gedok</span>
+                    <span class="px-3 py-1 rounded-full bg-white/14 border border-white/15 font-bold">⚡ Live Update</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-5">
+            <div class="info-chip text-center">
+                <div class="info-chip-label">Date</div>
+                <div class="info-chip-value">9 Ogos<br>2026</div>
+            </div>
+            <div class="info-chip text-center">
+                <div class="info-chip-label">Highlight</div>
+                <div class="info-chip-value">实时<br>成绩</div>
+            </div>
+            <div class="info-chip text-center">
+                <div class="info-chip-label">System</div>
+                <div class="info-chip-value">Live<br>Dashboard</div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl p-5 mb-5 mt-4 text-white relative overflow-hidden transition-colors duration-500" 
+             :class="[statusColor(serverData.currentEvent.id, serverData.currentEvent.status), serverData.currentEvent.status === 'Sedang Dijalankan' ? 'glow-active' : 'shadow-md']">
+            <div class="flex justify-between items-start">
+                <div class="flex-1 pr-4">
+                    <span v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="bg-white/30 text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded backdrop-blur-sm border border-white/40 shadow-sm inline-flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> LIVE NOW • 正在进行
+                    </span>
+                    <span v-else class="bg-black/30 text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded border border-white/20 inline-block">
+                        {{ translateStatus(serverData.currentEvent.status) }}
+                    </span>
+                    <h3 class="text-xl font-black mt-3 leading-tight drop-shadow-md">{{ serverData.currentEvent.name }}</h3>
+                    <p v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="text-[11px] text-white/90 mt-2 font-medium">请家长们为孩子加油打气！Diminta ibubapa memberi sokongan kepada anak！</p>
+                    <p v-else-if="serverData.currentEvent.status === 'Tangguh'" class="text-[11px] text-white/90 mt-2 font-medium">⚠️ 赛事由于突发状况暂停。请稍作等待。Pertandingan ditangguhkan, sila tunggu sebentar.</p>
+                </div>
+                <div v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="flex-shrink-0 opacity-90 mt-2">
+                    <i class="fa-solid fa-person-running text-4xl animate-bounce drop-shadow-lg"></i>
+                </div>
+                <div v-else-if="serverData.currentEvent.status === 'Tangguh'" class="flex-shrink-0 opacity-90 mt-2">
+                    <i class="fa-solid fa-triangle-exclamation text-4xl animate-pulse text-yellow-300 drop-shadow-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <section id="medals" class="section-card mb-5">
+            <div class="section-head">
+                <div>
+                    <div class="section-kicker">Medal Standings</div>
+                    <h3 class="section-title">奖牌总榜</h3>
+                    <p class="section-subtitle">Kedudukan Pingat Semasa</p>
+                </div>
+                <div class="mini-badge">实时更新</div>
+            </div>
+
+            <div class="medal-table-head">
+                <div>Rank</div>
+                <div>Team</div>
+                <div class="text-center">🥇</div>
+                <div class="text-center">🥈</div>
+                <div class="text-center">🥉</div>
+                <div class="text-center">Σ</div>
+            </div>
+
+            <transition-group name="slide-fade">
+                <div v-for="(team, index) in sortedMedals" :key="team.pasukan" class="medal-row transition-all duration-500" :class="index === 0 ? 'top-rank' : ''">
+                    <div class="text-center font-black text-sm" :class="index === 0 ? 'text-amber-500' : 'text-slate-400'">{{ index === 0 ? '🏆' : index + 1 }}</div>
+                    <div class="min-w-0 flex items-center gap-2.5">
+                        <div class="w-4 h-4 rounded-full flex-shrink-0 shadow-sm" :class="'bg-team-' + team.pasukan"></div>
+                        <div class="min-w-0">
+                            <div class="font-black text-[13px] text-slate-800 truncate">{{ getBilingualTeam(team.pasukan) }}</div>
+                            <div class="text-[10px] text-slate-400 font-semibold">Pasukan {{ team.pasukan }}</div>
+                        </div>
+                    </div>
+                    <div class="text-center font-black text-[13px] medal-emas">{{ team.emas }}</div>
+                    <div class="text-center font-black text-[13px] medal-perak">{{ team.perak }}</div>
+                    <div class="text-center font-black text-[13px] medal-gangsa">{{ team.gangsa }}</div>
+                    <div class="text-center font-black text-[13px] text-slate-700">{{ team.emas + team.perak + team.gangsa }}</div>
+                </div>
+            </transition-group>
+        </section>
+
+        <section id="padang" class="section-card mb-5 p-0 overflow-hidden">
+            <button @click="showPadang = !showPadang" class="toggle-shell w-full p-4 flex justify-between items-center text-left active:scale-[0.99] transition-all">
+                <div>
+                    <div class="section-kicker mb-1">Field Event Results</div>
+                    <div class="font-black text-sm text-slate-900">田径比赛成绩</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">Keputusan Acara Padang</div>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-white shadow flex items-center justify-center text-blue-700">
+                    <i class="fa-solid transition-transform duration-300" :class="showPadang ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                </div>
+            </button>
+            <div v-show="showPadang" class="px-4 pb-4 pt-1 bg-white/70 border-t border-slate-100">
+                <div v-for="group in groupedPadang" :key="group.acara" class="result-card mb-3 last:mb-0">
+                    <div class="font-black text-[12px] mb-2 text-slate-800">{{ group.acara }}</div>
+                    <div class="text-[11px] grid grid-cols-1 gap-2">
+                        <div v-for="res in sortPingat(group.results)" :key="res.pasukan + res.namaMurid" class="flex items-start gap-2.5 rounded-xl bg-slate-50 px-2.5 py-2 border border-slate-100">
+                            <span class="w-5 text-center flex-shrink-0 text-base leading-none">{{ getPingatEmoji(res.pingat) }}</span>
+                            <div class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div>
+                            <div class="flex-1 whitespace-pre-line leading-tight text-slate-700 font-bold">
+                                {{ res.namaMurid }} <span class="text-slate-400 font-normal text-[9px] ml-1">({{res.tahun}})</span>
+                                <span v-if="res.catatan" class="text-blue-600 font-bold ml-1 break-words"><br>📝 {{ res.catatan }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="!groupedPadang.length" class="text-center text-xs text-slate-400 py-4">暂无成绩 Tiada rekod setakat ini.</div>
+            </div>
+        </section>
+
+        <section id="timeline" class="section-card mb-4">
+            <div class="section-head">
+                <div>
+                    <div class="section-kicker">Event Timeline</div>
+                    <h3 class="section-title">赛程项目</h3>
+                    <p class="section-subtitle">Senarai Acara Hari Ini</p>
+                </div>
+                <div class="mini-badge">今日赛程</div>
+            </div>
+
+            <div class="timeline-shell">
+                <div v-for="item in serverData.timeline" :key="item.id" class="timeline-row">
+                    <div class="timeline-dot">
+                        <i v-if="item.status === 'Selesai'" class="fa-solid fa-circle-check text-green-500 text-xs"></i>
+                        <i v-else-if="item.status === 'Sedang Dijalankan'" class="fa-solid fa-fire text-orange-500 animate-pulse text-xs"></i>
+                        <i v-else-if="item.status === 'Tangguh'" class="fa-solid fa-triangle-exclamation text-red-500 text-xs"></i>
+                        <i v-else class="fa-regular fa-circle text-slate-300 text-xs"></i>
+                    </div>
+
+                    <div class="rounded-2xl border p-3 shadow-sm transition-all duration-300" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-50 border-orange-200 shadow-orange-100/60' : 'bg-white border-slate-200'">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="font-black text-[13px] leading-tight" :class="{'text-slate-800': item.status === 'Selesai', 'text-orange-600': item.status === 'Sedang Dijalankan', 'text-slate-600': item.status === 'Belum Mula', 'text-red-600': item.status === 'Tangguh'}">{{ item.name }}</div>
+                                <div class="text-[10px] text-slate-400 font-semibold mt-1">{{ item.kategori || 'Acara' }}</div>
+                            </div>
+                            <span v-if="item.status === 'Selesai'" class="status-pill bg-emerald-50 text-emerald-700">✅ 已结束</span>
+                            <span v-else-if="item.status === 'Sedang Dijalankan'" class="status-pill bg-orange-100 text-orange-700">🔥 进行中</span>
+                            <span v-else-if="item.status === 'Tangguh'" class="status-pill bg-red-100 text-red-700">⚠️ 暂停</span>
+                            <span v-else class="status-pill bg-slate-100 text-slate-500">⏳ 未开始</span>
+                        </div>
+
+                        <div v-if="item.status === 'Selesai' && serverData.eventResults && serverData.eventResults[item.id]" class="mt-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <div v-for="res in filterParentDisplay(serverData.eventResults[item.id])" :key="res.pasukan + res.namaMurid" class="flex items-start gap-2 mb-2 last:mb-0 rounded-lg bg-white px-2.5 py-2 border border-slate-100">
+                                <span class="w-5 text-center flex-shrink-0">{{ getPingatEmoji(res.pingat) }}</span>
+                                <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-0.5" :class="'bg-team-' + res.pasukan"></div>
+                                <span class="font-bold text-slate-700 text-[11px] leading-tight flex-1 whitespace-pre-line">
+                                    {{ res.namaMurid }}<template v-if="res.tahun"> <span class="text-slate-400 font-normal text-[9px] ml-0.5">({{ res.tahun }})</span></template>
+                                    <span v-if="res.catatan" class="text-blue-600 font-bold ml-1 break-words"><br>📝 {{ res.catatan }}</span>
+                                </span>
+                            </div>
+                            <div v-if="hasBatal(serverData.eventResults[item.id])" class="mt-2 border-t border-slate-200 pt-2">
+                                <details class="text-[10px]">
+                                    <summary class="cursor-pointer text-slate-400 hover:text-red-500 font-semibold inline-flex items-center gap-1 active:scale-95"><i class="fa-solid fa-caret-down"></i> <i class="fa-solid fa-circle-info"></i> {{ countBatal(serverData.eventResults[item.id]) }} Catatan</summary>
+                                    <div class="mt-2 pl-1 space-y-1.5">
+                                        <div v-for="res in getBatalOnly(serverData.eventResults[item.id])" :key="res.pasukan + res.namaMurid" class="flex items-start gap-1.5">
+                                            <div class="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div>
+                                            <span class="text-slate-500 opacity-90 flex-1 leading-tight"><span class="font-semibold">{{ res.namaMurid }}</span>
+                                                <template v-if="res.tahun"><span class="text-slate-400 font-normal text-[9px] ml-0.5">({{ res.tahun }})</span></template>
+                                                <span class="text-red-500 font-bold ml-1 break-words"><br>❌ {{ res.catatan }}</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="parent-float-nav">
+            <div class="parent-float-nav-inner">
+                <a href="#medals" class="parent-float-link"><i class="fa-solid fa-medal"></i>奖牌榜</a>
+                <a href="#padang" class="parent-float-link"><i class="fa-solid fa-person-running"></i>田赛成绩</a>
+                <a href="#timeline" class="parent-float-link"><i class="fa-solid fa-list-check"></i>赛程</a>
+            </div>
+        </div>
+    </div>
+
+    <div v-show="currentRole === 'pengurus'" class="p-4 min-h-screen relative z-10">
+        <div class="panel-header orange"><div class="text-[11px] uppercase tracking-[0.22em] font-black text-white/80 mb-1">Control Center</div><h2 class="text-lg font-black">👨‍✈️ 控制面板 Pengurus Acara</h2><p class="text-xs text-white/85 mt-1">快速更新比赛状态，现场操作更清楚。</p></div>
+        <div class="space-y-3">
+            <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-white rounded-xl shadow-sm p-3 border border-orange-100">
+                <div class="font-bold text-orange-900 text-sm mb-2">{{ item.name }}</div>
+                
+                <!-- 🌟 智能排版：如果是仪式项目变 2x2 网格，比赛项目则横向 3 连排 -->
+                <div v-if="item.status !== 'Selesai' && !item.status.includes('Menunggu')" :class="isCeremony(item) ? 'grid grid-cols-2 gap-2' : 'flex gap-2'">
+                    <button @click="instantStatusUpdate(item.id, 'Belum Mula')" class="flex-1 py-2 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Belum Mula' ? 'bg-gray-300 text-gray-800' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'">⚪ 未开始</button>
+                    <button @click="instantStatusUpdate(item.id, 'Sedang Dijalankan')" class="flex-1 py-2 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-orange-100'">🏃 进行中</button>
+                    <button @click="instantStatusUpdate(item.id, 'Tangguh')" class="flex-1 py-2 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Tangguh' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-red-50'">⚠️ 暂停</button>
+                    
+                    <!-- 🌟 专属按钮：只有非比赛项目才会出现“已完成” -->
+                    <button v-if="isCeremony(item)" @click="instantStatusUpdate(item.id, 'Selesai')" class="flex-1 py-2 rounded text-[10px] font-bold transition-colors bg-green-50 text-green-700 border border-green-200 hover:bg-green-500 hover:text-white">✅ 已完成</button>
+                </div>
+                
+                <div v-else class="text-xs text-gray-500 font-semibold italic bg-gray-50 p-2 rounded flex justify-between items-center">
+                    <span>Status: {{ translateStatus(item.status) }}</span>
+                    <!-- 贴心功能：如果仪式不小心按错了已完成，可以撤回 -->
+                    <button v-if="isCeremony(item) && item.status === 'Selesai'" @click="instantStatusUpdate(item.id, 'Belum Mula')" class="text-red-500 underline text-[10px] active:scale-95">撤回重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div v-show="currentRole === 'pencatat'" class="p-4 min-h-screen relative z-10">
+        <div class="panel-header blue"><div class="text-[11px] uppercase tracking-[0.22em] font-black text-white/80 mb-1">Result Entry</div><h2 class="text-lg font-black">⏱️ 录入成绩 Pencatat</h2><p class="text-xs text-white/85 mt-1">参赛者资料与成绩录入集中在这里完成。</p></div>
+        <div v-for="item in serverData.timeline" :key="'pen_'+item.id">
+            <div v-if="item.status === 'Sedang Dijalankan'" class="bg-white rounded-xl shadow-md border border-blue-100 p-4 mb-4">
+                <div class="font-bold text-blue-800 mb-4">{{ item.name }}</div>
+                <div class="space-y-3 mb-5">
+                    <template v-for="team in getEventTeams(item.id)" :key="team">
+                        <div v-for="num in getPesertaCount(item.id, team)" :key="`${team}_${num}`" class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 relative overflow-hidden">
+                            <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="'bg-team-' + team"></div>
+                            <div class="pl-2 flex items-center justify-between mb-2 pb-1 border-b border-gray-100">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-3 h-3 rounded-full" :class="'bg-team-' + team"></div>
+                                    <span class="font-bold text-xs text-gray-700">{{ getBilingualTeam(team) }} <span class="text-gray-400 font-normal ml-1">| Peserta {{ num }}</span></span>
+                                </div>
+                            </div>
+                            <div class="pl-2 flex items-start gap-2">
+                                <div class="flex-1 flex flex-col gap-1.5">
+                                    <input type="text" :custom-id="`tahun_${item.id}_${team}_${num}`" :id="`tahun_${item.id}_${team}_${num}`" :value="getPesertaTahun(item.id, team, num)" placeholder="Tahun (年级)" class="w-full text-[10px] p-1.5 border border-gray-200 rounded bg-gray-50 text-gray-700 focus:outline-blue-400">
+                                    <textarea :custom-id="`nama_${item.id}_${team}_${num}`" :id="`nama_${item.id}_${team}_${num}`" :value="getPesertaName(item.id, team, num)" placeholder="姓名 Nama" rows="2" class="w-full text-[11px] p-1.5 border border-gray-200 rounded bg-blue-50/30 text-blue-900 font-bold resize-y min-h-[50px] leading-tight focus:outline-blue-400"></textarea>
+                                </div>
+                                <select :custom-id="`pingat_${item.id}_${team}_${num}`" :id="`pingat_${item.id}_${team}_${num}`" class="w-24 flex-shrink-0 text-[10px] font-bold p-1.5 border border-gray-200 rounded bg-white shadow-sm focus:outline-blue-400">
+                                    <option value="-">- Tiada -</option>
+                                    <option value="Emas">🥇 Emas 金</option>
+                                    <option value="Perak">🥈 Perak 银</option>
+                                    <option value="Gangsa">🥉 Gangsa 筒</option>
+                                    <option value="Keempat">🎖️ Keempat 第四名</option>
+                                    <option value="Kelima">🏅 Kelima 第五名</option>
+                                    <option value="Batal">❌ Batal</option>
+                                </select>
+                            </div>
+                            <div class="pl-2 mt-1.5">
+                                <input type="text" :custom-id="`catatan_${item.id}_${team}_${num}`" :id="`catatan_${item.id}_${team}_${num}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-[10px] p-1.5 border border-red-100 rounded bg-red-50/30 text-red-600 placeholder-red-300 focus:outline-red-400">
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <button @click="submitScore(item.id)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow active:scale-95 transition-transform text-sm"><i class="fa-solid fa-paper-plane"></i> 提交 Hantar</button>
+            </div>
+        </div>
+        <div v-if="!serverData.timeline.some(i => i.status === 'Sedang Dijalankan')" class="text-center text-gray-400 py-10 text-xs">Tiada acara sedang dijalankan.</div>
+    </div>
+
+    <div v-show="currentRole === 'gpk'" class="p-4 min-h-screen relative z-10">
+        <div class="panel-header purple"><div class="text-[11px] uppercase tracking-[0.22em] font-black text-white/80 mb-1">Approval Center</div><h2 class="text-lg font-black mb-4 flex justify-between items-center">
+            <span>👨‍💼 成绩核准</span>
+            <div class="flex gap-2">
+                <!-- 🌟 新增的 MC 专属导出按钮 -->
+                <button @click="exportCSVForMC" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] px-3 py-1.5 rounded shadow flex items-center gap-1 active:scale-95">
+                    <i class="fa-solid fa-microphone"></i> Muat Turun utk MC
+                </button>
+                <!-- 原本的行政导出按钮 -->
+                <button @click="exportCSV" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] px-3 py-1.5 rounded shadow flex items-center gap-1 active:scale-95">
+                    <i class="fa-solid fa-download"></i> Muat Turun
+                </button>
+            </div>
+        </h2><p class="text-xs text-white/85 -mt-2 mb-0">审核、导出与成绩历史都集中在这里。</p></div>
+        
+        <div v-for="(results, eventId) in serverData.pendingApprovals" :key="'gpk_'+eventId" class="bg-white rounded-xl shadow border border-purple-200 overflow-hidden mb-4">
+            <div class="bg-purple-600 text-white p-2 text-[11px] font-bold">[{{ getEventKategori(eventId) }}] {{ getEventName(eventId) }}</div>
+            <div class="p-3">
+                <table class="w-full text-xs text-left mb-3">
+                    <tr v-for="res in sortPingat(results)" :key="res.pasukan + res.namaMurid" class="border-b last:border-0">
+                        <td class="py-2 align-top"><div class="w-3 h-3 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div></td>
+                        <td class="py-2 pl-1 pr-2">
+                            <div class="font-bold text-[11px] leading-tight whitespace-pre-line break-words text-gray-800">{{ res.namaMurid }}</div>
+                            <div class="text-[9px] text-gray-400 mt-0.5">{{ res.tahun }}</div>
+                            <div v-if="res.catatan" class="text-[10px] text-red-500 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> {{ res.catatan }}</div>
+                        </td>
+                        <td class="py-2 font-bold text-right align-top w-20" :class="{'medal-emas': res.pingat==='Emas', 'medal-perak': res.pingat==='Perak', 'medal-gangsa': res.pingat==='Gangsa', 'text-gray-500': res.pingat==='Keempat' || res.pingat==='Kelima', 'text-red-600': res.pingat==='Batal'}">{{ formatPingatGPK(res.pingat) }}</td>
+                    </tr>
+                </table>
+                <div class="flex gap-2">
+                    <button @click="gpkAction('approveResult', eventId)" class="flex-1 bg-green-500 text-white font-bold py-2 rounded text-xs shadow-sm active:scale-95 transition-transform">✅ Sahkan</button>
+                    <button @click="gpkAction('rejectResult', eventId)" class="bg-red-100 text-red-600 font-bold py-2 px-3 rounded text-xs active:scale-95 transition-transform">Tolak</button>
+                </div>
+            </div>
+        </div>
+        <div v-if="Object.keys(serverData.pendingApprovals || {}).length === 0" class="text-center text-gray-400 py-4 text-xs">Tiada semakan baru. 暂无待审核。</div>
+
+        <div class="mt-8 border-t-2 border-purple-200 pt-4">
+            <h3 class="text-sm font-bold text-purple-900 mb-3"><i class="fa-solid fa-clock-rotate-left"></i> Keputusan Telah Disahkan (已核准成绩历史区)</h3>
+            <div class="space-y-3">
+                <template v-for="item in serverData.timeline" :key="'hist_'+item.id">
+                    <details v-if="item.status === 'Selesai'" class="group bg-white rounded-xl shadow border border-gray-200 overflow-hidden mb-3">
+                        
+                        <summary class="bg-gray-700 text-white p-3 text-[11px] font-bold flex justify-between items-center cursor-pointer active:bg-gray-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+                            <span>[{{ item.kategori }}] {{ item.name }}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded font-bold shadow-sm">Selesai</span>
+                                <i class="fa-solid fa-chevron-down transition-transform duration-300 group-open:rotate-180"></i>
+                            </div>
+                        </summary>
+                        
+                        <div class="p-3 bg-gray-50/50 border-t border-gray-600">
+                            <table class="w-full text-xs text-left mb-3">
+                                <tr v-for="res in sortPingat(serverData.eventResults[item.id])" :key="res.pasukan + res.namaMurid" class="border-b last:border-0 border-gray-200">
+                                    <td class="py-1.5 align-top w-4"><div class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div></td>
+                                    <td class="py-1.5 pl-1 pr-2">
+                                        <div class="font-bold text-[11px] text-gray-800 leading-tight whitespace-pre-line">{{ res.namaMurid }}</div>
+                                        <div class="text-[9px] text-gray-400 mt-0.5" v-if="res.tahun">{{ res.tahun }}</div>
+                                        <div v-if="res.catatan" class="text-[10px] text-blue-600 font-bold mt-0.5"><i class="fa-solid fa-paperclip text-[9px]"></i> {{ res.catatan }}</div>
+                                    </td>
+                                    <td class="py-1.5 font-bold text-right align-top w-20" :class="{'medal-emas': res.pingat==='Emas', 'medal-perak': res.pingat==='Perak', 'medal-gangsa': res.pingat==='Gangsa', 'text-gray-500': res.pingat==='Keempat' || res.pingat==='Kelima', 'text-red-600': res.pingat==='Batal'}">
+                                        {{ getPingatEmoji(res.pingat) }} {{ res.pingat }}
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <div class="text-right border-t border-gray-100 pt-2 text-[10px]">
+                                <button @click="resetEventResult(item.id)" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-1.5 px-3 rounded shadow-sm border border-red-200 active:scale-95 transition-all">
+                                    <i class="fa-solid fa-rotate-left text-[9px]"></i> 🗑️ 重置此项成绩
+                                </button>
+                            </div>
+                        </div>
+                    </details>
+                </template>
+                <div v-if="!serverData.timeline.some(i => i.status === 'Selesai')" class="text-center text-gray-400 py-4 text-xs">Tiada rekod sejarah setakat ini. 暂无历史记录。</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { createApp, ref, computed, onMounted } from 'vue';
+    import { initializeApp } from "firebase/app";
+     import { getFirestore, doc, onSnapshot, setDoc, updateDoc, deleteField } from "firebase/firestore";
+
+     
+
+    // =========================================================================
+    // 🔴 必须替换为你真实的 Firebase 配置！
+    // =========================================================================
+    const firebaseConfig = {
+    apiKey: "AIzaSyCKyWCUbZsZ36h2UgIctUG6sAm7Hz4lSJ0",
+    authDomain: "sukan-sekolah-2026.firebaseapp.com",
+    projectId: "sukan-sekolah-2026",
+    storageBucket: "sukan-sekolah-2026.firebasestorage.app",
+    messagingSenderId: "1008050585646",
+    appId: "1:1008050585646:web:0082bbb0c14cc1b9751fbf"
+  };
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    createApp({
+        setup() {
+            const currentRole = ref('parent');
+            const isSyncingInBackground = ref(false);
+            const authModal = ref({ show: false, target: '', password: '', error: false });
+            const showPadang = ref(false); 
+            
+            const serverData = ref({
+                currentEvent: { id: '', name: 'Sila tunggu... 请稍候...', status: 'Belum Mula' },
+                timeline: [], medals: [], pendingApprovals: {}, peserta: {}, eventResults: {}, acaraPadang: [], passwords: {}
+            });
+
+            const listenToFirestore = () => {
+                const boardDocRef = doc(db, "config", "live_board");
+                onSnapshot(boardDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if(data.currentEvent) serverData.value.currentEvent = data.currentEvent;
+                        if(data.timeline) serverData.value.timeline = data.timeline;
+                        if(data.medals) serverData.value.medals = data.medals;
+                        if(data.pendingApprovals) serverData.value.pendingApprovals = data.pendingApprovals;
+                        if(data.peserta) serverData.value.peserta = data.peserta;
+                        if(data.eventResults) serverData.value.eventResults = data.eventResults;
+                        if(data.acaraPadang) serverData.value.acaraPadang = data.acaraPadang;
+                        if(data.passwords) serverData.value.passwords = data.passwords;
+                    }
+                });
+            };
+
+            const saveToFirestore = async () => {
+                isSyncingInBackground.value = true;
+                try {
+                    const boardDocRef = doc(db, "config", "live_board");
+                    await setDoc(boardDocRef, serverData.value, { merge: true });
+                } catch (error) {
+                    console.error("保存至 Firebase 失败:", error);
+                    alert("网络错误，保存失败！");
+                } finally {
+                    isSyncingInBackground.value = false;
+                }
+            };
+
+            const instantStatusUpdate = (eventId, status) => {
+                const ev = serverData.value.timeline.find(i => i.id === eventId);
+                if (ev) {
+                    ev.status = status;
+                    if (status === 'Sedang Dijalankan' || status === 'Tangguh') {
+                        serverData.value.currentEvent = { id: ev.id, name: ev.name, status: status };
+                    } else if (status === 'Belum Mula' && serverData.value.currentEvent.name === ev.name) {
+                        serverData.value.currentEvent = { id: '', name: 'Sila tunggu... 请稍候...', status: 'Belum Mula' };
+                    }
+                }
+                saveToFirestore();
+            };
+
+             // 🌟 智能识别是否为仪式/流程项目
+            const isCeremony = (item) => {
+                const keyword = (item.name + " " + (item.kategori || "")).toLowerCase();
+                // 只要名字或分类包含以下这些字眼，就判定为非比赛项目
+                return keyword.includes('perasmian') || 
+                       keyword.includes('集合') || 
+                       keyword.includes('开幕') || 
+                       keyword.includes('致词') || 
+                       keyword.includes('ucapan') || 
+                       keyword.includes('rehat') || 
+                       keyword.includes('penyampaian') || 
+                       keyword.includes('upacara');
+            };
+
+              // 🌟 新增：智能判断这个项目有哪些队伍参赛
+            const getEventTeams = (eventId) => {
+                if (serverData.value.peserta && serverData.value.peserta[eventId]) {
+                    const teams = Object.keys(serverData.value.peserta[eventId]);
+                    if (teams.length > 0) return teams;
+                }
+                return ['Merah', 'Biru', 'Kuning']; // 如果表格没填，默认出红蓝黄
+            };
+
+            const submitScore = (eventId) => {
+                const results = [];
+                const teams = getEventTeams(eventId);
+            teams.forEach(team => {
+                    const count = getPesertaCount(eventId, team);
+                    for (let num = 1; num <= count; num++) {
+                        const namaEl = document.getElementById(`nama_${eventId}_${team}_${num}`);
+                        const tahunEl = document.getElementById(`tahun_${eventId}_${team}_${num}`);
+                        const pingatEl = document.getElementById(`pingat_${eventId}_${team}_${num}`);
+                        const catatanEl = document.getElementById(`catatan_${eventId}_${team}_${num}`);
+                        
+                        if (namaEl) {
+                            const nama = namaEl.value.trim();
+                            const pingat = pingatEl ? pingatEl.value : "-";
+                            if (nama || pingat !== "-") {
+                                results.push({ pasukan: team, namaMurid: nama, tahun: tahunEl ? tahunEl.value.trim() : "", pingat: pingat, catatan: catatanEl ? catatanEl.value.trim() : "" });
+                            }
+                        }
+                    }
+                });
+                if (results.length === 0) return alert("Sila isi sekurang-kurangnya satu keputusan!");
+                
+                if (confirm("Hantar ke GPK?")) {
+                    const ev = serverData.value.timeline.find(i => i.id === eventId);
+                    if (ev) ev.status = 'Menunggu Pengesahan GPK';
+                    
+                    if (!serverData.value.pendingApprovals) serverData.value.pendingApprovals = {};
+                    serverData.value.pendingApprovals[eventId] = results;
+                    
+                    saveToFirestore();
+                }
+            };
+
+            // 🌟 修复：GPK 审核动作的原子级数据同步
+            const gpkAction = async (action, eventId) => {
+                const results = serverData.value.pendingApprovals[eventId];
+                if (!results) return;
+
+                // ==========================================
+                // 1. 本地处理逻辑（算奖牌、改状态）
+                // ==========================================
+                if (action === 'approveResult') {
+                    if (!serverData.value.eventResults) serverData.value.eventResults = {};
+                    serverData.value.eventResults[eventId] = results;
+                    
+                    results.forEach(res => {
+                        const teamObj = serverData.value.medals.find(m => m.pasukan === res.pasukan);
+                        if (teamObj) {
+                            if (res.pingat === 'Emas') teamObj.emas++;
+                            else if (res.pingat === 'Perak') teamObj.perak++;
+                            else if (res.pingat === 'Gangsa') teamObj.gangsa++;
+                        }
+                    });
+                    
+                    const ev = serverData.value.timeline.find(i => i.id === eventId);
+                    if (ev) ev.status = 'Selesai';
+
+                    if (serverData.value.currentEvent && serverData.value.currentEvent.id === eventId) {
+                        serverData.value.currentEvent = { id: '', name: 'Sila tunggu... 请稍候...', status: 'Belum Mula' };
+                    }
+                } else if (action === 'rejectResult') {
+                    const ev = serverData.value.timeline.find(i => i.id === eventId);
+                    if (ev) ev.status = 'Sedang Dijalankan';
+                }
+
+                // 在本地清除掉这个待审核项目
+                if (serverData.value.pendingApprovals) {
+                    delete serverData.value.pendingApprovals[eventId];
+                }
+
+                // ==========================================
+                // 2. 核心修复：打包成包裹发送给 Firebase，并强制抹除旧节点
+                // ==========================================
+                try {
+                    const docRef = doc(db, "config", "live_board");
+                    
+                    // 准备一个更新包裹
+                    let updatePayload = {
+                        [`pendingApprovals.${eventId}`]: deleteField(), // 🔪 强制斩断这个待审核记录！
+                        "timeline": serverData.value.timeline,
+                        "currentEvent": serverData.value.currentEvent
+                    };
+
+                    // 如果是审核通过，才需要更新成绩表和奖牌榜
+                    if (action === 'approveResult') {
+                        updatePayload[`eventResults.${eventId}`] = results;
+                        updatePayload["medals"] = serverData.value.medals;
+                    }
+
+                    // 一次性发送所有更新
+                    await updateDoc(docRef, updatePayload);
+
+                    // 🛑 不再调用旧的 saveToFirestore() 以防冲突！
+                    
+                } catch (error) {
+                    console.error("GPK 操作云端同步失败:", error);
+                    alert("❌ 操作失败，请检查网络连接！");
+                }
+            };
+
+           // 🚨 新增：重置比赛成绩并自动扣除奖牌
+            const resetEventResult = async (eventId) => {
+                if (!confirm("⚠️ 确定要删除此比赛的所有官方成绩，并扣除已发放的奖牌吗？\n(Tindakan ini akan memadam keputusan dan menolak pingat dari carta ganjaran!)")) return;
+
+                // 1. 本地算出扣除后的奖牌
+                const oldResults = serverData.value.eventResults[eventId];
+                if (oldResults) {
+                    oldResults.forEach(res => {
+                        const teamObj = serverData.value.medals.find(m => m.pasukan === res.pasukan);
+                        if (teamObj) {
+                            if (res.pingat === 'Emas') teamObj.emas = Math.max(0, teamObj.emas - 1);
+                            else if (res.pingat === 'Perak') teamObj.perak = Math.max(0, teamObj.perak - 1);
+                            else if (res.pingat === 'Gangsa') teamObj.gangsa = Math.max(0, teamObj.gangsa - 1);
+                        }
+                    });
+                }
+                
+                // 2. 本地改回正确的赛程状态
+                const ev = serverData.value.timeline.find(i => i.id === eventId);
+                if (ev) ev.status = 'Sedang Dijalankan';
+
+                if (serverData.value.currentEvent && serverData.value.currentEvent.id === eventId) {
+                    serverData.value.currentEvent = { id: '', name: 'Sila tunggu... 请稍候...', status: 'Belum Mula' };
+                }
+
+                // 3. 本地清除成绩，让画面立刻反应
+                if (serverData.value.eventResults) {
+                    delete serverData.value.eventResults[eventId];
+                }
+
+                try {
+                    // 🌟 核心修复：把所有的更新打包成“一次性”的原子更新发给云端！
+                    const docRef = doc(db, "config", "live_board");
+                    await updateDoc(docRef, {
+                        [`eventResults.${eventId}`]: deleteField(), // 精准删掉该项目的成绩
+                        "medals": serverData.value.medals,          // 覆盖更新扣除后的奖牌榜
+                        "timeline": serverData.value.timeline,      // 覆盖更新改回进行中的赛程表
+                        "currentEvent": serverData.value.currentEvent // 覆盖更新大看板状态
+                    });
+                    
+                    // 🛑 注意：已经移除了原本的 saveToFirestore()！
+                    // 因为上面的 updateDoc 已经完美同步了所有数据，不再需要多余的保存动作去引发冲突。
+                    
+                    alert("✅ 成绩已成功清除！此比赛已变回“进行中”，裁判现在可以重新录入。");
+                } catch (error) {
+                    console.error("删除云端成绩失败:", error);
+                    alert("❌ 删除云端数据失败，请检查网络连接。");
+                }
+            };
+
+           const exportCSV = () => {
+                let report = {}; 
+                const parseAndBuildReport = (rawNama, defaultTSummary, kategori, pasukan, achievementStr) => {
+                    if (!rawNama) return;
+                    let lines = rawNama.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    lines.forEach(line => {
+                        let match = line.match(/[(（]([^)）]+)[)）]/);
+                        let finalTahun = defaultTSummary || 'Tiada';
+                        let cleanName = line;
+                        if (match) {
+                            finalTahun = match[1].trim();
+                            cleanName = line.replace(/[(（][^)）]+[)）]/, '').trim(); 
+                        }
+                        let key = `${finalTahun}|${kategori || '-'} |${pasukan}|${cleanName}`;
+                        if (!report[key]) report[key] = [];
+                        report[key].push(achievementStr);
+                    });
+                };
+
+                Object.keys(serverData.value.eventResults).forEach(eventId => {
+                    let eventArray = serverData.value.eventResults[eventId];
+                    let evName = getEventName(eventId);
+                    let evKategori = getEventKategori(eventId); // 🌟 修复：从项目总表里提取 Kategori
+
+                    eventArray.forEach(res => {
+                        // 🌟 修复：屏蔽掉没有得奖 (pingat 为 '-') 的选手
+                        if (!res.pingat || res.pingat === '-') return;
+
+                        let pingatDisplay = res.pingat === 'Batal' ? `(Batal) (Catatan: ${res.catatan})` : `(${res.pingat})`;
+                        let award = `${evName} ${pingatDisplay}`;
+                        
+                        // 使用提取到的 evKategori 传入
+                        parseAndBuildReport(res.namaMurid, res.tahun, evKategori, res.pasukan, award); 
+                    });
+                });
+
+                serverData.value.acaraPadang.forEach(res => {
+                    // 🌟 同样加上安全屏蔽，确保田赛没得奖的也不会混入
+                    if (!res.pingat || res.pingat === '-') return;
+
+                    let pingatDisplay = res.pingat === 'Batal' ? `(Batal) (Catatan: ${res.catatan})` : `(${res.pingat})`;
+                    let award = `${res.acara} ${pingatDisplay}`;
+                    parseAndBuildReport(res.namaMurid, res.tahun, res.kategori, res.pasukan, award);
+                });
+
+                let csvContent = "Tahun,Kategori,Pasukan,Nama Murid,Pencapaian\n";
+                let sortedKeys = Object.keys(report).sort((a, b) => a.localeCompare(b));
+                
+                sortedKeys.forEach(key => {
+                    let parts = key.split('|');
+                    let pencapaian = report[key].map((item, index) => `${index + 1}) ${item}`).join('\n');
+                    
+                    csvContent += `${parts[0]},${parts[1]},${parts[2]},"${parts[3]}","${pencapaian}"\n`;
+                });
+
+                // 🌟 优化：自动获取今天的日期作为文件名
+                const dateStr = new Date().toISOString().split('T')[0]; // 例如 "2026-07-19"
+                const fileName = `Senarai_Pemenang_Sukan_Tahunan_${dateStr}.csv`;
+
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", fileName);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+              // 🌟 新增：司仪 (MC) 专属导出逻辑 (悬念倒序播报版)
+            const exportCSVForMC = () => {
+                let csvContent = "Kategori,Nama Acara,Tempat,Nama Murid,Tahun,Pasukan\n";
+                let rows = [];
+
+                const processRow = (rawNama, defaultTahun, kategori, pasukan, acaraName, pingat) => {
+                    // 屏蔽掉没有得奖或犯规的选手
+                    if (!pingat || pingat === '-' || pingat === 'Batal') return;
+
+                    let lines = rawNama.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    lines.forEach(line => {
+                        let match = line.match(/[(（]([^)）]+)[)）]/);
+                        let finalTahun = defaultTahun || 'Tiada';
+                        let cleanName = line;
+                        if (match) {
+                            finalTahun = match[1].trim();
+                            cleanName = line.replace(/[(（][^)）]+[)）]/, '').trim(); 
+                        }
+                        
+                        rows.push({
+                            kategori: kategori || '-',
+                            namaAcara: acaraName,
+                            tempat: pingat,
+                            namaMurid: cleanName,
+                            tahun: finalTahun,
+                            pasukan: pasukan
+                        });
+                    });
+                };
+
+                // 1. 抓取所有径赛 (Acara Balapan)
+                Object.keys(serverData.value.eventResults).forEach(eventId => {
+                    let eventArray = serverData.value.eventResults[eventId];
+                    let evName = getEventName(eventId);
+                    let evKategori = getEventKategori(eventId);
+
+                    eventArray.forEach(res => {
+                        processRow(res.namaMurid, res.tahun, evKategori, res.pasukan, evName, res.pingat);
+                    });
+                });
+
+                // 2. 抓取所有田赛 (Acara Padang)
+                serverData.value.acaraPadang.forEach(res => {
+                    processRow(res.namaMurid, res.tahun, res.kategori, res.pasukan, res.acara, res.pingat);
+                });
+
+                // 🌟 3. 悬念排序逻辑：先按“项目名称”，再按“第五 -> 第四 -> 铜 -> 银 -> 金”倒序排
+                const suspenseMedalOrder = { 'Kelima': 1, 'Keempat': 2, 'Gangsa': 3, 'Perak': 4, 'Emas': 5 };
+                rows.sort((a, b) => {
+                    if (a.namaAcara !== b.namaAcara) return a.namaAcara.localeCompare(b.namaAcara);
+                    return (suspenseMedalOrder[a.tempat] || 99) - (suspenseMedalOrder[b.tempat] || 99);
+                });
+
+                // 4. 组装 CSV 字符串
+                rows.forEach(r => {
+                    csvContent += `"${r.kategori}","${r.namaAcara}","${r.tempat}","${r.namaMurid}","${r.tahun}","${r.pasukan}"\n`;
+                });
+
+                // 5. 触发下载
+                const dateStr = new Date().toISOString().split('T')[0];
+                const fileName = `Senarai_Pemenang_Untuk_MC_${dateStr}.csv`;
+
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.setAttribute("href", URL.createObjectURL(blob));
+                link.setAttribute("download", fileName);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const requestRole = (role) => {
+                if (role === 'parent') { currentRole.value = 'parent'; return; }
+                if (localStorage.getItem('auth_' + role) === serverData.value.passwords[role]) { currentRole.value = role; } 
+                else { authModal.value = { show: true, target: role, password: '', error: false }; }
+            };
+            const verifyPassword = () => {
+                const target = authModal.value.target;
+                if (authModal.value.password === serverData.value.passwords[target]) {
+                    localStorage.setItem('auth_' + target, authModal.value.password);
+                    currentRole.value = target;
+                    authModal.value.show = false;
+                } else { authModal.value.error = true; }
+            };
+            const cancelAuth = () => { authModal.value.show = false; };
+
+            const sortedMedals = computed(() => {
+                if (!serverData.value.medals) return [];
+                return [...serverData.value.medals].sort((a, b) => {
+                    if (b.emas !== a.emas) return b.emas - a.emas;
+                    if (b.perak !== a.perak) return b.perak - a.perak;
+                    return b.gangsa - a.gangsa;
+                });
+            });
+
+            const groupedPadang = computed(() => {
+                if(!serverData.value.acaraPadang) return [];
+                const groups = {};
+                serverData.value.acaraPadang.forEach(item => {
+                    const title = `${item.acara} (${item.kategori})`;
+                    if (!groups[title]) groups[title] = { acara: title, results: [] };
+                    groups[title].results.push(item);
+                });
+                return Object.values(groups);
+            });
+
+            const getPesertaCount = (eventId, team) => {
+                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
+                    const list = serverData.value.peserta[eventId][team];
+                    return Math.max(Array.isArray(list) ? list.length : 1, 1);
+                }
+                return 1; 
+            };
+            const getPesertaName = (eventId, team, num) => { 
+                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
+                    const data = serverData.value.peserta[eventId][team];
+                    if (Array.isArray(data)) return data[num - 1] ? data[num - 1].nama : "";
+                    return num === 1 ? data.nama : "";
+                }
+                return ""; 
+            };
+            const getPesertaTahun = (eventId, team, num) => { 
+                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
+                    const data = serverData.value.peserta[eventId][team];
+                    if (Array.isArray(data)) return data[num - 1] ? data[num - 1].tahun : "";
+                    return num === 1 ? data.tahun : "";
+                }
+                return ""; 
+            };
+
+            const getEventName = (id) => { const ev = serverData.value.timeline.find(i => i.id === id); return ev ? ev.name : id; };
+            const getEventKategori = (id) => { const ev = serverData.value.timeline.find(i => i.id === id); return ev ? ev.kategori : ''; };
+            const getBilingualTeam = (pasukan) => { const map = { 'Merah': 'Merah 红队', 'Biru': 'Biru 蓝队', 'Kuning': 'Kuning 黄队', 'Putih': 'Putih 白队 / 公开组' }; return map[pasukan] || pasukan; };
+            const translateStatus = (status) => { const map = { 'Belum Mula': 'Belum Mula 未开始', 'Sedang Dijalankan': 'Sedang Dijalankan 进行中', 'Tangguh': 'Tangguh 暂停', 'Selesai': 'Selesai 已结束', 'Menunggu Pengesahan GPK': 'Menunggu GPK 审核中...' }; return map[status] || status; };
+            
+            const statusColor = (eventId, status) => {
+                if (status === 'Sedang Dijalankan') {
+                    const idx = serverData.value.timeline.findIndex(i => i.id === eventId);
+                    const colors = ['bg-gradient-to-r from-blue-600 to-cyan-400', 'bg-gradient-to-r from-emerald-500 to-teal-400', 'bg-gradient-to-r from-purple-600 to-fuchsia-500', 'bg-gradient-to-r from-amber-500 to-yellow-400'];
+                    return colors[Math.max(0, idx) % colors.length];
+                }
+                if (status === 'Tangguh') return 'bg-red-600 animate-pulse';
+                return 'bg-gradient-to-r from-gray-700 to-gray-900';
+            };
+
+            const getPingatEmoji = (pingat) => { const m = { 'Emas': '🥇', 'Perak': '🥈', 'Gangsa': '🥉', 'Keempat': '4️⃣', 'Kelima': '5️⃣', 'Batal': '❌' }; return m[pingat] || '🏅'; };
+            const formatPingatGPK = (pingat) => { return `${getPingatEmoji(pingat)} ${pingat}`; };
+            const filterParentDisplay = (resultsArray) => { 
+             const order = { "Emas": 1, "Perak": 2, "Gangsa": 3, "Keempat": 4, "Kelima": 5, "Batal": 6 };
+             return [...resultsArray]
+             .filter(r => r.pingat === 'Emas' || r.pingat === 'Perak' || r.pingat === 'Gangsa')
+             .sort((a, b) => (order[a.pingat] || 99) - (order[b.pingat] || 99)); 
+              };
+            const hasBatal = (resultsArray) => { return resultsArray.some(r => r.pingat === 'Batal'); };
+            const countBatal = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Batal').length; };
+            const getBatalOnly = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Batal'); };
+            const sortPingat = (resultsArray) => {
+    if (!resultsArray) return []; // 🛡️ 救命护盾：如果是空数据，直接返回空，防止网页白屏！
+    const order = { "Emas": 1, "Perak": 2, "Gangsa": 3, "Keempat": 4, "Kelima": 5, "Batal": 6 };
+    return [...resultsArray].sort((a, b) => (order[a.pingat] || 99) - (order[b.pingat] || 99));
+};
+
+            onMounted(() => { listenToFirestore(); });
+
+            return {
+                currentRole, isSyncingInBackground, serverData, sortedMedals, authModal, showPadang, groupedPadang, getPesertaCount,
+                requestRole, verifyPassword, cancelAuth, instantStatusUpdate, submitScore, gpkAction, resetEventResult, exportCSV, 
+                getEventName, getEventKategori, getBilingualTeam, translateStatus, statusColor, getPesertaName, getPesertaTahun, 
+                filterParentDisplay, hasBatal, countBatal, getBatalOnly, formatPingatGPK, sortPingat, getPingatEmoji, isCeremony, getEventTeams, exportCSVForMC
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
