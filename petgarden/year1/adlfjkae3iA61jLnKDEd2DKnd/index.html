@@ -1290,8 +1290,8 @@
       const handleAddTeacher = async () => {
         const name = newTeacherName.trim();
         const pin = newTeacherPin.trim();
-        if (!name || !pin) { alert("老师姓名和6位密码都必须填写哦！"); return; }
-        if (pin.length !== 6 || isNaN(pin)) { alert("密码必须是 6 位纯数字！"); return; }
+        if (!name || !pin) { alert("老师姓名和密码都必须填写哦！"); return;}
+        if (!/^[A-Za-z0-9]{4,12}$/.test(pin)) { alert("密码必须是4至12位英文字母或数字！"); return; }
         if (teachersList.some(t => t.name === name && t.subject === newTeacherSubject)) {
           alert(`【${newTeacherSubject}】已经授权过【${name}】了！`); return;
         }
@@ -1665,9 +1665,8 @@
                   <input type="text" value={newTeacherName} onChange={(e) => setNewTeacherName(e.target.value)} placeholder="如: 张老师, Mr. Wong..." className="w-full px-3 py-2 border rounded-xl text-sm font-bold bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner" />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-400">3. 设置独立6位白板登录密码</label>
-                  <input type="text" maxLength="6" value={newTeacherPin} onChange={(e) => setNewTeacherPin(e.target.value)} placeholder="如: 345678" className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
-                </div>
+                  <label>3. 设置老师登录密码（4至12位）</label>
+                  <input type="password" minLength="4" maxLength="12" value={newTeacherPin} onChange={(e) => setNewTeacherPin(e.target.value)} placeholder="如: Wong123" />
                 <button onClick={handleAddTeacher} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] mt-2"> ✨  批准并下发门禁卡</button>
                 
                 <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 flex flex-col gap-3 mt-2">
