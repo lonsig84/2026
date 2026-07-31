@@ -1966,6 +1966,37 @@
                         {badMarks.map(bad => <div key={bad.id} className="absolute text-center z-30 pointer-events-none" style={{ top: '20%', animation: 'dropDown 1.2s ease-in forwards' }}><div className="text-4xl drop-shadow-md">💔</div><div className="text-red-600 font-black text-xl drop-shadow-sm mt-1">-{bad.points}</div></div>)}
                       </div>
                       <div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-6 transition-all">Lv. {currentLevel} 【{levelTitles[currentLevel] || "元宇宙小萌新"}】</div>
+                      <div className="w-full mb-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-lime-50 shadow-sm">
+  <div className="flex items-center gap-3">
+    <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center text-2xl shadow-sm">
+      🌿
+    </div>
+
+    <div className="flex-1">
+      <p className="text-xs font-black text-emerald-700">
+        Ikon Lestari Mingguan
+      </p>
+
+      <p className="font-black text-slate-800">
+        🏆 测试学生
+      </p>
+
+      <p className="text-[10px] font-bold text-slate-500">
+        27 July 2026 – 2 August 2026
+      </p>
+    </div>
+
+    <div className="text-right">
+      <p className="text-xl font-black text-emerald-600">
+        20
+      </p>
+
+      <p className="text-[9px] font-bold text-slate-400">
+        mata bersih
+      </p>
+    </div>
+  </div>
+</div>
                       <div className="w-full mb-6">
                         <div className="flex justify-between text-xs font-bold text-slate-500 mb-2"><span>EXP: {student.totalExp}</span><span>{`距升级还需: ${nextLevelExp - student.totalExp} 分`}</span></div>
                         <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-indigo-400 to-purple-500 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }}></div></div>
