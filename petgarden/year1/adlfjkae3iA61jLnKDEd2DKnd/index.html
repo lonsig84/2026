@@ -1290,8 +1290,8 @@
       const handleAddTeacher = async () => {
         const name = newTeacherName.trim();
         const pin = newTeacherPin.trim();
-        if (!name || !pin) { alert("老师姓名和6位密码都必须填写哦！"); return; }
-        if (pin.length !== 6 || isNaN(pin)) { alert("密码必须是 6 位纯数字！"); return; }
+        if (!name || !pin) { alert("老师姓名和密码都必须填写哦！"); return; }
+        if (!/^[A-Za-z0-9]{4,12}$/.test(pin)) { alert(""密码必须是4至12位英文字母或数字！""); return; }
         if (teachersList.some(t => t.name === name && t.subject === newTeacherSubject)) {
           alert(`【${newTeacherSubject}】已经授权过【${name}】了！`); return;
         }
