@@ -179,6 +179,111 @@
       );
     }
 
+    // 🌿 Ikon Lestari Mingguan：每周课堂积分排行榜弹窗
+    function IkonLestariModal({ onClose, ikonData, currentWeek, currentStudentName }) {
+      const [selectedMonth, setSelectedMonth] = useState(
+        currentWeek?.month?.name || 'July'
+      );
+      const [selectedWeekStart, setSelectedWeekStart] = useState(
+        currentWeek?.startDate || ''
+      );
+
+      const months = ['July', 'August', 'September', 'October', 'November'];
+      const weeks = Array.isArray(ikonData?.weeks) ? ikonData.weeks : [];
+      const monthWeeks = weeks.filter(week => week.month?.name === selectedMonth);
+      const selectedWeek = weeks.find(week => week.startDate === selectedWeekStart)
+        || monthWeeks[0]
+        || currentWeek
+        || null;
+
+      useEffect(() => {
+        if (!monthWeeks.some(week => week.startDate === selectedWeekStart)) {
+          setSelectedWeekStart(monthWeeks[0]?.startDate || '');
+        }
+      }, [selectedMonth]);
+
+      const ranking = selectedWeek?.ranking || [];
+
+      return (
+        <div className="absolute inset-0 z-[160] flex items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[88vh]">
+            <div className="p-4 bg-gradient-to-r from-emerald-100 to-lime-100 flex justify-between items-center border-b border-emerald-200">
+              <div>
+                <h3 className="font-black text-emerald-900 text-lg">🌿 Ikon Lestari Mingguan</h3>
+                <p className="text-[10px] font-bold text-emerald-700 mt-0.5">根据每周课堂净积分排名</p>
+              </div>
+              <button onClick={onClose} className="text-emerald-700 hover:text-emerald-900 text-2xl font-bold active:scale-90">&times;</button>
+            </div>
+
+            <div className="p-3 bg-white border-b border-slate-100">
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                {months.map(month => (
+                  <button
+                    key={month}
+                    onClick={() => setSelectedMonth(month)}
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black flex-shrink-0 transition-all ${selectedMonth === month ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'}`}
+                  >
+                    {month}
+                  </button>
+                ))}
+              </div>
+
+              <select
+                value={selectedWeek?.startDate || ''}
+                onChange={e => setSelectedWeekStart(e.target.value)}
+                className="w-full mt-2 p-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs font-black focus:outline-none"
+              >
+                {monthWeeks.map(week => (
+                  <option key={week.startDate} value={week.startDate}>{week.dateRange}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="px-4 pt-3">
+              <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-3 text-center">
+                <p className="text-xs font-black text-emerald-800">{selectedWeek?.dateRange || '暂无星期资料'}</p>
+                <p className="text-[10px] text-slate-500 font-bold mt-1 leading-relaxed">
+                  净积分最高者胜出；净积分相同，则正面加分记录次数较多者胜出。
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 flex flex-col gap-2 overflow-y-auto">
+              {ranking.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 font-bold text-sm">🌱 这个星期还没有课堂记录。</div>
+              ) : (
+                ranking.map((item, index) => {
+                  const isMe = item.name === currentStudentName;
+                  return (
+                    <div key={`${item.name}-${index}`} className={`flex items-center gap-3 p-3 rounded-2xl border shadow-sm ${isMe ? 'bg-indigo-50 border-indigo-300' : index === 0 ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300' : 'bg-white border-slate-200'}`}>
+                      <div className="w-9 text-center font-black text-xl">
+                        {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : <span className="text-slate-400 text-sm">{item.rank}</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-black text-slate-800 text-sm truncate">
+                          {item.name}
+                          {isMe && <span className="ml-1 text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full">我</span>}
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-400 mt-0.5">
+                          正面记录 {item.positiveCount || 0} 次 · 扣分记录 {item.negativeCount || 0} 次
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className={`text-lg font-black ${item.netScore >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {item.netScore > 0 ? '+' : ''}{item.netScore}
+                        </div>
+                        <div className="text-[9px] font-bold text-slate-400">净积分</div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // 积木 3：成长足迹弹窗 (HistoryModal) - 🚀 核心改造：无缝接入 fetchGAS
     function HistoryModal({ onClose, studentName }) {
       const [history, setHistory] = useState([]);
@@ -1546,7 +1651,7 @@
               <label className="text-xs text-slate-400 font-bold">请输入管理密码：</label>
               <input
                 type="password"
-                maxLength="12"
+                maxLength="6"
                 autoFocus
                 value={inputPwd}
                 onChange={(e) => {
@@ -1618,115 +1723,70 @@
       const [ikonLestariData, setIkonLestariData] = useState(null);
       const [ikonLestariLoading, setIkonLestariLoading] = useState(true);
       const [showIkonLestariModal, setShowIkonLestariModal] = useState(false);
+      
       const [dataLoaded, setDataLoaded] = useState(false);
-     
-      const currentIkonWeek = (() => {
-    if (
-      !ikonLestariData ||
-      !Array.isArray(ikonLestariData.weeks)
-    ) {
-      return null;
-    }
 
-    const malaysiaToday = new Intl.DateTimeFormat(
-      'en-CA',
-      {
+      // --- 并行加载所有数据 (fetchGAS 引擎) ---
+      useEffect(() => {
+        const loadInitialData = async () => {
+          try {
+            const [studentsData, teachersData, rulesData, productsData, levelConf, adminPwd, ikonData] = await Promise.all([
+              fetchGAS('getStudents'),
+              fetchGAS('getTeachers'),
+              fetchGAS('getRules'),
+              fetchGAS('getProducts'),
+              fetchGAS('getLevelConfig'),
+              fetchGAS('getAdminPassword'),
+              fetchGAS('getIkonLestariHistory', { year: 2026 })
+            ]);
+
+            setGlobalStudents(studentsData || []);
+            setTeachersList(teachersData || []);
+            setGlobalRules(rulesData || []);
+            setGlobalProducts(productsData || []);
+            setIkonLestariData(ikonData || null);
+            setIkonLestariLoading(false);
+
+            if (levelConf && levelConf.length > 0) {
+              const newThresholds = [0, 0, 10, 30, 60, 100, 150, 210, 280];
+              const newTitles = [...levelTitles];
+              levelConf.forEach(row => {
+                if (row.level >= 0 && row.level <= 8) {
+                  newThresholds[row.level] = row.requiredExp || 0;
+                  if (row.stageName) newTitles[row.level] = row.stageName;
+                }
+              });
+              setLevelThresholds(newThresholds);
+              setLevelTitles(newTitles);
+            }
+
+            setAdminPassword(adminPwd || "888888");
+            setAdminPasswordLoaded(true);
+            setDataLoaded(true);
+          } catch (err) {
+            console.error("加载初始数据失败:", err);
+            setIkonLestariLoading(false);
+          }
+        };
+        loadInitialData();
+      }, []);
+
+      // 🌿 找出马来西亚今天所属的星期
+      const malaysiaDateParts = new Intl.DateTimeFormat('en-GB', {
         timeZone: 'Asia/Kuala_Lumpur',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-      }
-    ).format(new Date());
-
-    return ikonLestariData.weeks.find(week =>
-      malaysiaToday >= week.startDate &&
-      malaysiaToday <= week.endDate
-    ) || null;
-  })();
-
-  const currentIkonWinners =
-    currentIkonWeek?.winners || [];
-
-  const currentIkonWinner =
-    currentIkonWinners.length > 0
-      ? currentIkonWinners[0]
-      : null;
-
-      // --- 并行加载所有数据 (fetchGAS 引擎) ---
-      useEffect(() => {
-  const loadInitialData = async () => {
-    try {
-      const [
-        studentsData,
-        teachersData,
-        rulesData,
-        productsData,
-        levelConf,
-        adminPwd,
-        ikonData
-      ] = await Promise.all([
-        fetchGAS('getStudents'),
-        fetchGAS('getTeachers'),
-        fetchGAS('getRules'),
-        fetchGAS('getProducts'),
-        fetchGAS('getLevelConfig'),
-        fetchGAS('getAdminPassword'),
-
-        // 🌿 7月至11月每周 Ikon Lestari
-        fetchGAS('getIkonLestariHistory', {
-          year: 2026
-        })
-      ]);
-
-      setGlobalStudents(studentsData || []);
-      setTeachersList(teachersData || []);
-      setGlobalRules(rulesData || []);
-      setGlobalProducts(productsData || []);
-
-      // 🌿 保存后端返回的 Ikon 资料
-      setIkonLestariData(ikonData || null);
-      setIkonLestariLoading(false);
-
-      if (levelConf && levelConf.length > 0) {
-        const newThresholds = [
-          0, 0, 10, 30, 60,
-          100, 150, 210, 280
-        ];
-
-        const newTitles = [...levelTitles];
-
-        levelConf.forEach(row => {
-          if (row.level >= 0 && row.level <= 8) {
-            newThresholds[row.level] =
-              row.requiredExp || 0;
-
-            if (row.stageName) {
-              newTitles[row.level] =
-                row.stageName;
-            }
-          }
-        });
-
-        setLevelThresholds(newThresholds);
-        setLevelTitles(newTitles);
-      }
-
-      setAdminPassword(adminPwd || "888888");
-      setAdminPasswordLoaded(true);
-      setDataLoaded(true);
-
-    } catch (err) {
-      console.error(
-        "加载初始数据失败:",
-        err
+      }).formatToParts(new Date());
+      const malaysiaDateMap = Object.fromEntries(
+        malaysiaDateParts.map(part => [part.type, part.value])
       );
+      const malaysiaToday = `${malaysiaDateMap.year}-${malaysiaDateMap.month}-${malaysiaDateMap.day}`;
 
-      setIkonLestariLoading(false);
-    }
-  };
-
-  loadInitialData();
-}, []);
+      const currentIkonWeek = ikonLestariData?.weeks?.find(week =>
+        malaysiaToday >= week.startDate && malaysiaToday <= week.endDate
+      ) || null;
+      const currentIkonWinner = currentIkonWeek?.winners?.[0] || null;
 
       const PET_OPTIONS = [
         { id: "azure-dragon", name: "青龙", category: "myth" }, { id: "vermilion-bird", name: "朱雀", category: "myth" }, { id: "white-tiger", name: "白虎", category: "myth" }, { id: "pixiu", name: "貔貅", category: "myth" }, { id: "suanni", name: "狻猊", category: "myth" }, { id: "nine-tail-fox", name: "九尾狐", category: "myth" }, { id: "unicorn", name: "独角兽", category: "myth" },
@@ -1966,63 +2026,37 @@
                         {badMarks.map(bad => <div key={bad.id} className="absolute text-center z-30 pointer-events-none" style={{ top: '20%', animation: 'dropDown 1.2s ease-in forwards' }}><div className="text-4xl drop-shadow-md">💔</div><div className="text-red-600 font-black text-xl drop-shadow-sm mt-1">-{bad.points}</div></div>)}
                       </div>
                       <div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-6 transition-all">Lv. {currentLevel} 【{levelTitles[currentLevel] || "元宇宙小萌新"}】</div>
-                     <button
-  type="button"
-  onClick={() => setShowIkonLestariModal(true)}
-  className="w-full mb-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-lime-50 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99]"
->
-  {ikonLestariLoading ? (
-    <div className="text-center text-xs font-bold text-emerald-600 py-2">
-      🌿 正在读取 Ikon Lestari...
-    </div>
-  ) : currentIkonWeek && currentIkonWinner ? (
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center text-2xl shadow-sm">
-        🌿
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-black text-emerald-700">
-          Ikon Lestari Mingguan
-        </p>
-
-        <p className="font-black text-slate-800 truncate">
-          🏆 {currentIkonWinner.name}
-        </p>
-
-        <p className="text-[10px] font-bold text-slate-500">
-          {currentIkonWeek.dateRange}
-        </p>
-      </div>
-
-      <div className="text-right flex-shrink-0">
-        <p className="text-xl font-black text-emerald-600">
-          {currentIkonWinner.netScore}
-        </p>
-
-        <p className="text-[9px] font-bold text-slate-400">
-          mata bersih
-        </p>
-      </div>
-    </div>
-  ) : (
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center text-2xl shadow-sm">
-        🌱
-      </div>
-
-      <div>
-        <p className="text-xs font-black text-emerald-700">
-          Ikon Lestari Mingguan
-        </p>
-
-        <p className="text-xs font-bold text-slate-500">
-          Belum ada rekod kelas minggu ini.
-        </p>
-      </div>
-    </div>
-  )}
-</button>
+                      {/* 🌿 Ikon Lestari Mingguan 荣誉卡 */}
+                      <button
+                        type="button"
+                        onClick={() => setShowIkonLestariModal(true)}
+                        className="w-full mb-4 p-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-lime-50 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99]"
+                      >
+                        {ikonLestariLoading ? (
+                          <div className="text-center text-xs font-bold text-emerald-600 py-2">🌿 正在读取 Ikon Lestari...</div>
+                        ) : currentIkonWeek && currentIkonWinner ? (
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center text-2xl shadow-sm">🌿</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-black text-emerald-700">Ikon Lestari Mingguan</p>
+                              <p className="font-black text-slate-800 truncate">🏆 {currentIkonWinner.name}</p>
+                              <p className="text-[10px] font-bold text-slate-500">{currentIkonWeek.dateRange}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-xl font-black text-emerald-600">{currentIkonWinner.netScore}</p>
+                              <p className="text-[9px] font-bold text-slate-400">mata bersih</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center text-2xl shadow-sm">🌱</div>
+                            <div>
+                              <p className="text-xs font-black text-emerald-700">Ikon Lestari Mingguan</p>
+                              <p className="text-xs font-bold text-slate-500">Belum ada rekod kelas minggu ini.</p>
+                            </div>
+                          </div>
+                        )}
+                      </button>
                       <div className="w-full mb-6">
                         <div className="flex justify-between text-xs font-bold text-slate-500 mb-2"><span>EXP: {student.totalExp}</span><span>{`距升级还需: ${nextLevelExp - student.totalExp} 分`}</span></div>
                         <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-indigo-400 to-purple-500 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }}></div></div>
@@ -2040,6 +2074,14 @@
               )}
             </div>
             <BottomNav onOpenModal={setActiveModal} />
+            {showIkonLestariModal && (
+              <IkonLestariModal
+                onClose={() => setShowIkonLestariModal(false)}
+                ikonData={ikonLestariData}
+                currentWeek={currentIkonWeek}
+                currentStudentName={student.name}
+              />
+            )}
             {activeModal === 'leaderboard' && <LeaderboardModal onClose={() => setActiveModal(null)} globalStudents={globalStudents} currentStudentName={student.name} levelThresholds={levelThresholds} githubUser={GITHUB_USER} githubRepo={GITHUB_REPO} />}
             {activeModal === 'history' && <HistoryModal onClose={() => setActiveModal(null)} studentName={student.name} />}
             {activeModal === 'memorial' && <MemorialModal onClose={() => setActiveModal(null)} petHistory={student.petHistory || []} githubUser={GITHUB_USER} githubRepo={GITHUB_REPO} />}
