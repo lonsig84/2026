@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
 
   <meta
@@ -25,21 +25,20 @@
     }
 
     :root {
-      --header-height: 76px;
-      --toolbar-height: 74px;
-      --page-ratio: 0.707;
+      --header-height: 88px;
+      --toolbar-height: 72px;
+      --safe-gap: 24px;
     }
 
     html,
     body {
       width: 100%;
-      min-height: 100%;
+      height: 100%;
       margin: 0;
+      overflow: hidden;
     }
 
     body {
-      overflow-x: hidden;
-
       font-family:
         "Microsoft YaHei",
         "PingFang SC",
@@ -47,29 +46,20 @@
         Arial,
         sans-serif;
 
-      color: #16324f;
+      color: #194e75;
 
       background:
         radial-gradient(
-          circle at 15% 15%,
-          rgba(255, 255, 255, 0.95),
+          circle at 12% 14%,
+          rgba(255, 255, 255, 0.96),
           transparent 34%
-        ),
-        radial-gradient(
-          circle at 85% 80%,
-          rgba(183, 221, 246, 0.45),
-          transparent 35%
         ),
         linear-gradient(
           135deg,
-          #eaf6ff 0%,
-          #d8eefc 45%,
-          #f7fbff 100%
+          #eef8ff 0%,
+          #dceffd 55%,
+          #f8fcff 100%
         );
-    }
-
-    body.fullscreen-mode {
-      background: #102132;
     }
 
     button {
@@ -77,29 +67,37 @@
     }
 
     .app {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows:
+        var(--header-height)
+        minmax(0, 1fr)
+        var(--toolbar-height);
     }
 
-    .topbar {
-      min-height: var(--header-height);
+    /* =========================
+       顶部标题
+    ========================= */
 
+    .topbar {
       display: flex;
       align-items: center;
       justify-content: center;
 
-      padding: 12px 72px;
+      padding: 10px 20px;
 
-      position: relative;
-      z-index: 10;
+      background: rgba(255, 255, 255, 0.88);
+      border-bottom: 1px solid rgba(34, 103, 151, 0.12);
 
-      background: rgba(255, 255, 255, 0.82);
-      border-bottom: 1px solid rgba(37, 105, 154, 0.16);
-      box-shadow: 0 5px 22px rgba(21, 76, 116, 0.08);
+      box-shadow:
+        0 4px 18px rgba(33, 88, 126, 0.08);
 
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+
+      position: relative;
+      z-index: 20;
     }
 
     .title-wrap {
@@ -108,62 +106,57 @@
 
     .title-wrap h1 {
       margin: 0;
-      font-size: clamp(18px, 2.1vw, 30px);
+
+      color: #174f77;
+
+      font-size: clamp(20px, 2.1vw, 34px);
       line-height: 1.2;
-      letter-spacing: 0.06em;
-      color: #174e78;
+      letter-spacing: 0.04em;
     }
 
     .title-wrap p {
-      margin: 5px 0 0;
-      font-size: clamp(11px, 1.1vw, 14px);
-      color: #52748e;
+      margin: 6px 0 0;
+
+      color: #5c7b91;
+      font-size: clamp(11px, 1.1vw, 15px);
     }
 
-    .main {
-  flex: 1;
-  min-height: 0;
+    /* =========================
+       小册子区域
+    ========================= */
 
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+    .stage {
+      min-width: 0;
+      min-height: 0;
 
-  padding: 8px 16px 0;
-  }
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-    .book-area {
-  width: 100%;
-  height: calc(
-    100dvh
-    - var(--header-height)
-    - var(--toolbar-height)
-    - 8px
-  );
+      padding: 12px 18px;
 
-  min-height: 420px;
+      position: relative;
+      overflow: hidden;
+    }
 
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+    .book-viewport {
+      width: 100%;
+      height: 100%;
 
-  position: relative;
-  overflow: hidden;
-  padding-top: 6px;
-}
+      min-width: 0;
+      min-height: 0;
 
-    .book-shell {
-  width: 100%;
-  height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-
-  position: relative;
-}
+      position: relative;
+      overflow: hidden;
+    }
 
     #book {
       visibility: hidden;
+      flex: 0 0 auto;
     }
 
     #book.ready {
@@ -171,50 +164,48 @@
     }
 
     .page {
-      background: #ffffff;
       overflow: hidden;
+      background: #ffffff;
     }
 
     .page-content {
       width: 100%;
       height: 100%;
-      position: relative;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
+      overflow: hidden;
       background: #ffffff;
     }
 
     .page-content img {
       width: 100%;
       height: 100%;
+
       display: block;
 
       object-fit: contain;
       object-position: center;
 
+      background: #ffffff;
+
       user-select: none;
+      -webkit-user-select: none;
       -webkit-user-drag: none;
+
       pointer-events: none;
-
-      background: #ffffff;
     }
 
-    .page-cover {
-      background: #ffffff;
-    }
-
-    .page-cover .page-content {
-      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.07);
-    }
+    /* =========================
+       载入与错误提示
+    ========================= */
 
     .loading {
       position: absolute;
-      z-index: 20;
-
       inset: 0;
+      z-index: 30;
 
       display: flex;
       flex-direction: column;
@@ -223,7 +214,7 @@
 
       gap: 14px;
 
-      color: #265f87;
+      color: #286488;
     }
 
     .loading.hidden {
@@ -234,8 +225,8 @@
       width: 46px;
       height: 46px;
 
-      border: 5px solid rgba(31, 105, 157, 0.18);
-      border-top-color: #236d9e;
+      border: 5px solid rgba(33, 104, 154, 0.18);
+      border-top-color: #216b9d;
       border-radius: 50%;
 
       animation: spin 0.8s linear infinite;
@@ -254,69 +245,60 @@
       padding: 22px;
 
       border-radius: 16px;
+
       background: rgba(255, 255, 255, 0.96);
-      box-shadow: 0 12px 35px rgba(20, 53, 78, 0.18);
+      box-shadow:
+        0 12px 35px rgba(20, 53, 78, 0.18);
 
       text-align: center;
-      color: #8a2733;
+      color: #902c37;
     }
 
     .error-box.show {
       display: block;
     }
 
-    .error-box code {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 4px 8px;
-
-      border-radius: 6px;
-      background: #f3f5f7;
-
-      color: #283747;
-    }
-
     .hint {
       position: absolute;
-      z-index: 15;
-
       left: 50%;
-      bottom: 20px;
+      bottom: 12px;
+      z-index: 22;
 
       transform: translateX(-50%);
 
-      padding: 10px 16px;
+      padding: 9px 15px;
 
       border-radius: 999px;
-      background: rgba(13, 44, 67, 0.84);
+
+      background: rgba(16, 54, 80, 0.84);
       color: #ffffff;
 
-      font-size: 13px;
+      font-size: 12px;
       white-space: nowrap;
 
       pointer-events: none;
 
       opacity: 1;
-      transition: opacity 0.45s ease;
+      transition: opacity 0.4s ease;
     }
 
     .hint.hide {
       opacity: 0;
     }
 
-    .toolbar {
-      min-height: var(--toolbar-height);
+    /* =========================
+       控制栏
+    ========================= */
 
+    .toolbar {
       display: flex;
       align-items: center;
       justify-content: center;
 
-      gap: 10px;
-
-      padding: 10px 18px 16px;
+      padding: 6px 12px 12px;
 
       position: relative;
-      z-index: 20;
+      z-index: 40;
     }
 
     .control-group {
@@ -324,23 +306,24 @@
       align-items: center;
       justify-content: center;
 
-      gap: 8px;
+      gap: 7px;
+      padding: 7px;
 
-      padding: 8px;
+      border: 1px solid rgba(36, 104, 151, 0.14);
+      border-radius: 20px;
 
-      border: 1px solid rgba(37, 105, 154, 0.16);
-      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.92);
 
-      background: rgba(255, 255, 255, 0.88);
-      box-shadow: 0 8px 24px rgba(22, 75, 113, 0.13);
+      box-shadow:
+        0 8px 25px rgba(21, 72, 108, 0.16);
 
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
 
     .control-btn {
+      height: 46px;
       min-width: 48px;
-      height: 44px;
 
       display: inline-flex;
       align-items: center;
@@ -351,21 +334,21 @@
       padding: 0 14px;
 
       border: 0;
-      border-radius: 12px;
+      border-radius: 13px;
 
+      color: #174f77;
       background: #e8f3fa;
-      color: #174e78;
 
       cursor: pointer;
 
       transition:
-        transform 0.15s ease,
-        background 0.15s ease,
-        opacity 0.15s ease;
+        background 0.16s ease,
+        transform 0.16s ease,
+        opacity 0.16s ease;
     }
 
     .control-btn:hover:not(:disabled) {
-      background: #d5eaf7;
+      background: #d4eaf7;
       transform: translateY(-1px);
     }
 
@@ -374,8 +357,8 @@
     }
 
     .control-btn:disabled {
+      opacity: 0.35;
       cursor: not-allowed;
-      opacity: 0.38;
     }
 
     .control-btn .icon {
@@ -384,54 +367,74 @@
     }
 
     .page-status {
-      min-width: 86px;
-      height: 44px;
+      height: 46px;
+      min-width: 88px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      padding: 0 12px;
+      padding: 0 14px;
 
-      border-radius: 12px;
+      border-radius: 13px;
+
       background: #ffffff;
-
       color: #315e7c;
-      font-size: 14px;
+
+      font-size: 15px;
       font-weight: 700;
 
       white-space: nowrap;
     }
 
-    .fullscreen-btn {
+    .icon-only {
       width: 48px;
       padding: 0;
+    }
+
+    /* =========================
+       全屏模式
+    ========================= */
+
+    body.fullscreen-mode {
+      background: #102438;
+    }
+
+    body.fullscreen-mode .app {
+      grid-template-rows:
+        minmax(0, 1fr)
+        var(--toolbar-height);
     }
 
     body.fullscreen-mode .topbar {
       display: none;
     }
 
-    body.fullscreen-mode .main {
-      padding-top: 12px;
+    body.fullscreen-mode .stage {
+      padding:
+        max(10px, env(safe-area-inset-top))
+        max(10px, env(safe-area-inset-right))
+        6px
+        max(10px, env(safe-area-inset-left));
     }
 
-    body.fullscreen-mode .book-area {
-      height: calc(100vh - var(--toolbar-height) - 22px);
+    body.fullscreen-mode .toolbar {
+      padding-bottom:
+        max(9px, env(safe-area-inset-bottom));
     }
 
     body.fullscreen-mode .control-group {
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.94);
     }
+
+    /* =========================
+       手机
+    ========================= */
 
     @media (max-width: 700px) {
       :root {
-        --header-height: 66px;
-        --toolbar-height: 68px;
-      }
-
-      .topbar {
-        padding: 10px 48px;
+        --header-height: 70px;
+        --toolbar-height: 64px;
       }
 
       .title-wrap h1 {
@@ -439,95 +442,78 @@
       }
 
       .title-wrap p {
-        font-size: 11px;
+        margin-top: 3px;
+        font-size: 10px;
       }
 
-      .main {
-        padding: 10px 6px 4px;
-      }
-
-      .book-area {
-        min-height: 350px;
-
-        height: calc(
-          100dvh
-          - var(--header-height)
-          - var(--toolbar-height)
-          - 14px
-        );
+      .stage {
+        padding: 7px 5px;
       }
 
       .toolbar {
-        padding: 6px 8px 10px;
+        padding: 4px 5px 7px;
       }
 
       .control-group {
-        gap: 5px;
-        padding: 6px;
-        border-radius: 15px;
+        gap: 4px;
+        padding: 5px;
+        border-radius: 16px;
       }
 
       .control-btn {
-        min-width: 44px;
         height: 42px;
-        padding: 0 10px;
+        min-width: 42px;
+        padding: 0 9px;
       }
 
       .control-btn .label {
         display: none;
       }
 
+      .control-btn .icon {
+        font-size: 20px;
+      }
+
       .page-status {
-        min-width: 72px;
         height: 42px;
+        min-width: 68px;
+
+        padding: 0 9px;
         font-size: 13px;
       }
 
-      .fullscreen-btn {
-        width: 44px;
+      .icon-only {
+        width: 42px;
       }
 
       .hint {
-        bottom: 12px;
-        font-size: 12px;
-        padding: 8px 13px;
-      }
-
-      body.fullscreen-mode .book-area {
-        height: calc(100dvh - var(--toolbar-height) - 10px);
+        bottom: 7px;
+        padding: 7px 11px;
+        font-size: 11px;
       }
     }
 
     @media (max-height: 560px) and (orientation: landscape) {
+      :root {
+        --header-height: 0px;
+        --toolbar-height: 58px;
+      }
+
       .topbar {
         display: none;
       }
 
-      .main {
-        padding: 5px;
-      }
-
-      .book-area {
-        height: calc(100dvh - 65px);
-        min-height: 250px;
+      .stage {
+        padding: 5px 8px 2px;
       }
 
       .toolbar {
-        min-height: 60px;
-        padding: 4px 8px 8px;
+        padding: 3px 6px 6px;
       }
 
       .control-btn,
       .page-status {
-        height: 38px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        scroll-behavior: auto !important;
+        height: 39px;
       }
     }
   </style>
@@ -543,89 +529,91 @@
       </div>
     </header>
 
-    <main class="main">
+    <main class="stage">
       <section
-        class="book-area"
-        aria-label="电子小册子"
+        id="bookViewport"
+        class="book-viewport"
+        aria-label="学校运动会电子小册子"
       >
-        <div class="book-shell">
+        <div
+          id="loading"
+          class="loading"
+          aria-live="polite"
+        >
+          <div class="spinner"></div>
+          <div id="loadingText">正在载入小册子……</div>
+        </div>
+
+        <div
+          id="errorBox"
+          class="error-box"
+          role="alert"
+        >
+          <strong>图片或翻页组件无法载入</strong>
+
+          <p>
+            请检查网络连接，并确认图片名称为：
+          </p>
+
+          <p>
+            page-1.webp、page-2.webp、<br>
+            page-3.webp、page-4.webp
+          </p>
+        </div>
+
+        <div
+          id="book"
+          title="双击进入或退出全屏"
+        >
+          <div
+            class="page"
+            data-density="hard"
+          >
+            <div class="page-content">
+              <img
+                src="page-1.webp"
+                alt="学校运动会小册子封面"
+                draggable="false"
+              >
+            </div>
+          </div>
+
+          <div class="page">
+            <div class="page-content">
+              <img
+                src="page-2.webp"
+                alt="学校运动会工委表"
+                draggable="false"
+              >
+            </div>
+          </div>
+
+          <div class="page">
+            <div class="page-content">
+              <img
+                src="page-3.webp"
+                alt="学校运动会赛程"
+                draggable="false"
+              >
+            </div>
+          </div>
 
           <div
-            id="loading"
-            class="loading"
-            aria-live="polite"
+            class="page"
+            data-density="hard"
           >
-            <div class="spinner"></div>
-            <div id="loadingText">正在载入小册子……</div>
-          </div>
-
-          <div
-            id="errorBox"
-            class="error-box"
-            role="alert"
-          >
-            <strong>图片无法载入</strong>
-            <p>
-              请确认四张图片与
-              <code>index.html</code>
-              放在同一个文件夹，并检查文件名大小写。
-            </p>
-          </div>
-
-          <div id="book">
-
-            <div
-              class="page page-cover"
-              data-density="hard"
-            >
-              <div class="page-content">
-                <img
-                  src="page-1.webp"
-                  alt="2026年学校运动会小册子封面"
-                  draggable="false"
-                >
-              </div>
+            <div class="page-content">
+              <img
+                src="page-4.webp"
+                alt="学校运动会鸣谢页"
+                draggable="false"
+              >
             </div>
-
-            <div class="page">
-              <div class="page-content">
-                <img
-                  src="page-2.webp"
-                  alt="学校运动会工委表"
-                  draggable="false"
-                >
-              </div>
-            </div>
-
-            <div class="page">
-              <div class="page-content">
-                <img
-                  src="page-3.webp"
-                  alt="学校运动会赛程"
-                  draggable="false"
-                >
-              </div>
-            </div>
-
-            <div
-              class="page page-cover"
-              data-density="hard"
-            >
-              <div class="page-content">
-                <img
-                  src="page-4.webp"
-                  alt="学校运动会鸣谢页"
-                  draggable="false"
-                >
-              </div>
-            </div>
-
           </div>
+        </div>
 
-          <div id="hint" class="hint">
-            点击页面边缘或左右滑动翻页
-          </div>
-
+        <div id="hint" class="hint">
+          点击页角或左右滑动翻页 · 双击进入全屏
         </div>
       </section>
     </main>
@@ -664,11 +652,21 @@
         </button>
 
         <button
+          id="soundBtn"
+          class="control-btn icon-only"
+          type="button"
+          aria-label="关闭翻页声音"
+          title="翻页声音"
+        >
+          <span id="soundIcon" class="icon">🔊</span>
+        </button>
+
+        <button
           id="fullscreenBtn"
-          class="control-btn fullscreen-btn"
+          class="control-btn icon-only"
           type="button"
           aria-label="进入全屏"
-          title="全屏"
+          title="进入全屏"
         >
           <span id="fullscreenIcon" class="icon">⛶</span>
         </button>
@@ -688,15 +686,44 @@
       "page-4.webp"
     ];
 
-    const bookElement = document.getElementById("book");
-    const loadingElement = document.getElementById("loading");
-    const loadingText = document.getElementById("loadingText");
-    const errorBox = document.getElementById("errorBox");
-    const hint = document.getElementById("hint");
+    /*
+     * 图片原始比例约为：
+     * 宽度 ÷ 高度 = 0.707
+     */
+    const PAGE_RATIO = 0.707;
 
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const pageStatus = document.getElementById("pageStatus");
+    const bookElement =
+      document.getElementById("book");
+
+    const bookViewport =
+      document.getElementById("bookViewport");
+
+    const loadingElement =
+      document.getElementById("loading");
+
+    const loadingText =
+      document.getElementById("loadingText");
+
+    const errorBox =
+      document.getElementById("errorBox");
+
+    const hint =
+      document.getElementById("hint");
+
+    const prevBtn =
+      document.getElementById("prevBtn");
+
+    const nextBtn =
+      document.getElementById("nextBtn");
+
+    const pageStatus =
+      document.getElementById("pageStatus");
+
+    const soundBtn =
+      document.getElementById("soundBtn");
+
+    const soundIcon =
+      document.getElementById("soundIcon");
 
     const fullscreenBtn =
       document.getElementById("fullscreenBtn");
@@ -706,87 +733,230 @@
 
     let pageFlip = null;
     let resizeTimer = null;
+    let currentPageIndex = 0;
+    let soundEnabled = true;
+    let audioContext = null;
+
+    /*
+     * 判断是否采用单页模式。
+     * 手机、窄窗口或空间不足时使用单页。
+     */
+    function shouldUsePortraitMode() {
+      const width = bookViewport.clientWidth;
+      const height = bookViewport.clientHeight;
+
+      const estimatedTwoPageWidth =
+        height * PAGE_RATIO * 2;
+
+      return (
+        window.innerWidth <= 700 ||
+        width < 760 ||
+        estimatedTwoPageWidth > width
+      );
+    }
+
+    /*
+     * 根据可用空间计算页面尺寸。
+     * 页面一定小于容器，保留安全距离。
+     */
+    function calculateBookSize() {
+      const viewportWidth =
+        Math.max(bookViewport.clientWidth, 240);
+
+      const viewportHeight =
+        Math.max(bookViewport.clientHeight, 280);
+
+      const portraitMode =
+        shouldUsePortraitMode();
+
+      const horizontalPadding =
+        portraitMode ? 18 : 32;
+
+      const verticalPadding = 18;
+
+      const usableWidth =
+        Math.max(
+          viewportWidth - horizontalPadding,
+          220
+        );
+
+      const usableHeight =
+        Math.max(
+          viewportHeight - verticalPadding,
+          280
+        );
+
+      const pageCountAcross =
+        portraitMode ? 1 : 2;
+
+      /*
+       * 先按照高度计算，再检查总宽度。
+       */
+      let pageHeight =
+        Math.floor(usableHeight);
+
+      let pageWidth =
+        Math.floor(pageHeight * PAGE_RATIO);
+
+      const maximumPageWidth =
+        Math.floor(
+          usableWidth / pageCountAcross
+        );
+
+      if (pageWidth > maximumPageWidth) {
+        pageWidth = maximumPageWidth;
+        pageHeight =
+          Math.floor(pageWidth / PAGE_RATIO);
+      }
+
+      /*
+       * 防止小数与阴影造成边缘裁切。
+       */
+      pageWidth =
+        Math.max(180, pageWidth - 4);
+
+      pageHeight =
+        Math.max(255, pageHeight - 4);
+
+      return {
+        pageWidth,
+        pageHeight,
+        portraitMode
+      };
+    }
 
     function preloadImage(src) {
       return new Promise((resolve, reject) => {
         const image = new Image();
 
         image.onload = () => resolve(src);
-        image.onerror = () => reject(
-          new Error(`无法载入图片：${src}`)
-        );
 
-        image.src = src;
+        image.onerror = () => {
+          reject(
+            new Error(`无法载入图片：${src}`)
+          );
+        };
+
+        image.src = `${src}?v=20260806`;
       });
     }
 
     async function preloadAllImages() {
       let loaded = 0;
 
-      const jobs = IMAGE_FILES.map(async (src) => {
+      for (const src of IMAGE_FILES) {
         await preloadImage(src);
 
         loaded += 1;
 
         loadingText.textContent =
           `正在载入小册子…… ${loaded} / ${IMAGE_FILES.length}`;
-      });
-
-      await Promise.all(jobs);
+      }
     }
 
-    function getBookDimensions() {
-      const area =
-        document.querySelector(".book-area");
-
-      const availableWidth =
-      Math.max(area.clientWidth - 24, 280);
-
-      const availableHeight =
-      Math.max(area.clientHeight - 32, 300);
-
-      const isMobile =
-        window.matchMedia("(max-width: 700px)").matches;
-
-      /*
-       * 原图看起来接近 A4 竖版比例：
-       * 宽度约为高度的 0.707。
-       */
-      const ratio = 0.707;
-
-      let pageHeight;
-      let pageWidth;
-
-      if (isMobile) {
-        pageHeight = Math.min(
-          availableHeight,
-          availableWidth / ratio
-        );
-
-        pageWidth = pageHeight * ratio;
-
-        if (pageWidth > availableWidth) {
-          pageWidth = availableWidth;
-          pageHeight = pageWidth / ratio;
-        }
-      } else {
-        pageHeight = Math.min(
-          availableHeight,
-          availableWidth / (ratio * 2)
-        );
-
-        pageWidth = pageHeight * ratio;
-
-        if (pageWidth * 2 > availableWidth) {
-          pageWidth = availableWidth / 2;
-          pageHeight = pageWidth / ratio;
-        }
+    /*
+     * 使用 Web Audio 生成轻微的纸张翻动声。
+     * 不需要额外上传 mp3 文件。
+     */
+    function playPageTurnSound() {
+      if (!soundEnabled) {
+        return;
       }
 
-      return {
-        width: Math.max(Math.floor(pageWidth), 260),
-        height: Math.max(Math.floor(pageHeight), 368)
-      };
+      try {
+        if (!audioContext) {
+          audioContext =
+            new (
+              window.AudioContext ||
+              window.webkitAudioContext
+            )();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        const duration = 0.28;
+
+        const bufferLength =
+          Math.floor(
+            audioContext.sampleRate * duration
+          );
+
+        const buffer =
+          audioContext.createBuffer(
+            1,
+            bufferLength,
+            audioContext.sampleRate
+          );
+
+        const data =
+          buffer.getChannelData(0);
+
+        for (
+          let index = 0;
+          index < bufferLength;
+          index += 1
+        ) {
+          const progress =
+            index / bufferLength;
+
+          const envelope =
+            Math.pow(1 - progress, 2.2);
+
+          const wave =
+            Math.sin(progress * Math.PI * 13);
+
+          const noise =
+            Math.random() * 2 - 1;
+
+          data[index] =
+            noise *
+            envelope *
+            (0.35 + 0.15 * wave);
+        }
+
+        const source =
+          audioContext.createBufferSource();
+
+        const filter =
+          audioContext.createBiquadFilter();
+
+        const gain =
+          audioContext.createGain();
+
+        source.buffer = buffer;
+
+        filter.type = "bandpass";
+        filter.frequency.value = 1250;
+        filter.Q.value = 0.65;
+
+        gain.gain.setValueAtTime(
+          0.0001,
+          audioContext.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.22,
+          audioContext.currentTime + 0.025
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          audioContext.currentTime + duration
+        );
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContext.destination);
+
+        source.start();
+      } catch (error) {
+        console.warn(
+          "无法播放翻页声音：",
+          error
+        );
+      }
     }
 
     function updateControls() {
@@ -794,77 +964,90 @@
         return;
       }
 
-      const currentIndex =
+      currentPageIndex =
         pageFlip.getCurrentPageIndex();
 
-      const totalPages =
+      const total =
         pageFlip.getPageCount();
 
       pageStatus.textContent =
-        `${currentIndex + 1} / ${totalPages}`;
+        `${currentPageIndex + 1} / ${total}`;
 
-      prevBtn.disabled = currentIndex <= 0;
+      prevBtn.disabled =
+        currentPageIndex <= 0;
 
       nextBtn.disabled =
-        currentIndex >= totalPages - 1;
+        currentPageIndex >= total - 1;
     }
 
-    function hideHintLater() {
-      window.setTimeout(() => {
-        hint.classList.add("hide");
-      }, 3200);
+    function destroyBook() {
+      if (!pageFlip) {
+        return;
+      }
+
+      try {
+        pageFlip.destroy();
+      } catch (error) {
+        console.warn(
+          "重新建立小册子时出现提示：",
+          error
+        );
+      }
+
+      pageFlip = null;
+      bookElement.classList.remove("ready");
     }
 
-    function hideHintImmediately() {
-      hint.classList.add("hide");
-    }
-
-    function initialiseBook() {
+    function initialiseBook(
+      requestedPageIndex = 0
+    ) {
       if (
         !window.St ||
         typeof window.St.PageFlip !== "function"
       ) {
         throw new Error(
-          "翻页组件未能载入，请检查网络连接。"
+          "翻页组件没有成功载入。"
         );
       }
 
-      const dimensions = getBookDimensions();
+      const {
+        pageWidth,
+        pageHeight,
+        portraitMode
+      } = calculateBookSize();
 
       pageFlip = new St.PageFlip(
         bookElement,
         {
-          width: dimensions.width,
-          height: dimensions.height,
+          width: pageWidth,
+          height: pageHeight,
 
-          size: "stretch",
+          /*
+           * fixed 是关键：
+           * 不再让组件自行拉大超出容器。
+           */
+          size: "fixed",
 
-          minWidth: 260,
-          maxWidth: 1000,
+          minWidth: pageWidth,
+          maxWidth: pageWidth,
 
-          minHeight: 368,
-          maxHeight: 1415,
+          minHeight: pageHeight,
+          maxHeight: pageHeight,
 
-          maxShadowOpacity: 0.45,
+          autoSize: false,
 
           showCover: true,
-
-          mobileScrollSupport: false,
-
-          usePortrait: true,
-
-          autoSize: true,
+          usePortrait: portraitMode,
 
           drawShadow: true,
+          maxShadowOpacity: 0.42,
 
-          flippingTime: 850,
+          flippingTime: 760,
 
-          clickEventForward: true,
-
+          mobileScrollSupport: false,
           useMouseEvents: true,
 
-          swipeDistance: 20,
-
+          swipeDistance: 18,
           showPageCorners: true,
 
           disableFlipByClick: false
@@ -877,40 +1060,66 @@
 
       pageFlip.on("flip", () => {
         updateControls();
-        hideHintImmediately();
+        playPageTurnSound();
+        hint.classList.add("hide");
       });
 
-      pageFlip.on("changeOrientation", () => {
-        updateControls();
-      });
-
-      pageFlip.on("changeState", (event) => {
+      pageFlip.on("changeState", event => {
         if (event.data === "flipping") {
-          hideHintImmediately();
+          hint.classList.add("hide");
         }
       });
 
-      bookElement.classList.add("ready");
-      loadingElement.classList.add("hidden");
+      const maximumIndex =
+        pageFlip.getPageCount() - 1;
 
-      prevBtn.disabled = false;
-      nextBtn.disabled = false;
+      const safeIndex =
+        Math.min(
+          Math.max(requestedPageIndex, 0),
+          maximumIndex
+        );
 
-      updateControls();
-      hideHintLater();
-    }
-
-    function resizeBook() {
-      if (!pageFlip) {
-        return;
+      if (safeIndex > 0) {
+        window.setTimeout(() => {
+          pageFlip.turnToPage(safeIndex);
+          updateControls();
+        }, 60);
       }
 
-      const dimensions = getBookDimensions();
+      bookElement.classList.add("ready");
 
-      pageFlip.update({
-        width: dimensions.width,
-        height: dimensions.height
+      loadingElement.classList.add("hidden");
+
+      updateControls();
+    }
+
+    /*
+     * 窗口大小或全屏状态改变时，
+     * 重新建立翻页组件。
+     */
+    function rebuildBook() {
+      const savedPage =
+        pageFlip
+          ? pageFlip.getCurrentPageIndex()
+          : currentPageIndex;
+
+      destroyBook();
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          initialiseBook(savedPage);
+        });
       });
+    }
+
+    function scheduleRebuild(delay = 180) {
+      window.clearTimeout(resizeTimer);
+
+      resizeTimer =
+        window.setTimeout(
+          rebuildBook,
+          delay
+        );
     }
 
     prevBtn.addEventListener("click", () => {
@@ -925,38 +1134,26 @@
       }
     });
 
-    document.addEventListener("keydown", (event) => {
-      if (!pageFlip) {
-        return;
-      }
+    soundBtn.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
 
-      if (
-        event.key === "ArrowLeft" ||
-        event.key === "PageUp"
-      ) {
-        event.preventDefault();
-        pageFlip.flipPrev();
-      }
+      soundIcon.textContent =
+        soundEnabled ? "🔊" : "🔇";
 
-      if (
-        event.key === "ArrowRight" ||
-        event.key === "PageDown" ||
-        event.key === " "
-      ) {
-        event.preventDefault();
-        pageFlip.flipNext();
-      }
+      soundBtn.setAttribute(
+        "aria-label",
+        soundEnabled
+          ? "关闭翻页声音"
+          : "开启翻页声音"
+      );
 
-      if (event.key === "Home") {
-        event.preventDefault();
-        pageFlip.flip(0);
-      }
+      soundBtn.title =
+        soundEnabled
+          ? "关闭翻页声音"
+          : "开启翻页声音";
 
-      if (event.key === "End") {
-        event.preventDefault();
-        pageFlip.flip(
-          pageFlip.getPageCount() - 1
-        );
+      if (soundEnabled) {
+        playPageTurnSound();
       }
     });
 
@@ -975,18 +1172,25 @@
 
           if (target.requestFullscreen) {
             await target.requestFullscreen();
-          } else if (target.webkitRequestFullscreen) {
+          } else if (
+            target.webkitRequestFullscreen
+          ) {
             target.webkitRequestFullscreen();
           }
         } else {
           if (document.exitFullscreen) {
             await document.exitFullscreen();
-          } else if (document.webkitExitFullscreen) {
+          } else if (
+            document.webkitExitFullscreen
+          ) {
             document.webkitExitFullscreen();
           }
         }
       } catch (error) {
-        console.warn("无法切换全屏：", error);
+        console.warn(
+          "无法切换全屏：",
+          error
+        );
       }
     }
 
@@ -1007,14 +1211,28 @@
       );
 
       fullscreenBtn.title =
-        active ? "退出全屏" : "全屏";
+        active ? "退出全屏" : "进入全屏";
 
-      window.setTimeout(resizeBook, 160);
+      /*
+       * 等浏览器完成全屏版面调整后再计算。
+       */
+      scheduleRebuild(320);
     }
 
     fullscreenBtn.addEventListener(
       "click",
       toggleFullscreen
+    );
+
+    /*
+     * 双击小册子进入或退出全屏。
+     */
+    bookElement.addEventListener(
+      "dblclick",
+      event => {
+        event.preventDefault();
+        toggleFullscreen();
+      }
     );
 
     document.addEventListener(
@@ -1027,26 +1245,64 @@
       updateFullscreenUI
     );
 
-    window.addEventListener("resize", () => {
-      window.clearTimeout(resizeTimer);
+    document.addEventListener(
+      "keydown",
+      event => {
+        if (!pageFlip) {
+          return;
+        }
 
-      resizeTimer = window.setTimeout(
-        resizeBook,
-        180
-      );
-    });
+        if (
+          event.key === "ArrowLeft" ||
+          event.key === "PageUp"
+        ) {
+          event.preventDefault();
+          pageFlip.flipPrev();
+        }
+
+        if (
+          event.key === "ArrowRight" ||
+          event.key === "PageDown" ||
+          event.key === " "
+        ) {
+          event.preventDefault();
+          pageFlip.flipNext();
+        }
+
+        if (event.key === "Home") {
+          event.preventDefault();
+          pageFlip.turnToPage(0);
+        }
+
+        if (event.key === "End") {
+          event.preventDefault();
+
+          pageFlip.turnToPage(
+            pageFlip.getPageCount() - 1
+          );
+        }
+      }
+    );
+
+    window.addEventListener(
+      "resize",
+      () => scheduleRebuild(220)
+    );
 
     window.addEventListener(
       "orientationchange",
-      () => {
-        window.setTimeout(resizeBook, 300);
-      }
+      () => scheduleRebuild(420)
     );
 
     async function start() {
       try {
         await preloadAllImages();
-        initialiseBook();
+
+        initialiseBook(0);
+
+        window.setTimeout(() => {
+          hint.classList.add("hide");
+        }, 4200);
       } catch (error) {
         console.error(error);
 
