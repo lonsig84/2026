@@ -1,551 +1,383 @@
 <!DOCTYPE html>
-<html lang="zh-MY">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 运动会实时看板 (Sistem Sukan 2026)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>2026 运动会小册子 | Sukan Tahunan Sekolah</title>
+    <!-- 引入稳定的 page-flip 插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
     <style>
-        .bg-team-Merah { background-color: #ef4444; }
-        .bg-team-Biru { background-color: #3b82f6; }
-        .bg-team-Hijau { background-color: #06b6d4; }
-        .medal-emas { color: #fbbf24; text-shadow: 0 0 5px rgba(251, 191, 36, 0.5); }
-        .medal-perak { color: #9ca3af; }
-        .medal-gangsa { color: #b45309; }
-        * { -webkit-tap-highlight-color: transparent; }
-        .slide-fade-enter-active { transition: all 0.3s ease-out; }
-        .slide-fade-leave-active { transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1); }
-        .slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(-10px); opacity: 0; }
-        details > summary { list-style: none; }
-        details > summary::-webkit-details-marker { display: none; }
-        .glow-active {
-            animation: breath-glow 2s infinite;
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #e9ecef; overflow: hidden; }
+
+        #app {
+            display: flex; flex-direction: column;
+            height: 100vh; height: 100dvh; width: 100vw;
+            position: relative;
         }
-        @keyframes breath-glow {
-            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.15); }
-            50% { transform: scale(1.02); box-shadow: 0 0 25px rgba(255,255,255,0.4); } 
-            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+
+        header {
+            background-color: #004d40; color: white;
+            padding: 12px 20px; text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;
         }
+        header h1 { font-size: 1.2rem; font-weight: bold; }
+        header p { font-size: 0.8rem; opacity: 0.8; margin-top: 4px; }
+
+        main {
+            flex: 1; position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            padding: 10px; min-height: 200px; /* 防止高度塌陷 */
+        }
+
+        #drag-wrapper {
+            position: absolute; transform-origin: center center;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* 翻书容器 */
+        #flipbook { box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .page { background-color: #fff; border: solid 1px #ddd; overflow: hidden; }
+        .page img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
+        .page.--left { border-right: 0; box-shadow: inset -10px 0 20px rgba(0,0,0,0.05); }
+        .page.--right { border-left: 0; box-shadow: inset 10px 0 20px rgba(0,0,0,0.05); }
+
+        footer {
+            background: white; padding: 10px 5px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            display: flex; justify-content: center; align-items: center;
+            gap: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 10; flex-wrap: wrap;
+        }
+
+        button {
+            background: #f8f9fa; border: 1px solid #ced4da; border-radius: 6px;
+            padding: 6px 12px; color: #495057; cursor: pointer;
+            display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+        }
+        button:hover:not(:disabled) { background: #e2e6ea; }
+        button:active:not(:disabled) { transform: scale(0.95); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button svg { width: 18px; height: 18px; fill: currentColor; }
+
+        #page-info { font-weight: bold; font-variant-numeric: tabular-nums; min-width: 65px; text-align: center; margin: 0 5px; }
+
+        #loading {
+            position: absolute; inset: 0; background: #e9ecef;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 999; color: #004d40; font-weight: bold; font-size: 1.2rem;
+        }
+        .spinner {
+            width: 40px; height: 40px; margin-bottom: 15px;
+            border: 4px solid rgba(0, 77, 64, 0.2); border-top-color: #004d40;
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 全屏模式 (CSS 兜底写法，兼容所有旧浏览器) */
+        .fs-only { display: none; }
+        #app.fs-mode {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%; z-index: 99999; background: #222;
+        }
+        #app.fs-mode header { display: none; }
+        #app.fs-mode footer { 
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(20, 20, 20, 0.85); color: #fff;
+            border-top: 1px solid #444; backdrop-filter: blur(5px);
+        }
+        #app.fs-mode button { background: #333; color: #fff; border-color: #555; }
+        #app.fs-mode button:hover:not(:disabled) { background: #444; }
+        #app.fs-mode .fs-only { display: flex; }
+        #app.fs-mode #page-info { color: white; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased text-gray-800">
+<body>
 
-<div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg relative pb-20">
-    
-    <!-- 密码输入弹窗 -->
-    <div v-if="authModal.show" class="fixed inset-0 bg-black/80 z-[100] flex justify-center items-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl text-center relative">
-            <button @click="cancelAuth" class="absolute top-3 right-4 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <i class="fa-solid fa-lock text-3xl text-yellow-500 mb-3"></i>
-            <h3 class="font-bold text-gray-800 mb-1">Pengesahan Kata Laluan</h3>
-            <p class="text-xs text-gray-500 mb-4">Sila masukkan kata laluan untuk <b>{{ authModal.target.toUpperCase() }}</b></p>
-            <input type="password" v-model="authModal.password" placeholder="Kata Laluan" class="w-full text-center p-3 border-2 border-gray-200 rounded-lg mb-4 text-lg tracking-widest focus:border-blue-500 focus:outline-none">
-            <button @click="verifyPassword" class="w-full bg-gray-900 text-white font-bold py-3 rounded-lg shadow-md active:scale-95 transition-transform">Masuk / 登入</button>
-            <p v-if="authModal.error" class="text-xs text-red-500 mt-3 font-bold animate-bounce"><i class="fa-solid fa-circle-exclamation"></i> Kata laluan salah!</p>
-        </div>
-    </div>
+<div id="app">
+    <header>
+        <h1>2026 运动会小册子</h1>
+        <p>Brosur Sukan Tahunan Sekolah</p>
+    </header>
 
-    <!-- 导航栏 -->
-    <div class="bg-gray-900 text-white flex flex-wrap justify-around text-[10px] sm:text-xs p-1 sticky top-0 z-50 shadow-md">
-        <button @click="requestRole('parent')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'parent'}" class="p-2 transition-colors"><i class="fa-solid fa-users"></i> 家长 Ibu Bapa</button>
-        <button @click="requestRole('pengurus')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pengurus'}" class="p-2 transition-colors"><i class="fa-solid fa-walkie-talkie"></i> 控制 Pengurus</button>
-        <button @click="requestRole('pencatat')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'pencatat'}" class="p-2 transition-colors"><i class="fa-solid fa-pen-clip"></i> 录入 Pencatat</button>
-        <button @click="requestRole('gpk')" :class="{'text-yellow-400 font-bold border-b-2 border-yellow-400': currentRole === 'gpk'}" class="p-2 transition-colors"><i class="fa-solid fa-stamp"></i> 审核 Semakan</button>
-    </div>
-
-    <div v-if="isSyncingInBackground" class="fixed top-0 left-0 h-1 bg-blue-500 z-50 animate-pulse" style="width: 100%;"></div>
-
-    <!-- ========================================== -->
-    <!-- 👨‍👩‍👧‍👦 1. 家长端 (Ibu Bapa) -->
-    <!-- ========================================== -->
-    <div v-show="currentRole === 'parent'" class="p-4">
-        <div class="text-center mb-3 mt-2">
-            <img src="https://lh3.googleusercontent.com/d/1OBk9JZz-KyOwRoycmCSGzAXkd32vM6h5" alt="Logo Sekolah" class="h-20 mx-auto object-contain drop-shadow-sm">
+    <main id="main-area">
+        <div id="loading">
+            <div class="spinner"></div>
+            <div id="loading-text">载入小册子... 0%</div>
         </div>
         
-        <h1 class="text-xl font-black text-center mb-1 text-gray-800">🏆 2026 义乐新村华小常年运动会<br>Sukan Tahunan SJKC Kg Baru Gedok</h1>
-        
-        <!-- ✅ 贴上这段全新的升级版代码 ✅ -->
-        <div class="rounded-2xl p-5 mb-5 mt-4 text-white relative overflow-hidden transition-colors duration-500" 
-             :class="[statusColor(serverData.currentEvent.id, serverData.currentEvent.status), serverData.currentEvent.status === 'Sedang Dijalankan' ? 'glow-active' : 'shadow-md']">
-            
-            <div class="flex justify-between items-start">
-                <div class="flex-1 pr-4">
-                    <!-- 状态标签 (半透明磨砂效果 + 闪烁红点) -->
-                    <span v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="bg-white/30 text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded backdrop-blur-sm border border-white/40 shadow-sm inline-flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> LIVE NOW • 正在进行
-                    </span>
-                    <span v-else class="bg-black/30 text-white text-[10px] font-bold tracking-wider px-2.5 py-1 rounded border border-white/20 inline-block">
-                        {{ translateStatus(serverData.currentEvent.status) }}
-                    </span>
-                    
-                    <!-- 赛事标题 -->
-                    <h3 class="text-xl font-black mt-3 leading-tight drop-shadow-md">
-                        {{ serverData.currentEvent.name }}
-                    </h3>
-                    
-                    <!-- 情境引导语 -->
-                    <p v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="text-[11px] text-white/90 mt-2 font-medium">
-                        请家长们为孩子加油打气！Diminta ibubapa memberi sokongan kepada anak！
-                    </p>
-                    <p v-else-if="serverData.currentEvent.status === 'Tangguh'" class="text-[11px] text-white/90 mt-2 font-medium">
-                        ⚠️ 赛事由于突发状况暂停。请稍作等待。Pertandingan ditangguhkan, sila tunggu sebentar.
-                    </p>
-                </div>
-                
-                <!-- 弹跳图标 (FontAwesome 图标) -->
-                <div v-if="serverData.currentEvent.status === 'Sedang Dijalankan'" class="flex-shrink-0 opacity-90 mt-2">
-                    <i class="fa-solid fa-person-running text-4xl animate-bounce drop-shadow-lg"></i>
-                </div>
-                <div v-else-if="serverData.currentEvent.status === 'Tangguh'" class="flex-shrink-0 opacity-90 mt-2">
-                    <i class="fa-solid fa-triangle-exclamation text-4xl animate-pulse text-yellow-300 drop-shadow-lg"></i>
-                </div>
-            </div>
+        <div id="drag-wrapper">
+            <!-- 动态容器 -->
+            <div id="flipbook"></div>
         </div>
+    </main>
 
-        <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fa-solid fa-medal mr-1 text-yellow-500"></i> 奖牌总榜 Kedudukan Pingat</h3>
-        <div class="flex flex-col gap-2 mb-6 relative">
-            <transition-group name="slide-fade">
-                <div v-for="(team, index) in sortedMedals" :key="team.pasukan" class="bg-white border rounded-lg p-2 shadow-sm flex items-center justify-between transition-all duration-500">
-                    <div class="flex items-center gap-2 w-1/2">
-                        <span class="text-[10px] font-bold text-gray-400 w-3">{{ index + 1 }}</span>
-                        <div class="w-4 h-4 rounded-full flex-shrink-0" :class="'bg-team-' + team.pasukan"></div>
-                        <span class="font-bold text-sm text-gray-700">{{ getBilingualTeam(team.pasukan) }}</span>
-                    </div>
-                    <div class="flex gap-4 w-1/2 justify-end text-sm font-bold">
-                        <div class="text-center w-8"><i class="fa-solid fa-medal medal-emas block text-lg"></i>{{ team.emas }}</div>
-                        <div class="text-center w-8"><i class="fa-solid fa-medal medal-perak block text-lg"></i>{{ team.perak }}</div>
-                        <div class="text-center w-8"><i class="fa-solid fa-medal medal-gangsa block text-lg"></i>{{ team.gangsa }}</div>
-                    </div>
-                </div>
-            </transition-group>
-        </div>
+    <footer>
+        <button id="btn-prev" onclick="flipPrev()" title="上一页">
+            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+        </button>
+        <span id="page-info">-- / --</span>
+        <button id="btn-next" onclick="flipNext()" title="下一页">
+            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+        </button>
 
-        <div class="mb-5 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <button @click="showPadang = !showPadang" class="w-full p-3 flex justify-between items-center bg-blue-50 text-blue-900 font-bold text-xs active:bg-blue-100 transition-colors">
-                <span><i class="fa-solid fa-person-running text-blue-600 mr-2"></i> 田径比赛成绩 Keputusan Acara Padang</span>
-                <i class="fa-solid transition-transform duration-300" :class="showPadang ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </button>
-            
-            <div v-show="showPadang" class="p-3 border-t border-gray-100 bg-gray-50/50">
-                <div v-for="group in groupedPadang" :key="group.acara" class="mb-3 last:mb-0 border-b border-gray-200 pb-3 last:border-0 last:pb-0">
-                    <div class="font-bold text-xs mb-1.5 text-gray-800">{{ group.acara }}</div>
-                    <div class="text-[11px] grid grid-cols-1 gap-1.5 pl-1">
-                        <div v-for="res in sortPingat(group.results)" :key="res.pasukan + res.namaMurid" class="flex items-start gap-2">
-                            <span class="w-5 text-center flex-shrink-0">{{ getPingatEmoji(res.pingat) }}</span>
-                            <div class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div>
-                            <div class="flex-1 whitespace-pre-line leading-tight text-gray-700 font-bold">
-                                {{ res.namaMurid }} <span class="text-gray-400 font-normal text-[9px] ml-1">({{res.tahun}})</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div v-if="!groupedPadang.length" class="text-center text-xs text-gray-400 py-2">
-                    暂无成绩 Tiada rekod setakat ini.
-                </div>
-            </div>
-        </div>
+        <button class="fs-only" onclick="zoomOut()" title="缩小">-</button>
+        <span class="fs-only" id="zoom-info" style="min-width:45px; text-align:center; font-size:0.85rem;">100%</span>
+        <button class="fs-only" onclick="zoomIn()" title="放大">+</button>
+        <button class="fs-only" onclick="zoomReset()" title="重置位置">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/></svg>
+        </button>
 
-        <!-- 赛程项目 -->
-        <h3 class="font-bold text-gray-700 mb-2 text-sm"><i class="fa-solid fa-list-ul mr-1"></i> 赛程项目 Senarai Acara</h3>
-        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-            <ul class="divide-y divide-gray-100">
-                <li v-for="item in serverData.timeline" :key="item.id" class="p-3 text-xs flex items-start gap-2 transition-colors duration-300" :class="{'bg-orange-50': item.status === 'Sedang Dijalankan'}">
-                    <div class="mt-0.5 w-4 text-center">
-                        <i v-if="item.status === 'Selesai'" class="fa-solid fa-circle-check text-green-500"></i>
-                        <i v-else-if="item.status === 'Sedang Dijalankan'" class="fa-solid fa-fire text-orange-500 animate-pulse"></i>
-                        <i v-else-if="item.status === 'Tangguh'" class="fa-solid fa-triangle-exclamation text-red-500"></i>
-                        <i v-else class="fa-regular fa-circle text-gray-300"></i>
-                    </div>
-                    <div class="flex-1 pb-1">
-                        <div :class="{'text-gray-700 font-bold': item.status === 'Selesai', 'font-bold text-orange-600': item.status === 'Sedang Dijalankan', 'text-gray-600': item.status === 'Belum Mula'}">
-                            {{ item.name }}
-                        </div>
-                        
-                        <div v-if="item.status === 'Selesai' && serverData.eventResults && serverData.eventResults[item.id]" class="mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">
-                            <div v-for="res in filterParentDisplay(serverData.eventResults[item.id])" :key="res.pasukan + res.namaMurid" class="flex items-start gap-2 mb-1.5 last:mb-0 pt-0.5">
-                                <span class="w-5 text-center flex-shrink-0">{{ getPingatEmoji(res.pingat) }}</span>
-                                <div class="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-0.5" :class="'bg-team-' + res.pasukan"></div>
-                                <span class="font-bold text-gray-700 text-[11px] leading-tight flex-1 whitespace-pre-line">
-                                    {{ res.namaMurid }}<template v-if="res.tahun"> <span class="text-gray-400 font-normal text-[9px] ml-0.5">({{ res.tahun }})</span></template>
-                                </span>
-                            </div>
+        <button id="btn-sound" onclick="toggleSound()" title="音效开关">
+            <svg id="icon-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
 
-                            <div v-if="hasBatal(serverData.eventResults[item.id])" class="mt-2 border-t border-gray-200 pt-1">
-                                <details class="text-[10px]">
-                                    <summary class="cursor-pointer text-gray-400 hover:text-red-500 font-semibold inline-flex items-center gap-1 active:scale-95">
-                                        <i class="fa-solid fa-caret-down"></i> <i class="fa-solid fa-circle-info"></i> {{ countBatal(serverData.eventResults[item.id]) }} Catatan
-                                    </summary>
-                                    <div class="mt-1 pl-2 space-y-1">
-                                        <div v-for="res in getBatalOnly(serverData.eventResults[item.id])" :key="res.pasukan + res.namaMurid" class="flex items-start gap-1">
-                                            <div class="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div>
-                                            <!-- 🌟 移除了 line-through 删除线，单纯保留浅灰色名字 🌟 -->
-                                            <span class="text-gray-500 opacity-90 flex-1 leading-tight">
-                                                <span class="font-semibold">{{ res.namaMurid }}</span>
-                                                <template v-if="res.tahun"><span class="text-gray-400 font-normal text-[9px] ml-0.5">({{ res.tahun }})</span></template>
-                                                <span class="text-red-500 font-bold ml-1 break-words"><br>❌ {{ res.catatan }}</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </details>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 👨‍✈️ 2. 赛事控制 (Pengurus) -->
-    <!-- ========================================== -->
-    <div v-show="currentRole === 'pengurus'" class="p-4 bg-orange-50 min-h-screen">
-        <h2 class="text-lg font-bold text-orange-900 mb-4 border-b border-orange-200 pb-2">👨‍✈️ 控制面板 Pengurus Acara</h2>
-        <div class="space-y-3">
-            <div v-for="item in serverData.timeline" :key="'peng_'+item.id" class="bg-white rounded-xl shadow-sm p-3 border border-orange-100">
-                <div class="font-bold text-orange-900 text-sm mb-2">{{ item.name }}</div>
-                <div v-if="item.status !== 'Selesai' && !item.status.includes('Menunggu')" class="flex gap-2">
-                    <button @click="instantStatusUpdate(item.id, 'Belum Mula')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Belum Mula' ? 'bg-gray-300 text-gray-800' : 'bg-gray-100 text-gray-500 border border-gray-200'">未开始<br>Belum Mula</button>
-                    <button @click="instantStatusUpdate(item.id, 'Sedang Dijalankan')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Sedang Dijalankan' ? 'bg-orange-500 text-white shadow-sm' : 'bg-gray-100 text-gray-500 border border-gray-200'">进行中<br>Sedang Dijalankan</button>
-                    <button @click="instantStatusUpdate(item.id, 'Tangguh')" class="flex-1 py-1.5 rounded text-[10px] font-bold transition-colors" :class="item.status === 'Tangguh' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 border border-gray-200'">暂停<br>Tangguh</button>
-                </div>
-                <div v-else class="text-xs text-gray-500 font-semibold italic bg-gray-50 p-2 rounded">Status: {{ translateStatus(item.status) }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- ⏱️ 3. 成绩录入 (Pencatat) -->
-    <!-- ========================================== -->
-    <div v-show="currentRole === 'pencatat'" class="p-4 bg-blue-50 min-h-screen">
-        <h2 class="text-lg font-bold text-blue-900 mb-4 border-b border-blue-200 pb-2">⏱️ 录入成绩 Pencatat</h2>
-        
-        <div v-for="item in serverData.timeline" :key="'pen_'+item.id">
-            <div v-if="item.status === 'Sedang Dijalankan'" class="bg-white rounded-xl shadow-md border border-blue-100 p-4 mb-4">
-                <div class="font-bold text-blue-800 mb-4">{{ item.name }}</div>
-                
-                <div class="space-y-3 mb-5">
-                    <template v-for="team in ['Merah', 'Biru', 'Hijau']" :key="team">
-                        <div v-for="num in getPesertaCount(item.id, team)" :key="`${team}_${num}`" class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 relative overflow-hidden">
-                            
-                            <div class="absolute left-0 top-0 bottom-0 w-1.5" :class="'bg-team-' + team"></div>
-                            
-                            <div class="pl-2 flex items-center justify-between mb-2 pb-1 border-b border-gray-100">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-3 h-3 rounded-full" :class="'bg-team-' + team"></div>
-                                    <span class="font-bold text-xs text-gray-700">{{ getBilingualTeam(team) }} <span class="text-gray-400 font-normal ml-1">| Peserta {{ num }}</span></span>
-                                </div>
-                            </div>
-                            
-                            <div class="pl-2 flex items-start gap-2">
-                                <div class="flex-1 flex flex-col gap-1.5">
-                                    <input type="text" :custom-id="`tahun_${item.id}_${team}_${num}`" :id="`tahun_${item.id}_${team}_${num}`" :value="getPesertaTahun(item.id, team, num)" placeholder="Tahun (年级)" class="w-full text-[10px] p-1.5 border border-gray-200 rounded bg-gray-50 text-gray-700 focus:outline-blue-400">
-                                    <textarea :custom-id="`nama_${item.id}_${team}_${num}`" :id="`nama_${item.id}_${team}_${num}`" :value="getPesertaName(item.id, team, num)" placeholder="姓名 Nama" rows="2" class="w-full text-[11px] p-1.5 border border-gray-200 rounded bg-blue-50/30 text-blue-900 font-bold resize-y min-h-[50px] leading-tight focus:outline-blue-400"></textarea>
-                                </div>
-                                
-                                <select :custom-id="`pingat_${item.id}_${team}_${num}`" :id="`pingat_${item.id}_${team}_${num}`" class="w-24 flex-shrink-0 text-[10px] font-bold p-1.5 border border-gray-200 rounded bg-white shadow-sm focus:outline-blue-400">
-                                    <option value="-">- Tiada -</option>
-                                    <option value="Emas">🥇 Emas 金</option>
-                                    <option value="Perak">🥈 Perak 银</option>
-                                    <option value="Gangsa">🥉 Gangsa 筒</option>
-                                    <option value="Keempat">🎖️ Keempat 第四名</option>
-                                    <option value="Kelima">🏅 Kelima 第五名</option>
-                                    <option value="Batal">❌ Batal</option>
-                                </select>
-                            </div>
-                            <div class="pl-2 mt-1.5">
-                                <input type="text" :custom-id="`catatan_${item.id}_${team}_${num}`" :id="`catatan_${item.id}_${team}_${num}`" placeholder="Catatan (Sebab Batal / 备注)" class="w-full text-[10px] p-1.5 border border-red-100 rounded bg-red-50/30 text-red-600 placeholder-red-300 focus:outline-red-400">
-                            </div>
-                        </div>
-                    </template>
-                </div>
-                
-                <button @click="submitScore(item.id)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg shadow active:scale-95 transition-transform text-sm">
-                    <i class="fa-solid fa-paper-plane"></i> 提交 Hantar
-                </button>
-            </div>
-        </div>
-        <div v-if="!serverData.timeline.some(i => i.status === 'Sedang Dijalankan')" class="text-center text-gray-400 py-10 text-xs">Tiada acara sedang dijalankan.</div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 👨‍💼 4. GPK 审核 (Semakan) -->
-    <!-- ========================================== -->
-    <div v-show="currentRole === 'gpk'" class="p-4 bg-purple-50 min-h-screen">
-        <h2 class="text-lg font-bold text-purple-900 mb-4 border-b border-purple-200 pb-2 flex justify-between items-center">
-            <span>👨‍💼 成绩核准 Pengesahan Keputusan</span>
-            <button @click="exportCSV" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] px-3 py-1.5 rounded shadow flex items-center gap-1 active:scale-95">
-                <i class="fa-solid fa-download"></i> Muat Turun
-            </button>
-        </h2>
-        
-        <div v-for="(results, eventId) in serverData.pendingApprovals" :key="'gpk_'+eventId" class="bg-white rounded-xl shadow border border-purple-200 overflow-hidden mb-4">
-            <div class="bg-purple-600 text-white p-2 text-[11px] font-bold">[{{ getEventKategori(eventId) }}] {{ getEventName(eventId) }}</div>
-            <div class="p-3">
-                <table class="w-full text-xs text-left mb-3">
-                    <tr v-for="res in results" :key="res.pasukan + res.namaMurid" class="border-b last:border-0">
-                        <td class="py-2 align-top"><div class="w-3 h-3 rounded-full mt-0.5 flex-shrink-0" :class="'bg-team-' + res.pasukan"></div></td>
-                        <td class="py-2 pl-1 pr-2">
-                            <div class="font-bold text-[11px] leading-tight whitespace-pre-line break-words text-gray-800">{{ res.namaMurid }}</div>
-                            <div class="text-[9px] text-gray-400 mt-0.5">{{ res.tahun }}</div>
-                            <div v-if="res.catatan" class="text-[10px] text-red-500 mt-1"><i class="fa-solid fa-triangle-exclamation"></i> {{ res.catatan }}</div>
-                        </td>
-                        <td class="py-2 font-bold text-right align-top w-20" :class="{'medal-emas': res.pingat==='Emas', 'medal-perak': res.pingat==='Perak', 'medal-gangsa': res.pingat==='Gangsa', 'text-gray-500': res.pingat==='Keempat' || res.pingat==='Kelima', 'text-red-600': res.pingat==='Batal'}">
-                            {{ formatPingatGPK(res.pingat) }}
-                        </td>
-                    </tr>
-                </table>
-                <div class="flex gap-2">
-                    <button @click="gpkAction('approveResult', eventId)" class="flex-1 bg-green-500 text-white font-bold py-2 rounded text-xs shadow-sm active:scale-95 transition-transform">✅ Sahkan</button>
-                    <button @click="gpkAction('rejectResult', eventId)" class="bg-red-100 text-red-600 font-bold py-2 px-3 rounded text-xs active:scale-95 transition-transform">Tolak</button>
-                </div>
-            </div>
-        </div>
-        <div v-if="Object.keys(serverData.pendingApprovals || {}).length === 0" class="text-center text-gray-400 py-10 text-xs">Tiada semakan baru.</div>
-    </div>
-
+        <button id="btn-fs" onclick="toggleFullscreen()" title="全屏切换">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+    </footer>
 </div>
 
 <script>
-    const { createApp, ref, computed, onMounted } = Vue;
+    const TOTAL_PAGES = 4;
+    let book = null;
+    let isMobileMode = false;
+    let currentZoom = 1;
+    const zoomLevels = [1, 1.25, 1.5, 1.75, 2];
+    let isFullscreen = false;
+    let soundEnabled = true;
+    let startPageIdx = 0; // 提升作用域，永久记住页码
 
-    createApp({
-        setup() {
-            const currentRole = ref('parent');
-            const gasUrl = ref('https://script.google.com/macros/s/AKfycbw1zYvt7L_Jp2mskZucrjbgRuUDd7h1Fu3w3aRnAYFlvDacV3ab_uTNI4uwnvursV0C/exec');
-            const isSyncingInBackground = ref(false);
-            const authModal = ref({ show: false, target: '', password: '', error: false });
-            const showPadang = ref(false); 
-            
-            const serverData = ref({
-                currentEvent: { id: '', name: 'Sila tunggu...', status: 'Belum Mula' },
-                timeline: [], medals: [], pendingApprovals: {}, peserta: {}, eventResults: {}, acaraPadang: [], passwords: {}
-            });
+    // --- 音效引擎 ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function playFlipSound() {
+        if (!soundEnabled) return;
+        try {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const bufferSize = audioCtx.sampleRate * 0.15;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+            const noiseSrc = audioCtx.createBufferSource();
+            noiseSrc.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            filter.frequency.linearRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+            noiseSrc.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination);
+            noiseSrc.start();
+        } catch (e) {}
+    }
 
-            const requestRole = (role) => {
-                if (role === 'parent') { currentRole.value = 'parent'; return; }
-                if (localStorage.getItem('auth_' + role) === serverData.value.passwords[role]) { currentRole.value = role; } 
-                else { authModal.value = { show: true, target: role, password: '', error: false }; }
-            };
-            const verifyPassword = () => {
-                const target = authModal.value.target;
-                if (authModal.value.password === serverData.value.passwords[target]) {
-                    localStorage.setItem('auth_' + target, authModal.value.password);
-                    currentRole.value = target;
-                    authModal.value.show = false;
-                } else { authModal.value.error = true; }
-            };
-            const cancelAuth = () => { authModal.value.show = false; };
-
-            const sortedMedals = computed(() => {
-                if (!serverData.value.medals) return [];
-                return [...serverData.value.medals].sort((a, b) => {
-                    if (b.emas !== a.emas) return b.emas - a.emas;
-                    if (b.perak !== a.perak) return b.perak - a.perak;
-                    return b.gangsa - a.gangsa;
-                });
-            });
-
-            const groupedPadang = computed(() => {
-                const groups = {};
-                serverData.value.acaraPadang.forEach(item => {
-                    const title = `${item.acara} (${item.kategori})`;
-                    if (!groups[title]) groups[title] = { acara: title, results: [] };
-                    groups[title].results.push(item);
-                });
-                return Object.values(groups);
-            });
-
-            const fetchData = () => {
-                if (!gasUrl.value || gasUrl.value.includes('AKfycb...')) return; 
-                fetch(gasUrl.value).then(res => res.json()).then(data => { serverData.value = data; }).catch(e => console.log(e));
-            };
-
-            const postActionSilent = (action, payload, shouldRefetch = false) => {
-                isSyncingInBackground.value = true;
-                payload.action = action;
-                fetch(gasUrl.value, { method: 'POST', body: JSON.stringify(payload) })
-                .then(res => res.json()).then(data => { if (shouldRefetch) fetchData(); }).finally(() => { isSyncingInBackground.value = false; });
-            };
-
-            const instantStatusUpdate = (eventId, status) => {
-                const ev = serverData.value.timeline.find(i => i.id === eventId);
-                if (ev) {
-                    ev.status = status;
-                    if (status === 'Sedang Dijalankan' || status === 'Tangguh') serverData.value.currentEvent = { id: ev.id, name: ev.name, status: status };
-                    else if (status === 'Belum Mula' && serverData.value.currentEvent.name === ev.name) serverData.value.currentEvent = { id: '', name: 'Sila tunggu...', status: 'Belum Mula' };
-                }
-                postActionSilent('updateStatus', { eventId: eventId, status: status }, false);
-            };
-
-            const getPesertaCount = (eventId, team) => {
-                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
-                    const list = serverData.value.peserta[eventId][team];
-                    return Math.max(Array.isArray(list) ? list.length : 1, 1);
-                }
-                return 1; 
-            };
-
-            const submitScore = (eventId) => {
-                const results = [];
-                ['Merah', 'Biru', 'Hijau'].forEach(team => {
-                    const count = getPesertaCount(eventId, team);
-                    for (let num = 1; num <= count; num++) {
-                        const namaEl = document.getElementById(`nama_${eventId}_${team}_${num}`);
-                        const tahunEl = document.getElementById(`tahun_${eventId}_${team}_${num}`);
-                        const pingatEl = document.getElementById(`pingat_${eventId}_${team}_${num}`);
-                        const catatanEl = document.getElementById(`catatan_${eventId}_${team}_${num}`);
-                        
-                        if (namaEl) {
-                            const nama = namaEl.value.trim();
-                            const tahun = tahunEl ? tahunEl.value.trim() : "";
-                            const pingat = pingatEl ? pingatEl.value : "-";
-                            const catatan = catatanEl ? catatanEl.value.trim() : "";
-                            
-                            if (nama || pingat !== "-") {
-                                results.push({ pasukan: team, nama: nama, tahun: tahun, pingat: pingat, catatan: catatan });
-                            }
-                        }
-                    }
-                });
-                if (results.length === 0) {
-                    alert("Sila isi sekurang-kurangnya satu keputusan!");
-                    return;
-                }
-                if (confirm("Hantar ke GPK?")) {
-                    const ev = serverData.value.timeline.find(i => i.id === eventId);
-                    if (ev) ev.status = 'Menunggu Pengesahan GPK';
-                    postActionSilent('submitResult', { eventId: eventId, results: results }, true);
+    // --- 预加载 ---
+    function preloadImages() {
+        const urls = ['page-1.webp', 'page-2.webp', 'page-3.webp', 'page-4.webp'];
+        let loaded = 0, failed = false;
+        urls.forEach(url => {
+            const img = new Image();
+            img.onload = () => {
+                if (failed) return;
+                loaded++;
+                document.getElementById('loading-text').innerText = `载入小册子... ${Math.round(loaded/4 * 100)}%`;
+                if (loaded === 4) {
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        scheduleRebuild(); // 使用防抖函数初始化
+                    }, 300);
                 }
             };
+            img.onerror = () => { failed = true; document.getElementById('loading').innerHTML = `<div style="color:#d32f2f;">加载失败，找不到图片</div>`; };
+            img.src = url;
+        });
+    }
 
-            const gpkAction = (action, eventId) => {
-                delete serverData.value.pendingApprovals[eventId];
-                postActionSilent(action, { eventId: eventId }, true);
-            };
+    // --- 核心稳定器：防抖重建 ---
+    let rebuildTimer = null;
+    function scheduleRebuild() {
+        clearTimeout(rebuildTimer);
+        rebuildTimer = setTimeout(() => {
+            zoomReset();
+            initBook();
+        }, 300); // 等待浏览器重绘完成，彻底杜绝拿不到宽高的情况
+    }
 
-            const exportCSV = () => {
-                let report = {}; 
-                const parseAndBuildReport = (rawNama, defaultTSummary, kategori, pasukan, achievementStr) => {
-                    if (!rawNama) return;
-                    let lines = rawNama.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    lines.forEach(line => {
-                        let match = line.match(/[(（]([^)）]+)[)）]/);
-                        let finalTahun = defaultTSummary || 'Tiada';
-                        let cleanName = line;
-                        if (match) {
-                            finalTahun = match[1].trim();
-                            cleanName = line.replace(/[(（][^)）]+[)）]/, '').trim(); 
-                        }
-                        let key = `${finalTahun}|${kategori || '-'} |${pasukan}|${cleanName}`;
-                        if (!report[key]) report[key] = [];
-                        report[key].push(achievementStr);
-                    });
-                };
+    // --- 初始/重建引擎 (加入核平防御) ---
+    function initBook() {
+        const mainArea = document.getElementById('main-area');
+        const dragWrapper = document.getElementById('drag-wrapper');
 
-                Object.keys(serverData.value.eventResults).forEach(eventId => {
-                    let eventArray = serverData.value.eventResults[eventId];
-                    let evName = getEventName(eventId);
-                    eventArray.forEach(res => {
-                        let award = `${evName} (${res.pingat === 'Batal' ? 'Catatan: ' + res.catatan : res.pingat})`;
-                        parseAndBuildReport(res.namaMurid, res.tahun, res.kategori, res.pasukan, award);
-                    });
-                });
-
-                serverData.value.acaraPadang.forEach(res => {
-                    let award = `${res.acara} (${res.pingat})`;
-                    parseAndBuildReport(res.namaMurid, res.tahun, res.kategori, res.pasukan, award);
-                });
-
-                let csvContent = "Tahun,Kategori,Pasukan,Nama Murid,Pencapaian\n";
-                let sortedKeys = Object.keys(report).sort((a, b) => a.localeCompare(b));
-                sortedKeys.forEach(key => {
-                    let parts = key.split('|');
-                    let pencapaian = report[key].join('; ');
-                    csvContent += `${parts[0]},${parts[1]},${parts[2]},"${parts[3]}","${pencapaian}"\n`;
-                });
-
-                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                link.setAttribute("href", URL.createObjectURL(blob));
-                link.setAttribute("download", "Senarai_Pemenang_Sukan_Tahunan_2026.csv");
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-
-            const getEventName = (id) => { const ev = serverData.value.timeline.find(i => i.id === id); return ev ? ev.name : id; };
-            const getEventKategori = (id) => { const ev = serverData.value.timeline.find(i => i.id === id); return ev ? ev.kategori : ''; };
-            
-            const getBilingualTeam = (pasukan) => { 
-                const map = { 'Merah': 'Merah 红队', 'Biru': 'Biru 蓝队', 'Hijau': 'Hijau 青队' }; 
-                return map[pasukan] || pasukan; 
-            };
-            
-            const translateStatus = (status) => { const map = { 'Belum Mula': 'Belum Mula', 'Sedang Dijalankan': 'Sedang Dijalankan', 'Tangguh': 'Tangguh', 'Selesai': 'Selesai', 'Menunggu Pengesahan GPK': 'Menunggu GPK...' }; return map[status] || status; };
-            
-            const statusColor = (eventId, status) => {
-                if (status === 'Sedang Dijalankan') {
-                    const idx = serverData.value.timeline.findIndex(i => i.id === eventId);
-                    const colors = [
-                        'bg-gradient-to-r from-blue-600 to-cyan-400 shadow-sm',
-                        'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-sm',
-                        'bg-gradient-to-r from-purple-600 to-fuchsia-500 shadow-sm',
-                        'bg-gradient-to-r from-amber-500 to-yellow-400 shadow-sm'
-                    ];
-                    return colors[Math.max(0, idx) % colors.length];
-                }
-                if (status === 'Tangguh') return 'bg-red-600 animate-pulse';
-                return 'bg-gradient-to-r from-gray-700 to-gray-900';
-            };
-
-            const getPesertaName = (eventId, team, num) => { 
-                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
-                    const data = serverData.value.peserta[eventId][team];
-                    if (Array.isArray(data)) return data[num - 1] ? data[num - 1].nama : "";
-                    return num === 1 ? data.nama : "";
-                }
-                return ""; 
-            };
-            const getPesertaTahun = (eventId, team, num) => { 
-                if (serverData.value.peserta && serverData.value.peserta[eventId] && serverData.value.peserta[eventId][team]) {
-                    const data = serverData.value.peserta[eventId][team];
-                    if (Array.isArray(data)) return data[num - 1] ? data[num - 1].tahun : "";
-                    return num === 1 ? data.tahun : "";
-                }
-                return ""; 
-            };
-            
-            const getPingatEmoji = (pingat) => { const m = { 'Emas': '🥇', 'Perak': '🥈', 'Gangsa': '🥉', 'Keempat': '4️⃣', 'Kelima': '5️⃣', 'Batal': '❌' }; return m[pingat] || '🏅'; };
-            const formatPingatGPK = (pingat) => { return `${getPingatEmoji(pingat)} ${pingat}`; };
-            const filterParentDisplay = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Emas' || r.pingat === 'Perak' || r.pingat === 'Gangsa'); };
-            const hasBatal = (resultsArray) => { return resultsArray.some(r => r.pingat === 'Batal'); };
-            const countBatal = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Batal').length; };
-            const getBatalOnly = (resultsArray) => { return resultsArray.filter(r => r.pingat === 'Batal'); };
-
-            const sortPingat = (resultsArray) => {
-                const order = { "Emas": 1, "Perak": 2, "Gangsa": 3, "Keempat": 4, "Kelima": 5, "Batal": 6 };
-                return [...resultsArray].sort((a, b) => order[a.pingat] - order[b.pingat]);
-            };
-
-            onMounted(() => {
-                if (gasUrl.value && !gasUrl.value.includes('AKfycb...')) fetchData();
-                setInterval(() => {
-                    if (gasUrl.value && !gasUrl.value.includes('AKfycb...') && (currentRole.value === 'parent' || currentRole.value === 'gpk')) fetchData();
-                }, 5000); 
-            });
-
-            return {
-                currentRole, isSyncingInBackground, serverData, sortedMedals, authModal, showPadang, groupedPadang, getPesertaCount,
-                requestRole, verifyPassword, cancelAuth, instantStatusUpdate, submitScore, gpkAction, exportCSV, getEventName, 
-                getEventKategori, getBilingualTeam, translateStatus, statusColor, getPesertaName, getPesertaTahun, 
-                filterParentDisplay, hasBatal, countBatal, getBatalOnly, formatPingatGPK, sortPingat, getPingatEmoji
-            };
+        // 【防御1】安全卸载：加入 try-catch，无视动画报错
+        if (book) {
+            try {
+                startPageIdx = book.getCurrentPageIndex();
+                book.destroy();
+            } catch (e) { console.warn("拦截到翻页组件销毁异常", e); }
+            book = null; 
         }
-    }).mount('#app');
+
+        // 【防御2】暴力核平：直接干掉旧 DOM，换全新的
+        dragWrapper.innerHTML = '<div id="flipbook"></div>';
+        const container = document.getElementById('flipbook');
+
+        // 使用 JS 注入干净的页面结构，杜绝隐藏 DOM 带来的灵异事件
+        container.innerHTML = `
+            <div class="page" data-density="hard"><img src="page-1.webp" alt="封面"></div>
+            <div class="page"><img src="page-2.webp" alt="工委表"></div>
+            <div class="page"><img src="page-3.webp" alt="赛程"></div>
+            <div class="page" data-density="hard"><img src="page-4.webp" alt="鸣谢页"></div>
+        `;
+
+        // 【防御3】尺寸兜底：如果卡顿取到 0，强行用屏幕尺寸算，绝不崩溃
+        let W = mainArea.clientWidth;
+        let H = mainArea.clientHeight;
+        if (W < 100) W = window.innerWidth;
+        if (H < 100) H = window.innerHeight - 80;
+
+        const ratio = 0.707;
+        isMobileMode = window.innerWidth < 768;
+        
+        let pWidth, pHeight;
+        if (isMobileMode) {
+            pHeight = H - 20; pWidth = pHeight * ratio;
+            if (pWidth > W - 20) { pWidth = W - 20; pHeight = pWidth / ratio; }
+        } else {
+            pHeight = H - 40; pWidth = pHeight * ratio;
+            if (pWidth * 2 > W - 40) { pWidth = (W - 40) / 2; pHeight = pWidth / ratio; }
+        }
+
+        // 防止页码越界
+        if (startPageIdx >= TOTAL_PAGES) startPageIdx = 0;
+
+        book = new St.PageFlip(container, {
+            width: Math.max(Math.round(pWidth), 100),   // 最小强制 100
+            height: Math.max(Math.round(pHeight), 141), // 最小强制 141
+            size: 'fixed',
+            showCover: true,
+            usePortrait: isMobileMode,
+            maxShadowOpacity: 0.6,
+            drawShadow: true,
+            startPage: startPageIdx
+        });
+
+        book.loadFromHTML(container.querySelectorAll('.page'));
+        
+        book.on('flip', (e) => {
+            updatePageInfo(e.data);
+            if (e.data !== startPageIdx) playFlipSound();
+            startPageIdx = e.data;
+        });
+        updatePageInfo(startPageIdx);
+    }
+
+    function updatePageInfo(idx) {
+        const infoEl = document.getElementById('page-info');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        if (isMobileMode) {
+            infoEl.innerText = `${idx + 1} / 4`;
+            btnPrev.disabled = (idx === 0); btnNext.disabled = (idx === 3);
+        } else {
+            if (idx === 0) { infoEl.innerText = '1 / 4'; btnPrev.disabled = true; btnNext.disabled = false; }
+            else if (idx === 1 || idx === 2) { infoEl.innerText = '2–3 / 4'; btnPrev.disabled = false; btnNext.disabled = false; }
+            else if (idx === 3) { infoEl.innerText = '4 / 4'; btnPrev.disabled = false; btnNext.disabled = true; }
+        }
+    }
+
+    function flipPrev() { if(book) book.flipPrev(); }
+    function flipNext() { if(book) book.flipNext(); }
+
+    // --- 事件统一拦截 ---
+    let lastW = window.innerWidth;
+    let lastH = window.innerHeight;
+    window.addEventListener('resize', () => {
+        const newW = window.innerWidth; const newH = window.innerHeight;
+        if (Math.abs(newW - lastW) > 20 || Math.abs(newH - lastH) > 60) {
+            lastW = newW; lastH = newH;
+            scheduleRebuild();
+        }
+    });
+
+    // 修复全屏消失的核心逻辑：只切换 CSS，剩下的交给防抖统一处理
+    function toggleFullscreen() {
+        const app = document.getElementById('app');
+        isFullscreen = !isFullscreen;
+        if (isFullscreen) app.classList.add('fs-mode');
+        else app.classList.remove('fs-mode');
+        
+        // 交给防抖去重建，避免立刻获取导致高度为 0
+        scheduleRebuild();
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('btn-sound');
+        btn.innerHTML = soundEnabled 
+            ? `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`
+            : `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.82 3.08-1.48l3.17 3.17 1.27-1.27L11 10.27 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>`;
+    }
+
+    // --- 缩放拖拽保持不变 ---
+    const dragWrapper = document.getElementById('drag-wrapper');
+    const mainArea = document.getElementById('main-area');
+    let panX = 0, panY = 0, isDragging = false, startMouseX = 0, startMouseY = 0, startPanX = 0, startPanY = 0;
+
+    function applyTransform() {
+        dragWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+        document.getElementById('zoom-info').innerText = `${Math.round(currentZoom * 100)}%`;
+        const flipbookEl = document.getElementById('flipbook');
+        if(flipbookEl) flipbookEl.style.pointerEvents = currentZoom > 1 ? 'none' : 'auto';
+    }
+
+    function zoomIn() {
+        let idx = zoomLevels.indexOf(currentZoom);
+        if(idx < zoomLevels.length - 1) { currentZoom = zoomLevels[idx + 1]; applyTransform(); }
+    }
+    function zoomOut() {
+        let idx = zoomLevels.indexOf(currentZoom);
+        if(idx > 0) { currentZoom = zoomLevels[idx - 1]; applyTransform(); }
+        if(currentZoom === 1) zoomReset();
+    }
+    function zoomReset() {
+        currentZoom = 1; panX = 0; panY = 0;
+        dragWrapper.style.transition = 'transform 0.3s';
+        applyTransform();
+        setTimeout(() => { dragWrapper.style.transition = 'none'; }, 300);
+    }
+    mainArea.addEventListener('dblclick', (e) => {
+        if(!isFullscreen) return;
+        if(currentZoom === 1) { currentZoom = 1.5; applyTransform(); }
+        else { zoomReset(); }
+    });
+    function startDrag(e) {
+        if (currentZoom === 1) return;
+        isDragging = true;
+        startMouseX = e.touches ? e.touches[0].clientX : e.clientX;
+        startMouseY = e.touches ? e.touches[0].clientY : e.clientY;
+        startPanX = panX; startPanY = panY;
+        dragWrapper.style.transition = 'none';
+    }
+    function doDrag(e) {
+        if (!isDragging || currentZoom === 1) return;
+        e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        panX = startPanX + (clientX - startMouseX);
+        panY = startPanY + (clientY - startMouseY);
+        applyTransform();
+    }
+    function endDrag() { isDragging = false; }
+    mainArea.addEventListener('mousedown', startDrag); window.addEventListener('mousemove', doDrag, { passive: false }); window.addEventListener('mouseup', endDrag);
+    mainArea.addEventListener('touchstart', startDrag, { passive: false }); window.addEventListener('touchmove', doDrag, { passive: false }); window.addEventListener('touchend', endDrag);
+    window.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') flipPrev(); else if (e.key === 'ArrowRight') flipNext(); });
+    window.onload = preloadImages;
 </script>
 </body>
 </html>
