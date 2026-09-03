@@ -81,41 +81,63 @@
         }
       };
 
-      // 从 Supabase 载入数据
+      // 从 Supabase 载入数据（防崩溃弹性读取）
       const loadInitialData = async () => {
         if (!supabase) return showToast('❌ Supabase 客户端未就绪');
         setLoading(true);
         try {
           const [subRes, stuRes, recRes] = await Promise.all([
-            supabase.from('subjects').select('*').order('sort_order', { ascending: true }),
-            supabase.from('students').select('*').order('student_name', { ascending: true }),
-            supabase.from('homework_records').select('*').order('record_date', { ascending: false }).order('created_at', { ascending: false })
+            supabase.from('subjects').select('*'),
+            supabase.from('students').select('*'),
+            supabase.from('homework_records').select('*')
           ]);
 
-          if (subRes.error || stuRes.error || recRes.error) {
-            showToast('❌ 读取失败: ' + (subRes.error?.message || stuRes.error?.message || recRes.error?.message));
-            setLoading(false);
-            return;
-          }
+          if (subRes.error) console.error('Subjects error:', subRes.error);
+          if (stuRes.error) console.error('Students error:', stuRes.error);
+          if (recRes.error) console.error('Records error:', recRes.error);
 
-          const map = {};
-          (subRes.data || []).forEach(s => {
+          let map = {};
+          const sortedSubs = (subRes.data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+          sortedSubs.forEach(s => {
             map[s.code] = { 
-              zh: s.name_zh, 
-              ms: s.name_ms, 
+              zh: s.name_zh || s.code, 
+              ms: s.name_ms || s.code, 
               type: s.type || (s.code === 'Year1' || s.code === 'Y1' ? 'event' : 'homework')
             };
           });
+
+          // 若数据库科目为空，自动兜底提供常用科目，保证界面绝不卡死
+          if (Object.keys(map).length === 0) {
+            map = {
+              BC: { zh: '华文', ms: 'Bahasa Cina', type: 'homework' },
+              BI: { zh: '英文', ms: 'Bahasa Inggeris', type: 'homework' },
+              SN: { zh: '科学', ms: 'Sains', type: 'homework' },
+              Year1: { zh: '一年级事件记录', ms: 'Tahun 1', type: 'event' }
+            };
+          }
           setSubjectMap(map);
 
-          setAllStudents((stuRes.data || []).map(s => ({ id: s.id, subject: s.subject, name: s.student_name })));
-          setAllRecords(recRes.data || []);
+          const sortedStudents = (stuRes.data || []).sort((a, b) => String(a.student_name || '').localeCompare(String(b.student_name || '')));
+          setAllStudents(sortedStudents.map(s => ({ id: s.id, subject: s.subject, name: s.student_name })));
+
+          const sortedRecords = (recRes.data || []).sort((a, b) => String(b.record_date || b.date || '').localeCompare(String(a.record_date || a.date || '')));
+          setAllRecords(sortedRecords);
 
           const subjects = Object.keys(map);
-          if (subjects.length > 0 && !currentTab) setCurrentTab(subjects[0]);
+          if (subjects.length > 0) {
+            setCurrentTab(prev => prev || subjects[0]);
+          }
         } catch (err) {
-          console.error(err);
-          showToast('❌ 网络连接异常');
+          console.error('loadInitialData caught:', err);
+          showToast('⚠️ 数据加载提示: ' + err.message);
+          const fallbackMap = {
+            BC: { zh: '华文', ms: 'Bahasa Cina', type: 'homework' },
+            BI: { zh: '英文', ms: 'Bahasa Inggeris', type: 'homework' },
+            SN: { zh: '科学', ms: 'Sains', type: 'homework' },
+            Year1: { zh: '一年级事件记录', ms: 'Tahun 1', type: 'event' }
+          };
+          setSubjectMap(fallbackMap);
+          setCurrentTab('BC');
         }
         setLoading(false);
       };
@@ -141,15 +163,16 @@
       // 日期计算工具
       const parseDate = (dateStr) => {
         if (!dateStr) return null;
-        if (dateStr.includes('-')) {
-          const [y, m, d] = dateStr.split('-').map(Number);
+        const s = String(dateStr);
+        if (s.includes('-')) {
+          const [y, m, d] = s.split('-').map(Number);
           return new Date(y, m - 1, d);
         }
-        if (dateStr.includes('/')) {
-          const [d, m, y] = dateStr.split('/').map(Number);
+        if (s.includes('/')) {
+          const [d, m, y] = s.split('/').map(Number);
           return new Date(y, m - 1, d);
         }
-        return new Date(dateStr);
+        return new Date(s);
       };
 
       const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -157,13 +180,13 @@
 
       const getDayDiff = (dateStr) => {
         const d = parseDate(dateStr);
-        if (!d) return null;
+        if (!d || isNaN(d.getTime())) return null;
         return Math.floor((todayStart - startOfDay(d)) / 86400000);
       };
 
       const formatDateDisplay = (dateStr) => {
         const d = parseDate(dateStr);
-        if (!d) return dateStr;
+        if (!d || isNaN(d.getTime())) return String(dateStr || '');
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
@@ -197,7 +220,12 @@
       }
 
       if (!subjectMap) {
-        return <div className="flex justify-center items-center h-screen"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div></div>;
+        return (
+          <div className="flex flex-col justify-center items-center h-screen space-y-3">
+            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-xs text-slate-400 font-medium">正在读取云端数据...</p>
+          </div>
+        );
       }
 
       const subjectList = Object.keys(subjectMap);
@@ -1226,9 +1254,43 @@
       );
     }
 
+    class ErrorBoundary extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+      componentDidCatch(error, errorInfo) {
+        console.error("ErrorBoundary caught:", error, errorInfo);
+      }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="max-w-md mx-auto my-12 p-6 bg-red-50 border border-red-200 rounded-2xl text-center shadow-lg">
+              <div className="text-4xl mb-3">⚠️</div>
+              <h2 className="text-lg font-bold text-red-800 mb-2">界面渲染发生异常</h2>
+              <p className="text-xs text-red-600 mb-4 font-mono bg-white p-3 rounded-xl border border-red-100 text-left overflow-auto max-h-40">
+                {String(this.state.error?.message || this.state.error)}
+              </p>
+              <button onClick={() => window.location.reload()} className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow transition-all">
+                刷新页面重试
+              </button>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
     const rootElement = document.getElementById('root');
     const reactRoot = ReactDOM.createRoot(rootElement);
-    reactRoot.render(<App />);
+    reactRoot.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
   </script>
 </body>
 </html>
