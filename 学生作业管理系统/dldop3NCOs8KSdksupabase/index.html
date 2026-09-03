@@ -16,22 +16,32 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
 
-  <div id="root"></div>
+  <div id="root">
+    <div style="display:flex;justify-content:center;align-items:center;height:100vh;color:#64748b;font-family:sans-serif;">
+      正在加载系统...
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('error', function(e) {
+      var root = document.getElementById('root');
+      if (root) {
+        root.innerHTML = '<div style="padding:24px;color:#b91c1c;max-width:500px;margin:50px auto;background:#fee2e2;border-radius:12px;border:1px solid #f87171;font-family:sans-serif;">' +
+          '<h3 style="font-weight:bold;margin-bottom:8px;">⚠️ 页面加载错误：</h3><p style="font-size:13px;word-break:break-all;">' + (e.message || e) + '</p>' +
+          '<p style="color:#6b7280;font-size:12px;margin-top:12px;">若看到此提示，请将提示内容截图发给我。</p></div>';
+      }
+    });
+  </script>
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // =========================================================================
-    // 已填入你的 Supabase 项目配置
-    // =========================================================================
     const SUPABASE_URL = "https://fmecxejzfagtdlxcxymk.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable__WW7bNpZdQUOXDFDEBDBYQ_-6bhu76T"; 
-
-    // 系统访问密码
     const SYSTEM_PASSWORD = "8888"; 
 
-    // 初始化 Supabase 客户端
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+    const PAST_DAYS = Array.from({ length: 5 }, (_, i) => i);
 
     function App() {
       const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,7 +73,6 @@
         setTimeout(() => setToast(null), 3000);
       };
 
-      // 登录验证
       const handleLogin = (e) => {
         e.preventDefault();
         if (passwordInput === SYSTEM_PASSWORD) {
@@ -75,8 +84,11 @@
         }
       };
 
-      // 从 Supabase 载入数据
       const loadInitialData = async () => {
+        if (!supabase) {
+          showToast('❌ Supabase 客户端未初始化，请检查网络');
+          return;
+        }
         setLoading(true);
         try {
           const [subRes, stuRes, recRes] = await Promise.all([
@@ -86,7 +98,7 @@
           ]);
 
           if (subRes.error || stuRes.error || recRes.error) {
-            showToast('❌ 数据库连接异常: ' + (subRes.error?.message || stuRes.error?.message || recRes.error?.message));
+            showToast('❌ 读取数据库失败: ' + (subRes.error?.message || stuRes.error?.message || recRes.error?.message));
             setLoading(false);
             return;
           }
@@ -112,14 +124,13 @@
           if (subjects.length > 0 && !currentTab) setCurrentTab(subjects[0]);
         } catch (err) {
           console.error(err);
-          showToast('❌ 数据加载失败，请检查网络');
+          showToast('❌ 数据加载失败');
         }
         setLoading(false);
       };
 
-      // Supabase 实时推送 (手机端修改，电脑端自动同步)
       useEffect(() => {
-        if (!isAuthenticated) return;
+        if (!isAuthenticated || !supabase) return;
         const channel = supabase
           .channel('db_changes')
           .on('postgres_changes', { event: '*', schema: 'public', table: 'homework_records' }, () => {
@@ -132,7 +143,6 @@
         };
       }, [isAuthenticated]);
 
-      // 日期计算工具
       const parseDate = (dateStr) => {
         if (!dateStr) return null;
         if (dateStr.includes('-')) {
@@ -164,7 +174,6 @@
         return `${day}/${month}/${year}`;
       };
 
-      // 登录界面
       if (!isAuthenticated) {
         return (
           <div className="flex justify-center items-center h-screen px-4 bg-slate-100">
@@ -246,7 +255,6 @@
         setSelectedStudents({ ...selectedStudents, [studentName]: reason });
       };
 
-      // 提交到 Supabase 数据库
       const handleSubmit = async (e) => {
         e.preventDefault();
         if (!recordDate) return showToast('⚠️ 请选择日期！');
@@ -288,7 +296,6 @@
         setLoading(false);
       };
 
-      // 批量处理已补交（防抖合并同步）
       const flushResolveQueue = async () => {
         const ids = Array.from(resolveQueueRef.current);
         if (ids.length === 0) return;
@@ -321,7 +328,6 @@
           return next;
         });
 
-        // 立即从页面上移除，极致顺滑
         setPendingRecords(prev => prev.filter(r => r.id !== recordId));
         resolveQueueRef.current.add(recordId);
 
@@ -329,7 +335,6 @@
         resolveTimerRef.current = setTimeout(flushResolveQueue, 500);
       };
 
-      // 生成双语 WhatsApp 催交/表扬通知
       const handleGenerateMessage = () => {
         const todayStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
         const subInfo = subjectMap[currentTab] || { zh: currentTab, ms: currentTab };
@@ -357,7 +362,6 @@
         navigator.clipboard.writeText(msg.trim()).then(() => showToast('📋 催交信息已复制，快去 WhatsApp 粘贴吧！')).catch(() => showToast('❌ 复制失败'));
       };
 
-      // 科目设置
       const openSettings = () => {
         const currentArr = Object.keys(subjectMap).map(key => ({ code: key, zh: subjectMap[key].zh, ms: subjectMap[key].ms }));
         setTempSubjects(currentArr);
@@ -506,7 +510,7 @@
                         <span className="text-[10px] text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">共 {records.length} 项</span>
                       </div>
                       <div className="space-y-2">
-                        {.map(diff => {
+                        {PAST_DAYS.map(diff => {
                           const dayRecords = records.filter(r => getDayDiff(r.date) === diff);
                           if (dayRecords.length === 0) return null;
                           return (
@@ -566,7 +570,6 @@
             </section>
           </div>
 
-          {/* 科目配置弹窗 */}
           {isSettingsOpen && (
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
               <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
