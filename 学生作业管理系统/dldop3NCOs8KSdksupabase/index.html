@@ -5,10 +5,10 @@
   <title>学生作业与事件管理系统</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
   <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
@@ -16,22 +16,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
 
-  <div id="root">
-    <div style="display:flex;justify-content:center;align-items:center;height:100vh;color:#64748b;font-family:sans-serif;">
-      正在加载系统组件...
-    </div>
-  </div>
-
-  <script>
-    window.addEventListener('error', function(e) {
-      var root = document.getElementById('root');
-      if (root) {
-        root.innerHTML = '<div style="padding:24px;color:#b91c1c;max-width:520px;margin:50px auto;background:#fee2e2;border-radius:12px;border:1px solid #f87171;font-family:sans-serif;">' +
-          '<h3 style="font-weight:bold;margin-bottom:8px;">⚠️ 脚本运行异常：</h3><p style="font-size:13px;word-break:break-all;">' + (e.message || e) + '</p>' +
-          '<p style="color:#6b7280;font-size:12px;margin-top:12px;">请将此提示截图以便排查。</p></div>';
-      }
-    });
-  </script>
+  <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useRef, useMemo } = React;
@@ -50,7 +35,7 @@
       const [subjectMap, setSubjectMap] = useState(null); 
       const [currentTab, setCurrentTab] = useState('');
       const [allStudents, setAllStudents] = useState([]);
-      const [allRecords, setAllRecords] = useState([]); // 存储全部记录，供历史与未交使用
+      const [allRecords, setAllRecords] = useState([]);
 
       const todayYYYYMMDD = new Date().toLocaleDateString('en-CA'); 
       const [recordDate, setRecordDate] = useState(todayYYYYMMDD);
@@ -67,9 +52,9 @@
       const [tempSubjects, setTempSubjects] = useState([]);
       const [isStudentMgrOpen, setIsStudentMgrOpen] = useState(false);
       const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-      const [studentDetailModal, setStudentDetailModal] = useState(null); // 当前正在查看的学生名字
+      const [studentDetailModal, setStudentDetailModal] = useState(null);
 
-      // 学生管理表单状态
+      // 学生管理状态
       const [newStudentName, setNewStudentName] = useState('');
       const [batchStudentInput, setBatchStudentInput] = useState('');
 
@@ -220,18 +205,16 @@
       const isEventSubject = currentSubjectInfo.type === 'event';
 
       const currentStudents = allStudents.filter(s => s.subject === currentTab);
-      
-      // 当前科目的未完成记录 (作业类查 Pending，事件类查全部事件)
       const currentPendingRecords = allRecords.filter(r => r.subject === currentTab && r.status === 'Pending');
       const currentEventRecords = allRecords.filter(r => r.subject === currentTab);
 
-      // 每个学生的未完成作业数字典映射 { '张三': 3, ... }
+      // 每个学生的未完成作业数量映射
       const studentPendingCountMap = {};
       currentPendingRecords.forEach(r => {
         studentPendingCountMap[r.student_name] = (studentPendingCountMap[r.student_name] || 0) + 1;
       });
 
-      // --- 核心业务：标记单条已补交 ---
+      // 标记单条已补交
       const handleResolveRecord = async (recordId) => {
         const { error } = await supabase.from('homework_records').update({ status: 'Resolved' }).eq('id', recordId);
         if (!error) {
@@ -242,7 +225,7 @@
         }
       };
 
-      // --- 核心业务：一键全部补交（某个学生） ---
+      // 一键全部补交
       const handleResolveAllForStudent = async (studentName) => {
         const targetIds = currentPendingRecords.filter(r => r.student_name === studentName).map(r => r.id);
         if (targetIds.length === 0) return;
@@ -257,7 +240,7 @@
         }
       };
 
-      // --- 核心业务：删除记录 ---
+      // 删除单条记录
       const handleDeleteRecord = async (recordId) => {
         if (!window.confirm('确定要删除此条记录吗？此操作不可撤销。')) return;
         const { error } = await supabase.from('homework_records').delete().eq('id', recordId);
@@ -269,7 +252,7 @@
         }
       };
 
-      // --- 核心业务：提交新记录（支持作业与事件） ---
+      // 提交新记录
       const handleSubmitNewRecord = async (e) => {
         e.preventDefault();
         if (!recordDate) return showToast('⚠️ 请选择日期！');
@@ -304,7 +287,6 @@
         setLoading(false);
       };
 
-      // 学生选择切换
       const handleToggleStudent = (studentName) => {
         if (selectedStudents.hasOwnProperty(studentName)) {
           const updated = { ...selectedStudents };
@@ -317,7 +299,7 @@
         }
       };
 
-      // --- 学生管理操作 ---
+      // 添加单个学生
       const handleAddSingleStudent = async (e) => {
         e.preventDefault();
         if (!newStudentName.trim()) return showToast('⚠️ 请输入学生姓名');
@@ -338,6 +320,7 @@
         }
       };
 
+      // 批量导入学生
       const handleBatchImportStudents = async () => {
         if (!batchStudentInput.trim()) return showToast('⚠️ 请输入学生姓名列表');
         const names = batchStudentInput
@@ -367,6 +350,7 @@
         setLoading(false);
       };
 
+      // 移除学生
       const handleDeleteStudent = async (studentId, studentName) => {
         if (!window.confirm(`确定要从【${currentTab}】名册中移除 ${studentName} 吗？`)) return;
         const { error } = await supabase.from('students').delete().eq('id', studentId);
@@ -378,7 +362,7 @@
         }
       };
 
-      // --- 科目管理操作 ---
+      // 科目配置管理
       const openSettings = () => {
         const currentArr = Object.keys(subjectMap).map(key => ({ 
           code: key, 
@@ -400,7 +384,6 @@
         if (!window.confirm(`⚠️ 严重警告：确定要彻底删除科目【${code}】吗？\n该科目名下的所有学生以及关联的所有历史作业记录将会全部一并清理！`)) return;
 
         setLoading(true);
-        // 先清理该科目下的记录与学生
         await supabase.from('homework_records').delete().eq('subject', code);
         await supabase.from('students').delete().eq('subject', code);
         const { error } = await supabase.from('subjects').delete().eq('code', code);
@@ -441,14 +424,21 @@
         setLoading(false);
       };
 
-      // --- 导出 CSV (UTF-8 with BOM，完美兼容 Excel 无乱码) ---
+      // 导出 CSV (安全转义，Excel 无乱码)
       const exportToCSV = (recordsToExport) => {
         if (recordsToExport.length === 0) return showToast('⚠️ 没有可导出的记录');
-        const bom = "\uFEFF";
-        let csvContent = "序号,记录ID,日期,科目,作业/事件名称,学生姓名,原因/备注,状态\n";
+        const bom = '\uFEFF';
+        const q = String.fromCharCode(34);
+        const escapeCSV = (val) => {
+          const s = (val === null || val === undefined) ? '' : String(val);
+          return q + s.split(q).join(q + q) + q;
+        };
+
+        let csvContent = ['序号', '记录ID', '日期', '科目', '作业/事件名称', '学生姓名', '原因/备注', '状态'].map(escapeCSV).join(',') + '\n';
         recordsToExport.forEach((r, idx) => {
           const statusText = r.status === 'Resolved' ? '已补交' : r.status === 'Pending' ? '欠交中' : '事件备忘';
-          csvContent += `"${idx + 1}","${r.id}","${formatDateDisplay(r.date || r.record_date)}","${r.subject}","${(r.homework || '').replace(/"/g, '""')}","${(r.student_name || '').replace(/"/g, '""')}","${(r.reason || '').replace(/"/g, '""')}","${statusText}"\n`;
+          const row = [idx + 1, r.id, formatDateDisplay(r.date || r.record_date), r.subject, r.homework, r.student_name, r.reason, statusText];
+          csvContent += row.map(escapeCSV).join(',') + '\n';
         });
 
         const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -461,7 +451,7 @@
         showToast('📥 表格已成功导出为 CSV！');
       };
 
-      // 历史记录筛选逻辑
+      // 历史记录多维筛选
       const filteredHistoryRecords = useMemo(() => {
         return allRecords.filter(r => {
           if (histSubject !== 'all' && r.subject !== histSubject) return false;
@@ -484,12 +474,11 @@
         });
       }, [allRecords, histSubject, histStatus, histKeyword, histStartDate, histEndDate]);
 
-      // --- 生成催交/汇报信息 ---
+      // 生成通知文案
       const handleGenerateMessage = () => {
         const todayStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
 
         if (isEventSubject) {
-          // 事件类总结信息
           let msg = `📅 日期: ${todayStr}\n\n【${currentSubjectInfo.zh} ${currentTab}】今日班级事件与备忘流水记录如下：\n\n`;
           const todayEvents = currentEventRecords.filter(r => getDayDiff(r.record_date || r.date) === 0);
           if (todayEvents.length === 0) {
@@ -503,7 +492,6 @@
           return;
         }
 
-        // 作业类催交信息
         if (currentPendingRecords.length === 0) {
           const praiseMsg = `📅 日期 / Tarikh Semasa: ${todayStr}\n\n今日【${currentSubjectInfo.zh} ${currentTab}】功课全班皆已安全完成，感谢各位家长的悉心督促！\nSemua murid telah menyiapkan kerja sekolah bagi mata pelajaran 【${currentSubjectInfo.ms}】. Terima kasih atas kerjasama ibu bapa! ❤️`;
           navigator.clipboard.writeText(praiseMsg).then(() => showToast('📋 全班齐交！赞美信息已复制'));
@@ -921,9 +909,7 @@
             )}
           </div>
 
-          {/* ========================================================================= */}
-          {/* 弹窗 A: 学生个人专属作业专卡 (点击数字红点时弹出) */}
-          {/* ========================================================================= */}
+          {/* 弹窗 A: 学生个人专属作业专卡 */}
           {studentDetailModal && (
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
               <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -986,9 +972,7 @@
             </div>
           )}
 
-          {/* ========================================================================= */}
-          {/* 弹窗 B: 名单管理中心 (添加、改名、删除、批量粘贴导入) */}
-          {/* ========================================================================= */}
+          {/* 弹窗 B: 名单管理中心 */}
           {isStudentMgrOpen && (
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
               <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -1004,7 +988,6 @@
                 </div>
 
                 <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/30">
-                  {/* 单个添加学生 */}
                   <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
                     <label className="block text-xs font-bold text-slate-600">➕ 单个新增学生</label>
                     <form onSubmit={handleAddSingleStudent} className="flex gap-2">
@@ -1021,15 +1004,14 @@
                     </form>
                   </div>
 
-                  {/* 批量粘贴导入 */}
                   <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold text-slate-600">📋 批量快速导入（从表格直接复制粘贴）</label>
+                      <label className="block text-xs font-bold text-slate-600">📋 批量快速导入（从名册直接复制粘贴）</label>
                       <span className="text-[10px] text-slate-400">一行一个学生姓名</span>
                     </div>
                     <textarea 
                       rows="4" 
-                      placeholder={"请在此粘贴一整列学生名单，例如：\nCHAN SIN QI 郑惞嬨\nCHONG ZHI XUAN 张芷萱\nGAN WEI CHEN 颜维辰"} 
+                      placeholder={'请在此粘贴一整列学生名单，例如：\nCHAN SIN QI 郑惞嬨\nCHONG ZHI XUAN 张芷萱\nGAN WEI CHEN 颜维辰'} 
                       value={batchStudentInput} 
                       onChange={(e) => setBatchStudentInput(e.target.value)} 
                       className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 leading-relaxed font-mono"
@@ -1039,7 +1021,6 @@
                     </button>
                   </div>
 
-                  {/* 现有学生列表 */}
                   <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <h4 className="text-xs font-bold text-slate-700">当前科目学生名单 (共 {currentStudents.length} 人)</h4>
@@ -1073,9 +1054,7 @@
             </div>
           )}
 
-          {/* ========================================================================= */}
-          {/* 弹窗 C: 历史总账查询与数据导出 (支持多维筛选与一键生成 Excel CSV) */}
-          {/* ========================================================================= */}
+          {/* 弹窗 C: 历史总账查询与数据导出 */}
           {isHistoryOpen && (
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-3 sm:p-5 animate-fade-in">
               <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
@@ -1090,7 +1069,6 @@
                   <button onClick={() => setIsHistoryOpen(false)} className="text-slate-400 hover:text-red-500 text-xl font-bold px-2">&times;</button>
                 </div>
 
-                {/* 筛选控制器 */}
                 <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
                   <div>
                     <label className="block text-[11px] font-bold text-slate-500 mb-1">科目</label>
@@ -1126,7 +1104,6 @@
                   </div>
                 </div>
 
-                {/* 数据表格区域 */}
                 <div className="p-4 overflow-y-auto flex-1">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-bold text-slate-600">检索结果：共找到 {filteredHistoryRecords.length} 条记录</span>
@@ -1191,9 +1168,7 @@
             </div>
           )}
 
-          {/* ========================================================================= */}
-          {/* 弹窗 D: 科目配置管理 (支持添加、修改类型、安全删除) */}
-          {/* ========================================================================= */}
+          {/* 弹窗 D: 科目配置管理 */}
           {isSettingsOpen && (
             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
               <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
