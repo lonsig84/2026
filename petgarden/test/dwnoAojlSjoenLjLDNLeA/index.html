@@ -53,7 +53,7 @@
     // 🚀 核心基建：全栈分离后的 API 通信引擎
     // ========================================================
     // ⚠️ 请在这里填入你部署后获取到的 Google Apps Script Web App URL
-    const API_URL = "https://script.google.com/macros/s/AKfycby4jocHS4csKxAV0TCydB9xOlzpoFXzpYGIu6ullHBj3NzsFe-IVvdvqnI9AkUgPBI5DA/exec"; 
+    const API_URL = "https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbwJLflmdQOACJuWt_SlMVes_eO7nKoe435D7MD5JLGA_RuLzDCcJEOuSrraGgyWzQIdTQ/exec"; 
 
     // 统一的 fetchGAS 通信引擎，完美替代 google.script.run
     const fetchGAS = async (action, payload = {}) => {
@@ -1871,7 +1871,7 @@
 
       const [activeModal, setActiveModal] = useState(null);
 
-      // 🎒 V3 正式道具系统：Items → Inventory → EquippedItems
+      // 🎒 V5 正式道具系统 + 📅 签到抽奖 + 🔔 更新通知：Items → Inventory → EquippedItems
       const [showBackpack, setShowBackpack] = useState(false);
       const [globalItems, setGlobalItems] = useState([]);
       const [studentInventory, setStudentInventory] = useState([]);
@@ -1884,6 +1884,25 @@
       });
       const [inventoryLoading, setInventoryLoading] = useState(false);
       const [equippingSlot, setEquippingSlot] = useState(null);
+
+      // 📅 V4 每日签到 + 7天抽奖
+      const [showCheckin, setShowCheckin] = useState(false);
+      const [checkinData, setCheckinData] = useState({
+        lastCheckinDate: '',
+        progress: 0,
+        totalCheckins: 0,
+        drawTickets: 0
+      });
+      const [checkinActionLoading, setCheckinActionLoading] = useState(false);
+      const [drawResult, setDrawResult] = useState(null);
+
+      // 🔔 V5 系统更新通知中心
+      const [showUpdates, setShowUpdates] = useState(false);
+      const [latestUpdate, setLatestUpdate] = useState(null);
+      const [updateHistory, setUpdateHistory] = useState([]);
+      const [lastSeenUpdate, setLastSeenUpdate] = useState('');
+      const [updateLoading, setUpdateLoading] = useState(false);
+
       const [activeGift, setActiveGift] = useState(null);
       const [hearts, setHearts] = useState([]);
       const [badMarks, setBadMarks] = useState([]);
@@ -1970,6 +1989,10 @@
         malaysiaDateParts.map(part => [part.type, part.value])
       );
       const malaysiaToday = `${malaysiaDateMap.year}-${malaysiaDateMap.month}-${malaysiaDateMap.day}`;
+
+      const alreadyCheckedInToday = checkinData.lastCheckinDate === malaysiaToday;
+      const checkinProgress = Math.max(0, Math.min(7, Number(checkinData.progress || 0)));
+      const checkinDisplayProgress = (checkinProgress === 0 && Number(checkinData.drawTickets || 0) > 0) ? 7 : checkinProgress;
 
       const currentIkonWeek = ikonLestariData?.weeks?.find(week =>
         malaysiaToday >= week.startDate && malaysiaToday <= week.endDate
@@ -2084,6 +2107,46 @@
         }
       };
 
+      const handleDailyCheckin = async () => {
+        if (!student.id || checkinActionLoading) return;
+        setCheckinActionLoading(true);
+        setDrawResult(null);
+        try {
+          const result = await fetchGAS('dailyCheckin', { username: student.id });
+          if (result?.checkinData) setCheckinData(result.checkinData);
+          if (result?.alreadyCheckedIn) {
+            alert('今天已经签到过了 😊');
+          }
+        } catch (err) {
+          console.error('签到失败:', err);
+          alert('签到失败，请稍后再试。');
+        } finally {
+          setCheckinActionLoading(false);
+        }
+      };
+
+      const handleDrawRandomItem = async () => {
+        if (!student.id || checkinActionLoading || Number(checkinData.drawTickets || 0) <= 0) return;
+        setCheckinActionLoading(true);
+        setDrawResult(null);
+        try {
+          const result = await fetchGAS('drawRandomItem', { username: student.id });
+          if (!result?.success) {
+            alert(result?.message || '暂时不能抽奖。');
+            if (result?.checkinData) setCheckinData(result.checkinData);
+            return;
+          }
+          if (Array.isArray(result.inventory)) setStudentInventory(result.inventory);
+          if (result.checkinData) setCheckinData(result.checkinData);
+          setDrawResult(result.item || null);
+        } catch (err) {
+          console.error('抽奖失败:', err);
+          alert('抽奖失败，请稍后再试。');
+        } finally {
+          setCheckinActionLoading(false);
+        }
+      };
+
       const handleClaimReward = async (rewardId, points, reason) => {
         if (isClaimingRef.current) return;
         isClaimingRef.current = true;
@@ -2097,6 +2160,37 @@
         });
         await fetchGAS('claimReward', { logId: rewardId });
         isClaimingRef.current = false;
+      };
+
+
+      // 🔔 读取更新历史（点击铃铛时使用）
+      const openUpdateCenter = async () => {
+        setShowUpdates(true);
+        setUpdateLoading(true);
+        try {
+          const history = await fetchGAS('getUpdateHistory', {});
+          const list = Array.isArray(history) ? history : [];
+          setUpdateHistory(list);
+          if (!latestUpdate && list.length > 0) setLatestUpdate(list[0]);
+        } catch (err) {
+          console.error('读取更新历史失败:', err);
+        } finally {
+          setUpdateLoading(false);
+        }
+      };
+
+      // 关闭公告时，把最新公告标记为已读
+      const closeUpdateCenter = async () => {
+        setShowUpdates(false);
+        if (!student.id || !latestUpdate?.updateId || lastSeenUpdate === latestUpdate.updateId) return;
+        const seenId = latestUpdate.updateId;
+        setLastSeenUpdate(seenId);
+        try {
+          await fetchGAS('markUpdateSeen', { username: student.id, updateId: seenId });
+        } catch (err) {
+          console.error('标记更新已读失败:', err);
+          setLastSeenUpdate('');
+        }
       };
 
       const handleFeed = () => {
@@ -2260,6 +2354,14 @@
             </div>
             {/* 你熟悉的返回大厅按钮 */}
             <button onClick={() => setCurrentView("login")} className="absolute top-4 left-4 z-50 bg-slate-800 text-white px-4 py-2 rounded-xl font-bold shadow-lg text-xs">🚪 锁屏大厅</button>
+            <button onClick={openUpdateCenter} title="系统更新" className="absolute top-4 right-28 z-50 w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 text-white flex items-center justify-center font-black shadow-lg text-lg active:scale-95">
+              🔔
+              {latestUpdate?.updateId && latestUpdate.updateId !== lastSeenUpdate && <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full border-2 border-white animate-pulse"></span>}
+            </button>
+            <button onClick={() => { setShowCheckin(true); setDrawResult(null); }} title="每日签到" className="absolute top-4 right-16 z-50 w-10 h-10 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white flex items-center justify-center font-black shadow-lg text-lg active:scale-95">
+              📅
+              {Number(checkinData.drawTickets || 0) > 0 && <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white">{checkinData.drawTickets}</span>}
+            </button>
             <button onClick={() => setShowBackpack(true)} title="我的背包" className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-center font-black shadow-lg text-lg active:scale-95">🎒</button>
             <div className="absolute -bottom-20 -left-20 w-[600px] h-[600px] bg-gradient-radial from-indigo-300/40 to-transparent opacity-70 blur-3xl pointer-events-none"></div>
             <div className="absolute top-10 -right-20 w-[500px] h-[500px] bg-gradient-radial from-blue-200/50 to-transparent opacity-60 blur-3xl pointer-events-none"></div>
@@ -2373,6 +2475,135 @@
                 </div>
               )}
             </div>
+            {/* 🔔 V5 系统更新通知中心 */}
+            {showUpdates && (
+              <div className="fixed inset-0 z-[190] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                <div className="w-full max-w-md max-h-[88vh] overflow-hidden bg-white rounded-[2rem] shadow-2xl border border-white flex flex-col">
+                  <div className="p-5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">🔔</span>
+                        <h3 className="font-black text-xl">系统更新通知</h3>
+                      </div>
+                      <p className="text-[11px] font-bold text-white/80 mt-1">看看宠物乐园最近增加了什么新功能</p>
+                    </div>
+                    <button onClick={closeUpdateCenter} className="text-3xl leading-none font-bold active:scale-90">&times;</button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+                    {updateLoading && updateHistory.length === 0 ? (
+                      <div className="py-12 text-center text-slate-400 font-bold">正在读取更新记录...</div>
+                    ) : (updateHistory.length > 0 ? updateHistory : (latestUpdate ? [latestUpdate] : [])).length === 0 ? (
+                      <div className="py-12 text-center">
+                        <div className="text-5xl mb-3">📭</div>
+                        <p className="font-black text-slate-500">暂时没有更新公告</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {(updateHistory.length > 0 ? updateHistory : [latestUpdate]).map((u, index) => (
+                          <div key={u.updateId || index} className={`rounded-2xl border p-4 shadow-sm ${index === 0 ? 'bg-white border-indigo-200 ring-2 ring-indigo-100' : 'bg-white border-slate-200'}`}>
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                  {index === 0 && <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black">NEW</span>}
+                                  <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-black">{u.version || '更新'}</span>
+                                  <span className="text-[10px] font-bold text-slate-400">{u.date || ''}</span>
+                                </div>
+                                <h4 className="font-black text-slate-800 text-base">{u.title || '系统更新'}</h4>
+                              </div>
+                              <span className="text-2xl shrink-0">✨</span>
+                            </div>
+                            <div className="mt-3 text-sm font-bold leading-6 text-slate-600 whitespace-pre-line bg-slate-50 rounded-xl p-3 border border-slate-100">
+                              {u.content || '这次更新没有额外说明。'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-[10px] text-center font-bold text-slate-400 mt-4">关闭后会标记为已阅读；以后仍可点击 🔔 再查看。</p>
+                  </div>
+
+                  <div className="p-4 bg-white border-t border-slate-100">
+                    <button onClick={closeUpdateCenter} className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black text-sm shadow-md active:scale-[0.98]">我知道了 👍</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 📅 V4 每日签到 + 7天抽奖 */}
+            {showCheckin && (
+              <div className="fixed inset-0 z-[180] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                <div className="w-full max-w-sm overflow-hidden bg-white rounded-[2rem] shadow-2xl border border-white">
+                  <div className="p-5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white flex items-start justify-between">
+                    <div>
+                      <h3 className="font-black text-xl">📅 每日签到</h3>
+                      <p className="text-[11px] font-bold text-white/85 mt-1">累计 7 天，获得 1 次宠物道具抽奖</p>
+                    </div>
+                    <button onClick={() => { setShowCheckin(false); setDrawResult(null); }} className="text-3xl leading-none font-bold active:scale-90">&times;</button>
+                  </div>
+
+                  <div className="p-5 bg-slate-50">
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-xs font-black text-slate-500">本轮签到进度</p>
+                          <p className="text-2xl font-black text-emerald-600 mt-0.5">{checkinDisplayProgress} / 7</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-black text-slate-400">累计签到</p>
+                          <p className="text-lg font-black text-slate-700">{Number(checkinData.totalCheckins || 0)} 天</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-7 gap-1.5">
+                        {[1,2,3,4,5,6,7].map(day => (
+                          <div key={day} className={`aspect-square rounded-xl flex flex-col items-center justify-center border text-[10px] font-black ${day <= checkinDisplayProgress ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
+                            <span className="text-sm">{day <= checkinDisplayProgress ? '✓' : day}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleDailyCheckin}
+                      disabled={alreadyCheckedInToday || checkinActionLoading}
+                      className={`w-full mt-4 py-3.5 rounded-2xl font-black text-sm shadow-md transition-all active:scale-[0.98] ${alreadyCheckedInToday ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'} ${checkinActionLoading ? 'opacity-60' : ''}`}
+                    >
+                      {checkinActionLoading ? '处理中...' : alreadyCheckedInToday ? '✅ 今日已签到' : '🌟 今日签到'}
+                    </button>
+
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-black text-amber-700">🎟️ 可用抽奖机会</p>
+                          <p className="text-2xl font-black text-orange-600 mt-0.5">{Number(checkinData.drawTickets || 0)}</p>
+                        </div>
+                        <button
+                          onClick={handleDrawRandomItem}
+                          disabled={Number(checkinData.drawTickets || 0) <= 0 || checkinActionLoading}
+                          className={`px-5 py-3 rounded-xl font-black text-sm shadow-sm transition-all active:scale-95 ${Number(checkinData.drawTickets || 0) > 0 ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white animate-pulse' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                        >
+                          🎁 抽道具
+                        </button>
+                      </div>
+                    </div>
+
+                    {drawResult && (
+                      <div className="mt-4 bg-white rounded-2xl border-2 border-indigo-200 shadow-md p-4 text-center animate-[fadeIn_0.2s_ease-out]">
+                        <p className="text-xs font-black text-indigo-500 mb-2">🎉 恭喜抽中！</p>
+                        <div className="w-28 h-24 mx-auto rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                          {drawResult.assetUrl ? <img src={drawResult.assetUrl} alt={drawResult.name} className="w-full h-full object-contain p-1" /> : <span className="text-4xl">🎁</span>}
+                        </div>
+                        <p className="font-black text-slate-800 mt-2">{drawResult.name}</p>
+                        <p className="text-[10px] font-bold text-slate-400 mt-1">已经自动放进你的背包</p>
+                        <button onClick={() => { setShowCheckin(false); setDrawResult(null); setShowBackpack(true); }} className="mt-3 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-black shadow-sm active:scale-95">🎒 去背包看看</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 🎒 V3 正式背包：只显示当前学生真正拥有的道具 */}
             {showBackpack && (
               <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
@@ -2544,6 +2775,13 @@
               setStudentInventory([]);
               setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null });
               setShowBackpack(false);
+              setShowCheckin(false);
+              setDrawResult(null);
+              setCheckinData({ lastCheckinDate: '', progress: 0, totalCheckins: 0, drawTickets: 0 });
+              setShowUpdates(false);
+              setLatestUpdate(null);
+              setUpdateHistory([]);
+              setLastSeenUpdate('');
 
               setStudent(prev => ({ ...prev, id: currentDB.id, name: currentDB.name, totalExp: currentDB.totalExp, unfedFood: currentDB.unfedFood || 0, badges: currentDB.badges || 0, mythUnlocked: currentDB.mythUnlocked || false, petId: currentDB.petId || null, petHistory: currentDB.petHistory || [], pin: currentDB.pin || '123456', pendingRewards: [] }));
               setSelectedStudentForLogin(null);
@@ -2559,6 +2797,31 @@
                   sceneObject: null,
                   ...(bagData?.equippedItems || {})
                 });
+                setCheckinData({
+                  lastCheckinDate: '',
+                  progress: 0,
+                  totalCheckins: 0,
+                  drawTickets: 0,
+                  ...(bagData?.checkinData || {})
+                });
+
+                // 🔔 V5：登录时检查最新公告。新版本只自动弹一次。
+                const seenUpdateId = String(bagData?.lastSeenUpdate || '');
+                setLastSeenUpdate(seenUpdateId);
+                try {
+                  const newest = await fetchGAS('getLatestUpdate', {});
+                  setLatestUpdate(newest || null);
+                  if (newest?.updateId && String(newest.updateId) !== seenUpdateId) {
+                    setShowUpdates(true);
+                    // 自动弹出时先准备完整历史，方便学生往下看旧版本
+                    fetchGAS('getUpdateHistory', {})
+                      .then(history => setUpdateHistory(Array.isArray(history) ? history : []))
+                      .catch(err => console.error('读取更新历史失败:', err));
+                  }
+                } catch (updateErr) {
+                  console.error('检查系统更新失败:', updateErr);
+                }
+
                 setInventoryLoading(false);
                 // 新学生装备资料到齐后才进入宠物页面
                 setCurrentView("student");
@@ -2588,6 +2851,11 @@
                 // 读取失败时也只用空装备进入，绝不沿用上一位学生的装备
                 setStudentInventory([]);
                 setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null });
+                setCheckinData({ lastCheckinDate: '', progress: 0, totalCheckins: 0, drawTickets: 0 });
+                setLastSeenUpdate('');
+                setLatestUpdate(null);
+                setUpdateHistory([]);
+                setShowUpdates(false);
                 setCurrentView("student");
               }
             }} />
