@@ -53,7 +53,7 @@
     // 🚀 核心基建：全栈分离后的 API 通信引擎
     // ========================================================
     // ⚠️ 请在这里填入你部署后获取到的 Google Apps Script Web App URL
-    const API_URL = "https://script.google.com/macros/s/AKfycbx9Hs8jFPpxFkiTPPWSrIdf6eGeXegAOwoenJv9jDHLNdmSCNX6cZPG3xwTZXOFD4NI8A/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycby4jocHS4csKxAV0TCydB9xOlzpoFXzpYGIu6ullHBj3NzsFe-IVvdvqnI9AkUgPBI5DA/exec"; 
 
     // 统一的 fetchGAS 通信引擎，完美替代 google.script.run
     const fetchGAS = async (action, payload = {}) => {
@@ -90,24 +90,24 @@
 // 积木 1：悬浮式底部导航栏 (BottomNav)
     function BottomNav({ onOpenModal }) {
       return (
-        <div className="absolute bottom-6 w-[90%] max-w-md bg-white/80 backdrop-blur-md border border-white shadow-xl rounded-3xl p-2 flex justify-around items-center z-40">
-          <button onClick={() => onOpenModal(null)} className="flex flex-col items-center p-2 text-indigo-600 transition-all hover:scale-110 active:scale-95">
+        <div className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[94%] max-w-md bg-white/95 backdrop-blur-md border border-white shadow-2xl rounded-3xl p-1.5 sm:p-2 flex justify-around items-center z-[140]">
+          <button onClick={() => onOpenModal(null)} className="flex flex-col items-center p-1.5 sm:p-2 text-indigo-600 transition-all hover:scale-110 active:scale-95">
             <span className="text-2xl mb-1"> 🏠 </span>
             <span className="text-[10px] font-bold">宠物园</span>
           </button>
-          <button onClick={() => onOpenModal('history')} className="flex flex-col items-center p-2 text-slate-400 hover:text-indigo-500 transition-all hover:scale-110 active:scale-95">
+          <button onClick={() => onOpenModal('history')} className="flex flex-col items-center p-1.5 sm:p-2 text-slate-400 hover:text-indigo-500 transition-all hover:scale-110 active:scale-95">
             <span className="text-2xl mb-1"> 📜 </span>
             <span className="text-[10px] font-bold">足迹</span>
           </button>
-          <button onClick={() => onOpenModal('leaderboard')} className="flex flex-col items-center p-2 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-95">
+          <button onClick={() => onOpenModal('leaderboard')} className="flex flex-col items-center p-1.5 sm:p-2 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-95">
             <span className="text-2xl mb-1"> 🏆 </span>
             <span className="text-[10px] font-bold">荣誉榜</span>
           </button>
-          <button onClick={() => onOpenModal('shop')} className="flex flex-col items-center p-2 text-slate-400 hover:text-pink-500 transition-all hover:scale-110 active:scale-95">
+          <button onClick={() => onOpenModal('shop')} className="flex flex-col items-center p-1.5 sm:p-2 text-slate-400 hover:text-pink-500 transition-all hover:scale-110 active:scale-95">
             <span className="text-2xl mb-1"> 🛍️ </span>
             <span className="text-[10px] font-bold">兑换</span>
           </button>
-          <button onClick={() => onOpenModal('memorial')} className="flex flex-col items-center p-2 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-95">
+          <button onClick={() => onOpenModal('memorial')} className="flex flex-col items-center p-1.5 sm:p-2 text-slate-400 hover:text-amber-500 transition-all hover:scale-110 active:scale-95">
             <span className="text-2xl mb-1"> 🏅 </span>
             <span className="text-[10px] font-bold">纪念册</span>
           </button>
@@ -173,6 +173,272 @@
                   );
                 })
               )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 🌿 Ikon Lestari Mingguan：每周课堂积分排行榜弹窗
+    function IkonLestariModal({ onClose, ikonData, currentWeek, currentStudentName }) {
+      const [selectedMonth, setSelectedMonth] = useState(
+        currentWeek?.month?.name || 'July'
+      );
+      const [selectedWeekStart, setSelectedWeekStart] = useState(
+        currentWeek?.startDate || ''
+      );
+
+      const months = ['July', 'August', 'September', 'October', 'November'];
+      const weeks = Array.isArray(ikonData?.weeks) ? ikonData.weeks : [];
+      const monthWeeks = weeks.filter(week => week.month?.name === selectedMonth);
+      const selectedWeek = weeks.find(week => week.startDate === selectedWeekStart)
+        || monthWeeks[0]
+        || currentWeek
+        || null;
+
+      useEffect(() => {
+        if (!monthWeeks.some(week => week.startDate === selectedWeekStart)) {
+          setSelectedWeekStart(monthWeeks[0]?.startDate || '');
+        }
+      }, [selectedMonth]);
+
+      const ranking = selectedWeek?.ranking || [];
+
+      return (
+        <div className="absolute inset-0 z-[160] flex items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[88vh]">
+            <div className="p-4 bg-gradient-to-r from-emerald-100 to-lime-100 flex justify-between items-center border-b border-emerald-200">
+              <div>
+                <h3 className="font-black text-emerald-900 text-lg">🌿 Ikon Lestari Mingguan</h3>
+                <p className="text-[10px] font-bold text-emerald-700 mt-0.5">根据每周课堂净积分排名</p>
+              </div>
+              <button onClick={onClose} className="text-emerald-700 hover:text-emerald-900 text-2xl font-bold active:scale-90">&times;</button>
+            </div>
+
+            <div className="p-3 bg-white border-b border-slate-100">
+              <div className="flex gap-1 overflow-x-auto pb-1">
+                {months.map(month => (
+                  <button
+                    key={month}
+                    onClick={() => setSelectedMonth(month)}
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black flex-shrink-0 transition-all ${selectedMonth === month ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-500'}`}
+                  >
+                    {month}
+                  </button>
+                ))}
+              </div>
+
+              <select
+                value={selectedWeek?.startDate || ''}
+                onChange={e => setSelectedWeekStart(e.target.value)}
+                className="w-full mt-2 p-2.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs font-black focus:outline-none"
+              >
+                {monthWeeks.map(week => (
+                  <option key={week.startDate} value={week.startDate}>{week.dateRange}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="px-4 pt-3">
+              <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-3 text-center">
+                <p className="text-xs font-black text-emerald-800">{selectedWeek?.dateRange || '暂无星期资料'}</p>
+                <p className="text-[10px] text-slate-500 font-bold mt-1 leading-relaxed">
+                  净积分最高者胜出；净积分相同，则正面加分记录次数较多者胜出。
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 flex flex-col gap-2 overflow-y-auto">
+              {ranking.length === 0 ? (
+                <div className="text-center py-10 text-slate-400 font-bold text-sm">🌱 这个星期还没有课堂记录。</div>
+              ) : (
+                ranking.map((item, index) => {
+                  const isMe = item.name === currentStudentName;
+                  return (
+                    <div key={`${item.name}-${index}`} className={`flex items-center gap-3 p-3 rounded-2xl border shadow-sm ${isMe ? 'bg-indigo-50 border-indigo-300' : index === 0 ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300' : 'bg-white border-slate-200'}`}>
+                      <div className="w-9 text-center font-black text-xl">
+                        {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : <span className="text-slate-400 text-sm">{item.rank}</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-black text-slate-800 text-sm truncate">
+                          {item.name}
+                          {isMe && <span className="ml-1 text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded-full">我</span>}
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-400 mt-0.5">
+                          正面记录 {item.positiveCount || 0} 次 · 扣分记录 {item.negativeCount || 0} 次
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className={`text-lg font-black ${item.netScore >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {item.netScore > 0 ? '+' : ''}{item.netScore}
+                        </div>
+                        <div className="text-[9px] font-bold text-slate-400">净积分</div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+
+    // 🌿 班主任后台：7月至11月每周 Ikon Lestari 查询面板
+    function AdminIkonPanel({ ikonData, currentWeek }) {
+      const months = ['July', 'August', 'September', 'October', 'November'];
+      const weeks = Array.isArray(ikonData?.weeks) ? ikonData.weeks : [];
+
+      const initialMonth = currentWeek?.month?.name || months.find(month =>
+        weeks.some(week => week.month?.name === month)
+      ) || 'July';
+
+      const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+      const [selectedWeekStart, setSelectedWeekStart] = useState(
+        currentWeek?.startDate || ''
+      );
+
+      const monthWeeks = weeks.filter(week => week.month?.name === selectedMonth);
+      const selectedWeek = weeks.find(week => week.startDate === selectedWeekStart)
+        || monthWeeks[0]
+        || currentWeek
+        || null;
+
+      useEffect(() => {
+        if (!monthWeeks.some(week => week.startDate === selectedWeekStart)) {
+          setSelectedWeekStart(monthWeeks[0]?.startDate || '');
+        }
+      }, [selectedMonth, weeks.length]);
+
+      const ranking = selectedWeek?.ranking || [];
+      const winners = selectedWeek?.winners || [];
+
+      return (
+        <div className="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col gap-4 overflow-y-auto animate-[fadeIn_0.15s_ease-out]">
+          <div className="bg-gradient-to-r from-emerald-700 to-lime-600 text-white rounded-3xl p-5 shadow-md">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-black">🌿 Ikon Lestari Mingguan</h3>
+                <p className="text-xs font-bold text-emerald-100 mt-1">
+                  查看2026年7月至11月每个星期的课堂积分排名
+                </p>
+              </div>
+              <div className="bg-white/15 border border-white/20 rounded-2xl px-4 py-2 text-xs font-black">
+                共 {weeks.length} 个星期
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[11px] font-black text-slate-400 mb-2">1. 选择月份</label>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {months.map(month => (
+                    <button
+                      key={month}
+                      onClick={() => setSelectedMonth(month)}
+                      className={`px-4 py-2 rounded-xl text-xs font-black flex-shrink-0 transition-all ${selectedMonth === month ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700'}`}
+                    >
+                      {month}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-slate-400 mb-2">2. 选择星期</label>
+                <select
+                  value={selectedWeek?.startDate || ''}
+                  onChange={e => setSelectedWeekStart(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs font-black focus:outline-none focus:border-emerald-500"
+                >
+                  {monthWeeks.map(week => (
+                    <option key={week.startDate} value={week.startDate}>
+                      {week.dateRange}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 min-h-0">
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 h-fit">
+              <p className="text-[11px] font-black text-slate-400">所选星期</p>
+              <h4 className="font-black text-slate-800 mt-1 leading-snug">
+                {selectedWeek?.dateRange || '没有星期资料'}
+              </h4>
+
+              {winners.length > 0 ? (
+                <div className="mt-4 space-y-2">
+                  <p className="text-[11px] font-black text-emerald-700">🏆 本周最高</p>
+                  {winners.map((winner, index) => (
+                    <div key={`${winner.name}-${index}`} className="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-4">
+                      <p className="font-black text-slate-800">{winner.name}</p>
+                      <div className="flex justify-between items-end mt-2">
+                        <div className="text-[10px] font-bold text-slate-500">
+                          正面记录 {winner.positiveCount || 0} 次
+                        </div>
+                        <div className="text-2xl font-black text-emerald-600">
+                          {winner.netScore > 0 ? '+' : ''}{winner.netScore}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200 p-5 text-center text-xs font-bold text-slate-400">
+                  🌱 本星期还没有课堂记录
+                </div>
+              )}
+
+              <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-100 p-3 text-[10px] font-bold text-slate-600 leading-relaxed">
+                规则：先比较课堂净积分；净积分相同，再比较正面加分记录次数；两项都相同则共同获奖。
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col min-h-[420px] overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                <div>
+                  <h4 className="font-black text-slate-800">📊 全班星期排名</h4>
+                  <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                    共 {ranking.length} 位学生有课堂记录
+                  </p>
+                </div>
+                <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">
+                  净积分 ↓
+                </span>
+              </div>
+
+              <div className="p-4 bg-slate-50 flex-1 overflow-y-auto space-y-2">
+                {ranking.length === 0 ? (
+                  <div className="h-full min-h-[280px] flex items-center justify-center text-slate-400 font-bold text-sm">
+                    暂无排名资料
+                  </div>
+                ) : (
+                  ranking.map((item, index) => (
+                    <div key={`${item.name}-${index}`} className={`grid grid-cols-[44px_1fr_auto] items-center gap-3 p-3 rounded-2xl border shadow-sm ${item.rank === 1 ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300' : 'bg-white border-slate-200'}`}>
+                      <div className="text-center font-black text-xl">
+                        {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : <span className="text-slate-400 text-sm">{item.rank}</span>}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-black text-slate-800 text-sm truncate">{item.name}</p>
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">
+                          正面 {item.positiveCount || 0} 次 · 扣分 {item.negativeCount || 0} 次 · 共 {item.totalRecords || 0} 条记录
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-lg font-black ${item.netScore >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {item.netScore > 0 ? '+' : ''}{item.netScore}
+                        </p>
+                        <p className="text-[9px] font-bold text-slate-400">净积分</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -861,7 +1127,8 @@
     function AdminPanel({
       onExit, teachersList, setTeachersList, globalStudents, setGlobalStudents,
       levelThresholds, setLevelThresholds, levelTitles, setLevelTitles,
-      globalRules, setGlobalRules, globalProducts, setGlobalProducts, setAdminPassword
+      globalRules, setGlobalRules, globalProducts, setGlobalProducts, setAdminPassword,
+      ikonLestariData, currentIkonWeek
     }) {
 
       const [activeTab, setActiveTab] = useState("students");
@@ -1023,8 +1290,8 @@
       const handleAddTeacher = async () => {
         const name = newTeacherName.trim();
         const pin = newTeacherPin.trim();
-        if (!name || !pin) { alert("老师姓名和6位密码都必须填写哦！"); return; }
-        if (pin.length !== 6 || isNaN(pin)) { alert("密码必须是 6 位纯数字！"); return; }
+        if (!name || !pin) { alert("老师姓名和密码都必须填写哦！"); return; }
+        if (!/^[A-Za-z0-9]{4,12}$/.test(pin)) { alert("密码必须是4至12位英文字母或数字！"); return; }
         if (teachersList.some(t => t.name === name && t.subject === newTeacherSubject)) {
           alert(`【${newTeacherSubject}】已经授权过【${name}】了！`); return;
         }
@@ -1067,7 +1334,7 @@
             <div>
               <h2 className="text-xl font-black tracking-wide flex items-center gap-2"> 👑  班主任超级后台</h2>
               <p className="text-xs text-indigo-300 font-bold">
-                当前板块：{activeTab === 'students' ? "花名册与神兽权限" : activeTab === 'grow_config' ? "宠物成长数值局" : activeTab === 'shop' ? "兑换商店进货商" : activeTab === 'rules' ? "全班金科玉律" : "系统设置"}
+                当前板块：{activeTab === 'students' ? "花名册与神兽权限" : activeTab === 'grow_config' ? "宠物成长数值局" : activeTab === 'shop' ? "兑换商店进货商" : activeTab === 'rules' ? "全班金科玉律" : activeTab === 'ikon' ? "Ikon Lestari 每周排名" : "系统设置"}
               </p>
             </div>
             {/* 🛠️  顶部分流导航 */}
@@ -1076,6 +1343,7 @@
               <button onClick={() => setActiveTab("grow_config")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'grow_config' ? 'bg-amber-500 text-white shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 📈  宠物成长局</button>
               <button onClick={() => setActiveTab("shop")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'shop' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 🛍️  商店进货商</button>
               <button onClick={() => setActiveTab("rules")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'rules' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 📜  班级金科玉律</button>
+              <button onClick={() => setActiveTab("ikon")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'ikon' ? 'bg-emerald-500 text-white shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> 🌿 Ikon Lestari</button>
               <button onClick={() => setActiveTab("teachers")} className={`px-3 py-1.5 rounded-xl font-black text-xs transition-all flex-shrink-0 ${activeTab === 'teachers' ? 'bg-white text-indigo-950 shadow-md scale-105' : 'text-slate-300 hover:text-white'}`}> ⚙️  系统设置</button>
             </div>
             <div className="flex gap-2">
@@ -1374,6 +1642,15 @@
             </div>
           )}
 
+
+          {/* 🌿 Ikon Lestari 每周排名查询 */}
+          {activeTab === 'ikon' && (
+            <AdminIkonPanel
+              ikonData={ikonLestariData}
+              currentWeek={currentIkonWeek}
+            />
+          )}
+
           {/* 📢  第四板斧：科任老师授权 */}
           {activeTab === 'teachers' && (
             <div className="flex-1 max-w-5xl w-full mx-auto p-4 flex flex-col md:flex-row gap-6 overflow-y-auto animate-[fadeIn_0.15s_ease-out]">
@@ -1388,16 +1665,16 @@
                   <input type="text" value={newTeacherName} onChange={(e) => setNewTeacherName(e.target.value)} placeholder="如: 张老师, Mr. Wong..." className="w-full px-3 py-2 border rounded-xl text-sm font-bold bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner" />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-slate-400">3. 设置独立6位白板登录密码</label>
-                  <input type="text" maxLength="6" value={newTeacherPin} onChange={(e) => setNewTeacherPin(e.target.value)} placeholder="如: 345678" className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
+                  <label className="text-[10px] font-bold text-slate-400">3. 设置老师登录密码（4至12位）</label>
+                  <input type="text" maxLength="12" value={newTeacherPin} onChange={(e) => setNewTeacherPin(e.target.value)} placeholder="如: Wong123" className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-slate-50 focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
                 </div>
                 <button onClick={handleAddTeacher} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-sm shadow-md transition-all active:scale-[0.98] mt-2"> ✨  批准并下发门禁卡</button>
                 
                 <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200 flex flex-col gap-3 mt-2">
                   <h3 className="font-black text-slate-700 text-sm border-b border-slate-200 pb-2"> 🔐  修改班主任密码</h3>
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-slate-400">新的6位密码</label>
-                    <input type="password" maxLength="6" value={newAdminPin} onChange={(e) => setNewAdminPin(e.target.value)} placeholder="输入新密码..." className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-white focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
+                    <label className="text-[10px] font-bold text-slate-400">新的4-12位密码</label>
+                    <input type="password" maxLength="12" value={newAdminPin} onChange={(e) => setNewAdminPin(e.target.value)} placeholder="输入新密码..." className="w-full px-3 py-2 border rounded-xl text-sm font-black tracking-widest text-center bg-white focus:outline-none focus:border-indigo-500 shadow-inner text-indigo-600" />
                   </div>
                   <button onClick={async () => {
                     if (newAdminPin.length !== 6 || isNaN(newAdminPin)) { alert("密码必须是 6 位纯数字！"); return; }
@@ -1546,7 +1823,7 @@
               <label className="text-xs text-slate-400 font-bold">请输入管理密码：</label>
               <input
                 type="password"
-                maxLength="6"
+                maxLength="12"
                 autoFocus
                 value={inputPwd}
                 onChange={(e) => {
@@ -1593,6 +1870,20 @@
       const latestStatsRef = useRef({ exp: 0, unfedFood: 0 });
 
       const [activeModal, setActiveModal] = useState(null);
+
+      // 🎒 V3 正式道具系统：Items → Inventory → EquippedItems
+      const [showBackpack, setShowBackpack] = useState(false);
+      const [globalItems, setGlobalItems] = useState([]);
+      const [studentInventory, setStudentInventory] = useState([]);
+      const [equippedItems, setEquippedItems] = useState({
+        background: null,
+        ground: null,
+        foreground: null,
+        frame: null,
+        sceneObject: null
+      });
+      const [inventoryLoading, setInventoryLoading] = useState(false);
+      const [equippingSlot, setEquippingSlot] = useState(null);
       const [activeGift, setActiveGift] = useState(null);
       const [hearts, setHearts] = useState([]);
       const [badMarks, setBadMarks] = useState([]);
@@ -1615,6 +1906,9 @@
       const [globalRules, setGlobalRules] = useState([]);
       const [globalProducts, setGlobalProducts] = useState([]);
       const [globalStudents, setGlobalStudents] = useState([]);
+      const [ikonLestariData, setIkonLestariData] = useState(null);
+      const [ikonLestariLoading, setIkonLestariLoading] = useState(true);
+      const [showIkonLestariModal, setShowIkonLestariModal] = useState(false);
       
       const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -1622,19 +1916,24 @@
       useEffect(() => {
         const loadInitialData = async () => {
           try {
-            const [studentsData, teachersData, rulesData, productsData, levelConf, adminPwd] = await Promise.all([
+            const [studentsData, teachersData, rulesData, productsData, levelConf, adminPwd, ikonData, itemsData] = await Promise.all([
               fetchGAS('getStudents'),
               fetchGAS('getTeachers'),
               fetchGAS('getRules'),
               fetchGAS('getProducts'),
               fetchGAS('getLevelConfig'),
-              fetchGAS('getAdminPassword')
+              fetchGAS('getAdminPassword'),
+              fetchGAS('getIkonLestariHistory', { year: 2026 }),
+              fetchGAS('getItems').catch(err => { console.error('读取 Items 失败:', err); return []; })
             ]);
 
             setGlobalStudents(studentsData || []);
             setTeachersList(teachersData || []);
             setGlobalRules(rulesData || []);
             setGlobalProducts(productsData || []);
+            setGlobalItems(Array.isArray(itemsData) ? itemsData : []);
+            setIkonLestariData(ikonData || null);
+            setIkonLestariLoading(false);
 
             if (levelConf && levelConf.length > 0) {
               const newThresholds = [0, 0, 10, 30, 60, 100, 150, 210, 280];
@@ -1654,10 +1953,28 @@
             setDataLoaded(true);
           } catch (err) {
             console.error("加载初始数据失败:", err);
+            setIkonLestariLoading(false);
           }
         };
         loadInitialData();
       }, []);
+
+      // 🌿 找出马来西亚今天所属的星期
+      const malaysiaDateParts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kuala_Lumpur',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(new Date());
+      const malaysiaDateMap = Object.fromEntries(
+        malaysiaDateParts.map(part => [part.type, part.value])
+      );
+      const malaysiaToday = `${malaysiaDateMap.year}-${malaysiaDateMap.month}-${malaysiaDateMap.day}`;
+
+      const currentIkonWeek = ikonLestariData?.weeks?.find(week =>
+        malaysiaToday >= week.startDate && malaysiaToday <= week.endDate
+      ) || null;
+      const currentIkonWinner = currentIkonWeek?.winners?.[0] || null;
 
       const PET_OPTIONS = [
         { id: "azure-dragon", name: "青龙", category: "myth" }, { id: "vermilion-bird", name: "朱雀", category: "myth" }, { id: "white-tiger", name: "白虎", category: "myth" }, { id: "pixiu", name: "貔貅", category: "myth" }, { id: "suanni", name: "狻猊", category: "myth" }, { id: "nine-tail-fox", name: "九尾狐", category: "myth" }, { id: "unicorn", name: "独角兽", category: "myth" },
@@ -1679,6 +1996,93 @@
       const progressPercent = isGraduated ? 100 : ((student.totalExp - currentLevelExp) / (nextLevelExp - currentLevelExp)) * 100;
       const petImageUrl = student.petId ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/${student.petId}/${currentLevel}.webp` : `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/egg.webp`;
       const canFeed = student.unfedFood > 0 && !isGraduated && student.petId;
+
+      // 🎒 V3 正式渲染：完全根据 Items + EquippedItems 显示
+      const ownedItemIds = new Set(
+        (studentInventory || [])
+          .filter(entry => Number(entry?.quantity ?? 1) > 0)
+          .map(entry => String(entry.itemId))
+      );
+
+      const findItemById = (itemId) =>
+        globalItems.find(item => String(item.itemId) === String(itemId));
+
+      const renderEquippedBackground = () => {
+        const item = findItemById(equippedItems.background);
+        if (!item || item.subtype !== 'background' || !item.assetUrl) {
+          return <div className="absolute inset-0 bg-gradient-to-b from-indigo-100 via-pink-50 to-amber-50"></div>;
+        }
+        return (
+          <div className="absolute inset-0 bg-slate-100">
+            <img
+              src={item.assetUrl}
+              alt={item.name}
+              className="absolute inset-0 w-full h-full object-cover select-none"
+              style={{ objectPosition: 'center center' }}
+              draggable="false"
+            />
+            <div className="absolute inset-0 bg-white/5"></div>
+          </div>
+        );
+      };
+
+      const renderEquippedGround = () => {
+        const item = findItemById(equippedItems.ground);
+        if (!item || item.subtype !== 'ground' || !item.assetUrl) return null;
+        const isMagic = item.itemId === 'ground_magic_blue';
+        return (
+          <img
+            src={item.assetUrl}
+            alt={item.name}
+            draggable="false"
+            className={`object-contain select-none pointer-events-none drop-shadow-md ${isMagic ? 'w-36 sm:w-40 opacity-95' : 'w-40 sm:w-44 opacity-95'}`}
+          />
+        );
+      };
+
+      const handleEquipItem = async (item) => {
+        if (!item || !student.id) return;
+        const slot = item.subtype;
+        if (!['background', 'ground', 'foreground', 'frame', 'sceneObject'].includes(slot)) return;
+        if (!ownedItemIds.has(String(item.itemId))) {
+          alert('这个道具还没有进入你的背包。');
+          return;
+        }
+
+        const previous = { ...equippedItems };
+        const next = { ...equippedItems, [slot]: item.itemId };
+        setEquippingSlot(slot);
+        setEquippedItems(next);
+        try {
+          await fetchGAS('updateEquippedItems', {
+            username: student.id,
+            equippedItems: next
+          });
+        } catch (err) {
+          console.error('装备保存失败:', err);
+          setEquippedItems(previous);
+          alert('装备保存失败，请稍后再试。');
+        } finally {
+          setEquippingSlot(null);
+        }
+      };
+
+      const handleUnequipSlot = async (slot) => {
+        if (!student.id) return;
+        const previous = { ...equippedItems };
+        const next = { ...equippedItems, [slot]: null };
+        setEquippingSlot(slot);
+        setEquippedItems(next);
+        try {
+          await fetchGAS('updateEquippedItems', { username: student.id, equippedItems: next });
+        } catch (err) {
+          console.error('卸下装备失败:', err);
+          setEquippedItems(previous);
+          alert('保存失败，请稍后再试。');
+        } finally {
+          setEquippingSlot(null);
+        }
+      };
 
       const handleClaimReward = async (rewardId, points, reason) => {
         if (isClaimingRef.current) return;
@@ -1813,7 +2217,7 @@
         return <TeacherPanel onExit={() => { setCurrentView('login'); setActiveTeacher(null); }} subject={activeTeacher.subject} teacherName={activeTeacher.name} rules={globalRules} globalStudents={globalStudents} />;
       }
       if (currentView === 'admin') {
-        return <AdminPanel onExit={() => setCurrentView('login')} teachersList={teachersList} setTeachersList={setTeachersList} globalStudents={globalStudents} setGlobalStudents={setGlobalStudents} levelThresholds={levelThresholds} setLevelThresholds={setLevelThresholds} levelTitles={levelTitles} setLevelTitles={setLevelTitles} globalRules={globalRules} setGlobalRules={setGlobalRules} globalProducts={globalProducts} setGlobalProducts={setGlobalProducts} setAdminPassword={setAdminPassword} />;
+        return <AdminPanel onExit={() => setCurrentView('login')} teachersList={teachersList} setTeachersList={setTeachersList} globalStudents={globalStudents} setGlobalStudents={setGlobalStudents} levelThresholds={levelThresholds} setLevelThresholds={setLevelThresholds} levelTitles={levelTitles} setLevelTitles={setLevelTitles} globalRules={globalRules} setGlobalRules={setGlobalRules} globalProducts={globalProducts} setGlobalProducts={setGlobalProducts} setAdminPassword={setAdminPassword} ikonLestariData={ikonLestariData} currentIkonWeek={currentIkonWeek} />;
       }
       if (currentView === 'teacher_office') {
         return (
@@ -1840,22 +2244,29 @@
       }
       if (currentView === 'student') {
         return (
-          <div className="relative w-screen h-screen flex items-center justify-center bg-slate-50 overflow-hidden">
+          <div className="relative w-screen h-screen flex items-start justify-center bg-slate-50 overflow-y-auto overflow-x-hidden">
             <style>{`
               @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(115vh) rotate(720deg); opacity: 0; } }
               .animate-confetti { animation: confettiFall var(--dur) linear var(--delay) forwards; }
+              @keyframes itemBubbleRise { 0% { transform: translateY(35px) scale(.65); opacity: 0; } 20% { opacity: .9; } 100% { transform: translateY(-205px) scale(1.15); opacity: 0; } }
+              @keyframes itemStarTwinkle { 0%,100% { transform: scale(.65) rotate(0deg); opacity: .25; } 50% { transform: scale(1.25) rotate(20deg); opacity: 1; } }
+              @keyframes itemMagicPulse { 0%,100% { transform: scale(.94); opacity: .55; } 50% { transform: scale(1.05); opacity: .95; } }
+              .item-particle-bubble { position: absolute; bottom: -20px; font-size: 20px; animation: itemBubbleRise linear infinite; filter: drop-shadow(0 2px 2px rgba(59,130,246,.25)); }
+              .item-particle-star { position: absolute; top: var(--star-top, 20%); font-size: 20px; animation: itemStarTwinkle ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(250,204,21,.75)); }
+              .item-particle-star:nth-child(1) { top: 12%; } .item-particle-star:nth-child(2) { top: 30%; } .item-particle-star:nth-child(3) { top: 18%; } .item-particle-star:nth-child(4) { top: 56%; } .item-particle-star:nth-child(5) { top: 42%; } .item-particle-star:nth-child(6) { top: 68%; }
             `}</style>
             <div className="absolute inset-0 pointer-events-none z-[110] overflow-hidden">
               {confettis.map(c => <span key={c.id} className="absolute text-3xl md:text-4xl animate-confetti select-none" style={{ left: c.left, top: c.top, '--dur': c.duration, '--delay': c.delay }}>{c.emoji}</span>)}
             </div>
             {/* 你熟悉的返回大厅按钮 */}
             <button onClick={() => setCurrentView("login")} className="absolute top-4 left-4 z-50 bg-slate-800 text-white px-4 py-2 rounded-xl font-bold shadow-lg text-xs">🚪 锁屏大厅</button>
+            <button onClick={() => setShowBackpack(true)} title="我的背包" className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-center font-black shadow-lg text-lg active:scale-95">🎒</button>
             <div className="absolute -bottom-20 -left-20 w-[600px] h-[600px] bg-gradient-radial from-indigo-300/40 to-transparent opacity-70 blur-3xl pointer-events-none"></div>
             <div className="absolute top-10 -right-20 w-[500px] h-[500px] bg-gradient-radial from-blue-200/50 to-transparent opacity-60 blur-3xl pointer-events-none"></div>
             
-            <div className={`relative z-10 w-[90%] max-w-md p-6 rounded-3xl bg-white/70 backdrop-blur-md shadow-2xl border border-white flex flex-col items-center ${isShaking ? 'animate-shake' : ''}`}>
-              <div className="w-full flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-700">{student.name} 的宠物园</h2>
+            <div className={`relative z-10 w-[92%] max-w-md p-4 sm:p-5 mt-16 mb-32 rounded-3xl bg-white/70 backdrop-blur-md shadow-xl border border-white flex flex-col items-center ${isShaking ? 'animate-shake' : ''}`}>
+              <div className="w-full flex justify-between items-center mb-4">
+                <h2 className="text-lg sm:text-xl font-black text-slate-700 truncate pr-2">{student.name} 的宠物园</h2>
                 {/* 你熟悉的信箱和设置齿轮 */}
                 <div className="flex gap-2">
                   <button onClick={() => setShowMailbox(true)} className="relative bg-white p-2 rounded-full shadow-sm hover:shadow-md transition-all active:scale-95">
@@ -1890,22 +2301,71 @@
                     </div>
                   ) : (
                     <div className="w-full flex flex-col items-center">
-                      <div className="relative w-40 h-40 bg-gradient-to-tr from-blue-50 to-indigo-100 rounded-full shadow-inner flex items-center justify-center mb-2 border-4 border-white transition-all duration-500">
-                        {/* 你熟悉的蹦蹦跳跳的宠物 */}
-                        <img src={petImageUrl} alt="Pet" className="w-28 h-28 drop-shadow-lg animate-bounce" style={{ animationDuration: '3s' }} />
-                        {hearts.map(heart => <span key={heart.id} className="absolute text-2xl md:text-3xl pointer-events-none drop-shadow-md z-20" style={{ left: heart.left, top: heart.top, animation: `floatUpBurst ${heart.duration} ease-out ${heart.delay} forwards` }}>{heart.emoji}</span>)}
-                        {badMarks.map(bad => <div key={bad.id} className="absolute text-center z-30 pointer-events-none" style={{ top: '20%', animation: 'dropDown 1.2s ease-in forwards' }}><div className="text-4xl drop-shadow-md">💔</div><div className="text-red-600 font-black text-xl drop-shadow-sm mt-1">-{bad.points}</div></div>)}
+                      {/* 🎒 正式宠物舞台：背景 → 脚下光圈 → 宠物 → 未来前景特效 */}
+                      <div className="relative w-48 h-48 sm:w-52 sm:h-52 rounded-[1.75rem] shadow-inner mb-2 border-4 border-white overflow-hidden transition-all duration-500">
+                        {/* 第1层：背景 */}
+                        <div className="absolute inset-0 z-0">{renderEquippedBackground()}</div>
+
+                        {/* 第2层：脚下光圈（固定，不跟宠物上下移动） */}
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 z-10 pointer-events-none">
+                          {renderEquippedGround()}
+                        </div>
+
+                        {/* 第3层：原有宠物，保留上下浮动 */}
+                        <div className="absolute inset-0 z-20 flex items-center justify-center translate-y-2">
+                          <img src={petImageUrl} alt="Pet" className="w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-lg animate-bounce" style={{ animationDuration: '3s' }} />
+                        </div>
+
+                        {/* 第4层：全画面特效 */}
+                        <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden">
+                          {/* foreground 特效位已预留，未来从 Items 读取 */}
+                        </div>
+
+                        {/* 原有即时奖励/扣分动画维持在最前 */}
+                        {hearts.map(heart => <span key={heart.id} className="absolute text-2xl md:text-3xl pointer-events-none drop-shadow-md z-40" style={{ left: heart.left, top: heart.top, animation: `floatUpBurst ${heart.duration} ease-out ${heart.delay} forwards` }}>{heart.emoji}</span>)}
+                        {badMarks.map(bad => <div key={bad.id} className="absolute text-center z-50 pointer-events-none left-1/2 -translate-x-1/2" style={{ top: '20%', animation: 'dropDown 1.2s ease-in forwards' }}><div className="text-4xl drop-shadow-md">💔</div><div className="text-red-600 font-black text-xl drop-shadow-sm mt-1">-{bad.points}</div></div>)}
                       </div>
-                      <div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-6 transition-all">Lv. {currentLevel} 【{levelTitles[currentLevel] || "元宇宙小萌新"}】</div>
-                      <div className="w-full mb-6">
+                      <div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-4 transition-all max-w-full truncate">Lv. {currentLevel} 【{levelTitles[currentLevel] || "元宇宙小萌新"}】</div>
+                      {/* 🌿 Ikon Lestari Mingguan 荣誉卡 */}
+                      <button
+                        type="button"
+                        onClick={() => setShowIkonLestariModal(true)}
+                        className="w-full mb-3 p-3 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-lime-50 shadow-sm text-left transition-all hover:shadow-md active:scale-[0.99]"
+                      >
+                        {ikonLestariLoading ? (
+                          <div className="text-center text-xs font-bold text-emerald-600 py-2">🌿 正在读取 Ikon Lestari...</div>
+                        ) : currentIkonWeek && currentIkonWinner ? (
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-xl shadow-sm flex-shrink-0">🌿</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-black text-emerald-700">Ikon Lestari Mingguan</p>
+                              <p className="font-black text-slate-800 truncate">🏆 {currentIkonWinner.name}</p>
+                              <p className="text-[10px] font-bold text-slate-500">{currentIkonWeek.dateRange}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-xl font-black text-emerald-600">{currentIkonWinner.netScore}</p>
+                              <p className="text-[9px] font-bold text-slate-400">mata bersih</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 flex items-center justify-center text-xl shadow-sm flex-shrink-0">🌱</div>
+                            <div>
+                              <p className="text-xs font-black text-emerald-700">Ikon Lestari Mingguan</p>
+                              <p className="text-xs font-bold text-slate-500">Belum ada rekod kelas minggu ini.</p>
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                      <div className="w-full mb-4">
                         <div className="flex justify-between text-xs font-bold text-slate-500 mb-2"><span>EXP: {student.totalExp}</span><span>{`距升级还需: ${nextLevelExp - student.totalExp} 分`}</span></div>
-                        <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-indigo-400 to-purple-500 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }}></div></div>
+                        <div className="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-indigo-400 to-purple-500 transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }}></div></div>
                       </div>
-                      <div className="w-full flex justify-center mb-20">
+                      <div className="w-full flex justify-center mb-1">
                         {/* 你熟悉的完整的喂养框，口粮为0时也会显示！ */}
-                        <div className="w-full p-3 bg-white/80 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                        <div className="w-full px-4 py-3 bg-white/85 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
                           <div><p className="text-xs font-bold text-slate-500 mb-1">口粮</p><p className="text-xl font-black text-amber-500">{student.unfedFood}</p></div>
-                          <button onClick={handleFeed} disabled={!canFeed} className={`flex items-center gap-1 py-2 px-6 rounded-xl font-black shadow-md transition-all active:scale-95 ${canFeed ? "bg-amber-400 hover:bg-amber-500 text-amber-900" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}>喂养 <span className="text-lg">🍎</span></button>
+                          <button onClick={handleFeed} disabled={!canFeed} className={`flex items-center gap-1 py-2 px-5 rounded-xl font-black shadow-md transition-all active:scale-95 ${canFeed ? "bg-amber-400 hover:bg-amber-500 text-amber-900" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}>喂养 <span className="text-lg">🍎</span></button>
                         </div>
                       </div>
                     </div>
@@ -1913,7 +2373,109 @@
                 </div>
               )}
             </div>
+            {/* 🎒 V3 正式背包：只显示当前学生真正拥有的道具 */}
+            {showBackpack && (
+              <div className="fixed inset-0 z-[170] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                <div className="w-full max-w-md max-h-[88vh] overflow-hidden bg-white rounded-3xl shadow-2xl border border-white flex flex-col">
+                  <div className="p-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white flex justify-between items-center">
+                    <div>
+                      <h3 className="font-black text-lg">🎒 我的宠物背包</h3>
+                      <p className="text-[10px] font-bold text-white/85">装备会自动保存到你的账号</p>
+                    </div>
+                    <button onClick={() => setShowBackpack(false)} className="text-3xl font-bold active:scale-90">&times;</button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-5">
+                    {inventoryLoading ? (
+                      <div className="py-12 text-center text-slate-400 font-bold">正在读取背包...</div>
+                    ) : studentInventory.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <div className="text-5xl mb-3">🎒</div>
+                        <p className="font-black text-slate-600">背包还是空的</p>
+                        <p className="text-xs font-bold text-slate-400 mt-1">以后签到、活动或奖励获得的道具会出现在这里。</p>
+                      </div>
+                    ) : (
+                      <>
+                        {[
+                          { slot: 'background', title: '🖼️ 场景背景', category: 'scene' },
+                          { slot: 'ground', title: '⭕ 脚下光圈', category: 'decoration' }
+                        ].map(section => {
+                          const items = globalItems
+                            .filter(item => item.enabled !== false)
+                            .filter(item => item.category === section.category && item.subtype === section.slot)
+                            .filter(item => ownedItemIds.has(String(item.itemId)));
+
+                          return (
+                            <div key={section.slot}>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-black text-slate-600">{section.title}</p>
+                                {equippedItems[section.slot] && (
+                                  <button
+                                    onClick={() => handleUnequipSlot(section.slot)}
+                                    disabled={equippingSlot !== null}
+                                    className="text-[10px] font-black text-slate-400 hover:text-rose-500 disabled:opacity-40"
+                                  >
+                                    卸下
+                                  </button>
+                                )}
+                              </div>
+
+                              {items.length === 0 ? (
+                                <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无此类道具</div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-3">
+                                  {items.map(item => {
+                                    const equipped = equippedItems[section.slot] === item.itemId;
+                                    const rare = item.rarity === 'rare';
+                                    const legendary = item.rarity === 'legendary';
+                                    return (
+                                      <button
+                                        key={item.itemId}
+                                        onClick={() => handleEquipItem(item)}
+                                        disabled={equippingSlot !== null}
+                                        className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${equipped ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50 shadow-md' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
+                                      >
+                                        <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
+                                          {item.assetUrl ? (
+                                            <img src={item.assetUrl} alt={item.name} className={`w-full h-full ${section.slot === 'ground' ? 'object-contain p-2' : 'object-cover'}`} />
+                                          ) : (
+                                            <span className="text-3xl">🎁</span>
+                                          )}
+                                        </div>
+                                        <div className="p-2.5">
+                                          <div className="flex items-start justify-between gap-1">
+                                            <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${legendary ? 'bg-amber-100 text-amber-700' : rare ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>
+                                              {legendary ? '传说' : rare ? '稀有' : '普通'}
+                                            </span>
+                                          </div>
+                                          <p className={`text-[9px] font-black mt-1 ${equipped ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                            {equipped ? '✓ 使用中' : '点击装备'}
+                                          </p>
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             <BottomNav onOpenModal={setActiveModal} />
+            {showIkonLestariModal && (
+              <IkonLestariModal
+                onClose={() => setShowIkonLestariModal(false)}
+                ikonData={ikonLestariData}
+                currentWeek={currentIkonWeek}
+                currentStudentName={student.name}
+              />
+            )}
             {activeModal === 'leaderboard' && <LeaderboardModal onClose={() => setActiveModal(null)} globalStudents={globalStudents} currentStudentName={student.name} levelThresholds={levelThresholds} githubUser={GITHUB_USER} githubRepo={GITHUB_REPO} />}
             {activeModal === 'history' && <HistoryModal onClose={() => setActiveModal(null)} studentName={student.name} />}
             {activeModal === 'memorial' && <MemorialModal onClose={() => setActiveModal(null)} petHistory={student.petHistory || []} githubUser={GITHUB_USER} githubRepo={GITHUB_REPO} />}
@@ -1977,11 +2539,30 @@
           {selectedStudentForLogin && !isTeacherLoginProcess && (
             <TeacherLoginModal title={`${selectedStudentForLogin.name} 的宠物园`} correctPassword={selectedStudentForLogin.pin} onClose={() => { setSelectedStudentForLogin(null); }} onSuccess={async () => {
               const currentDB = globalStudents.find(gs => gs.id === selectedStudentForLogin.id) || selectedStudentForLogin;
+              // 🎒 切换学生时先清空上一位学生的道具状态，避免短暂显示别人的装备
+              setInventoryLoading(true);
+              setStudentInventory([]);
+              setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null });
+              setShowBackpack(false);
+
               setStudent(prev => ({ ...prev, id: currentDB.id, name: currentDB.name, totalExp: currentDB.totalExp, unfedFood: currentDB.unfedFood || 0, badges: currentDB.badges || 0, mythUnlocked: currentDB.mythUnlocked || false, petId: currentDB.petId || null, petHistory: currentDB.petHistory || [], pin: currentDB.pin || '123456', pendingRewards: [] }));
-              setCurrentView("student");
               setSelectedStudentForLogin(null);
               
               try {
+                const bagData = await fetchGAS('getStudentInventory', { username: currentDB.id });
+                setStudentInventory(Array.isArray(bagData?.inventory) ? bagData.inventory : []);
+                setEquippedItems({
+                  background: null,
+                  ground: null,
+                  foreground: null,
+                  frame: null,
+                  sceneObject: null,
+                  ...(bagData?.equippedItems || {})
+                });
+                setInventoryLoading(false);
+                // 新学生装备资料到齐后才进入宠物页面
+                setCurrentView("student");
+
                 const rewards = await fetchGAS('getStudentPendingRewards', { studentName: currentDB.name });
                 if (rewards) setStudent(prev => ({ ...prev, pendingRewards: rewards }));
 
@@ -2001,7 +2582,14 @@
                   setTimeout(() => { setBadMarks(prev => prev.filter(b => b.id !== newBadMark.id)); }, 1200);
                   await fetchGAS('claimAllDeductions', { studentName: currentDB.name });
                 }
-              } catch (err) { console.error('拉取新数据失败:', err); }
+              } catch (err) {
+                setInventoryLoading(false);
+                console.error('拉取新数据失败:', err);
+                // 读取失败时也只用空装备进入，绝不沿用上一位学生的装备
+                setStudentInventory([]);
+                setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null });
+                setCurrentView("student");
+              }
             }} />
           )}
           {showAdminAuth && adminPasswordLoaded && <TeacherLoginModal title="班主任超级后台" correctPassword={adminPassword} onClose={() => setShowAdminAuth(false)} onSuccess={() => { setCurrentView("admin"); setShowAdminAuth(false); }} />}
