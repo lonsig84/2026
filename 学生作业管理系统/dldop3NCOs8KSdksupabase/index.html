@@ -16,7 +16,23 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
 
-  <div id="root"></div>
+  <div id="root">
+    <div style="display:flex;justify-content:center;align-items:center;height:100vh;color:#64748b;font-family:sans-serif;">
+      正在加载系统组件...
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('error', function(e) {
+      var root = document.getElementById('root');
+      if (root && (!root.children.length || root.innerHTML.indexOf('正在加载') !== -1)) {
+        root.innerHTML = '<div style="max-width:500px;margin:40px auto;padding:20px;background:#fee2e2;border:1px solid #f87171;border-radius:12px;color:#991b1b;font-family:sans-serif;text-align:center;">' +
+          '<h3 style="font-weight:bold;margin-bottom:8px;">⚠️ 脚本解析异常</h3>' +
+          '<p style="font-size:12px;word-break:break-all;">' + (e.message || e) + '</p>' +
+          '<p style="font-size:11px;color:#666;margin-top:8px;">请刷新或截图反馈。</p></div>';
+      }
+    });
+  </script>
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
@@ -106,7 +122,6 @@
             };
           });
 
-          // 若数据库科目为空，自动兜底提供常用科目，保证界面绝不卡死
           if (Object.keys(map).length === 0) {
             map = {
               BC: { zh: '华文', ms: 'Bahasa Cina', type: 'homework' },
@@ -236,7 +251,6 @@
       const currentPendingRecords = allRecords.filter(r => r.subject === currentTab && r.status === 'Pending');
       const currentEventRecords = allRecords.filter(r => r.subject === currentTab);
 
-      // 每个学生的未完成作业数量映射
       const studentPendingCountMap = {};
       currentPendingRecords.forEach(r => {
         studentPendingCountMap[r.student_name] = (studentPendingCountMap[r.student_name] || 0) + 1;
@@ -452,7 +466,7 @@
         setLoading(false);
       };
 
-      // 导出 CSV (安全转义，Excel 无乱码)
+      // 导出 CSV
       const exportToCSV = (recordsToExport) => {
         if (recordsToExport.length === 0) return showToast('⚠️ 没有可导出的记录');
         const bom = '\uFEFF';
@@ -479,7 +493,7 @@
         showToast('📥 表格已成功导出为 CSV！');
       };
 
-      // 历史记录多维筛选（纯原生 JS 运算，无任何 Hook 计数冲突）
+      // 历史记录多维筛选
       const filteredHistoryRecords = allRecords.filter(r => {
         if (histSubject !== 'all' && r.subject !== histSubject) return false;
         if (histStatus !== 'all' && r.status !== histStatus) return false;
@@ -934,9 +948,9 @@
             )}
           </div>
 
-          {/* 弹窗 A: 学生个人专属作业专卡 */}
+          {/* 弹窗 A: 学生个人专属作业专卡（顶部靠齐） */}
           {studentDetailModal && (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-start pt-4 sm:pt-8 p-3 overflow-y-auto animate-fade-in">
               <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
                 <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50/50">
                   <div className="flex items-center space-x-2">
@@ -953,7 +967,7 @@
                   {currentPendingRecords.filter(r => r.student_name === studentDetailModal).length === 0 ? (
                     <div className="text-center py-8 text-slate-500 text-sm">🎉 该生目前没有任何欠交作业，表现优秀！</div>
                   ) : (
->                     <>
+                    <>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
                           共欠交 {currentPendingRecords.filter(r => r.student_name === studentDetailModal).length} 项
@@ -997,9 +1011,9 @@
             </div>
           )}
 
-          {/* 弹窗 B: 名单管理中心 */}
+          {/* 弹窗 B: 名单管理中心（顶部靠齐） */}
           {isStudentMgrOpen && (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-start pt-4 sm:pt-8 p-3 overflow-y-auto animate-fade-in">
               <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50/50">
                   <div className="flex items-center space-x-2">
@@ -1079,9 +1093,9 @@
             </div>
           )}
 
-          {/* 弹窗 C: 历史总账查询与数据导出 */}
+          {/* 弹窗 C: 历史总账查询与数据导出（顶部靠齐） */}
           {isHistoryOpen && (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-3 sm:p-5 animate-fade-in">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-start pt-3 sm:pt-6 p-2 sm:p-4 overflow-y-auto animate-fade-in">
               <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50">
                   <div className="flex items-center space-x-2">
@@ -1193,9 +1207,9 @@
             </div>
           )}
 
-          {/* 弹窗 D: 科目配置管理 */}
+          {/* 弹窗 D: 科目配置管理（顶部靠齐） */}
           {isSettingsOpen && (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-start pt-4 sm:pt-8 p-3 overflow-y-auto animate-fade-in">
               <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                   <div>
@@ -1222,7 +1236,6 @@
                       </div>
                       <div className="sm:col-span-3">
                         <label className="block sm:hidden text-[10px] text-slate-400 font-bold mb-1">科目属性</label>
-                        <select value={-slate-400 font-bold mb-1">科目属性</label>
                         <select value={sub.type || 'homework'} onChange={(e) => handleSubjectRowChange(idx, 'type', e.target.value)} className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg font-bold">
                           <option value="homework">📚 作业追踪类</option>
                           <option value="event">📌 事件备忘类</option>
