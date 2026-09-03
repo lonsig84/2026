@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>学生作业与事件管理系统</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+  <div id="root">
+    <div style="display:flex;justify-content:center;align-items:center;height:100vh;color:#64748b;font-family:sans-serif;">
+      正在加载系统组件...
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('error', function(e) {
+      var root = document.getElementById('root');
+      if (root) {
+        root.innerHTML = '<div style="padding:24px;color:#b91c1c;max-width:520px;margin:50px auto;background:#fee2e2;border-radius:12px;border:1px solid #f87171;font-family:sans-serif;">' +
+          '<h3 style="font-weight:bold;margin-bottom:8px;">⚠️ 脚本运行异常：</h3><p style="font-size:13px;word-break:break-all;">' + (e.message || e) + '</p>' +
+          '<p style="color:#6b7280;font-size:12px;margin-top:12px;">请将此提示截图以便排查。</p></div>';
+      }
+    });
+  </script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
+
+    const SUPABASE_URL = "https://fmecxejzfagtdlxcxymk.supabase.co"; 
+    const SUPABASE_KEY = "sb_publishable__WW7bNpZdQUOXDFDEBDBYQ_-6bhu76T"; 
+    const SYSTEM_PASSWORD = "8888"; 
+
+    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+    const PAST_DAYS = Array.from({ length: 5 }, (_, i) => i);
+
+    function App() {
+      const [isAuthenticated, setIsAuthenticated] = useState(false);
+      const [passwordInput, setPasswordInput] = useState('');
+
+      const [subjectMap, setSubjectMap] = useState(null); 
+      const [currentTab, setCurrentTab] = useState('');
+      const [allStudents, setAllStudents] = useState([]);
+      const [allRecords, setAllRecords] = useState([]); // 存储全部记录，供历史与未交使用
+
+      const todayYYYYMMDD = new Date().toLocaleDateString('en-CA'); 
+      const [recordDate, setRecordDate] = useState(todayYYYYMMDD);
+      const [homeworkName, setHomeworkName] = useState('');
+      const [selectedStudents, setSelectedStudents] = useState({});
+      const [activeStudentInput, setActiveStudentInput] = useState(null);
+
+      const [loading, setLoading] = useState(false);
+      const [toast, setToast] = useState(null);
+      const [recentFilter, setRecentFilter] = useState('all');
+
+      // 弹窗状态
+      const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+      const [tempSubjects, setTempSubjects] = useState([]);
+      const [isStudentMgrOpen, setIsStudentMgrOpen] = useState(false);
+      const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+      const [studentDetailModal, setStudentDetailModal] = useState(null); // 当前正在查看的学生名字
+
+      // 学生管理表单状态
+      const [newStudentName, setNewStudentName] = useState('');
+      const [batchStudentInput, setBatchStudentInput] = useState('');
+
+      // 历史记录筛选状态
+      const [histSubject, setHistSubject] = useState('all');
+      const [histStatus, setHistStatus] = useState('all');
+      const [histKeyword, setHistKeyword] = useState('');
+      const [histStartDate, setHistStartDate] = useState('');
+      const [histEndDate, setHistEndDate] = useState('');
+
+      const showToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        if (passwordInput === SYSTEM_PASSWORD) {
+          setIsAuthenticated(true);
+          loadInitialData();
+        } else {
+          showToast('❌ 密码错误，请重试');
+          setPasswordInput('');
+        }
+      };
+
+      // 从 Supabase 载入数据
+      const loadInitialData = async () => {
+        if (!supabase) return showToast('❌ Supabase 客户端未就绪');
+        setLoading(true);
+        try {
+          const [subRes, stuRes, recRes] = await Promise.all([
+            supabase.from('subjects').select('*').order('sort_order', { ascending: true }),
+            supabase.from('students').select('*').order('student_name', { ascending: true }),
+            supabase.from('homework_records').select('*').order('record_date', { ascending: false }).order('created_at', { ascending: false })
+          ]);
+
+          if (subRes.error || stuRes.error || recRes.error) {
+            showToast('❌ 读取失败: ' + (subRes.error?.message || stuRes.error?.message || recRes.error?.message));
+            setLoading(false);
+            return;
+          }
+
+          const map = {};
+          (subRes.data || []).forEach(s => {
+            map[s.code] = { 
+              zh: s.name_zh, 
+              ms: s.name_ms, 
+              type: s.type || (s.code === 'Year1' || s.code === 'Y1' ? 'event' : 'homework')
+            };
+          });
+          setSubjectMap(map);
+
+          setAllStudents((stuRes.data || []).map(s => ({ id: s.id, subject: s.subject, name: s.student_name })));
+          setAllRecords(recRes.data || []);
+
+          const subjects = Object.keys(map);
+          if (subjects.length > 0 && !currentTab) setCurrentTab(subjects[0]);
+        } catch (err) {
+          console.error(err);
+          showToast('❌ 网络连接异常');
+        }
+        setLoading(false);
+      };
+
+      // 实时订阅更新
+      useEffect(() => {
+        if (!isAuthenticated || !supabase) return;
+        const channel = supabase
+          .channel('schema_db_changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'homework_records' }, () => {
+            loadInitialData();
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+            loadInitialData();
+          })
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      }, [isAuthenticated]);
+
+      // 日期计算工具
+      const parseDate = (dateStr) => {
+        if (!dateStr) return null;
+        if (dateStr.includes('-')) {
+          const [y, m, d] = dateStr.split('-').map(Number);
+          return new Date(y, m - 1, d);
+        }
+        if (dateStr.includes('/')) {
+          const [d, m, y] = dateStr.split('/').map(Number);
+          return new Date(y, m - 1, d);
+        }
+        return new Date(dateStr);
+      };
+
+      const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const todayStart = startOfDay(new Date());
+
+      const getDayDiff = (dateStr) => {
+        const d = parseDate(dateStr);
+        if (!d) return null;
+        return Math.floor((todayStart - startOfDay(d)) / 86400000);
+      };
+
+      const formatDateDisplay = (dateStr) => {
+        const d = parseDate(dateStr);
+        if (!d) return dateStr;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
+
+      if (!isAuthenticated) {
+        return (
+          <div className="flex justify-center items-center h-screen px-4 bg-slate-100">
+            {toast && <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-red-600 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-2xl z-[110] animate-bounce">{toast}</div>}
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm animate-fade-in text-center border border-slate-200">
+              <div className="text-5xl mb-4">🔐</div>
+              <h2 className="text-xl font-bold text-slate-800 mb-2">系统访问验证</h2>
+              <p className="text-xs text-slate-500 mb-6">请输入管理员密码以进入管理系统</p>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input 
+                  type="password" 
+                  value={passwordInput} 
+                  onChange={(e) => setPasswordInput(e.target.value)} 
+                  className="w-full px-4 py-3 text-center tracking-widest text-lg border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none" 
+                  placeholder="••••" 
+                  autoFocus 
+                />
+                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
+                  进入系统
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      if (!subjectMap) {
+        return <div className="flex justify-center items-center h-screen"><div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div></div>;
+      }
+
+      const subjectList = Object.keys(subjectMap);
+      const currentSubjectInfo = subjectMap[currentTab] || { zh: currentTab, ms: currentTab, type: 'homework' };
+      const isEventSubject = currentSubjectInfo.type === 'event';
+
+      const currentStudents = allStudents.filter(s => s.subject === currentTab);
+      
+      // 当前科目的未完成记录 (作业类查 Pending，事件类查全部事件)
+      const currentPendingRecords = allRecords.filter(r => r.subject === currentTab && r.status === 'Pending');
+      const currentEventRecords = allRecords.filter(r => r.subject === currentTab);
+
+      // 每个学生的未完成作业数字典映射 { '张三': 3, ... }
+      const studentPendingCountMap = {};
+      currentPendingRecords.forEach(r => {
+        studentPendingCountMap[r.student_name] = (studentPendingCountMap[r.student_name] || 0) + 1;
+      });
+
+      // --- 核心业务：标记单条已补交 ---
+      const handleResolveRecord = async (recordId) => {
+        const { error } = await supabase.from('homework_records').update({ status: 'Resolved' }).eq('id', recordId);
+        if (!error) {
+          setAllRecords(prev => prev.map(r => r.id === recordId ? { ...r, status: 'Resolved' } : r));
+          showToast('✅ 已成功标记补交！');
+        } else {
+          showToast('❌ 标记失败: ' + error.message);
+        }
+      };
+
+      // --- 核心业务：一键全部补交（某个学生） ---
+      const handleResolveAllForStudent = async (studentName) => {
+        const targetIds = currentPendingRecords.filter(r => r.student_name === studentName).map(r => r.id);
+        if (targetIds.length === 0) return;
+
+        const { error } = await supabase.from('homework_records').update({ status: 'Resolved' }).in('id', targetIds);
+        if (!error) {
+          setAllRecords(prev => prev.map(r => targetIds.includes(r.id) ? { ...r, status: 'Resolved' } : r));
+          showToast(`🎉 已为 ${studentName} 一键结清所有作业！`);
+          setStudentDetailModal(null);
+        } else {
+          showToast('❌ 批量处理失败: ' + error.message);
+        }
+      };
+
+      // --- 核心业务：删除记录 ---
+      const handleDeleteRecord = async (recordId) => {
+        if (!window.confirm('确定要删除此条记录吗？此操作不可撤销。')) return;
+        const { error } = await supabase.from('homework_records').delete().eq('id', recordId);
+        if (!error) {
+          setAllRecords(prev => prev.filter(r => r.id !== recordId));
+          showToast('🗑️ 记录已删除');
+        } else {
+          showToast('❌ 删除失败: ' + error.message);
+        }
+      };
+
+      // --- 核心业务：提交新记录（支持作业与事件） ---
+      const handleSubmitNewRecord = async (e) => {
+        e.preventDefault();
+        if (!recordDate) return showToast('⚠️ 请选择日期！');
+        if (!homeworkName.trim()) return showToast(isEventSubject ? '⚠️ 请输入事件名称/备忘事项！' : '⚠️ 请输入功课名称！');
+
+        const studentKeys = Object.keys(selectedStudents);
+        if (studentKeys.length === 0) {
+          return showToast('⚠️ 请至少选择一位学生！');
+        }
+
+        setLoading(true);
+        const recordsToInsert = studentKeys.map(name => ({
+          id: `REC_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+          record_date: recordDate,
+          subject: currentTab,
+          homework: homeworkName.trim(),
+          student_name: name,
+          reason: selectedStudents[name],
+          status: isEventSubject ? 'Event' : 'Pending'
+        }));
+
+        const { data, error } = await supabase.from('homework_records').insert(recordsToInsert).select();
+        if (!error) {
+          setAllRecords(prev => [...(data || recordsToInsert), ...prev]);
+          setHomeworkName('');
+          setSelectedStudents({});
+          setActiveStudentInput(null);
+          showToast(isEventSubject ? '✅ 成功记入班级流水账！' : '✅ 成功录入未交作业！');
+        } else {
+          showToast('❌ 保存失败: ' + error.message);
+        }
+        setLoading(false);
+      };
+
+      // 学生选择切换
+      const handleToggleStudent = (studentName) => {
+        if (selectedStudents.hasOwnProperty(studentName)) {
+          const updated = { ...selectedStudents };
+          delete updated[studentName];
+          setSelectedStudents(updated);
+          if (activeStudentInput === studentName) setActiveStudentInput(null);
+        } else {
+          setSelectedStudents({ ...selectedStudents, [studentName]: isEventSubject ? '记录' : '没做' });
+          setActiveStudentInput(studentName);
+        }
+      };
+
+      // --- 学生管理操作 ---
+      const handleAddSingleStudent = async (e) => {
+        e.preventDefault();
+        if (!newStudentName.trim()) return showToast('⚠️ 请输入学生姓名');
+        const exists = currentStudents.some(s => s.name.trim().toLowerCase() === newStudentName.trim().toLowerCase());
+        if (exists) return showToast('⚠️ 该科目已有同名学生！');
+
+        const { data, error } = await supabase.from('students').insert([{
+          subject: currentTab,
+          student_name: newStudentName.trim()
+        }]).select();
+
+        if (!error && data) {
+          setAllStudents(prev => [...prev, { id: data[0].id, subject: currentTab, name: newStudentName.trim() }]);
+          setNewStudentName('');
+          showToast('✅ 学生添加成功');
+        } else {
+          showToast('❌ 添加失败: ' + error.message);
+        }
+      };
+
+      const handleBatchImportStudents = async () => {
+        if (!batchStudentInput.trim()) return showToast('⚠️ 请输入学生姓名列表');
+        const names = batchStudentInput
+          .split('\n')
+          .map(n => n.trim())
+          .filter(n => n.length > 0);
+
+        if (names.length === 0) return showToast('⚠️ 未识别到有效学生姓名');
+
+        const existingNames = new Set(currentStudents.map(s => s.name.trim()));
+        const toAdd = Array.from(new Set(names))
+          .filter(n => !existingNames.has(n))
+          .map(n => ({ subject: currentTab, student_name: n }));
+
+        if (toAdd.length === 0) return showToast('ℹ️ 所输入学生均已在名册中');
+
+        setLoading(true);
+        const { data, error } = await supabase.from('students').insert(toAdd).select();
+        if (!error && data) {
+          const addedFormatted = data.map(d => ({ id: d.id, subject: currentTab, name: d.student_name }));
+          setAllStudents(prev => [...prev, ...addedFormatted]);
+          setBatchStudentInput('');
+          showToast(`✅ 成功批量导入 ${toAdd.length} 名学生！`);
+        } else {
+          showToast('❌ 批量导入失败: ' + error.message);
+        }
+        setLoading(false);
+      };
+
+      const handleDeleteStudent = async (studentId, studentName) => {
+        if (!window.confirm(`确定要从【${currentTab}】名册中移除 ${studentName} 吗？`)) return;
+        const { error } = await supabase.from('students').delete().eq('id', studentId);
+        if (!error) {
+          setAllStudents(prev => prev.filter(s => s.id !== studentId));
+          showToast(`🗑️ 已移除学生 ${studentName}`);
+        } else {
+          showToast('❌ 移除失败: ' + error.message);
+        }
+      };
+
+      // --- 科目管理操作 ---
+      const openSettings = () => {
+        const currentArr = Object.keys(subjectMap).map(key => ({ 
+          code: key, 
+          zh: subjectMap[key].zh, 
+          ms: subjectMap[key].ms,
+          type: subjectMap[key].type || 'homework'
+        }));
+        setTempSubjects(currentArr);
+        setIsSettingsOpen(true);
+      };
+
+      const handleSubjectRowChange = (index, field, value) => {
+        const updated = [...tempSubjects];
+        updated[index][field] = value;
+        setTempSubjects(updated);
+      };
+
+      const handleDeleteSubjectRow = async (code, index) => {
+        if (!window.confirm(`⚠️ 严重警告：确定要彻底删除科目【${code}】吗？\n该科目名下的所有学生以及关联的所有历史作业记录将会全部一并清理！`)) return;
+
+        setLoading(true);
+        // 先清理该科目下的记录与学生
+        await supabase.from('homework_records').delete().eq('subject', code);
+        await supabase.from('students').delete().eq('subject', code);
+        const { error } = await supabase.from('subjects').delete().eq('code', code);
+
+        if (!error) {
+          const updated = [...tempSubjects];
+          updated.splice(index, 1);
+          setTempSubjects(updated);
+          await loadInitialData();
+          showToast(`🗑️ 科目【${code}】及关联数据已全部清理！`);
+        } else {
+          showToast('❌ 删除科目失败: ' + error.message);
+        }
+        setLoading(false);
+      };
+
+      const saveSettings = async () => {
+        const invalid = tempSubjects.some(s => !s.code.trim());
+        if (invalid) return showToast('⚠️ 科目代号不能为空！');
+
+        setLoading(true);
+        const rows = tempSubjects.map((s, idx) => ({
+          code: s.code.trim().toUpperCase(),
+          name_zh: s.zh.trim(),
+          name_ms: s.ms.trim(),
+          type: s.type || 'homework',
+          sort_order: idx + 1
+        }));
+
+        const { error } = await supabase.from('subjects').upsert(rows);
+        if (!error) {
+          await loadInitialData();
+          setIsSettingsOpen(false);
+          showToast('✅ 科目配置更新成功！');
+        } else {
+          showToast('❌ 保存失败: ' + error.message);
+        }
+        setLoading(false);
+      };
+
+      // --- 导出 CSV (UTF-8 with BOM，完美兼容 Excel 无乱码) ---
+      const exportToCSV = (recordsToExport) => {
+        if (recordsToExport.length === 0) return showToast('⚠️ 没有可导出的记录');
+        const bom = "\uFEFF";
+        let csvContent = "序号,记录ID,日期,科目,作业/事件名称,学生姓名,原因/备注,状态\n";
+        recordsToExport.forEach((r, idx) => {
+          const statusText = r.status === 'Resolved' ? '已补交' : r.status === 'Pending' ? '欠交中' : '事件备忘';
+          csvContent += `"${idx + 1}","${r.id}","${formatDateDisplay(r.date || r.record_date)}","${r.subject}","${(r.homework || '').replace(/"/g, '""')}","${(r.student_name || '').replace(/"/g, '""')}","${(r.reason || '').replace(/"/g, '""')}","${statusText}"\n`;
+        });
+
+        const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `作业与事件记录_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        showToast('📥 表格已成功导出为 CSV！');
+      };
+
+      // 历史记录筛选逻辑
+      const filteredHistoryRecords = useMemo(() => {
+        return allRecords.filter(r => {
+          if (histSubject !== 'all' && r.subject !== histSubject) return false;
+          if (histStatus !== 'all' && r.status !== histStatus) return false;
+          if (histKeyword.trim()) {
+            const kw = histKeyword.trim().toLowerCase();
+            const sName = (r.student_name || '').toLowerCase();
+            const hw = (r.homework || '').toLowerCase();
+            if (!sName.includes(kw) && !hw.includes(kw)) return false;
+          }
+          if (histStartDate) {
+            const rDate = r.record_date || r.date;
+            if (rDate < histStartDate) return false;
+          }
+          if (histEndDate) {
+            const rDate = r.record_date || r.date;
+            if (rDate > histEndDate) return false;
+          }
+          return true;
+        });
+      }, [allRecords, histSubject, histStatus, histKeyword, histStartDate, histEndDate]);
+
+      // --- 生成催交/汇报信息 ---
+      const handleGenerateMessage = () => {
+        const todayStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
+
+        if (isEventSubject) {
+          // 事件类总结信息
+          let msg = `📅 日期: ${todayStr}\n\n【${currentSubjectInfo.zh} ${currentTab}】今日班级事件与备忘流水记录如下：\n\n`;
+          const todayEvents = currentEventRecords.filter(r => getDayDiff(r.record_date || r.date) === 0);
+          if (todayEvents.length === 0) {
+            msg += '今日无特殊突发或收费备忘事项，一切正常。✨';
+          } else {
+            todayEvents.forEach((r, idx) => {
+              msg += `${idx + 1}. 【${r.homework}】 涉及学生: ${r.student_name} (详情: ${r.reason || '无'})\n`;
+            });
+          }
+          navigator.clipboard.writeText(msg.trim()).then(() => showToast('📋 事件流水记录已复制！')).catch(() => showToast('❌ 复制失败'));
+          return;
+        }
+
+        // 作业类催交信息
+        if (currentPendingRecords.length === 0) {
+          const praiseMsg = `📅 日期 / Tarikh Semasa: ${todayStr}\n\n今日【${currentSubjectInfo.zh} ${currentTab}】功课全班皆已安全完成，感谢各位家长的悉心督促！\nSemua murid telah menyiapkan kerja sekolah bagi mata pelajaran 【${currentSubjectInfo.ms}】. Terima kasih atas kerjasama ibu bapa! ❤️`;
+          navigator.clipboard.writeText(praiseMsg).then(() => showToast('📋 全班齐交！赞美信息已复制'));
+          return;
+        }
+
+        const grouped = {};
+        currentPendingRecords.forEach(r => {
+          if (!grouped[r.student_name]) grouped[r.student_name] = [];
+          grouped[r.student_name].push(r);
+        });
+
+        let msg = `📅 日期 / Tarikh Semasa: ${todayStr}\n\n各位家长好，以下是【${currentSubjectInfo.zh} ${currentTab}】尚未完成功课的学生名单，请家长多加关注及督促孩子的学习，谢谢配合。\nSalam sejahtera ibu bapa, berikut adalah senarai murid yang belum menyiapkan kerja sekolah bagi mata pelajaran 【${currentSubjectInfo.ms}】. Mohon kerjasama ibu bapa untuk memantau pembelajaran anak anda. Terima kasih.\n\n`;
+
+        Object.keys(grouped).forEach((student, index) => {
+          msg += `👤 ${index + 1}. ${student}\n`;
+          grouped[student].forEach(r => { msg += `   - ${r.homework} (欠交日期: ${formatDateDisplay(r.record_date || r.date)}, 原因: ${r.reason})\n`; });
+          msg += `\n`;
+        });
+
+        navigator.clipboard.writeText(msg.trim()).then(() => showToast('📋 催交信息已复制，快去 WhatsApp 粘贴吧！')).catch(() => showToast('❌ 复制失败'));
+      };
+
+      return (
+        <div className="max-w-4xl mx-auto p-3 sm:p-5 pb-24 relative animate-fade-in">
+          {/* 顶栏与系统标题 */}
+          <header className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">📝</span>
+              <div>
+                <h1 className="text-xl font-bold text-slate-800 leading-tight">学生作业与事件管理系统</h1>
+                <p className="text-[11px] text-slate-400">已连接 Supabase 云端数据库 · 毫秒级即时响应</p>
+              </div>
+            </div>
+            {/* 顶栏右侧三大功能入口 */}
+            <div className="flex items-center space-x-2 flex-wrap justify-center">
+              <button onClick={() => setIsStudentMgrOpen(true)} className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-colors flex items-center gap-1 shadow-sm">
+                👥 名单管理
+              </button>
+              <button onClick={() => setIsHistoryOpen(true)} className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 transition-colors flex items-center gap-1 shadow-sm">
+                📜 历史总账与导出
+              </button>
+              <button onClick={openSettings} className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors shadow-sm" title="管理科目">
+                ⚙️
+              </button>
+            </div>
+          </header>
+
+          {loading && (
+            <div className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm flex items-center justify-center z-[100]">
+              <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3">
+                <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-slate-700 font-medium text-sm">正在同步云端数据...</span>
+              </div>
+            </div>
+          )}
+
+          {toast && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-2xl z-[110] animate-fade-in">{toast}</div>
+          )}
+
+          {/* 科目切换栏 */}
+          <div className="flex items-center space-x-2 bg-slate-200 p-1.5 rounded-xl mb-5 shadow-sm overflow-x-auto">
+            {subjectList.map(tab => {
+              const info = subjectMap[tab] || {};
+              const isEvent = info.type === 'event';
+              return (
+                <button 
+                  key={tab} 
+                  type="button" 
+                  onClick={() => { setCurrentTab(tab); setSelectedStudents({}); setActiveStudentInput(null); setRecentFilter('all'); }} 
+                  className={`flex-1 min-w-[100px] py-2.5 px-3 text-center text-sm font-bold rounded-lg transition-all duration-150 flex items-center justify-center gap-1 ${currentTab === tab ? 'bg-white text-indigo-600 shadow-md scale-[1.01]' : 'text-slate-600 hover:bg-white/50'}`}
+                >
+                  <span>{isEvent ? '📌' : '📚'}</span>
+                  <span>{tab} ({info.zh})</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 主体面板 */}
+          <div className="grid grid-cols-1 gap-6">
+
+            {/* 1. 录入区 */}
+            <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+              <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <h2 className="text-base font-bold text-slate-700 flex items-center">
+                  <span className={`w-2.5 h-2.5 ${isEventSubject ? 'bg-blue-500' : 'bg-amber-500'} rounded-full mr-2`}></span>
+                  {isEventSubject ? `📌 新增【${currentSubjectInfo.zh}】事件备忘记录` : `📝 新增【${currentSubjectInfo.zh}】未交作业`}
+                </h2>
+                <span className="text-xs text-slate-400">
+                  {isEventSubject ? '（备忘流水类 · 不设补交）' : '（课业追踪类 · 支持红点清账）'}
+                </span>
+              </div>
+
+              <form onSubmit={handleSubmitNewRecord} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">1. 选择发生日期</label>
+                    <input type="date" value={recordDate} onChange={(e) => setRecordDate(e.target.value)} className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      {isEventSubject ? '2. 输入事件/费用/备忘标题' : '2. 输入功课名称'}
+                    </label>
+                    <input 
+                      type="text" 
+                      placeholder={isEventSubject ? "例如: 下半年书费RM29.50 / 打架纠纷 / 同意书" : "例如: 活动本下册 M/S 14 / 听写订正"} 
+                      value={homeworkName} 
+                      onChange={(e) => setHomeworkName(e.target.value)} 
+                      className="w-full px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 text-sm" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5 mt-2">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      {isEventSubject ? `3. 选择涉及学生名单 (${currentStudents.length} 人)` : `3. 点击未完成的学生名字 (${currentStudents.length} 人)`}
+                    </label>
+                    <span className="text-[11px] text-indigo-600">💡 提示：点击学生右侧数字红点可直接弹出个人明细清账</span>
+                  </div>
+
+                  {currentStudents.length === 0 ? (
+                    <div className="text-xs text-amber-700 bg-amber-50 p-4 rounded-xl border border-dashed border-amber-300 flex items-center justify-between">
+                      <span>💡 当前科目名册为空，快点击右侧按钮导入学生吧！</span>
+                      <button type="button" onClick={() => setIsStudentMgrOpen(true)} className="px-3 py-1 bg-amber-600 text-white rounded-lg font-bold">导入名单</button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                      {currentStudents.map(student => {
+                        const isSelected = selectedStudents.hasOwnProperty(student.name);
+                        const pendingCount = studentPendingCountMap[student.name] || 0;
+
+                        return (
+                          <div 
+                            key={student.name}
+                            onClick={() => handleToggleStudent(student.name)}
+                            className={`group relative flex items-center justify-between p-2 rounded-xl border cursor-pointer select-none transition-all duration-150 ${
+                              isSelected 
+                                ? 'bg-red-50 text-red-600 border-red-300 ring-2 ring-red-100 font-bold' 
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                            }`}
+                          >
+                            <span className="truncate text-xs flex-1 mr-1">{student.name}</span>
+                            
+                            {/* 未交数字红色徽章 - 点击独立弹出个人专卡 */}
+                            {!isEventSubject && pendingCount > 0 && (
+                              <span 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setStudentDetailModal(student.name);
+                                }}
+                                className="px-2 py-0.5 bg-red-500 hover:bg-red-600 text-white text-[10px] font-extrabold rounded-full shrink-0 shadow-sm transition-transform active:scale-90"
+                                title={`该生欠交 ${pendingCount} 项，点击查看明细并处理补交`}
+                              >
+                                {pendingCount}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 快速配置欠交原因 / 事件详情 */}
+                {Object.keys(selectedStudents).length > 0 && (
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 animate-fade-in">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      {isEventSubject ? '4. 为所选学生附带备注详情' : '4. 快速配置欠交原因'}
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.keys(selectedStudents).map(name => (
+                        <button 
+                          type="button" 
+                          key={name} 
+                          onClick={() => setActiveStudentInput(name)} 
+                          className={`px-3 py-1 text-xs rounded-lg transition-all ${activeStudentInput === name ? 'bg-indigo-600 text-white font-bold shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'}`}
+                        >
+                          {name}: {selectedStudents[name]}
+                        </button>
+                      ))}
+                    </div>
+                    {activeStudentInput && selectedStudents.hasOwnProperty(activeStudentInput) && (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-white p-3 rounded-lg border border-slate-300 shadow-sm">
+                        <span className="text-xs font-bold text-slate-600 whitespace-nowrap">为 【{activeStudentInput}】 修改:</span>
+                        <input 
+                          type="text" 
+                          value={selectedStudents[activeStudentInput]} 
+                          onChange={(e) => setSelectedStudents({ ...selectedStudents, [activeStudentInput]: e.target.value })} 
+                          className="w-full sm:flex-1 px-3 py-1.5 rounded border border-slate-300 text-xs focus:outline-none focus:border-indigo-500" 
+                        />
+                        {!isEventSubject && (
+                          <div className="flex gap-1.5 flex-wrap">
+                            {['没做', '没带', '不完整', '不认真重做'].map(text => (
+                              <button 
+                                type="button" 
+                                key={text} 
+                                onClick={() => setSelectedStudents({ ...selectedStudents, [activeStudentInput]: text })} 
+                                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] rounded font-medium border border-slate-200"
+                              >
+                                {text}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md active:scale-[0.99]">
+                  {isEventSubject ? '📌 记入班级流水账' : '📥 提交到未交排行榜'}
+                </button>
+              </form>
+            </section>
+
+            {/* 2. 展示区（根据科目类型自动切换） */}
+            {isEventSubject ? (
+              // ==================== 事件记录类视图 ====================
+              <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 mb-4 gap-2">
+                  <div>
+                    <h2 className="text-base font-bold text-slate-700 flex items-center">
+                      <span className="w-2.5 h-2.5 bg-blue-500 rounded-full mr-2"></span>
+                      📌【{currentTab}】班级事件流水备忘录 ({currentEventRecords.length} 项)
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">纯流水备忘记载 · 不设“已补交”干扰</p>
+                  </div>
+                  <button type="button" onClick={handleGenerateMessage} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all">
+                    📋 复制事件摘要
+                  </button>
+                </div>
+
+                {currentEventRecords.length === 0 ? (
+                  <div className="text-center py-10 text-slate-400 text-sm">📭 当前暂无任何事件记录。</div>
+                ) : (
+                  <div className="space-y-3">
+                    {currentEventRecords.map(item => (
+                      <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-100/70 transition-colors">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-md border border-blue-200">{formatDateDisplay(item.record_date || item.date)}</span>
+                            <span className="font-bold text-slate-800 text-sm">{item.homework}</span>
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            <span className="font-semibold text-slate-700">涉及学生: </span>{item.student_name}
+                            {item.reason && item.reason !== '记录' && <span className="ml-2 text-slate-500">· 备注: {item.reason}</span>}
+                          </div>
+                        </div>
+                        <button type="button" onClick={() => handleDeleteRecord(item.id)} className="text-red-500 hover:text-red-700 text-xs px-2.5 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 self-end sm:self-center transition-colors">
+                          🗑️ 删除
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ) : (
+              // ==================== 作业追踪类视图 ====================
+              <>
+                {/* 近5天未完成 */}
+                <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                  <div className="border-b border-slate-100 pb-3 mb-4">
+                    <h2 className="text-base font-bold text-slate-700 flex items-center mb-3">
+                      <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full mr-2"></span>
+                      📅【{currentTab}】近5天未完成作业
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { key: 'all', label: '总览' },
+                        { key: '0', label: '今天' },
+                        { key: '1', label: '昨天' },
+                        { key: '2', label: '前天' },
+                        { key: '3', label: '3天前' },
+                        { key: '4', label: '4天前' }
+                      ].map(opt => {
+                        const count = opt.key === 'all'
+                          ? new Set(currentPendingRecords.filter(r => { const d = getDayDiff(r.record_date || r.date); return d !== null && d >= 0 && d <= 4; }).map(r => r.student_name)).size
+                          : new Set(currentPendingRecords.filter(r => String(getDayDiff(r.record_date || r.date)) === opt.key).map(r => r.student_name)).size;
+
+                        return (
+                          <button 
+                            key={opt.key} 
+                            type="button" 
+                            onClick={() => setRecentFilter(opt.key)} 
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${recentFilter === opt.key ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+                          >
+                            {opt.label} {count}人
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {currentStudents.filter(stu => {
+                    const stuRecs = currentPendingRecords.filter(r => {
+                      if (r.student_name !== stu.name) return false;
+                      const diff = getDayDiff(r.record_date || r.date);
+                      if (diff === null || diff < 0 || diff > 4) return false;
+                      return recentFilter === 'all' || String(diff) === recentFilter;
+                    });
+                    return stuRecs.length > 0;
+                  }).length === 0 ? (
+                    <div className="text-center py-8"><span className="text-3xl inline-block mb-2">🎉</span><p className="text-sm text-slate-500 font-medium">近 5 天该范围内没有未完成作业。</p></div>
+                  ) : (
+                    <div className="space-y-4">
+                      {currentStudents.map(student => {
+                        const stuRecords = currentPendingRecords.filter(r => {
+                          if (r.student_name !== student.name) return false;
+                          const diff = getDayDiff(r.record_date || r.date);
+                          if (diff === null || diff < 0 || diff > 4) return false;
+                          return recentFilter === 'all' || String(diff) === recentFilter;
+                        });
+
+                        if (stuRecords.length === 0) return null;
+
+                        return (
+                          <div key={student.name} className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div className="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between gap-2">
+                              <span className="flex items-center gap-1.5">
+                                <span>👤</span>
+                                <span>{student.name}</span>
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">共 {stuRecords.length} 项</span>
+                                <button type="button" onClick={() => handleResolveAllForStudent(student.name)} className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded-lg transition-colors">
+                                  全部补交
+                                </button>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              {PAST_DAYS.map(diff => {
+                                const dayRecs = stuRecords.filter(r => getDayDiff(r.record_date || r.date) === diff);
+                                if (dayRecs.length === 0) return null;
+                                return (
+                                  <div key={diff} className="border-t first:border-t-0 border-slate-200/70 pt-2 first:pt-0">
+                                    <div className="text-[11px] font-bold text-slate-500 mb-1">{diff === 0 ? '今天' : diff === 1 ? '昨天' : diff === 2 ? '前天' : diff === 3 ? '3天前' : '4天前'}</div>
+                                    <div className="space-y-1.5">
+                                      {dayRecs.map(rec => (
+                                        <div key={rec.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white border border-slate-200 rounded-lg p-2.5">
+                                          <div className="flex-1 min-w-0">
+                                            <div className="font-semibold text-indigo-900 text-xs">{rec.homework}</div>
+                                            <div className="text-[11px] text-slate-500 mt-0.5">{formatDateDisplay(rec.record_date || rec.date)}{rec.reason ? ` · 原因: ${rec.reason}` : ''}</div>
+                                          </div>
+                                          <button type="button" onClick={() => handleResolveRecord(rec.id)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-3 py-1.5 rounded-lg border border-emerald-300 text-xs transition-colors shrink-0">✓ 已补交</button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+
+                {/* 未交作业追踪榜总览 */}
+                <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-3 mb-4 gap-3">
+                    <div>
+                      <h2 className="text-base font-bold text-slate-700 flex items-center">
+                        <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full mr-2"></span>
+                        【{currentTab}】未交作业追踪排行榜 ({currentPendingRecords.length} 项)
+                      </h2>
+                    </div>
+                    <button type="button" onClick={handleGenerateMessage} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md">
+                      📋 复制本堂催交双语信息
+                    </button>
+                  </div>
+
+                  {currentPendingRecords.length === 0 ? (
+                    <div className="text-center py-8"><span className="text-4xl inline-block mb-2">🎉</span><p className="text-sm text-slate-500 font-medium">全班齐交！当前没有任何未完成作业。</p></div>
+                  ) : (
+                    <div className="space-y-4">
+                      {Object.entries(currentPendingRecords.reduce((acc, cur) => { 
+                        if (!acc[cur.student_name]) acc[cur.student_name] = []; 
+                        acc[cur.student_name].push(cur); 
+                        return acc; 
+                      }, {})).map(([studentName, records]) => (
+                        <div key={studentName} className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                          <div className="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
+                            <span className="flex items-center">
+                              <span className="mr-1.5">👤</span> {studentName} 
+                              <span className="ml-2 text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-200 font-bold">欠 {records.length} 项</span>
+                            </span>
+                            <button type="button" onClick={() => handleResolveAllForStudent(studentName)} className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg transition-colors">
+                              🎉 全部结清
+                            </button>
+                          </div>
+                          <div className="divide-y divide-slate-200/60">
+                            {records.map(record => (
+                              <div key={record.id} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                                <div className="space-y-1 flex-1">
+                                  <span className="font-semibold text-indigo-900 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded mr-2 text-[11px] inline-block">{record.homework}</span>
+                                  <span className="text-slate-500 font-medium">({formatDateDisplay(record.record_date || record.date)})</span>
+                                  {record.reason && <span className="text-slate-600 bg-white inline-block px-2 py-0.5 rounded border border-slate-100 ml-2">原因: {record.reason}</span>}
+                                </div>
+                                <button type="button" onClick={() => handleResolveRecord(record.id)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold px-3 py-1.5 rounded-lg border border-emerald-300 transition-colors shrink-0">
+                                  ✓ 已补交
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* 弹窗 A: 学生个人专属作业专卡 (点击数字红点时弹出) */}
+          {/* ========================================================================= */}
+          {studentDetailModal && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
+              <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50/50">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">👤</span>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-800">{studentDetailModal}</h3>
+                      <p className="text-[11px] text-slate-500">【{currentTab}】当前欠交作业清单</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setStudentDetailModal(null)} className="text-slate-400 hover:text-red-500 text-xl font-bold px-2">&times;</button>
+                </div>
+
+                <div className="p-5 overflow-y-auto space-y-3 bg-slate-50/30 flex-1">
+                  {currentPendingRecords.filter(r => r.student_name === studentDetailModal).length === 0 ? (
+                    <div className="text-center py-8 text-slate-500 text-sm">🎉 该生目前没有任何欠交作业，表现优秀！</div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
+                          共欠交 {currentPendingRecords.filter(r => r.student_name === studentDetailModal).length} 项
+                        </span>
+                        <button 
+                          type="button" 
+                          onClick={() => handleResolveAllForStudent(studentDetailModal)} 
+                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95"
+                        >
+                          🎉 全部标记已补交
+                        </button>
+                      </div>
+
+                      {currentPendingRecords.filter(r => r.student_name === studentDetailModal).map(rec => (
+                        <div key={rec.id} className="p-3 bg-white border border-slate-200 rounded-xl shadow-sm space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-indigo-950 text-xs">{rec.homework}</span>
+                            <span className="text-[11px] text-slate-400">{formatDateDisplay(rec.record_date || rec.date)}</span>
+                          </div>
+                          <div className="text-xs text-slate-500 flex items-center justify-between">
+                            <span>原因: <strong className="text-slate-700">{rec.reason || '没做'}</strong></span>
+                            <div className="space-x-1.5">
+                              <button type="button" onClick={() => handleDeleteRecord(rec.id)} className="text-[11px] text-red-500 hover:text-red-700 px-2 py-0.5 rounded border border-red-200">
+                                🗑️
+                              </button>
+                              <button type="button" onClick={() => handleResolveRecord(rec.id)} className="text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-300">
+                                ✓ 标记补交
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+
+                <div className="px-5 py-3 bg-white border-t border-slate-100 flex justify-end">
+                  <button type="button" onClick={() => setStudentDetailModal(null)} className="px-5 py-1.5 text-xs font-bold bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl">关闭</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 弹窗 B: 名单管理中心 (添加、改名、删除、批量粘贴导入) */}
+          {/* ========================================================================= */}
+          {isStudentMgrOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
+              <div className="bg-white w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50/50">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">👥</span>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-800">学生名册管理中心</h3>
+                      <p className="text-[11px] text-slate-500">当前正在配置科目：<strong className="text-indigo-600">【{currentTab} ({currentSubjectInfo.zh})】</strong></p>
+                    </div>
+                  </div>
+                  <button onClick={() => setIsStudentMgrOpen(false)} className="text-slate-400 hover:text-red-500 text-xl font-bold px-2">&times;</button>
+                </div>
+
+                <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/30">
+                  {/* 单个添加学生 */}
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                    <label className="block text-xs font-bold text-slate-600">➕ 单个新增学生</label>
+                    <form onSubmit={handleAddSingleStudent} className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="例如: 林明德 或 LIM MIN DE" 
+                        value={newStudentName} 
+                        onChange={(e) => setNewStudentName(e.target.value)} 
+                        className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500" 
+                      />
+                      <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm shrink-0">
+                        添加
+                      </button>
+                    </form>
+                  </div>
+
+                  {/* 批量粘贴导入 */}
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-600">📋 批量快速导入（从表格直接复制粘贴）</label>
+                      <span className="text-[10px] text-slate-400">一行一个学生姓名</span>
+                    </div>
+                    <textarea 
+                      rows="4" 
+                      placeholder={"请在此粘贴一整列学生名单，例如：\nCHAN SIN QI 郑惞嬨\nCHONG ZHI XUAN 张芷萱\nGAN WEI CHEN 颜维辰"} 
+                      value={batchStudentInput} 
+                      onChange={(e) => setBatchStudentInput(e.target.value)} 
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-indigo-500 leading-relaxed font-mono"
+                    ></textarea>
+                    <button type="button" onClick={handleBatchImportStudents} className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all">
+                      📥 一键批量导入至【{currentTab}】
+                    </button>
+                  </div>
+
+                  {/* 现有学生列表 */}
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h4 className="text-xs font-bold text-slate-700">当前科目学生名单 (共 {currentStudents.length} 人)</h4>
+                    </div>
+                    {currentStudents.length === 0 ? (
+                      <p className="text-xs text-slate-400 py-3 text-center">暂无学生，可通过上方表单录入。</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                        {currentStudents.map(student => (
+                          <div key={student.id} className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                            <span className="font-medium text-slate-700 truncate">{student.name}</span>
+                            <button 
+                              type="button" 
+                              onClick={() => handleDeleteStudent(student.id, student.name)} 
+                              className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-colors ml-2" 
+                              title="移除此学生"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="px-6 py-3 bg-white border-t border-slate-100 flex justify-end">
+                  <button type="button" onClick={() => setIsStudentMgrOpen(false)} className="px-6 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">完成关闭</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 弹窗 C: 历史总账查询与数据导出 (支持多维筛选与一键生成 Excel CSV) */}
+          {/* ========================================================================= */}
+          {isHistoryOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-3 sm:p-5 animate-fade-in">
+              <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">📜</span>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-800">历史总账检索与数据导出</h3>
+                      <p className="text-[11px] text-slate-500">支持全学期多条件筛选、实时检索与 Excel/CSV 表格导出</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setIsHistoryOpen(false)} className="text-slate-400 hover:text-red-500 text-xl font-bold px-2">&times;</button>
+                </div>
+
+                {/* 筛选控制器 */}
+                <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">科目</label>
+                    <select value={histSubject} onChange={(e) => setHistSubject(e.target.value)} className="w-full p-2 rounded-lg border border-slate-300 font-medium">
+                      <option value="all">全部科目</option>
+                      {subjectList.map(s => <option key={s} value={s}>{s} ({subjectMap[s].zh})</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">状态</label>
+                    <select value={histStatus} onChange={(e) => setHistStatus(e.target.value)} className="w-full p-2 rounded-lg border border-slate-300 font-medium">
+                      <option value="all">全部状态</option>
+                      <option value="Pending">欠交中 (Pending)</option>
+                      <option value="Resolved">已补交 (Resolved)</option>
+                      <option value="Event">事件备忘 (Event)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">关键词 (姓名/作业)</label>
+                    <input type="text" placeholder="输入搜索..." value={histKeyword} onChange={(e) => setHistKeyword(e.target.value)} className="w-full p-2 rounded-lg border border-slate-300" />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">开始日期</label>
+                    <input type="date" value={histStartDate} onChange={(e) => setHistStartDate(e.target.value)} className="w-full p-2 rounded-lg border border-slate-300" />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">结束日期</label>
+                    <input type="date" value={histEndDate} onChange={(e) => setHistEndDate(e.target.value)} className="w-full p-2 rounded-lg border border-slate-300" />
+                  </div>
+                </div>
+
+                {/* 数据表格区域 */}
+                <div className="p-4 overflow-y-auto flex-1">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-slate-600">检索结果：共找到 {filteredHistoryRecords.length} 条记录</span>
+                    <button type="button" onClick={() => exportToCSV(filteredHistoryRecords)} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-1 transition-all active:scale-95">
+                      <span>📥 导出筛选结果为 CSV (Excel)</span>
+                    </button>
+                  </div>
+
+                  {filteredHistoryRecords.length === 0 ? (
+                    <div className="text-center py-16 text-slate-400 text-sm">没有匹配到符合条件的记录。</div>
+                  ) : (
+                    <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                      <table className="w-full text-left text-xs text-slate-600 divide-y divide-slate-200">
+                        <thead className="bg-slate-100 font-bold text-slate-700">
+                          <tr>
+                            <th className="p-2.5">日期</th>
+                            <th className="p-2.5">科目</th>
+                            <th className="p-2.5">学生姓名</th>
+                            <th className="p-2.5">作业 / 事件名称</th>
+                            <th className="p-2.5">原因 / 备注</th>
+                            <th className="p-2.5">状态</th>
+                            <th className="p-2.5 text-right">操作</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200/60 bg-white">
+                          {filteredHistoryRecords.slice(0, 150).map(row => (
+                            <tr key={row.id} className="hover:bg-slate-50">
+                              <td className="p-2.5 whitespace-nowrap text-slate-500">{formatDateDisplay(row.record_date || row.date)}</td>
+                              <td className="p-2.5 font-bold text-indigo-700">{row.subject}</td>
+                              <td className="p-2.5 font-medium text-slate-800">{row.student_name}</td>
+                              <td className="p-2.5 font-semibold text-slate-900">{row.homework}</td>
+                              <td className="p-2.5 text-slate-500">{row.reason || '-'}</td>
+                              <td className="p-2.5">
+                                {row.status === 'Resolved' ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">✓ 已补交</span>
+                                ) : row.status === 'Pending' ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">欠交中</span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">事件备忘</span>
+                                )}
+                              </td>
+                              <td className="p-2.5 text-right">
+                                <button type="button" onClick={() => handleDeleteRecord(row.id)} className="text-red-500 hover:text-red-700 p-1">🗑️</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {filteredHistoryRecords.length > 150 && (
+                        <div className="p-2.5 text-center text-[11px] text-slate-400 bg-slate-50">
+                          仅预览前 150 条记录。如需完整全量数据，请点击上方“导出 CSV (Excel)”直接下载！
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="px-6 py-3 bg-white border-t border-slate-100 flex justify-end">
+                  <button type="button" onClick={() => setIsHistoryOpen(false)} className="px-6 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">关闭</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 弹窗 D: 科目配置管理 (支持添加、修改类型、安全删除) */}
+          {/* ========================================================================= */}
+          {isSettingsOpen && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in">
+              <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-800">⚙️ 管理科目配置</h3>
+                    <p className="text-[11px] text-slate-500">可设定科目代号、名称，并自由切换为【作业追踪类】或【事件备忘类】</p>
+                  </div>
+                  <button onClick={() => setIsSettingsOpen(false)} className="text-slate-400 hover:text-red-500 text-xl font-bold px-2">&times;</button>
+                </div>
+
+                <div className="p-6 overflow-y-auto bg-slate-50/50 flex-1 space-y-3">
+                  {tempSubjects.map((sub, idx) => (
+                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-white p-3 border border-slate-200 rounded-xl shadow-sm items-center">
+                      <div className="sm:col-span-2">
+                        <label className="block sm:hidden text-[10px] text-slate-400 font-bold mb-1">代号</label>
+                        <input type="text" placeholder="代号" value={sub.code} onChange={(e) => handleSubjectRowChange(idx, 'code', e.target.value.toUpperCase())} className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg uppercase font-bold" />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="block sm:hidden text-[10px] text-slate-400 font-bold mb-1">中文名称</label>
+                        <input type="text" placeholder="中文" value={sub.zh} onChange={(e) => handleSubjectRowChange(idx, 'zh', e.target.value)} className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="block sm:hidden text-[10px] text-slate-400 font-bold mb-1">国文名称</label>
+                        <input type="text" placeholder="国文" value={sub.ms} onChange={(e) => handleSubjectRowChange(idx, 'ms', e.target.value)} className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg" />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="block sm:hidden text-[10px] text-slate-400 font-bold mb-1">科目属性</label>
+                        <select value={sub.type || 'homework'} onChange={(e) => handleSubjectRowChange(idx, 'type', e.target.value)} className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg font-bold">
+                          <option value="homework">📚 作业追踪类</option>
+                          <option value="event">📌 事件备忘类</option>
+                        </select>
+                      </div>
+                      <div className="sm:col-span-1 flex justify-end">
+                        <button type="button" onClick={() => handleDeleteSubjectRow(sub.code, idx)} className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors" title="彻底删除此科目">
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button type="button" onClick={() => setTempSubjects([...tempSubjects, { code: '', zh: '', ms: '', type: 'homework' }])} className="mt-4 w-full py-3 border-2 border-dashed border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-xs transition-colors">
+                    ➕ 新增一行科目
+                  </button>
+                </div>
+
+                <div className="px-6 py-4 bg-white border-t border-slate-100 flex justify-end space-x-3">
+                  <button type="button" onClick={() => setIsSettingsOpen(false)} className="px-5 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl">取消</button>
+                  <button type="button" onClick={saveSettings} className="px-6 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md">💾 确认保存</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const reactRoot = ReactDOM.createRoot(rootElement);
+    reactRoot.render(<App />);
+  </script>
+</body>
+</html>
