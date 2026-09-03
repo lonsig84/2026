@@ -19,7 +19,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo } = React;
+    const { useState, useEffect, useRef } = React;
 
     const SUPABASE_URL = "https://fmecxejzfagtdlxcxymk.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable__WW7bNpZdQUOXDFDEBDBYQ_-6bhu76T"; 
@@ -479,28 +479,26 @@
         showToast('📥 表格已成功导出为 CSV！');
       };
 
-      // 历史记录多维筛选
-      const filteredHistoryRecords = useMemo(() => {
-        return allRecords.filter(r => {
-          if (histSubject !== 'all' && r.subject !== histSubject) return false;
-          if (histStatus !== 'all' && r.status !== histStatus) return false;
-          if (histKeyword.trim()) {
-            const kw = histKeyword.trim().toLowerCase();
-            const sName = (r.student_name || '').toLowerCase();
-            const hw = (r.homework || '').toLowerCase();
-            if (!sName.includes(kw) && !hw.includes(kw)) return false;
-          }
-          if (histStartDate) {
-            const rDate = r.record_date || r.date;
-            if (rDate < histStartDate) return false;
-          }
-          if (histEndDate) {
-            const rDate = r.record_date || r.date;
-            if (rDate > histEndDate) return false;
-          }
-          return true;
-        });
-      }, [allRecords, histSubject, histStatus, histKeyword, histStartDate, histEndDate]);
+      // 历史记录多维筛选（纯原生 JS 运算，无任何 Hook 计数冲突）
+      const filteredHistoryRecords = allRecords.filter(r => {
+        if (histSubject !== 'all' && r.subject !== histSubject) return false;
+        if (histStatus !== 'all' && r.status !== histStatus) return false;
+        if (histKeyword.trim()) {
+          const kw = histKeyword.trim().toLowerCase();
+          const sName = (r.student_name || '').toLowerCase();
+          const hw = (r.homework || '').toLowerCase();
+          if (!sName.includes(kw) && !hw.includes(kw)) return false;
+        }
+        if (histStartDate) {
+          const rDate = r.record_date || r.date;
+          if (rDate < histStartDate) return false;
+        }
+        if (histEndDate) {
+          const rDate = r.record_date || r.date;
+          if (rDate > histEndDate) return false;
+        }
+        return true;
+      });
 
       // 生成通知文案
       const handleGenerateMessage = () => {
@@ -666,7 +664,6 @@
                           >
                             <span className="truncate text-xs flex-1 mr-1">{student.name}</span>
                             
-                            {/* 未交数字红色徽章 - 点击独立弹出个人专卡 */}
                             {!isEventSubject && pendingCount > 0 && (
                               <span 
                                 onClick={(e) => {
@@ -956,7 +953,7 @@
                   {currentPendingRecords.filter(r => r.student_name === studentDetailModal).length === 0 ? (
                     <div className="text-center py-8 text-slate-500 text-sm">🎉 该生目前没有任何欠交作业，表现优秀！</div>
                   ) : (
-                    <>
+>                     <>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-full">
                           共欠交 {currentPendingRecords.filter(r => r.student_name === studentDetailModal).length} 项
@@ -1225,6 +1222,7 @@
                       </div>
                       <div className="sm:col-span-3">
                         <label className="block sm:hidden text-[10px] text-slate-400 font-bold mb-1">科目属性</label>
+                        <select value={-slate-400 font-bold mb-1">科目属性</label>
                         <select value={sub.type || 'homework'} onChange={(e) => handleSubjectRowChange(idx, 'type', e.target.value)} className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg font-bold">
                           <option value="homework">📚 作业追踪类</option>
                           <option value="event">📌 事件备忘类</option>
