@@ -8,7 +8,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
-  <!-- 引入 Supabase 官方 SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -23,7 +22,7 @@
     const { useState, useEffect, useRef } = React;
 
     // =========================================================================
-    // ⚠️ 请填入你的 Supabase 项目参数
+    // 已填入你的 Supabase 项目配置
     // =========================================================================
     const SUPABASE_URL = "https://fmecxejzfagtdlxcxymk.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable__WW7bNpZdQUOXDFDEBDBYQ_-6bhu76T"; 
@@ -64,7 +63,7 @@
         setTimeout(() => setToast(null), 3000);
       };
 
-      // 处理登录
+      // 登录验证
       const handleLogin = (e) => {
         e.preventDefault();
         if (passwordInput === SYSTEM_PASSWORD) {
@@ -76,7 +75,7 @@
         }
       };
 
-      // 从 Supabase 加载初始数据
+      // 从 Supabase 载入数据
       const loadInitialData = async () => {
         setLoading(true);
         try {
@@ -87,7 +86,7 @@
           ]);
 
           if (subRes.error || stuRes.error || recRes.error) {
-            showToast('❌ 读取数据库失败: ' + (subRes.error?.message || stuRes.error?.message || recRes.error?.message));
+            showToast('❌ 数据库连接异常: ' + (subRes.error?.message || stuRes.error?.message || recRes.error?.message));
             setLoading(false);
             return;
           }
@@ -102,7 +101,7 @@
 
           setPendingRecords((recRes.data || []).map(r => ({
             id: r.id,
-            date: r.record_date, // YYYY-MM-DD
+            date: r.record_date,
             subject: r.subject,
             homework: r.homework,
             student: r.student_name,
@@ -113,12 +112,12 @@
           if (subjects.length > 0 && !currentTab) setCurrentTab(subjects[0]);
         } catch (err) {
           console.error(err);
-          showToast('❌ 网络错误，请重试');
+          showToast('❌ 数据加载失败，请检查网络');
         }
         setLoading(false);
       };
 
-      // 实时订阅 Realtime（多设备即时同步：手机改了，电脑自动变）
+      // Supabase 实时推送 (手机端修改，电脑端自动同步)
       useEffect(() => {
         if (!isAuthenticated) return;
         const channel = supabase
@@ -133,7 +132,7 @@
         };
       }, [isAuthenticated]);
 
-      // 日期计算辅助函数 (支持 YYYY-MM-DD 与 DD/MM/YYYY)
+      // 日期计算工具
       const parseDate = (dateStr) => {
         if (!dateStr) return null;
         if (dateStr.includes('-')) {
@@ -247,7 +246,7 @@
         setSelectedStudents({ ...selectedStudents, [studentName]: reason });
       };
 
-      // 提交到 Supabase
+      // 提交到 Supabase 数据库
       const handleSubmit = async (e) => {
         e.preventDefault();
         if (!recordDate) return showToast('⚠️ 请选择日期！');
@@ -289,7 +288,7 @@
         setLoading(false);
       };
 
-      // 批量将记录标记为 Resolved (已补交)
+      // 批量处理已补交（防抖合并同步）
       const flushResolveQueue = async () => {
         const ids = Array.from(resolveQueueRef.current);
         if (ids.length === 0) return;
@@ -322,7 +321,7 @@
           return next;
         });
 
-        // 界面秒删，流畅无卡顿
+        // 立即从页面上移除，极致顺滑
         setPendingRecords(prev => prev.filter(r => r.id !== recordId));
         resolveQueueRef.current.add(recordId);
 
@@ -330,7 +329,7 @@
         resolveTimerRef.current = setTimeout(flushResolveQueue, 500);
       };
 
-      // 生成催交/表扬信息 (支持双语)
+      // 生成双语 WhatsApp 催交/表扬通知
       const handleGenerateMessage = () => {
         const todayStr = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/');
         const subInfo = subjectMap[currentTab] || { zh: currentTab, ms: currentTab };
