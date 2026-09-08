@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rekod Bacaan – 8 September 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e8f4fd;
+    --blue: #4a90d9;
+    --blue-dark: #2c6fad;
+    --green: #5bbf8a;
+    --green-dark: #3a9a68;
+    --orange: #f5a623;
+    --pink: #f06292;
+    --purple: #7c5cbf;
+    --text: #2d3a4a;
+    --text-light: #6b7a8d;
+    --border: #c8ddf0;
+    --drag-bg: #fff8e1;
+    --drag-border: #f5a623;
+    --drop-filled: #d4edda;
+    --shadow: 0 4px 16px rgba(74,144,217,0.13);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #dbeeff 0%, #e8f4fd 50%, #edfaf3 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding-bottom: 60px;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+    color: white; padding: 20px 32px 16px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 4px 20px rgba(44,111,173,.3);
+  }
+  header .logo { font-size: 2.2rem; }
+  header h1 { font-family:'Baloo 2',sans-serif; font-size:1.45rem; font-weight:800; line-height:1.2; }
+  header p { font-size:.86rem; opacity:.85; margin-top:2px; }
+
+  /* Steps */
+  .steps {
+    display:flex; background:#fff;
+    border-bottom:2px solid var(--border); padding:0 32px; overflow-x:auto;
+  }
+  .step {
+    display:flex; align-items:center; gap:8px;
+    padding:11px 18px; font-size:.83rem; font-weight:700;
+    color:var(--text-light); white-space:nowrap;
+    border-bottom:3px solid transparent;
+  }
+  .step.on { color:var(--blue-dark); border-bottom-color:var(--blue); }
+  .step .num {
+    width:21px; height:21px; border-radius:50%;
+    background:var(--border); color:var(--text-light);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.76rem; font-weight:900;
+  }
+  .step.on .num { background:var(--blue); color:white; }
+  .sarr { color:var(--border); font-weight:700; padding:11px 2px; line-height:44px; }
+
+  /* Layout */
+  main {
+    max-width:1200px; margin:26px auto; padding:0 22px;
+    display:grid; grid-template-columns:290px 1fr;
+    gap:26px; align-items:start;
+  }
+
+  /* Left panel */
+  .sel-panel {
+    background:white; border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+    position:sticky; top:18px;
+  }
+  .panel-hd {
+    background:linear-gradient(135deg, var(--purple), #a07ed4);
+    color:white; padding:13px 17px;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:.97rem;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sel-body { padding:16px; }
+  .lbl {
+    font-size:.8rem; font-weight:800; color:var(--text-light);
+    text-transform:uppercase; letter-spacing:.05em;
+    margin-bottom:5px; margin-top:13px;
+  }
+  .lbl:first-child { margin-top:0; }
+
+  select {
+    width:100%; padding:10px 13px;
+    border:2px solid var(--border); border-radius:10px;
+    font-family:'Nunito',sans-serif; font-size:.93rem; font-weight:700;
+    color:var(--text); background:var(--sky);
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a90d9' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 11px center; cursor:pointer;
+  }
+  select:focus { outline:none; border-color:var(--blue); }
+
+  .book-list { margin-top:12px; display:flex; flex-direction:column; gap:7px; }
+  .book-btn {
+    padding:9px 13px; border-radius:10px; border:2px solid var(--border);
+    background:var(--sky); text-align:left; cursor:pointer;
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:.86rem; color:var(--text);
+    display:flex; align-items:center; gap:8px; transition:all .18s;
+  }
+  .book-btn:hover { border-color:var(--blue); background:#dbeeff; }
+  .book-btn.active { border-color:var(--blue-dark); background:var(--blue-dark); color:white; }
+  .book-btn .bnum {
+    min-width:23px; height:23px; border-radius:50%; background:var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.76rem; font-weight:900; flex-shrink:0;
+  }
+  .book-btn.active .bnum { background:rgba(255,255,255,.28); color:white; }
+  .btitle { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+
+  .hint-box {
+    background:linear-gradient(135deg,#fff8e1,#fff3cd);
+    border:2px solid var(--orange); border-radius:10px;
+    padding:11px 13px; font-size:.8rem; color:#8a6300;
+    font-weight:600; line-height:1.6; margin-top:14px;
+  }
+  .hint-box strong { font-weight:900; }
+
+  /* Right: info panel */
+  .info-panel {
+    background:white; border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+    animation:fadeUp .3s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .info-hd {
+    background:linear-gradient(135deg, var(--orange), #f7bc54);
+    color:white; padding:13px 18px;
+    font-family:'Baloo 2',sans-serif; font-weight:800; font-size:.97rem;
+    display:flex; align-items:center; gap:8px;
+  }
+
+  /* Row list */
+  .row-list { padding:8px 0; }
+
+  .info-row {
+    display:grid;
+    grid-template-columns:175px 1fr;
+    align-items:center;
+    border-bottom:1px solid #eef4fb;
+    min-height:50px;
+  }
+  .info-row:last-child { border-bottom:none; }
+  .info-row.tall { align-items:flex-start; min-height:88px; }
+
+  .row-lbl {
+    display:flex; align-items:center; gap:8px;
+    padding:10px 15px;
+    background:#f7fbff; border-right:2px solid var(--border);
+    font-size:.81rem; font-weight:800; color:var(--text-light);
+    height:100%;
+  }
+  .info-row.tall .row-lbl { padding-top:13px; align-items:flex-start; }
+  .info-row.grey .row-lbl { background:#f6f6f6; border-right-color:#ddd; color:#bbb; }
+
+  .rnum {
+    min-width:22px; height:22px; border-radius:50%;
+    background:var(--blue); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:900; flex-shrink:0;
+  }
+  .info-row.grey .rnum { background:#bbb; }
+
+  .row-val {
+    display:flex; align-items:center; padding:7px 14px;
+    flex-wrap:wrap; gap:6px;
+  }
+  .info-row.tall .row-val { align-items:flex-start; padding-top:11px; padding-bottom:11px; }
+
+  /* Static filled value */
+  .static-val {
+    display:inline-flex; align-items:center; gap:6px;
+    background:#eaf7ef; border:2px solid var(--green);
+    border-radius:9px; padding:7px 13px;
+    font-weight:700; font-size:.88rem; color:var(--text);
+  }
+
+  /* Draggable chip */
+  .drag-chip {
+    display:inline-flex; align-items:flex-start; gap:7px;
+    background:var(--drag-bg); border:2.5px dashed var(--drag-border);
+    border-radius:9px; padding:7px 13px;
+    cursor:grab; font-weight:700; font-size:.88rem; color:#5a3800;
+    user-select:none; -webkit-user-select:none;
+    transition:all .18s; max-width:100%;
+    animation:popIn .2s ease both; line-height:1.45;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform:scale(.88); }
+    to   { opacity:1; transform:scale(1); }
+  }
+  .drag-chip:hover { background:#ffe8a0; transform:translateY(-1px); box-shadow:0 3px 10px rgba(245,166,35,.22); }
+  .drag-chip:active { cursor:grabbing; }
+  .drag-icon { font-size:.9rem; opacity:.5; flex-shrink:0; margin-top:1px; }
+  .chip-text { word-break:break-word; }
+
+  /* Grey rows */
+  .grey-note { font-size:.82rem; color:#bbb; font-style:italic; font-weight:600; }
+
+  /* Toggle */
+  .tog-grp { display:flex; border-radius:9px; overflow:hidden; border:2px solid var(--border); }
+  .tog-btn {
+    flex:1; padding:8px 10px; border:none;
+    background:var(--sky); font-family:'Nunito',sans-serif;
+    font-weight:800; font-size:.86rem; color:var(--text-light); cursor:pointer; transition:all .18s;
+  }
+  .tog-btn.on { background:var(--purple); color:white; }
+
+  /* Kategori */
+  .kat-sel {
+    padding:8px 30px 8px 11px;
+    border:2px solid var(--border); border-radius:9px;
+    font-family:'Nunito',sans-serif; font-size:.88rem; font-weight:700;
+    color:var(--text); background:var(--sky);
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%234a90d9' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 9px center;
+  }
+  .kat-sel.filled { border-color:var(--green); background-color:#eaf7ef; }
+
+  /* Bahasa */
+  .bhs-grp { display:flex; gap:6px; flex-wrap:wrap; }
+  .bhs-btn {
+    padding:6px 11px; border:2px solid var(--border); border-radius:8px;
+    background:var(--sky); font-family:'Nunito',sans-serif;
+    font-weight:700; font-size:.8rem; color:var(--text-light); cursor:pointer; transition:all .15s;
+  }
+  .bhs-btn.on { border-color:var(--green-dark); background:var(--green-dark); color:white; }
+
+  /* Empty state */
+  .empty-st { text-align:center; padding:56px 20px; color:var(--text-light); }
+  .empty-st .em { font-size:3.2rem; margin-bottom:12px; }
+  .empty-st p { font-weight:700; font-size:.97rem; }
+  .empty-st small { font-size:.8rem; opacity:.65; }
+
+  @media(max-width:860px){
+    main { grid-template-columns:1fr; }
+    .sel-panel { position:static; }
+    .info-row { grid-template-columns:130px 1fr; }
+  }
+  @media(max-width:480px){
+    main { padding:0 10px; }
+    .info-row { grid-template-columns:100px 1fr; }
+    .row-lbl { font-size:.72rem; padding:8px 9px; }
+  }
+
+  /* Improved drag/copy controls */
+  .drag-wrap { display:flex; align-items:flex-start; gap:8px; width:100%; }
+  .drag-wrap .drag-chip { flex:1; }
+  .drag-chip.dragging { opacity:.35; transform:scale(.98); }
+  .copy-btn {
+    border:2px solid #b9d5ee; background:#eef7ff; color:#2c6fad; border-radius:8px;
+    padding:7px 10px; font-family:'Nunito',sans-serif; font-size:.76rem; font-weight:800;
+    cursor:pointer; white-space:nowrap; transition:.15s ease;
+  }
+  .copy-btn:hover { border-color:#4a90d9; background:#dbeeff; }
+  .copy-btn:active { transform:scale(.96); }
+  .copy-toast {
+    position:fixed; left:50%; bottom:30px; transform:translate(-50%,20px); background:#2d3a4a;
+    color:white; padding:11px 20px; border-radius:30px; font-family:'Nunito',sans-serif;
+    font-size:.88rem; font-weight:800; box-shadow:0 6px 25px rgba(0,0,0,.22); opacity:0;
+    pointer-events:none; transition:opacity .2s ease,transform .2s ease; z-index:99999;
+  }
+  .copy-toast.show { opacity:1; transform:translate(-50%,0); }
+  @media(max-width:600px){ .drag-wrap{flex-direction:column;} .copy-btn{align-self:flex-start;} }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📚</div>
+  <div>
+    <h1>Rekod Bacaan Saya</h1>
+    <p>Tarikh: 8 September 2026 &nbsp;•&nbsp; Pilih nama dan buku, kemudian seret maklumat ke laman web AINS</p>
+  </div>
+</header>
+
+<div class="steps">
+  <div class="step on"><span class="num">1</span> Pilih Nama</div>
+  <div class="sarr">›</div>
+  <div class="step on"><span class="num">2</span> Pilih Buku</div>
+  <div class="sarr">›</div>
+  <div class="step on"><span class="num">3</span> Seret ke AINS</div>
+</div>
+
+<main>
+  <!-- LEFT -->
+  <div class="sel-panel">
+    <div class="panel-hd">🎓 Pilih Murid &amp; Buku</div>
+    <div class="sel-body">
+      <div class="lbl">Nama Murid</div>
+      <select id="stuSel" onchange="onStuChange()">
+        <option value="">— Pilih nama —</option>
+      </select>
+      <div id="bookLbl" class="lbl" style="display:none">Buku ke-</div>
+      <div class="book-list" id="bookList"></div>
+      <div class="hint-box" id="hintBox" style="display:none">
+        <strong>💡 Cara guna:</strong><br>
+        Klik dan <strong>seret / drag</strong> maklumat ke AINS. Jika sesuatu kotak tidak menerima drag, klik <strong>📋 Salin</strong> kemudian tampal dengan <strong>Ctrl+V</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="info-panel" id="infoPanel">
+    <div class="info-hd">📦 Maklumat Buku</div>
+    <div id="infoBody">
+      <div class="empty-st">
+        <div class="em">👆</div>
+        <p>Pilih nama dan buku dahulu</p>
+        <small>Maklumat akan muncul di sini untuk diseret</small>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const DATA = {"徐义恒":[{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"}],"周宇晗":[{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"}],"周宇婧":[{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"}],"颜嘉丞":[{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"}],"吴宏泽":[{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"}],"李蒿芋":[{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"}],"李仲":[{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"}],"廖思彤":[{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"}],"梁添杰":[{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"}],"彭芯湉":[{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"}],"伊娜拉":[{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"}],"周丽思":[{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"}],"希娃":[{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"}],"陈愷熠":[{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"}],"王婉灵":[{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"}],"余淽颖":[{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"},{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"}],"YAP KAI LE":[{"Tajuk":"钱从哪儿来","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"36","Penulis":"王丽娜","Penerbit":"重庆出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事从孩子日常生活中常见的买东西开始，引导读者思考钱究竟从哪里来。书中说明大人通过工作和劳动获得收入，而家庭的钱需要用来支付食物、交通、住房和学习等开销。孩子也认识到想买的东西不一定都必须买，应该先分清需要和想要，并学习储蓄、计划和合理消费，懂得每一分钱都来自辛苦劳动。","Pengajaran":"我们要珍惜父母辛苦赚来的钱，学会分辨需要和想要，合理消费，并养成储蓄和不浪费的习惯。","Tarikh":"8.9.2026"},{"Tajuk":"勇士","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"文森特·乐费福尔","Penerbit":"海豚出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的小主人公在成长过程中遇到让自己害怕和不安的事情。起初，他以为真正的勇士必须什么都不怕，也不能表现软弱。经过一次特别的经历后，他发现勇敢并不是没有恐惧，而是在害怕时仍愿意尝试、寻求帮助和继续前进。他逐渐学会相信自己，也懂得承认害怕并不丢脸，每完成一个小挑战，都能让自己变得更坚强、更有信心。","Pengajaran":"真正的勇敢不是从不害怕，而是在害怕时仍愿意尝试、求助和坚持，用行动一步步克服困难。","Tarikh":"8.9.2026"},{"Tajuk":"为什么大家不爱和我玩","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"坂本野湖","Penerbit":"化学工业出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事中的孩子很想和大家一起玩，却常常因为自己的说话方式、行为或不懂得顾及别人而被伙伴拒绝。他感到委屈和孤单，于是开始观察别人相处的方法，也认真听取提醒。慢慢地，他学会先询问对方的意愿，遵守游戏规则，轮流分享，不抢东西，也不随便嘲笑别人。当他愿意改变并尊重伙伴后，大家也更愿意接纳他一起游戏。","Pengajaran":"想交朋友要懂得尊重别人、遵守规则、轮流分享和认真倾听。愿意改正不合适的行为，友谊才会更好。","Tarikh":"8.9.2026"},{"Tajuk":"如果地球被我们吃掉了","Kategori":"Fiksyen","Bilangan Mukasurat":"36","Penulis":"阿兰·塞尔","Penerbit":"河北少年儿童出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事用夸张而富有想象力的方式提出一个重要问题：如果人类不断消耗森林、动物、水源、空气和各种自然资源，地球最后会变成什么样子？书中让孩子看见环境破坏可能带来的后果，也提醒大家地球上的资源并不是取之不尽的。每个人都可以从少浪费、节约水电、减少垃圾、保护动物和植物开始，为地球保留更多绿色与美好。","Pengajaran":"地球资源有限，我们要珍惜水源、森林和动物，减少浪费与污染，用实际行动共同保护生活环境。","Tarikh":"8.9.2026"},{"Tajuk":"我想你","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"中国人口出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事围绕孩子对亲人或朋友的思念展开。当重要的人暂时不在身边时，孩子会觉得孤单、难过，也会不停想起一起相处的快乐时光。通过回忆、画画、写信、拥抱熟悉的物品和与家人倾诉，孩子慢慢明白思念是一种自然的情感。即使不能马上见面，爱和关心仍然存在，等待重逢的过程也可以充满希望与温暖。","Pengajaran":"想念别人时可以勇敢表达感受，用合适的方法安慰自己，并相信真正的关心不会因为距离而消失。","Tarikh":"8.9.2026"},{"Tajuk":"红气球不见了","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"爱丽丝·布歇尔-阿凯","Penerbit":"上海人民美术出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"孩子非常喜欢自己的红气球，可是在玩耍时气球突然不见了。他焦急地四处寻找，担心再也找不回来，并经历失望、难过和不安。寻找的过程中，他遇到不同的人和事情，也学会仔细回想、观察周围并向别人求助。无论最后是否找回气球，这段经历让他明白，面对失去时可以表达难过，但也要慢慢接受变化，继续珍惜身边的人和新的快乐。","Pengajaran":"心爱的东西丢失时可以难过，但要冷静寻找并学会接受结果。珍惜拥有的事物，也珍惜身边的人。","Tarikh":"8.9.2026"},{"Tajuk":"10个小怪物历险记","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"迈克·布朗洛","Penerbit":"外语教学与研究出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"十个性格各异的小怪物一起踏上有趣的冒险旅程。他们在路上遇到陌生环境、突然的困难和各种需要合作完成的任务。虽然大家有时意见不同，也会害怕或闹别扭，但他们学会互相帮助、轮流想办法，并发挥各自的长处。经历一次次挑战后，小怪物们终于明白，好朋友最重要的是彼此信任、团结合作和共同面对问题。","Pengajaran":"遇到困难时要勇敢面对，也要珍惜朋友，学会合作、互相帮助和尊重彼此不同的想法。","Tarikh":"8.9.2026"},{"Tajuk":"发火","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"中川宏贵","Penerbit":"河北教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"故事描写孩子生气时的感受和表现。遇到不顺心的事情后，怒气像火一样越来越大，让人想大声喊叫、哭闹，甚至做出伤害别人或自己的举动。随着情绪慢慢平静，孩子开始认识到生气本身并不可怕，重要的是学会察觉自己的情绪，暂停行动，深呼吸、离开冲突现场或向可信任的人说明原因，再用适当方式解决问题。","Pengajaran":"生气是正常的情绪，但不能用伤害别人的方式发泄。我们应先冷静，再表达感受和解决问题。","Tarikh":"8.9.2026"},{"Tajuk":"小熊大冒险","Kategori":"Fiksyen","Bilangan Mukasurat":"32","Penulis":"-","Penerbit":"-","Bahasa":"Lain-lain (中文)","Sinopsis":"小熊离开熟悉的地方，踏上一段充满新鲜事物的冒险旅程。一路上，它遇到不同的道路、陌生的朋友和突如其来的困难，有时感到兴奋，有时也会害怕和犹豫。小熊在一次次尝试中学会观察环境、思考办法，并在需要时接受别人的帮助。最后，它不但完成了旅程，也发现自己比想象中更勇敢，懂得探索世界需要好奇心、谨慎和坚持。","Pengajaran":"探索新事物要有好奇心和勇气，也要注意安全、认真思考，并在遇到困难时坚持或主动寻求帮助。","Tarikh":"8.9.2026"},{"Tajuk":"嗓门不是用来嚷嚷的","Kategori":"Bukan Fiksyen","Bilangan Mukasurat":"32","Penulis":"伊丽莎白·弗迪克","Penerbit":"贵州教育出版社","Bahasa":"Lain-lain (中文)","Sinopsis":"这本书通过孩子熟悉的家庭、学校和游戏情境，说明声音有许多不同的用途。大声说话在紧急求助或提醒危险时很重要，但如果为了抢话、发脾气或引起注意而一直嚷嚷，会让别人不舒服，也容易造成争吵。孩子从故事中学习根据场合调整音量，轮流说话，先听别人表达，并用清楚、礼貌而平静的声音说出自己的需要。","Pengajaran":"我们要根据场合控制音量，学会认真倾听和轮流说话，用礼貌平静的声音表达自己的需要。","Tarikh":"8.9.2026"}]};
+
+// Teks Sinopsis dan Pengajaran yang dipanjangkan serta diperbetulkan mengikut bahasa buku.
+const BOOK_TEXT = {};
+
+function getBookData(bk) {
+  const fixed = BOOK_TEXT[bk.Tajuk];
+  return fixed ? { ...bk, Sinopsis: fixed.Sinopsis, Pengajaran: fixed.Pengajaran } : bk;
+}
+
+// Init student dropdown
+(function(){
+  const s = document.getElementById('stuSel');
+  Object.keys(DATA).sort().forEach(n => {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n; s.appendChild(o);
+  });
+})();
+
+function onStuChange() {
+  const name = document.getElementById('stuSel').value;
+  if (!name) { clearAll(); return; }
+  document.getElementById('bookLbl').style.display = 'block';
+  document.getElementById('hintBox').style.display = 'block';
+  const bl = document.getElementById('bookList');
+  bl.innerHTML = '';
+  DATA[name].forEach((bk, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'book-btn';
+    btn.innerHTML = `<span class="bnum">${i+1}</span><span class="btitle">${esc(bk.Tajuk)}</span>`;
+    btn.onclick = () => {
+      document.querySelectorAll('.book-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+      renderInfo(bk);
+    };
+    bl.appendChild(btn);
+  });
+  renderInfo(null);
+}
+
+function clearAll() {
+  document.getElementById('bookLbl').style.display='none';
+  document.getElementById('hintBox').style.display='none';
+  document.getElementById('bookList').innerHTML='';
+  renderInfo(null);
+}
+
+function renderInfo(bk) {
+  const body = document.getElementById('infoBody');
+  if (!bk) {
+    body.innerHTML = `<div class="empty-st"><div class="em">👆</div><p>Pilih nama dan buku dahulu</p><small>Maklumat akan muncul di sini untuk diseret</small></div>`;
+    return;
+  }
+
+  // Gunakan teks yang telah diperbetulkan dan dipanjangkan.
+  bk = getBookData(bk);
+
+  const penulis = (!bk.Penulis || bk.Penulis === '-') ? '-' : bk.Penulis;
+  const kat = bk.Kategori || '';
+  const bhs = bk.Bahasa || '';
+
+  // Build rows in required order
+  // Each row: [num, label, content_html, greyClass, tallClass]
+  function dragRow(val) {
+    const safe = esc(val);
+    return `<div class="drag-wrap">
+      <div class="drag-chip" draggable="true" data-value="${safe}"
+        ondragstart="ds(event)" ondragend="de(event)"
+        ondblclick="copyFromChip(this)" title="Seret ke AINS atau klik dua kali untuk salin">
+        <span class="drag-icon">⠿</span>
+        <span class="chip-text">${safe}</span>
+      </div>
+      <button type="button" class="copy-btn" onclick="copyFromButton(this)">📋 Salin</button>
+    </div>`;
+  }
+
+  const bahsaOpts = ['Bahasa Melayu','English','Lain-lain (中文)'];
+  const bhsBtns = bahsaOpts.map(o =>
+    `<button class="bhs-btn${o===bhs?' on':''}" onclick="setBhs(this)">${esc(o)}</button>`
+  ).join('');
+
+  const rows = [
+    { n:1,  lbl:'Tarikh',             cls:'',      tall:false,
+      val: `<span class="static-val">📅 ${esc(bk.Tarikh)}</span>` },
+    { n:2,  lbl:'Tajuk',              cls:'',      tall:false,
+      val: dragRow(bk.Tajuk) },
+    { n:3,  lbl:'Jenis Buku',         cls:'',      tall:false,
+      val: `<div class="tog-grp"><button class="tog-btn on" onclick="togFiz(this)">Fizikal</button><button class="tog-btn" onclick="togEbk(this)">E-Buku</button></div>` },
+    { n:4,  lbl:'Kategori',           cls:'',      tall:false,
+      val: `<select class="kat-sel${kat?' filled':''}" onchange="this.classList.toggle('filled',this.value!=='')">
+              <option value="">Pilih satu</option>
+              <option value="Fiksyen"${kat==='Fiksyen'?' selected':''}>Fiksyen</option>
+              <option value="Bukan Fiksyen"${kat==='Bukan Fiksyen'?' selected':''}>Bukan Fiksyen</option>
+            </select>` },
+    { n:5,  lbl:'Bilangan Mukasurat', cls:'',      tall:false,
+      val: dragRow(bk['Bilangan Mukasurat']) },
+    { n:6,  lbl:'ISBN',               cls:' grey', tall:false,
+      val: `<span class="grey-note">— Tidak diperlukan —</span>` },
+    { n:7,  lbl:'Penulis',            cls:'',      tall:false,
+      val: dragRow(penulis) },
+    { n:8,  lbl:'Penerbit',           cls:'',      tall:false,
+      val: dragRow(bk.Penerbit) },
+    { n:9,  lbl:'Tahun Terbitan',     cls:' grey', tall:false,
+      val: `<span class="grey-note">— Tidak diperlukan —</span>` },
+    { n:10, lbl:'Bahasa',             cls:'',      tall:false,
+      val: `<div class="bhs-grp">${bhsBtns}</div>` },
+    { n:11, lbl:'Rumusan',            cls:'',      tall:true,
+      val: dragRow(bk.Sinopsis) },
+    { n:12, lbl:'Pengajaran',         cls:'',      tall:true,
+      val: dragRow(bk.Pengajaran) },
+  ];
+
+  let html = '<div class="row-list">';
+  rows.forEach((r,i) => {
+    const tallCls = r.tall ? ' tall' : '';
+    html += `<div class="info-row${r.cls}${tallCls}" style="animation-delay:${i*0.03}s;animation:fadeUp .28s ease both">
+      <div class="row-lbl"><span class="rnum">${r.n}</span>${esc(r.lbl)}</div>
+      <div class="row-val">${r.val}</div>
+    </div>`;
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function ds(e) {
+  const chip = e.currentTarget;
+  const val = chip.dataset.value || '';
+  try {
+    e.dataTransfer.clearData();
+    e.dataTransfer.setData('text/plain', val);
+    e.dataTransfer.setData('text', val);
+    e.dataTransfer.effectAllowed = 'copy';
+  } catch (err) {
+    console.error('Drag error:', err);
+  }
+  setTimeout(() => chip.classList.add('dragging'), 0);
+}
+function de(e) {
+  e.currentTarget.classList.remove('dragging');
+}
+async function copyText(text, trigger) {
+  try {
+    await navigator.clipboard.writeText(text);
+    copyDone(trigger);
+  } catch (err) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); copyDone(trigger); }
+    catch (e) { showToast('❌ Tidak dapat menyalin teks'); }
+    ta.remove();
+  }
+}
+function copyFromChip(chip) {
+  copyText(chip.dataset.value || '', chip);
+}
+function copyFromButton(btn) {
+  const chip = btn.closest('.drag-wrap').querySelector('.drag-chip');
+  copyText(chip ? (chip.dataset.value || '') : '', btn);
+}
+function copyDone(trigger) {
+  showToast('✅ Teks telah disalin');
+  if (trigger && trigger.classList.contains('copy-btn')) {
+    trigger.textContent = '✅ Disalin';
+    setTimeout(() => trigger.textContent = '📋 Salin', 1200);
+  }
+}
+function showToast(message) {
+  let toast = document.getElementById('copyToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'copyToast';
+    toast.className = 'copy-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+}
+function togFiz(btn) {
+  const g = btn.closest('.tog-grp');
+  g.querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function togEbk(btn) {
+  const g = btn.closest('.tog-grp');
+  g.querySelectorAll('.tog-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function setBhs(btn) {
+  btn.closest('.bhs-grp').querySelectorAll('.bhs-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
