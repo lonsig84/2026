@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五年级华文：勇于抗战的斗士 · 闯关大作战！</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #FF6584 0%, #FFB800 50%, #706FD3 100%);
+      --pink-neon: #FF1493;
+      --yellow-sun: #FFDE03;
+      --mint-green: #00E676;
+      --cyan-pop: #00F0FF;
+      --purple-candy: #8C52FF;
+      --orange-fire: #FF5E36;
+      --card-bg: #FFFFFF;
+      --border-dark: #2C2C54;
+      --shadow-3d: 0 8px 0 var(--border-dark);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      color: #2D3436;
+      overflow-x: hidden;
+    }
+
+    /* 糖果游戏外壳 */
+    .game-console {
+      width: 100%;
+      max-width: 820px;
+      background: #FFF7ED;
+      border: 5px solid var(--border-dark);
+      border-radius: 36px;
+      box-shadow: 0 16px 0 var(--border-dark), 0 25px 40px rgba(0,0,0,0.3);
+      padding: 24px;
+      position: relative;
+    }
+
+    /* 顶部彩虹标题栏 */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFEAA7;
+      border: 4px solid var(--border-dark);
+      border-radius: 24px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-3d);
+    }
+
+    .game-title {
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 26px;
+      color: var(--pink-neon);
+      text-shadow: 2px 2px 0 #FFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-pill {
+      background: var(--purple-candy);
+      color: #FFF;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 900;
+      border: 2px solid var(--border-dark);
+    }
+
+    .stats-tray {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-chip {
+      background: #FFF;
+      border: 3px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 4px 0 var(--border-dark);
+    }
+
+    .stat-chip.score { color: var(--orange-fire); }
+    .stat-chip.timer { color: var(--purple-candy); }
+
+    /* 关卡进度条 */
+    .progress-track {
+      height: 18px;
+      background: #DFE6E9;
+      border: 3px solid var(--border-dark);
+      border-radius: 999px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #FFDE03, #00E676);
+      transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* 关卡舞台容器 */
+    .stage {
+      display: none;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .stage.active { display: block; }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 萌系角色卡片 */
+    .character-banner {
+      background: #FFF;
+      border: 4px solid var(--border-dark);
+      border-radius: 28px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-3d);
+    }
+
+    .char-avatar-box {
+      width: 90px;
+      height: 90px;
+      border-radius: 22px;
+      border: 3px solid var(--border-dark);
+      background: #FFEAA7;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .char-avatar-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .char-dialogue {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 700;
+      color: #2D3436;
+      line-height: 1.5;
+    }
+
+    .char-dialogue b {
+      color: var(--pink-neon);
+    }
+
+    /* 关卡一：词语连线/点击消除 */
+    .match-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .bubble-btn {
+      background: #FFF;
+      border: 4px solid var(--border-dark);
+      border-radius: 22px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-3d);
+      transition: all 0.15s ease;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bubble-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 var(--border-dark);
+    }
+
+    .bubble-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 var(--border-dark);
+    }
+
+    .bubble-btn.word { background: #FFD200; color: #574B90; }
+    .bubble-btn.def { background: #E4F9F5; color: #2C2C54; font-size: 15px; }
+
+    .bubble-btn.selected {
+      background: var(--cyan-pop) !important;
+      border-color: var(--pink-neon);
+      transform: scale(1.03);
+    }
+
+    .bubble-btn.matched {
+      background: #55E6C1 !important;
+      color: #FFF !important;
+      border-color: #2ED573;
+      transform: scale(0.96);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* 关卡二：装备卡片点击 */
+    .card-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .equipment-card {
+      background: #FFF;
+      border: 4px solid var(--border-dark);
+      border-radius: 24px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-3d);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .equipment-card:hover {
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .card-thumb {
+      width: 100%;
+      height: 110px;
+      border-radius: 16px;
+      border: 3px solid var(--border-dark);
+      background: #F8EFBA;
+      overflow: hidden;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-title {
+      font-weight: 900;
+      font-size: 16px;
+      color: #2C2C54;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      font-weight: 600;
+      color: #636E72;
+    }
+
+    /* 关卡三：深究选择题 */
+    .quiz-box {
+      background: #FFF;
+      border: 4px solid var(--border-dark);
+      border-radius: 26px;
+      padding: 20px;
+      box-shadow: var(--shadow-3d);
+    }
+
+    .question-stem {
+      font-size: 18px;
+      font-weight: 900;
+      color: #2C2C54;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .opt-btn {
+      background: #FFF;
+      border: 3px solid var(--border-dark);
+      border-radius: 18px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--border-dark);
+      transition: all 0.15s ease;
+    }
+
+    .opt-btn:hover {
+      background: #F1F2F6;
+      transform: translateX(4px);
+    }
+
+    .opt-btn.correct {
+      background: #2ED573 !important;
+      color: #FFF !important;
+    }
+
+    .opt-btn.wrong {
+      background: #FF4757 !important;
+      color: #FFF !important;
+    }
+
+    /* 关卡四：打卡提交页面 */
+    .result-sheet {
+      background: #FFF;
+      border: 5px solid var(--border-dark);
+      border-radius: 30px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: var(--shadow-3d);
+    }
+
+    .badge-icon-box {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      border: 5px solid var(--border-dark);
+      background: #FFEAA7;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-3d);
+      animation: pulse 1.8s infinite;
+    }
+
+    .badge-icon-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .hero-honor-title {
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 28px;
+      color: var(--pink-neon);
+      margin-bottom: 8px;
+    }
+
+    .hero-honor-quote {
+      font-size: 15px;
+      font-weight: 700;
+      color: #574B90;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto 20px;
+    }
+
+    .cute-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 4px solid var(--border-dark);
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: 800;
+      outline: none;
+      background: #F7F1E3;
+      box-shadow: inset 0 3px 0 rgba(0,0,0,0.1);
+    }
+
+    .cute-input:focus {
+      background: #FFF;
+      border-color: var(--pink-neon);
+    }
+
+    .cta-submit-btn {
+      background: linear-gradient(180deg, #FF5E36, #FF1493);
+      color: #FFF;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 24px;
+      border: 4px solid var(--border-dark);
+      border-radius: 24px;
+      padding: 16px 40px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 var(--border-dark);
+      transition: all 0.15s ease;
+      display: inline-block;
+    }
+
+    .cta-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 var(--border-dark);
+    }
+
+    .cta-submit-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 var(--border-dark);
+    }
+
+    /* 纸屑动画 Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 七彩礼花纸屑画板 -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="game-console">
+    <!-- 顶部状态栏 -->
+    <header class="header-bar">
+      <div class="game-title">
+        <span>🦠 战疫小斗士</span>
+        <span class="badge-pill" id="stage-indicator">第 1 / 4 关</span>
+      </div>
+      <div class="stats-tray">
+        <div class="stat-chip score">⭐ 得分: <span id="val-score">0</span></div>
+        <div class="stat-chip timer">⏱️ 时间: <span id="val-timer">0</span>s</div>
+      </div>
+    </header>
+
+    <!-- 关卡进度条 -->
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-bar"></div>
+    </div>
+
+    <!-- 角色导读条（伍连德博士与病菌立绘占位） -->
+    <div class="character-banner">
+      <div class="char-avatar-box">
+        <!-- 占位P1：Q版伍连德医生 -->
+        <img id="img-hero" data-img-key="hero_doctor" 
+             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%23FF9FF3' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-weight='bold' font-size='13' fill='%23FFF'>伍医生立绘</text></svg>" 
+             alt="伍连德博士">
+      </div>
+      <div class="char-dialogue" id="guide-text">
+        1910年冬天东北暴发严重肺鼠疫！我是伍连德医生。快来帮助我完成科学防疫，拯救千万民众！
+      </div>
+    </div>
+
+    <!-- ================= 关卡一：词语糖果爆破 ================= -->
+    <section class="stage active" id="stage-1">
+      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 12px; color: #574B90;">
+        🍬 第一关：【词语糖果爆破】点击左边词语，再点击右边对应的词义进行消除！
+      </h3>
+      <div class="match-grid">
+        <!-- 词语列表 -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="bubble-btn word" data-pair="1" onclick="handleWordClick(this)">猝不及防</div>
+          <div class="bubble-btn word" data-pair="2" onclick="handleWordClick(this)">匮乏</div>
+          <div class="bubble-btn word" data-pair="3" onclick="handleWordClick(this)">遏制</div>
+          <div class="bubble-btn word" data-pair="4" onclick="handleWordClick(this)">交叉感染</div>
+        </div>
+        <!-- 词义列表 -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="bubble-btn def" data-pair="3" onclick="handleDefClick(this)">阻止、制止事情恶化</div>
+          <div class="bubble-btn def" data-pair="1" onclick="handleDefClick(this)">事情突然发生，来不及防备</div>
+          <div class="bubble-btn def" data-pair="4" onclick="handleDefClick(this)">病菌在人与人之间互相传染</div>
+          <div class="bubble-btn def" data-pair="2" onclick="handleDefClick(this)">物资缺乏、很不充足</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 关卡二：科学防疫大侦探 ================= -->
+    <section class="stage" id="stage-2">
+      <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 12px; color: #574B90;">
+        🔬 第二关：【科学防疫大侦探】点击伍连德医生当时真正采取的【4项科学防疫策略】！
+      </h3>
+      <div class="card-choice-grid">
+        <!-- 选项 1：正确 (伍氏口罩) -->
+        <div class="equipment-card" onclick="handleEquipSelect(this, true, 7.5)">
+          <div class="card-thumb">
+            <!-- 占位P3：伍氏口罩 -->
+            <img data-img-key="wu_mask" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%2354A0FF' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='13' font-weight='bold' fill='%23FFF'>伍氏口罩</text></svg>">
+          </div>
+          <div class="card-title">佩戴药棉纱布口罩</div>
+          <div class="card-desc">双层纱布夹吸水药棉，阻断飞沫传播</div>
+        </div>
+
+        <!-- 选项 2：错误 -->
+        <div class="equipment-card" onclick="handleEquipSelect(this, false, 0)">
+          <div class="card-thumb">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%23FF6B6B' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='13' font-weight='bold' fill='%23FFF'>关门逃跑</text></svg>">
+          </div>
+          <div class="card-title">封锁城门任其自灭</div>
+          <div class="card-desc">不救治病人，让民众自生自灭</div>
+        </div>
+
+        <!-- 选项 3：正确 (设立隔离医院) -->
+        <div class="equipment-card" onclick="handleEquipSelect(this, true, 7.5)">
+          <div class="card-thumb">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%231DD1A1' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='13' font-weight='bold' fill='%23FFF'>隔离医院</text></svg>">
+          </div>
+          <div class="card-title">设立鼠疫专科隔离</div>
+          <div class="card-desc">送病患入专门医院，接触者严格隔离</div>
+        </div>
+
+        <!-- 选项 4：正确 (火化处理) -->
+        <div class="equipment-card" onclick="handleEquipSelect(this, true, 7.5)">
+          <div class="card-thumb">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%23FF9F43' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='13' font-weight='bold' fill='%23FFF'>火化阻断</text></svg>">
+          </div>
+          <div class="card-title">疫尸集中火化处理</div>
+          <div class="card-desc">断绝尸体上的鼠疫菌传染源</div>
+        </div>
+
+        <!-- 选项 5：正确 (显微镜实验) -->
+        <div class="equipment-card" onclick="handleEquipSelect(this, true, 7.5)">
+          <div class="card-thumb">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%2348DBFB' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='13' font-weight='bold' fill='%23FFF'>显微实验</text></svg>">
+          </div>
+          <div class="card-title">病理解剖与显微镜观察</div>
+          <div class="card-desc">证实是旱獭鼠疫菌飞沫传播</div>
+        </div>
+
+        <!-- 选项 6：错误 -->
+        <div class="equipment-card" onclick="handleEquipSelect(this, false, 0)">
+          <div class="card-thumb">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect fill='%23EE5253' width='100%' height='100%'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='13' font-weight='bold' fill='%23FFF'>迷信法事</text></svg>">
+          </div>
+          <div class="card-title">烧香念咒驱逐瘟神</div>
+          <div class="card-desc">组织万人聚集跪拜祈福</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 关卡三：斗士智慧大挑战 ================= -->
+    <section class="stage" id="stage-3">
+      <div class="quiz-box">
+        <div class="question-stem" id="quiz-question">题目加载中...</div>
+        <div class="quiz-options" id="quiz-options-container">
+          <!-- 动态注入选项 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 关卡四：小斗士光荣榜与成绩提交 ================= -->
+    <section class="stage" id="stage-4">
+      <div class="result-sheet">
+        <div class="badge-icon-box">
+          <!-- 占位P4：通关金色奖章 -->
+          <img data-img-key="badge_gold" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><circle cx='60' cy='60' r='55' fill='%23FECA57'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='20' font-weight='bold' fill='%23D35400'>🥇金牌勋章</text></svg>">
+        </div>
+        <h2 class="hero-honor-title">🎉 恭喜荣获【抗疫先锋小斗士】勋章！</h2>
+        <p class="hero-honor-quote">
+          “不管做什么事情，只要固守本心坚毅不拔，一路披荆斩棘，就能到达巅峰！”<br>
+          你一共斩获了 <b style="color:var(--orange-fire); font-size:24px;" id="final-score-text">0</b> 分！
+        </p>
+
+        <div class="form-row">
+          <input type="text" class="cute-input" id="input-name" placeholder="请输入你的姓名 (例: 王小明)" required>
+          <input type="text" class="cute-input" style="max-width: 140px;" id="input-class" placeholder="班级 (5A)" value="5A">
+        </div>
+
+        <button class="cta-submit-btn" id="btn-submit" onclick="submitFinalResult()">
+          🚀 提交成绩打卡！
+        </button>
+        <p id="submit-status" style="margin-top: 14px; font-weight:800; font-size:15px; color:#10AC84;"></p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // ==========================================================
+    // 1. Google Apps Script 终结点 (请替换为您部署生成的 Web App 网址)
+    // ==========================================================
+    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbz-nFRh0O5zTCHVUmEuL-5ZFJF-gCxy2wCuNhySYmt9A7b4-jxdJ0cR3nYD5TbHd2mb/exec";
+
+    // 全局数据状态
+    let currentStage = 1;
+    let score = 0;
+    let timerSeconds = 0;
+    let timerInterval = null;
+
+    // ==========================================================
+    // 2. 原生 Web Audio API（萌系音效引擎，纯代码合成无外链依赖）
+    // ==========================================================
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playPopSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
+    }
+
+    function playCorrectSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (跳跃金币三和弦)
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.08 + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + i * 0.08);
+        osc.stop(audioCtx.currentTime + i * 0.08 + 0.18);
+      });
+    }
+
+    function playWrongSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(260, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    }
+
+    function playVictorySound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const melody = [
+        { f: 392, d: 0.12 }, { f: 523.25, d: 0.12 }, { f: 659.25, d: 0.12 }, 
+        { f: 783.99, d: 0.2 }, { f: 1046.5, d: 0.4 }
+      ];
+      let t = audioCtx.currentTime;
+      melody.forEach(note => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = note.f;
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.linearRampToValueAtTime(0.01, t + note.d);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + note.d);
+        t += note.d + 0.04;
+      });
+    }
+
+    // ==========================================================
+    // 3. 页面初始化：向 Google Sheet 读取图片配置并启动计时
+    // ==========================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 启动秒表
+      timerInterval = setInterval(() => {
+        timerSeconds++;
+        document.getElementById('val-timer').innerText = timerSeconds;
+      }, 1000);
+
+      // 请求 Google Sheet 读取图片字典
+      try {
+        console.log("正在从 Google Sheet 读取最新图片配置...");
+        const res = await fetch(GAS_ENDPOINT);
+        const data = await res.json();
+        if (data.status === "success" && data.images) {
+          document.querySelectorAll('img[data-img-key]').forEach(img => {
+            const key = img.getAttribute('data-img-key');
+            if (data.images[key]) {
+              img.src = data.images[key];
+            }
+          });
+          console.log("图片全部加载成功！");
+        }
+      } catch (e) {
+        console.warn("未能连接至 Google Sheet 或离线测试，已启用萌系 SVG 兜底图标", e);
+      }
+    });
+
+    // 更新总得分与进度条
+    function addScore(pts) {
+      score += pts;
+      document.getElementById('val-score').innerText = score;
+    }
+
+    function updateProgress(percent) {
+      document.getElementById('progress-bar').style.width = percent + '%';
+    }
+
+    function switchStage(stageNum) {
+      document.querySelectorAll('.stage').forEach(el => el.classList.remove('active'));
+      document.getElementById(`stage-${stageNum}`).classList.add('active');
+      document.getElementById('stage-indicator').innerText = `第 ${stageNum} / 4 关`;
+      currentStage = stageNum;
+    }
+
+    // ==========================================================
+    // 关卡一逻辑：词语糖果爆破（词义配对）
+    // ==========================================================
+    let selectedWord = null;
+    let selectedDef = null;
+    let matchedPairs = 0;
+
+    function handleWordClick(btn) {
+      playPopSound();
+      if (selectedWord) selectedWord.classList.remove('selected');
+      selectedWord = btn;
+      btn.classList.add('selected');
+      checkPair();
+    }
+
+    function handleDefClick(btn) {
+      playPopSound();
+      if (selectedDef) selectedDef.classList.remove('selected');
+      selectedDef = btn;
+      btn.classList.add('selected');
+      checkPair();
+    }
+
+    function checkPair() {
+      if (!selectedWord || !selectedDef) return;
+
+      const p1 = selectedWord.getAttribute('data-pair');
+      const p2 = selectedDef.getAttribute('data-pair');
+
+      if (p1 === p2) {
+        playCorrectSound();
+        selectedWord.classList.remove('selected');
+        selectedDef.classList.remove('selected');
+        selectedWord.classList.add('matched');
+        selectedDef.classList.add('matched');
+        selectedWord = null;
+        selectedDef = null;
+        matchedPairs++;
+        addScore(5); // 4对共20分
+
+        if (matchedPairs === 4) {
+          updateProgress(25);
+          document.getElementById('guide-text').innerHTML = "太棒了！词语难不倒你！现在进入第二关，帮伍医生挑选<b>正确的科学防疫措施</b>！";
+          setTimeout(() => switchStage(2), 700);
+        }
+      } else {
+        playWrongSound();
+        selectedWord.classList.remove('selected');
+        selectedDef.classList.remove('selected');
+        selectedWord = null;
+        selectedDef = null;
+      }
+    }
+
+    // ==========================================================
+    // 关卡二逻辑：装备选择（4个正确措施）
+    // ==========================================================
+    let correctEquipCount = 0;
+
+    function handleEquipSelect(card, isCorrect, pts) {
+      if (card.classList.contains('matched') || card.classList.contains('failed')) return;
+
+      if (isCorrect) {
+        playCorrectSound();
+        card.style.borderColor = "#2ED573";
+        card.style.background = "#DFF9FB";
+        card.classList.add('matched');
+        correctEquipCount++;
+        addScore(pts); // 4项各7.5分，共30分
+
+        if (correctEquipCount === 4) {
+          updateProgress(50);
+          document.getElementById('guide-text').innerHTML = "精准识别！这正是伍连德博士首创的中国现代防疫体系！进入第三关<b>斗士智慧问答</b>！";
+          setTimeout(() => {
+            initQuiz();
+            switchStage(3);
+          }, 800);
+        }
+      } else {
+        playWrongSound();
+        card.style.borderColor = "#FF4757";
+        card.style.background = "#FFD2D2";
+        card.classList.add('failed');
+      }
+    }
+
+    // ==========================================================
+    // 关卡三逻辑：深究多选题
+    // ==========================================================
+    const quizData = [
+      {
+        q: "1. 面对缺乏实验设备与防疫常识的恶劣环境，青年医生伍连德展现了怎样的态度？",
+        options: [
+          { text: "A. 向上级抱怨条件太差，申请返回南方", correct: false },
+          { text: "B. 没有向困难低头，毅然踏上坎坷征途向瘟疫宣战", correct: true },
+          { text: "C. 听从地方士绅意见，采取传统巫术疗法", correct: false }
+        ]
+      },
+      {
+        q: "2. 春节前夕，伍连德提倡民众按习俗燃放鞭炮，主要作用是什么？",
+        options: [
+          { text: "A. 借硫磺弥漫的烟雾杀菌，同时舒缓民众恐慌情绪", correct: true },
+          { text: "B. 纯粹为了热闹庆祝新年，忘掉疫情", correct: false },
+          { text: "C. 吓跑可能携带病菌的野生动物", correct: false }
+        ]
+      },
+      {
+        q: "3. 课文《勇于抗战的斗士》给我们的深刻人生启示是什么？",
+        options: [
+          { text: "A. 人生苦短，遇到危险一定要第一时间逃避", correct: false },
+          { text: "B. 只要固守本心坚毅不拔，一路披荆斩棘，就能到达巅峰", correct: true },
+          { text: "C. 只有拿到诺贝尔奖提名的人才值得被尊敬", correct: false }
+        ]
+      }
+    ];
+
+    let currentQuizIdx = 0;
+
+    function initQuiz() {
+      const q = quizData[currentQuizIdx];
+      document.getElementById('quiz-question').innerText = q.q;
+      const box = document.getElementById('quiz-options-container');
+      box.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('div');
+        btn.className = 'opt-btn';
+        btn.innerText = opt.text;
+        btn.onclick = () => {
+          if (opt.correct) {
+            playCorrectSound();
+            btn.classList.add('correct');
+            addScore(10); // 3题共30分
+          } else {
+            playWrongSound();
+            btn.classList.add('wrong');
+          }
+          // 锁定所有按钮
+          Array.from(box.children).forEach(b => b.style.pointerEvents = 'none');
+
+          setTimeout(() => {
+            currentQuizIdx++;
+            if (currentQuizIdx < quizData.length) {
+              initQuiz();
+            } else {
+              // 通关四！
+              updateProgress(100);
+              clearInterval(timerInterval);
+              addScore(20); // 通关奖励分，满分100分！
+              document.getElementById('final-score-text').innerText = score;
+              document.getElementById('guide-text').innerHTML = "太棒了！你已顺利破关并获得【抗疫先锋小斗士】称号！快打卡记录成绩吧！";
+              switchStage(4);
+              playVictorySound();
+              launchConfetti();
+            }
+          }, 800);
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    // ==========================================================
+    // 关卡四：提交打卡到 Google Sheet (置顶插行)
+    // ==========================================================
+    function submitFinalResult() {
+      const name = document.getElementById('input-name').value.trim();
+      const className = document.getElementById('input-class').value.trim();
+      const statusText = document.getElementById('submit-status');
+
+      if (!name) {
+        alert("请输入你的名字哦！");
+        return;
+      }
+
+      playPopSound();
+      statusText.style.color = "#FF9F43";
+      statusText.innerText = "⏳ 正在同步提交到 Google Sheet 数据库...";
+
+      const payload = {
+        name: name,
+        className: className || "5A",
+        score: score,
+        timeUsed: timerSeconds,
+        badge: "抗疫先锋小斗士"
+      };
+
+      fetch(GAS_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors", // 避免浏览器重定向阻拦跨域
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        statusText.style.color = "#10AC84";
+        statusText.innerText = "✅ 打卡成功！老师的表格第 1 行已实时记录你的满分壮举！";
+        document.getElementById('btn-submit').style.display = 'none';
+        launchConfetti();
+      }).catch(err => {
+        statusText.style.color = "#FF4757";
+        statusText.innerText = "⚠️ 提交完成（若遇网络波动也请不要重复点击）。";
+      });
+    }
+
+    // ==========================================================
+    // 4. 超炫酷彩虹纸屑粒子引擎 (Canvas Confetti)
+    // ==========================================================
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#FF1493', '#FFDE03', '#00E676', '#00F0FF', '#8C52FF', '#FF5E36'];
+
+      for (let i = 0; i < 120; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          r: Math.random() * 8 + 4,
+          dx: (Math.random() - 0.5) * 16,
+          dy: (Math.random() - 0.7) * 18,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10,
+          tiltAngle: 0,
+          tiltAngleInc: (Math.random() * 0.07) + 0.05
+        });
+      }
+
+      let animationFrames = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, idx) => {
+          p.x += p.dx;
+          p.y += p.dy;
+          p.dy += 0.35; // 重力
+          p.tiltAngle += p.tiltAngleInc;
+          p.tilt = Math.sin(p.tiltAngle) * 12;
+
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+          ctx.stroke();
+
+          if (p.y > canvas.height) particles.splice(idx, 1);
+        });
+
+        animationFrames++;
+        if (particles.length > 0 && animationFrames < 240) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+  </script>
+</body>
+</html>
