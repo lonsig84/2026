@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UASA Year 6 English Quest (Full 50 Marks Edition)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-light: #EEF2FF;
+      --accent: #F59E0B;
+      --success: #10B981;
+      --danger: #EF4444;
+      --space-dark: #0F172A;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #F1F5F9 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 12px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    /* Header & Navigation Bar */
+    .game-header {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 16px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .stats-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .tool-btn {
+      background: #F1F5F9;
+      border: none;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .tool-btn:hover { background: #E2E8F0; }
+
+    /* Progress Bar */
+    .progress-wrap {
+      width: 100%;
+      height: 10px;
+      background: #E2E8F0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6366F1, #10B981);
+      transition: width 0.4s ease;
+    }
+
+    /* Screen Views */
+    .screen {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .part-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #E0E7FF;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 800;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .passage-box {
+      background: #F8FAFC;
+      border-left: 5px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin: 16px 0 24px 0;
+      font-size: 0.98rem;
+      line-height: 1.65;
+      color: #334155;
+    }
+
+    .passage-box h4 {
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    .question-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Options */
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      text-align: left;
+      padding: 14px 20px;
+      background: #FFFFFF;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .option-btn .opt-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #F1F5F9;
+      font-weight: 700;
+      color: #475569;
+      flex-shrink: 0;
+    }
+
+    .option-btn.correct {
+      border-color: var(--success);
+      background: #ECFDF5;
+      color: #065F46;
+    }
+    .option-btn.correct .opt-badge {
+      background: var(--success);
+      color: #FFFFFF;
+    }
+
+    .option-btn.wrong {
+      border-color: var(--danger);
+      background: #FEF2F2;
+      color: #991B1B;
+    }
+    .option-btn.wrong .opt-badge {
+      background: var(--danger);
+      color: #FFFFFF;
+    }
+
+    /* Matching cards */
+    .persona-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .persona-card {
+      background: #F8FAFC;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .persona-card strong {
+      display: block;
+      color: var(--primary);
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    /* Word puzzle inputs */
+    .word-puzzle {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+
+    .letter-input {
+      width: 44px;
+      height: 52px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #FFFFFF;
+      color: #0F172A;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .letter-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    .letter-input.fixed {
+      background: #E2E8F0;
+      border-color: #CBD5E1;
+      color: #475569;
+      cursor: not-allowed;
+    }
+
+    /* Feedback Box */
+    .feedback-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      display: none;
+    }
+    .feedback-box.correct {
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+    }
+    .feedback-box.wrong {
+      background: #FEF2F2;
+      color: #991B1B;
+      border: 1px solid #FECACA;
+    }
+
+    /* Writing Section Styles (Part 6 & 7) */
+    .writing-guide-box {
+      background: #FFFBEB;
+      border: 2px dashed #F59E0B;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 0.92rem;
+      color: #78350F;
+    }
+
+    .writing-guide-box h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #B45309;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .space-poster-card {
+      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
+      color: white;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 20px rgba(49, 46, 129, 0.2);
+    }
+
+    .space-poster-card h3 {
+      font-size: 1.5rem;
+      color: #FDE047;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .poster-detail-tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin: 4px 6px 4px 0;
+    }
+
+    .writing-textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text);
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    .writing-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    .word-counter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .word-count-badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: #E2E8F0;
+      color: #475569;
+    }
+    .word-count-badge.valid { background: #D1FAE5; color: #065F46; }
+    .word-count-badge.warn { background: #FEF3C7; color: #92400E; }
+    .word-count-badge.danger { background: #FEE2E2; color: #991B1B; }
+
+    /* AI Scoring Panel */
+    .ai-score-card {
+      background: #F8FAFC;
+      border: 2px solid #E0E7FF;
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 24px;
+      display: none;
+    }
+
+    .ai-score-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #EEF2FF;
+      padding-bottom: 12px;
+    }
+
+    .rubric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .rubric-item {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+    .rubric-item .r-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .rubric-item .r-score { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin: 4px 0; }
+    .rubric-item .r-desc { font-size: 0.8rem; color: #64748B; }
+
+    .ai-feedback-text {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      border-left: 4px solid var(--primary);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #334155;
+    }
+
+    /* Buttons */
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      padding: 12px 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: var(--primary-light);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      font-size: 1rem;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    /* Hero / Results */
+    .hero-center {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .hero-center h1 {
+      font-size: 2.2rem;
+      color: #0F172A;
+      margin-bottom: 12px;
+    }
+    .hero-center p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .zone-map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .zone-badge-card {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 16px;
+      text-align: left;
+    }
+    .zone-badge-card .z-num { font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; }
+    .zone-badge-card .z-name { font-size: 0.92rem; font-weight: 700; color: var(--text); margin: 2px 0; }
+    .zone-badge-card .z-marks { font-size: 0.8rem; color: var(--text-muted); }
+
+    .sync-status {
+      margin-top: 15px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .sync-loading { background: #FEF3C7; color: #92400E; }
+    .sync-success { background: #D1FAE5; color: #065F46; }
+    .sync-error { background: #FEE2E2; color: #991B1B; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-box {
+      background: white;
+      padding: 28px;
+      border-radius: 20px;
+      max-width: 480px;
+      width: 90%;
+      box-shadow: var(--shadow);
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="game-header">
+      <div class="stats-group">
+        <div class="stat-badge">🏆 Total: <span id="current-score">0</span> / 50 Marks</div>
+        <div class="stat-badge">⭐ Objective: <span id="objective-score">0</span>/25</div>
+        <div class="stat-badge">✍️ Writing: <span id="writing-score">0</span>/25</div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span id="question-indicator" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Zone 1/7</span>
+        <button id="ai-settings-btn" class="tool-btn" title="AI Settings"><i class="fa-solid fa-robot"></i> AI</button>
+        <button id="sound-toggle" class="tool-btn" title="Toggle Sound">🔊</button>
+      </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrap">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <!-- START SCREEN -->
+    <section id="start-screen" class="screen active">
+      <div class="card hero-center">
+        <div style="font-size: 3.8rem; margin-bottom: 12px;">🧭✨</div>
+        <h1>UASA Year 6 Adventure Quest</h1>
+        <p>Complete all 7 Zones across Reading, Vocabulary & Writing to claim the 50-mark A-Star Treasure!</p>
+
+        <div class="zone-map-grid">
+          <div class="zone-badge-card">
+            <div class="z-num">Zone 1 & 2</div>
+            <div class="z-name">Reading Rapids</div>
+            <div class="z-marks">Short Texts & Cloze (9m)</div>
+          </div>
+          <div class="zone-badge-card">
+            <div class="z-num">Zone 3 & 4</div>
+            <div class="z-name">Comprehension Caves</div>
+            <div class="z-marks">Swan Story & Careers (11m)</div>
+          </div>
+          <div class="zone-badge-card">
+            <div class="z-num">Zone 5</div>
+            <div class="z-name">Vocabulary Valley</div>
+            <div class="z-marks">Spelling Challenge (5m)</div>
+          </div>
+          <div class="zone-badge-card" style="border: 2px solid #818CF8; background: #EEF2FF;">
+            <div class="z-num" style="color: #4F46E5;">Zone 6 (AI Marked)</div>
+            <div class="z-name">Writing Workshop</div>
+            <div class="z-marks">Short Email to Alex (10m)</div>
+          </div>
+          <div class="zone-badge-card" style="border: 2px solid #818CF8; background: #EEF2FF;">
+            <div class="z-num" style="color: #4F46E5;">Zone 7 (AI Marked)</div>
+            <div class="z-name">Masterpiece Studio</div>
+            <div class="z-marks">Space Escape Email (15m)</div>
+          </div>
+        </div>
+
+        <!-- Student Form Inputs -->
+        <div style="max-width: 440px; margin: 0 auto 24px auto; text-align: left;">
+          <label style="font-weight: 700; font-size: 0.9rem; color: #475569;">Nama Calon (Candidate Name) *</label>
+          <input type="text" id="student-name" class="input-field" placeholder="e.g. AHMAD DANISH / CHLOE TAN" required />
+
+          <label style="font-weight: 700; font-size: 0.9rem; color: #475569;">Kelas (Class) *</label>
+          <input type="text" id="student-class" class="input-field" placeholder="e.g. 6 CEMERLANG" required />
+        </div>
+
+        <button class="btn-main" onclick="game.validateAndStart()">🚀 Begin Adventure (75 Mins)</button>
+      </div>
+    </section>
+
+    <!-- OBJECTIVE QUESTIONS SCREEN (PARTS 1 to 5) -->
+    <section id="quiz-screen" class="screen">
+      <div class="card">
+        <span id="part-tag" class="part-tag">PART 1</span>
+        
+        <div id="passage-container" class="passage-box" style="display: none;"></div>
+
+        <h3 id="question-text" class="question-title">Question</h3>
+
+        <div id="interactive-area"></div>
+
+        <div id="feedback-box" class="feedback-box"></div>
+
+        <div class="action-row">
+          <div></div>
+          <button id="next-btn" class="btn-main" onclick="game.nextQuestion()" style="display: none;">Continue ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WRITING PART 6 SCREEN -->
+    <section id="part6-screen" class="screen">
+      <div class="card">
+        <span class="part-tag" style="background: #FEF3C7; color: #B45309;">ZONE 6: WRITING WORKSHOP (10 MARKS)</span>
+        
+        <div class="passage-box" style="border-left-color: #F59E0B;">
+          <h4>📜 Mission Scroll: Advice to Alex (30 - 50 words)</h4>
+          <p>Your best friend, <strong>Alex</strong>, is joining a school trip to the <strong>National Science Museum</strong> next week. It is his first trip there. Write an email to give him some advice.</p>
+          <div style="margin-top: 10px; font-weight: 600; color: #1E293B;">
+            In your email, include ALL three points:
+            <ol style="margin-left: 20px; margin-top: 4px;">
+              <li>Clothes someone should wear.</li>
+              <li>Things someone needs to bring.</li>
+              <li>Ways to keep safe.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Burger Framework Tip Card -->
+        <div class="writing-guide-box">
+          <h4>🍔 The Kawaii Burger Framework Hint:</h4>
+          <p>• <strong>Top Bun (Opening):</strong> <em>Hi ______，</em><br>
+             • <strong>Filling (Details):</strong> _____wear a comfortable t-shirt _____a water bottle and a notebook_____stay close to your______.<br>
+             • <strong>Bottom Bun (Closing):</strong> <em>Have a great time! Bye for now, [Your Name].</em></p>
+        </div>
+
+        <h4 style="margin-bottom: 8px;">✍️ Write your email below:</h4>
+        <textarea id="part6-input" class="writing-textarea" placeholder="To: alex@school.com&#10;Subject: Advice for National Science Museum Trip&#10;&#10;Hi Alex,&#10;..." oninput="game.onWritingInput('part6')"></textarea>
+
+        <div class="word-counter-bar">
+          <div>Target: <strong>30 - 50 words</strong></div>
+          <div id="part6-word-badge" class="word-count-badge">0 words</div>
+        </div>
+
+        <!-- AI Evaluation Result -->
+        <div id="part6-ai-card" class="ai-score-card">
+          <div class="ai-score-header">
+            <div>
+              <h3 style="color: var(--primary);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Examiner Scorecard</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Assessed against official UASA CEFR Year 6 Band Descriptors</p>
+            </div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--primary);" id="part6-score-num">0/10</div>
+          </div>
+          <div class="rubric-grid">
+            <div class="rubric-item">
+              <div class="r-title">Content (4m)</div>
+              <div class="r-score" id="p6-r-content">-</div>
+              <div class="r-desc">All 3 points covered</div>
+            </div>
+            <div class="rubric-item">
+              <div class="r-title">Comm. Achievement (2m)</div>
+              <div class="r-score" id="p6-r-comm">-</div>
+              <div class="r-desc">Email conventions & tone</div>
+            </div>
+            <div class="rubric-item">
+              <div class="r-title">Organisation (2m)</div>
+              <div class="r-score" id="p6-r-org">-</div>
+              <div class="r-desc">Paragraphs & transitions</div>
+            </div>
+            <div class="rubric-item">
+              <div class="r-title">Language (2m)</div>
+              <div class="r-score" id="p6-r-lang">-</div>
+              <div class="r-desc">Vocabulary & spelling</div>
+            </div>
+          </div>
+          <div class="ai-feedback-text" id="p6-feedback-text"></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-secondary" onclick="game.gradeWriting('part6')"><i class="fa-solid fa-robot"></i> Grade Part 6 with AI</button>
+          <button id="part6-next-btn" class="btn-main" onclick="game.goToPart7()" style="display: none;">Next: Zone 7 (Masterpiece Studio) ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WRITING PART 7 SCREEN -->
+    <section id="part7-screen" class="screen">
+      <div class="card">
+        <span class="part-tag" style="background: #EDE9FE; color: #6D28D9;">ZONE 7: MASTERPIECE STUDIO (15 MARKS)</span>
+
+        <!-- Space Poster from Slides -->
+        <div class="space-poster-card">
+          <h3>🚀 Galactic Space Escape</h3>
+          <p style="font-size: 1.05rem; margin-bottom: 12px; color: #E0E7FF;">Can your team fix the spaceship and escape in 60 minutes?</p>
+          <div>
+            <span class="poster-detail-tag">📅 <strong>Date:</strong> Saturday, 24 October 2026</span>
+            <span class="poster-detail-tag">⏰ <strong>Time:</strong> 2:00 p.m. – 3:30 p.m.</span>
+            <span class="poster-detail-tag">📍 <strong>Place:</strong> Level 2, Star Mall</span>
+            <span class="poster-detail-tag">🧩 <strong>Things to do:</strong> Find hidden crystals & solve alien codes</span>
+            <span class="poster-detail-tag">👥 <strong>Team:</strong> 4 to 6 players</span>
+            <span class="poster-detail-tag">🎁 <strong>Special:</strong> Book online for a free astronaut badge!</span>
+          </div>
+        </div>
+
+        <div class="passage-box" style="border-left-color: #6366F1;">
+          <h4>📜 Mission: Persuade Sarah (60 - 80 words)</h4>
+          <p>You saw this poster during the school holidays. Write an email to your friend, <strong>Sarah</strong>. Ask her to go to the game with you. Explain why you want to go and what you can do there.</p>
+        </div>
+
+        <!-- Magic Spices Transition Hint from Slide 10 -->
+        <div class="writing-guide-box" style="background: #F5F3FF; border-color: #8B5CF6; color: #4C1D95;">
+          <h4 style="color: #6D28D9;">🌶️ The Magic Spices (Transitions) Hint:</h4>
+          <p>Level up your writing with connectors: <strong>Because</strong> ----we can play in teams of 4 to 6, let's invite Adam------ <strong>Furthermore</strong>, we can find hidden crystals... <strong>If</strong> ----we book online today------- <strong>So</strong>-----let me know quickly-----</p>
+        </div>
+
+        <h4 style="margin-bottom: 8px;">✍️ Write your email to Sarah below:</h4>
+        <textarea id="part7-input" class="writing-textarea" placeholder="To: sarah@school.com&#10;Subject: Let's join Galactic Space Escape!&#10;&#10;Hi Sarah,&#10;..." oninput="game.onWritingInput('part7')"></textarea>
+
+        <div class="word-counter-bar">
+          <div>Target: <strong>60 - 80 words</strong></div>
+          <div id="part7-word-badge" class="word-count-badge">0 words</div>
+        </div>
+
+        <!-- AI Evaluation Result -->
+        <div id="part7-ai-card" class="ai-score-card">
+          <div class="ai-score-header">
+            <div>
+              <h3 style="color: var(--primary);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Examiner Scorecard</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Assessed against official UASA CEFR Year 6 Band Descriptors</p>
+            </div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--primary);" id="part7-score-num">0/15</div>
+          </div>
+          <div class="rubric-grid">
+            <div class="rubric-item">
+              <div class="r-title">Content (5m)</div>
+              <div class="r-score" id="p7-r-content">-</div>
+              <div class="r-desc">Poster details & persuasion</div>
+            </div>
+            <div class="rubric-item">
+              <div class="r-title">Comm. Achievement (4m)</div>
+              <div class="r-score" id="p7-r-comm">-</div>
+              <div class="r-desc">Tone & enthusiasm</div>
+            </div>
+            <div class="rubric-item">
+              <div class="r-title">Organisation (3m)</div>
+              <div class="r-score" id="p7-r-org">-</div>
+              <div class="r-desc">Transitions & cohesive flow</div>
+            </div>
+            <div class="rubric-item">
+              <div class="r-title">Language (3m)</div>
+              <div class="r-score" id="p7-r-lang">-</div>
+              <div class="r-desc">Grammar, syntax & range</div>
+            </div>
+          </div>
+          <div class="ai-feedback-text" id="p7-feedback-text"></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn-secondary" onclick="game.gradeWriting('part7')"><i class="fa-solid fa-robot"></i> Grade Part 7 with AI</button>
+          <button id="part7-next-btn" class="btn-main" onclick="game.finishQuest()" style="display: none;">Submit Full Exam & View Certificate ➔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL RESULT SCREEN -->
+    <section id="result-screen" class="screen">
+      <div class="card hero-center">
+        <div id="result-medal" style="font-size: 4.5rem; margin-bottom: 12px;">🏆</div>
+        <h1 id="result-title">A-Star Treasure Unlocked!</h1>
+        <p id="result-summary">You have conquered all 7 Zones of the UASA Year 6 English Assessment!</p>
+        
+        <div style="background: #F8FAFC; border-radius: 20px; padding: 26px; max-width: 500px; margin: 0 auto 20px auto; border: 2px solid var(--border);">
+          <div style="font-size: 1.1rem; font-weight: 700; color: #334155;" id="result-student-info">Calon: -</div>
+          <div style="font-size: 3rem; font-weight: 800; color: var(--primary); margin: 8px 0;" id="final-score-display">50 / 50</div>
+          
+          <!-- Detailed Mark Breakdown Table -->
+          <div style="display: flex; justify-content: space-around; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border); font-size: 0.9rem;">
+            <div>
+              <div style="color: var(--text-muted);">Parts 1 - 5</div>
+              <strong id="final-breakdown-obj">25 / 25</strong>
+            </div>
+            <div>
+              <div style="color: var(--text-muted);">Part 6 (Short)</div>
+              <strong id="final-breakdown-p6">10 / 10</strong>
+            </div>
+            <div>
+              <div style="color: var(--text-muted);">Part 7 (Long)</div>
+              <strong id="final-breakdown-p7">15 / 15</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sheet Sync Indicator -->
+        <div id="sheet-sync-status" class="sync-status sync-loading">⏳ Syncing complete 50-mark report to Google Sheets...</div>
+
+        <div style="margin-top: 25px;">
+          <button class="btn-main" onclick="game.restart()">🔄 Take Assessment Again</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- AI API Settings Modal -->
+  <div id="ai-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 12px; color: var(--primary);"><i class="fa-solid fa-robot"></i> AI Examiner Settings</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+        The system comes with an <strong>Intelligent Built-in NLP Rubric Engine</strong> that marks automatically without any key. If you'd like to use Google's live Gemini LLM, paste your key below:
+      </p>
+      <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">Google Gemini API Key (Optional):</label>
+      <input type="password" id="gemini-api-key" class="input-field" placeholder="AIzaSy..." />
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="tool-btn" onclick="document.getElementById('ai-modal').style.display='none'">Close</button>
+        <button class="btn-main" style="padding: 8px 18px; font-size: 0.9rem;" onclick="game.saveAiKey()">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       CONFIG: GOOGLE APPS SCRIPT WEB APP URL
+    ========================================================= */
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzY0CbC6rzezzGX0a7mHV0NBdoXNiiEaBEVltcsOx1_sCoOJd7HcJzdRSWfIM_3m9IaSg/exec";
+
+    /* =========================================================
+       AUDIO SYNTHESIZER
+    ========================================================= */
+    const Sound = {
+      muted: false,
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      },
+      play(freq, type = 'sine', duration = 0.15, delay = 0) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        setTimeout(() => {
+          try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + duration);
+          } catch(e) {}
+        }, delay * 1000);
+      },
+      correct() {
+        this.play(523.25, 'triangle', 0.12, 0);
+        this.play(659.25, 'triangle', 0.12, 0.08);
+        this.play(783.99, 'triangle', 0.25, 0.16);
+      },
+      wrong() {
+        this.play(220, 'sawtooth', 0.2, 0);
+        this.play(180, 'sawtooth', 0.25, 0.15);
+      },
+      win() {
+        [523, 659, 784, 1046].forEach((n, idx) => this.play(n, 'sine', 0.2, idx * 0.1));
+      }
+    };
+
+    /* =========================================================
+       MASTER OBJECTIVE QUESTION BANK (PARTS 1 to 5)
+    ========================================================= */
+    const rawQuestions = [
+      // Part 1 (Q1-Q5)
+      {
+        part: "PART 1: Short Texts",
+        passage: "<h4>SJK (C) CEMERLANG - NOTICE: ANNUAL SCHOOL FIRE DRILL</h4><p><strong>Date:</strong> Thursday, 15 October 2026<br><strong>Time:</strong> 10:00 a.m.<br>When the fire alarm bell rings continuously, all pupils must leave their classrooms calmly. Please walk quickly with your class teacher to the open school field. Do not run or take your heavy school bags with you. Firefighters will show us how to use a fire extinguisher safely.</p>",
+        question: "1. What should pupils do when they hear the fire alarm bell ring?",
+        type: "mcq",
+        options: [
+          "They should walk quietly and calmly to the open school field with their teacher.",
+          "They should carry their heavy school bags quickly out of the classrooms.",
+          "They should run fast to test the red fire extinguisher safely."
+        ],
+        correctAnswer: "They should walk quietly and calmly to the open school field with their teacher.",
+        explanation: "The notice advises students to walk quickly with their teacher to the open field calmly."
+      },
+      {
+        part: "PART 1: Short Texts",
+        passage: "<h4>Dear Priya,</h4><p>My uncle invited me to visit the National History Museum this Saturday. They have a special exhibition about life in the past before people had electricity. We can see real horse carriages, old oil lamps, and learn how people washed their clothes in the river. Let me know if your parents allow you to come along.<br><em>From, Mei Ling</em></p>",
+        question: "2. What is the main purpose of Mei Ling's note to Priya?",
+        type: "mcq",
+        options: [
+          "She wants to invite Priya to visit a special history exhibition about life in the past.",
+          "She hopes to ask Priya's parents how people washed clothes in the river.",
+          "She plans to show Priya how to light an old oil lamp."
+        ],
+        correctAnswer: "She wants to invite Priya to visit a special history exhibition about life in the past.",
+        explanation: "Mei Ling invites Priya to visit the museum exhibition with her."
+      },
+      {
+        part: "PART 1: Short Texts",
+        passage: "<h4>SUNSHINE ADVENTURE CAMP 2026</h4><p><strong>Exciting Water Sports for Year 6 Pupils!</strong><br><strong>Important Safety Rules:</strong><br>• All participants must wear a safety life jacket at all times on the water.<br>• You must listen carefully to your camp coach before paddling the kayak.<br>• Bring a refillable water bottle and comfortable sports shoes.<br>• Kayaking requires a lot of stamina and basic swimming skills.</p>",
+        question: "3. What must pupils do before they begin paddling their kayaks on the river?",
+        type: "mcq",
+        options: [
+          "They must listen carefully to the safety instructions given by their camp coach.",
+          "They must show that they have strong stamina for difficult rock climbing.",
+          "They must buy a brand new life jacket for water sports."
+        ],
+        correctAnswer: "They must listen carefully to the safety instructions given by their camp coach.",
+        explanation: "Safety rules state participants must listen to the camp coach before paddling."
+      },
+      {
+        part: "PART 1: Short Texts",
+        passage: "<h4>bart99:</h4><p>\"I watched a TV documentary about food yesterday. Did you know that supermarket food producers add lots of sugar to bread and soup? Some sweet breakfast cereals even have eight teaspoons of sugar! In my opinion, our school canteen should stop selling sweet drinks and offer fresh fruit instead.\"</p>",
+        question: "4. What does bart99 suggest to improve pupils' health at school?",
+        type: "mcq",
+        options: [
+          "The school canteen should stop selling sweet drinks and offer fresh fruit instead.",
+          "Supermarket food producers must remove all sugar from sweet breakfast cereals.",
+          "Pupils must stop eating bread and soup during school hours."
+        ],
+        correctAnswer: "The school canteen should stop selling sweet drinks and offer fresh fruit instead.",
+        explanation: "Bart99 directly suggests replacing sweet canteen drinks with fresh fruit."
+      },
+      {
+        part: "PART 1: Short Texts",
+        passage: "<h4>BLUE DOCK FERRY SERVICE</h4><p>Departing from Blue Dock to Palm Beach: 8:25 a.m. | 10:25 a.m. | 1:25 p.m. | 3:25 p.m. | 5:25 p.m.*<br>Journey Time: 25 minutes | Single Ticket: $4 | Return Ticket: $7<br><em>*Notice: The 5:25 p.m. evening ferry service does not run on Sundays.</em></p>",
+        question: "5. What should passengers know if they plan to travel on Sunday evening?",
+        type: "mcq",
+        options: [
+          "They cannot take the five o'clock ferry service because it does not run on Sundays.",
+          "They must pay seven dollars to buy a single ticket for the journey.",
+          "They will arrive at Harbour Bay in exactly twenty-five minutes."
+        ],
+        correctAnswer: "They cannot take the five o'clock ferry service because it does not run on Sundays.",
+        explanation: "The notice states the 5:25 p.m. evening service does not operate on Sundays."
+      },
+
+      // Part 2 (Q6-Q9)
+      {
+        part: "PART 2: Cloze Passage",
+        passage: "<h4>Life in the Past</h4><p>My grandparents often talk about their life in the past. When my grandfather was young, he worked as a <strong>(6) [____]</strong> on a small village farm. Transportation was very simple back then, so people usually travelled <strong>(7) [____]</strong> bicycle or walked on foot. Life was quiet, but things were much cheaper. A bowl of hot noodles used to cost only fifty sen, which people considered very <strong>(8) [____]</strong> compared to today. In their free time, my grandparents used to <strong>(9) [____]</strong> to traditional music on an old radio.</p>",
+        question: "6. Choose the best word for blank (6):",
+        type: "mcq",
+        options: ["farmer", "pilot", "doctor"],
+        correctAnswer: "farmer",
+        explanation: "Working on a farm means working as a farmer."
+      },
+      {
+        part: "PART 2: Cloze Passage",
+        passage: "<h4>Life in the Past</h4><p>...Transportation was very simple back then, so people usually travelled <strong>(7) [____]</strong> bicycle or walked on foot...</p>",
+        question: "7. Choose the best word for blank (7):",
+        type: "mcq",
+        options: ["with", "by", "in"],
+        correctAnswer: "by",
+        explanation: "Use 'by' for transport modes (by bicycle, by bus)."
+      },
+      {
+        part: "PART 2: Cloze Passage",
+        passage: "<h4>Life in the Past</h4><p>...A bowl of hot noodles used to cost only fifty sen, which people considered very <strong>(8) [____]</strong> compared to today...</p>",
+        question: "8. Choose the best word for blank (8):",
+        type: "mcq",
+        options: ["expensive", "affordable", "dangerous"],
+        correctAnswer: "affordable",
+        explanation: "Fifty sen was an inexpensive price, meaning very affordable."
+      },
+      {
+        part: "PART 2: Cloze Passage",
+        passage: "<h4>Life in the Past</h4><p>...In their free time, my grandparents used to <strong>(9) [____]</strong> to traditional music on an old radio.</p>",
+        question: "9. Choose the best word for blank (9):",
+        type: "mcq",
+        options: ["listen", "listened", "listening"],
+        correctAnswer: "listen",
+        explanation: "'Used to' is followed by the bare base verb: 'used to listen'."
+      },
+
+      // Part 3 (Q10-Q14)
+      {
+        part: "PART 3: Reading Comprehension",
+        passage: "<h4>The Perfect Swan</h4><p>Many years ago, Emperor Zhang Wei ruled a powerful empire. He loved beautiful art and owned thousands of paintings in his magnificent palace. One day, the emperor asked his assistant, Hong, to find the most famous artist in the country. Hong recommended Cheng Li.<br><br>The emperor invited Cheng Li to his palace and said, \"Please paint the most perfect swan for me.\" Cheng Li agreed, but told the emperor that he needed time. One year passed, and the emperor visited Cheng Li. The painting was not ready. Cheng Li politely asked for another year.<br><br>After three years, the emperor was furious. He returned to Cheng Li's room and shouted angrily. Cheng Li placed a large sheet of paper on the wooden table. With just a few brushstrokes, he painted a breathtaking swan in only two minutes. The emperor was astonished, but his bad temper made him furious again. \"How dare you make me wait three years for a two-minute painting!\" shouted the emperor. He immediately sent Cheng Li away to a distant land.<br><br>A week later, servants cleared Cheng Li's room and found thousands of swan paintings on the floor. The emperor suddenly realized his terrible mistake. Cheng Li was not lazy; he had practised every day for three years to create perfection. The emperor apologized and welcomed Cheng Li back as his royal painter.</p>",
+        question: "10. Why did Emperor Zhang Wei invite Cheng Li to his palace?",
+        type: "mcq",
+        options: [
+          "He wanted the famous artist to paint the most magnificent swan for his palace.",
+          "He wanted his assistant Hong to collect old paintings from the empire.",
+          "He wanted to teach Cheng Li how to make royal art."
+        ],
+        correctAnswer: "He wanted the famous artist to paint the most magnificent swan for his palace.",
+        explanation: "The story states: 'Please paint the most perfect swan for me.'"
+      },
+      {
+        part: "PART 3: Reading Comprehension",
+        passage: "<em>Refer to the story 'The Perfect Swan' above.</em>",
+        question: "11. How did Emperor Zhang Wei feel when Cheng Li finished the painting in two minutes?",
+        type: "mcq",
+        options: [
+          "He was furious because he thought the artist had made a fool of him after three years.",
+          "He was astonished because his royal servants could not draw such a beautiful bird.",
+          "He was delighted because the assistant brought a large sheet of paper."
+        ],
+        correctAnswer: "He was furious because he thought the artist had made a fool of him after three years.",
+        explanation: "The emperor shouted: 'How dare you make me wait three years for a two-minute painting!'"
+      },
+      {
+        part: "PART 3: Reading Comprehension",
+        passage: "<em>Refer to the story 'The Perfect Swan' above.</em>",
+        question: "12. What did the servants find when they cleaned Cheng Li's room at the palace?",
+        type: "mcq",
+        options: [
+          "They discovered thousands of swan sketches that the artist had practised every single day.",
+          "They found a large sheet of paper left on the wooden table.",
+          "They saw old ink brushes hidden inside the assistant's wooden box."
+        ],
+        correctAnswer: "They discovered thousands of swan sketches that the artist had practised every single day.",
+        explanation: "Servants 'found thousands of swan paintings on the floor' showing his daily practice."
+      },
+      {
+        part: "PART 3: Reading Comprehension",
+        passage: "<em>Refer to the story 'The Perfect Swan' above.</em>",
+        question: "13. Why did Emperor Zhang Wei send a message to apologize to Cheng Li?",
+        type: "mcq",
+        options: [
+          "He realized his terrible mistake and understood that Cheng Li had worked hard for three years.",
+          "He felt afraid that his assistant Hong would leave the magnificent royal palace forever.",
+          "He wanted the famous painter to teach other servants how to draw swans."
+        ],
+        correctAnswer: "He realized his terrible mistake and understood that Cheng Li had worked hard for three years.",
+        explanation: "The emperor understood that Cheng Li practised every single day to achieve effortless perfection."
+      },
+      {
+        part: "PART 3: Reading Comprehension",
+        passage: "<em>Refer to the story 'The Perfect Swan' above.</em>",
+        question: "14. What is the main moral value of the story?",
+        type: "mcq",
+        options: [
+          "We must control our bad temper and appreciate the hard work behind true perfection.",
+          "We should never invite famous artists to stay in our homes.",
+          "We ought to finish our paintings in two minutes."
+        ],
+        correctAnswer: "We must control our bad temper and appreciate the hard work behind true perfection.",
+        explanation: "The moral teaches us to recognize and respect the devotion behind mastery."
+      },
+
+      // Part 4 (Q15-Q20)
+      {
+        part: "PART 4: Career Matching",
+        personaData: true,
+        question: "15. This person has worked in their current career for twelve years.",
+        type: "mcq",
+        options: [
+          "Adela (Emergency Helicopter Pilot)",
+          "Tyler (Horse Trainer and Tour Guide)",
+          "Derek (Botanical Garden Conservationist)"
+        ],
+        correctAnswer: "Adela (Emergency Helicopter Pilot)",
+        explanation: "Adela has served as an emergency pilot for 'twelve years'."
+      },
+      {
+        part: "PART 4: Career Matching",
+        personaData: true,
+        question: "16. This person explains how transport was used before cars existed.",
+        type: "mcq",
+        options: [
+          "Adela (Emergency Helicopter Pilot)",
+          "Tyler (Horse Trainer and Tour Guide)",
+          "Derek (Botanical Garden Conservationist)"
+        ],
+        correctAnswer: "Tyler (Horse Trainer and Tour Guide)",
+        explanation: "Tyler teaches children how people travelled before cars existed."
+      },
+      {
+        part: "PART 4: Career Matching",
+        personaData: true,
+        question: "17. This person works with medical staff to help injured people.",
+        type: "mcq",
+        options: [
+          "Adela (Emergency Helicopter Pilot)",
+          "Tyler (Horse Trainer and Tour Guide)",
+          "Derek (Botanical Garden Conservationist)"
+        ],
+        correctAnswer: "Adela (Emergency Helicopter Pilot)",
+        explanation: "Adela works closely with medical teams to transport patients safely."
+      },
+      {
+        part: "PART 4: Career Matching",
+        personaData: true,
+        question: "18. This person teaches school children how to grow vegetables.",
+        type: "mcq",
+        options: [
+          "Adela (Emergency Helicopter Pilot)",
+          "Tyler (Horse Trainer and Tour Guide)",
+          "Derek (Botanical Garden Conservationist)"
+        ],
+        correctAnswer: "Derek (Botanical Garden Conservationist)",
+        explanation: "Derek teaches pupils how to grow organic vegetables."
+      },
+      {
+        part: "PART 4: Career Matching",
+        personaData: true,
+        question: "19. This person takes care of animals in an outdoor environment.",
+        type: "mcq",
+        options: [
+          "Adela (Emergency Helicopter Pilot)",
+          "Tyler (Horse Trainer and Tour Guide)",
+          "Derek (Botanical Garden Conservationist)"
+        ],
+        correctAnswer: "Tyler (Horse Trainer and Tour Guide)",
+        explanation: "Tyler works in open fields caring for and training horses."
+      },
+      {
+        part: "PART 4: Career Matching",
+        personaData: true,
+        question: "20. This person works in a reserve protecting different types of plants.",
+        type: "mcq",
+        options: [
+          "Adela (Emergency Helicopter Pilot)",
+          "Tyler (Horse Trainer and Tour Guide)",
+          "Derek (Botanical Garden Conservationist)"
+        ],
+        correctAnswer: "Derek (Botanical Garden Conservationist)",
+        explanation: "Derek is a plant specialist at a national nature reserve caring for plants."
+      },
+
+      // Part 5 (Q21-Q25)
+      {
+        part: "PART 5: Word Spelling",
+        question: "21. A serious and unexpected situation that requires immediate help from doctors or firefighters.",
+        type: "spelling",
+        word: "EMERGENCY",
+        firstLetter: "E",
+        lastLetter: "Y",
+        explanation: "Correct! The word is E-M-E-R-G-E-N-C-Y (emergency)."
+      },
+      {
+        part: "PART 5: Word Spelling",
+        question: "22. A vehicle with four wheels pulled by horses that people used for travelling in the past.",
+        type: "spelling",
+        word: "CARRIAGE",
+        firstLetter: "C",
+        lastLetter: "E",
+        explanation: "Correct! The word is C-A-R-R-I-A-G-E (carriage)."
+      },
+      {
+        part: "PART 5: Word Spelling",
+        question: "23. A light, narrow water boat that a person moves through river water using a double paddle.",
+        type: "spelling",
+        word: "KAYAK",
+        firstLetter: "K",
+        lastLetter: "K",
+        explanation: "Correct! The word is K-A-Y-A-K (kayak)."
+      },
+      {
+        part: "PART 5: Word Spelling",
+        question: "24. The physical power and energy to do active exercise or sports for a long time.",
+        type: "spelling",
+        word: "STAMINA",
+        firstLetter: "S",
+        lastLetter: "A",
+        explanation: "Correct! The word is S-T-A-M-I-N-A (stamina)."
+      },
+      {
+        part: "PART 5: Word Spelling",
+        question: "25. A public display of items, objects, or works of art in a museum or art gallery.",
+        type: "spelling",
+        word: "EXHIBITION",
+        firstLetter: "E",
+        lastLetter: "N",
+        explanation: "Correct! The word is E-X-H-I-B-I-T-I-O-N (exhibition)."
+      }
+    ];
+
+    /* Dynamic Shuffle Function */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function generateRandomizedExam() {
+      return rawQuestions.map(item => {
+        if (item.type !== 'mcq') return { ...item };
+        const shuffled = shuffleArray(item.options);
+        const correctIndex = shuffled.indexOf(item.correctAnswer);
+        return {
+          ...item,
+          options: shuffled,
+          answer: correctIndex
+        };
+      });
+    }
+
+    /* =========================================================
+       AI EVALUATOR ENGINE (Dual Mode: NLP Rubric + Optional Gemini)
+    ========================================================= */
+    const AiEvaluator = {
+      apiKey: localStorage.getItem('uasa_gemini_key') || '',
+
+      countWords(text) {
+        if (!text) return 0;
+        return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+      },
+
+      async evaluatePart6(text) {
+        const wordCount = this.countWords(text);
+        
+        // If Gemini API Key exists, try live LLM evaluation
+        if (this.apiKey) {
+          try {
+            return await this.callGeminiAPI(6, text, wordCount);
+          } catch(e) {
+            console.warn("Gemini API call failed, falling back to local NLP engine", e);
+          }
+        }
+
+        // Local Intelligent NLP Rubric Engine
+        let contentScore = 0;
+        let commScore = 0;
+        let orgScore = 0;
+        let langScore = 0;
+        let feedback = [];
+
+        const lower = text.toLowerCase();
+
+        // 1. Content Points (Max 4 marks)
+        // Point 1: Clothes
+        const clothesTerms = ['clothes', 'wear', 't-shirt', 'tshirt', 'shirt', 'shoes', 'sports shoes', 'sneakers', 'comfortable', 'pants', 'jacket'];
+        const hasPoint1 = clothesTerms.some(t => lower.includes(t));
+        if (hasPoint1) { contentScore += 1.33; } else { feedback.push("⚠️ Point 1 missing: Mention suitable clothes to wear (e.g. comfortable t-shirt & sports shoes)."); }
+
+        // Point 2: Things to bring
+        const bringTerms = ['bring', 'take', 'pack', 'bottle', 'water', 'notebook', 'pen', 'pencil', 'bag', 'backpack', 'money', 'snack'];
+        const hasPoint2 = bringTerms.some(t => lower.includes(t));
+        if (hasPoint2) { contentScore += 1.33; } else { feedback.push("⚠️ Point 2 missing: Mention things to bring along (e.g. water bottle, notebook)."); }
+
+        // Point 3: Keep safe
+        const safeTerms = ['safe', 'safety', 'teacher', 'stay with', 'group', 'listen', 'rules', 'wander', 'careful', 'lost'];
+        const hasPoint3 = safeTerms.some(t => lower.includes(t));
+        if (hasPoint3) { contentScore += 1.34; } else { feedback.push("⚠️ Point 3 missing: Mention how to stay safe (e.g. stay close to the teacher)."); }
+
+        // 2. Communicative Achievement (Max 2 marks)
+        const hasGreeting = lower.includes('hi alex') || lower.includes('hello alex') || lower.includes('dear alex') || lower.includes('alex');
+        const hasSignoff = lower.includes('bye') || lower.includes('regards') || lower.includes('from') || lower.includes('your friend') || lower.includes('see you') || lower.includes('time');
+        if (hasGreeting) commScore += 1;
+        if (hasSignoff) commScore += 1;
+        if (!hasGreeting) feedback.push("💡 Add a friendly greeting like 'Hi Alex,'.");
+        if (!hasSignoff) feedback.push("💡 Add a closing sign-off like 'Have a great time! Bye, [Your Name]'.");
+
+        // 3. Organisation (Max 2 marks)
+        const orgConnectors = ['and', 'also', 'because', 'so', 'first', 'remember to', 'make sure', 'don\'t forget', 'to'];
+        let matchedConn = orgConnectors.filter(c => lower.includes(c)).length;
+        orgScore = Math.min(2, Math.max(1, matchedConn));
+
+        // 4. Language & Word Count (Max 2 marks)
+        if (wordCount >= 30 && wordCount <= 50) {
+          langScore = 2;
+          feedback.unshift("🎯 Perfect word count! Exactly within 30 - 50 words.");
+        } else if (wordCount >= 25 && wordCount <= 60) {
+          langScore = 1.5;
+          feedback.unshift(`ℹ️ Word count is ${wordCount} words (ideal is 30 - 50 words).`);
+        } else {
+          langScore = 1;
+          feedback.unshift(`⚠️ Word count alert: ${wordCount} words. Try to aim for 30 - 50 words.`);
+        }
+
+        const totalScore = Math.min(10, Math.round((contentScore + commScore + orgScore + langScore)));
+
+        return {
+          total: totalScore,
+          max: 10,
+          content: Math.min(4, Math.round(contentScore)),
+          comm: commScore,
+          org: orgScore,
+          lang: Math.round(langScore),
+          feedbackText: feedback.join("<br>") || "Excellent! Full task fulfillment with outstanding structure."
+        };
+      },
+
+      async evaluatePart7(text) {
+        const wordCount = this.countWords(text);
+
+        if (this.apiKey) {
+          try {
+            return await this.callGeminiAPI(7, text, wordCount);
+          } catch(e) {
+            console.warn("Gemini API call failed, falling back to local NLP engine", e);
+          }
+        }
+
+        // Local Intelligent NLP Rubric Engine for Part 7
+        let contentScore = 0;
+        let commScore = 0;
+        let orgScore = 0;
+        let langScore = 0;
+        let feedback = [];
+
+        const lower = text.toLowerCase();
+
+        // 1. Content Points (Max 5 marks)
+        let posterFacts = 0;
+        if (lower.includes('galactic') || lower.includes('space') || lower.includes('escape')) posterFacts++;
+        if (lower.includes('star mall') || lower.includes('level 2') || lower.includes('mall')) posterFacts++;
+        if (lower.includes('crystal') || lower.includes('energy') || lower.includes('code') || lower.includes('spaceship')) posterFacts++;
+        if (lower.includes('team') || lower.includes('4') || lower.includes('player')) posterFacts++;
+        if (lower.includes('badge') || lower.includes('book online') || lower.includes('free') || lower.includes('online')) posterFacts++;
+
+        contentScore = Math.min(5, Math.max(1, posterFacts));
+        if (posterFacts < 3) feedback.push("⚠️ Include more poster facts (e.g. Star Mall, solving alien codes, teams of 4-6, free astronaut badge).");
+
+        // 2. Communicative Achievement / Persuasion (Max 4 marks)
+        const hasGreeting = lower.includes('hi sarah') || lower.includes('hello sarah') || lower.includes('dear sarah') || lower.includes('sarah');
+        const hasPersuasion = lower.includes('let\'s') || lower.includes('join me') || lower.includes('would you like') || lower.includes('come with') || lower.includes('so exciting') || lower.includes('fun');
+        const hasSignoff = lower.includes('bye') || lower.includes('know') || lower.includes('from') || lower.includes('see you');
+
+        if (hasGreeting) commScore += 1;
+        if (hasPersuasion) commScore += 2; else commScore += 1;
+        if (hasSignoff) commScore += 1;
+        commScore = Math.min(4, commScore);
+
+        // 3. Organisation / Magic Spices (Max 3 marks)
+        const spices = ['because', 'furthermore', 'besides that', 'so', 'if', 'also', 'therefore'];
+        const matchedSpices = spices.filter(s => lower.includes(s)).length;
+        if (matchedSpices >= 3) {
+          orgScore = 3;
+          feedback.push("🌟 Superb! You used great transitions (e.g. Because, Furthermore, If, So).");
+        } else if (matchedSpices >= 1) {
+          orgScore = 2;
+          feedback.push("💡 Tip: Add more transitions like 'Furthermore' or 'Besides that' to boost cohesion.");
+        } else {
+          orgScore = 1;
+          feedback.push("⚠️ Try to connect your sentences using 'Because', 'Furthermore' and 'So'.");
+        }
+
+        // 4. Language & Word Count (Max 3 marks)
+        if (wordCount >= 60 && wordCount <= 80) {
+          langScore = 3;
+          feedback.unshift("🎯 Perfect length! Exactly within the 60 - 80 words target.");
+        } else if (wordCount >= 50 && wordCount <= 95) {
+          langScore = 2;
+          feedback.unshift(`ℹ️ Word count is ${wordCount} words (ideal is 60 - 80 words).`);
+        } else {
+          langScore = 1;
+          feedback.unshift(`⚠️ Word count warning: ${wordCount} words. Keep within 60 - 80 words.`);
+        }
+
+        const totalScore = Math.min(15, Math.round(contentScore + commScore + orgScore + langScore));
+
+        return {
+          total: totalScore,
+          max: 15,
+          content: contentScore,
+          comm: commScore,
+          org: orgScore,
+          lang: langScore,
+          feedbackText: feedback.join("<br>") || "Outstanding email! Clear persuasive tone and rich vocabulary."
+        };
+      },
+
+      async callGeminiAPI(partNum, text, wordCount) {
+        const prompt = partNum === 6 ? 
+          `You are an official Malaysian primary school UASA Year 6 English examiner. Evaluate this student Part 6 Short Writing (Target: 30-50 words, prompt: email giving advice to Alex about a museum trip covering 1. clothes to wear, 2. things to bring, 3. ways to keep safe).
+Student Text: "${text}"
+Word Count: ${wordCount}
+Provide JSON response only with format:
+{"total": <number 0-10>, "content": <number 0-4>, "comm": <number 0-2>, "org": <number 0-2>, "lang": <number 0-2>, "feedbackText": "<constructive comments in English>"}`
+          :
+          `You are an official Malaysian primary school UASA Year 6 English examiner. Evaluate this student Part 7 Extended Writing (Target: 60-80 words, prompt: email persuading friend Sarah to join 'Galactic Space Escape' at Level 2 Star Mall, mention activities and online booking).
+Student Text: "${text}"
+Word Count: ${wordCount}
+Provide JSON response only with format:
+{"total": <number 0-15>, "content": <number 0-5>, "comm": <number 0-4>, "org": <number 0-3>, "lang": <number 0-3>, "feedbackText": "<constructive comments in English>"}`;
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        const rawJson = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        return JSON.parse(rawJson);
+      }
+    };
+
+    /* =========================================================
+       MAIN GAME CONTROLLER
+    ========================================================= */
+    const game = {
+      studentName: "",
+      studentClass: "",
+      activeQuestions: [],
+      currentIndex: 0,
+      objectiveScore: 0,
+      part6Score: 0,
+      part7Score: 0,
+      part6Text: "",
+      part7Text: "",
+      part6Report: null,
+      part7Report: null,
+      hasAnswered: false,
+
+      validateAndStart() {
+        const nameInput = document.getElementById('student-name').value.trim();
+        const classInput = document.getElementById('student-class').value.trim();
+
+        if (!nameInput || !classInput) {
+          alert('Sila masukkan Nama Calon dan Kelas terlebih dahulu!\n(Please enter your Name and Class)');
+          return;
+        }
+
+        this.studentName = nameInput;
+        this.studentClass = classInput;
+        this.startQuest();
+      },
+
+      startQuest() {
+        this.activeQuestions = generateRandomizedExam();
+        this.currentIndex = 0;
+        this.objectiveScore = 0;
+        this.part6Score = 0;
+        this.part7Score = 0;
+
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('part6-screen').classList.remove('active');
+        document.getElementById('part7-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+
+        this.updateScores();
+        this.loadObjectiveQuestion();
+      },
+
+      updateScores() {
+        const total = this.objectiveScore + this.part6Score + this.part7Score;
+        document.getElementById('current-score').textContent = total;
+        document.getElementById('objective-score').textContent = this.objectiveScore;
+        document.getElementById('writing-score').textContent = (this.part6Score + this.part7Score);
+
+        const totalSteps = this.activeQuestions.length + 2; // + Part 6 + Part 7
+        let currentStep = this.currentIndex;
+        if (document.getElementById('part6-screen').classList.contains('active')) currentStep = this.activeQuestions.length + 1;
+        if (document.getElementById('part7-screen').classList.contains('active')) currentStep = this.activeQuestions.length + 2;
+
+        const progress = Math.min(100, (currentStep / totalSteps) * 100);
+        document.getElementById('progress-bar').style.width = `${progress}%`;
+      },
+
+      loadObjectiveQuestion() {
+        this.hasAnswered = false;
+        this.updateScores();
+
+        const q = this.activeQuestions[this.currentIndex];
+        document.getElementById('part-tag').textContent = q.part;
+        document.getElementById('question-indicator').textContent = `Question ${this.currentIndex + 1} of ${this.activeQuestions.length}`;
+        document.getElementById('question-text').textContent = q.question;
+
+        const feedback = document.getElementById('feedback-box');
+        feedback.style.display = 'none';
+        feedback.className = 'feedback-box';
+        document.getElementById('next-btn').style.display = 'none';
+
+        const passageBox = document.getElementById('passage-container');
+        if (q.personaData) {
+          passageBox.style.display = 'block';
+          passageBox.innerHTML = `
+            <div class="persona-cards">
+              <div class="persona-card">
+                <strong>Adela (Emergency Helicopter Pilot)</strong>
+                Rescue pilot for 12 years. Flies red helicopter for rescues. Works closely with medical teams.
+              </div>
+              <div class="persona-card">
+                <strong>Tyler (Horse Trainer & Tour Guide)</strong>
+                Works at heritage park (8 years). Explains transport before cars. Trains horses in open fields.
+              </div>
+              <div class="persona-card">
+                <strong>Derek (Botanical Conservationist)</strong>
+                Reserve specialist since 2018. Cares for rare tropical plants. Teaches children organic gardening.
+              </div>
+            </div>
+          `;
+        } else if (q.passage) {
+          passageBox.style.display = 'block';
+          passageBox.innerHTML = q.passage;
+        } else {
+          passageBox.style.display = 'none';
+        }
+
+        const container = document.getElementById('interactive-area');
+        container.innerHTML = '';
+
+        if (q.type === 'mcq') {
+          const grid = document.createElement('div');
+          grid.className = 'options-grid';
+          const labels = ['A', 'B', 'C'];
+
+          q.options.forEach((optText, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span class="opt-badge">${labels[idx]}</span> <span>${optText}</span>`;
+            btn.onclick = () => this.handleMcqChoice(idx, btn);
+            grid.appendChild(btn);
+          });
+          container.appendChild(grid);
+
+        } else if (q.type === 'spelling') {
+          const puzzleWrap = document.createElement('div');
+          puzzleWrap.className = 'word-puzzle';
+
+          const word = q.word;
+          const inputs = [];
+
+          for (let i = 0; i < word.length; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1;
+            input.className = 'letter-input';
+            input.dataset.index = i;
+
+            if (i === 0) {
+              input.value = q.firstLetter;
+              input.classList.add('fixed');
+              input.readOnly = true;
+            } else if (i === word.length - 1) {
+              input.value = q.lastLetter;
+              input.classList.add('fixed');
+              input.readOnly = true;
+            } else {
+              input.oninput = (e) => {
+                e.target.value = e.target.value.toUpperCase();
+                if (e.target.value && i + 1 < word.length - 1) inputs[i + 1].focus();
+              };
+              input.onkeydown = (e) => {
+                if (e.key === 'Backspace' && !e.target.value && i - 1 > 0) inputs[i - 1].focus();
+                if (e.key === 'Enter') this.checkSpelling(word, inputs);
+              };
+            }
+            inputs.push(input);
+            puzzleWrap.appendChild(input);
+          }
+
+          container.appendChild(puzzleWrap);
+
+          const submitRow = document.createElement('div');
+          submitRow.style.textAlign = 'center';
+          submitRow.style.marginTop = '12px';
+          const submitBtn = document.createElement('button');
+          submitBtn.className = 'btn-main';
+          submitBtn.textContent = 'Check Spelling ✔';
+          submitBtn.onclick = () => this.checkSpelling(word, inputs);
+          submitRow.appendChild(submitBtn);
+          container.appendChild(submitRow);
+
+          setTimeout(() => { if (inputs[1]) inputs[1].focus(); }, 150);
+        }
+      },
+
+      handleMcqChoice(choiceIdx, selectedBtn) {
+        if (this.hasAnswered) return;
+        this.hasAnswered = true;
+
+        const q = this.activeQuestions[this.currentIndex];
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        const feedback = document.getElementById('feedback-box');
+        feedback.style.display = 'block';
+
+        if (choiceIdx === q.answer) {
+          selectedBtn.classList.add('correct');
+          this.objectiveScore++;
+          Sound.correct();
+          feedback.className = 'feedback-box correct';
+          feedback.innerHTML = `<strong>🎉 Excellent!</strong> ${q.explanation}`;
+        } else {
+          selectedBtn.classList.add('wrong');
+          buttons[q.answer].classList.add('correct');
+          Sound.wrong();
+          feedback.className = 'feedback-box wrong';
+          feedback.innerHTML = `<strong>⚠️ Keep going!</strong> ${q.explanation}`;
+        }
+
+        this.updateScores();
+        document.getElementById('next-btn').style.display = 'inline-flex';
+      },
+
+      checkSpelling(targetWord, inputElements) {
+        if (this.hasAnswered) return;
+
+        let enteredWord = '';
+        inputElements.forEach(inp => enteredWord += (inp.value || '').toUpperCase());
+
+        if (enteredWord.length < targetWord.length) {
+          alert('Please fill in all empty letter spaces!');
+          return;
+        }
+
+        this.hasAnswered = true;
+        inputElements.forEach(inp => inp.disabled = true);
+
+        const q = this.activeQuestions[this.currentIndex];
+        const feedback = document.getElementById('feedback-box');
+        feedback.style.display = 'block';
+
+        if (enteredWord === targetWord) {
+          this.objectiveScore++;
+          Sound.correct();
+          inputElements.forEach(inp => inp.style.borderColor = 'var(--success)');
+          feedback.className = 'feedback-box correct';
+          feedback.innerHTML = `<strong>🎉 Well Done!</strong> ${q.explanation}`;
+        } else {
+          Sound.wrong();
+          inputElements.forEach(inp => inp.style.borderColor = 'var(--danger)');
+          feedback.className = 'feedback-box wrong';
+          feedback.innerHTML = `<strong>⚠️ Incorrect.</strong> The correct word is <strong>${targetWord}</strong>.<br>${q.explanation}`;
+        }
+
+        this.updateScores();
+        document.getElementById('next-btn').style.display = 'inline-flex';
+      },
+
+      nextQuestion() {
+        this.currentIndex++;
+        if (this.currentIndex < this.activeQuestions.length) {
+          this.loadObjectiveQuestion();
+        } else {
+          this.goToPart6();
+        }
+      },
+
+      /* Writing Section Routing */
+      goToPart6() {
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('part6-screen').classList.add('active');
+        document.getElementById('question-indicator').textContent = 'Zone 6: Writing Workshop';
+        this.updateScores();
+      },
+
+      goToPart7() {
+        document.getElementById('part6-screen').classList.remove('active');
+        document.getElementById('part7-screen').classList.add('active');
+        document.getElementById('question-indicator').textContent = 'Zone 7: Masterpiece Studio';
+        this.updateScores();
+      },
+
+      onWritingInput(part) {
+        const text = document.getElementById(`${part}-input`).value;
+        const count = AiEvaluator.countWords(text);
+        const badge = document.getElementById(`${part}-word-badge`);
+        badge.textContent = `${count} words`;
+
+        const min = part === 'part6' ? 30 : 60;
+        const max = part === 'part6' ? 50 : 80;
+
+        if (count >= min && count <= max) {
+          badge.className = 'word-count-badge valid';
+        } else if (count > 0 && count < min) {
+          badge.className = 'word-count-badge warn';
+        } else if (count > max) {
+          badge.className = 'word-count-badge danger';
+        } else {
+          badge.className = 'word-count-badge';
+        }
+      },
+
+      async gradeWriting(part) {
+        const text = document.getElementById(`${part}-input`).value.trim();
+        const wordCount = AiEvaluator.countWords(text);
+
+        if (wordCount < 10) {
+          alert("Please write at least a few sentences before submitting to the AI examiner!");
+          return;
+        }
+
+        const nextBtn = document.getElementById(`${part}-next-btn`);
+        const card = document.getElementById(`${part}-ai-card`);
+        card.style.display = 'block';
+
+        if (part === 'part6') {
+          this.part6Text = text;
+          const report = await AiEvaluator.evaluatePart6(text);
+          this.part6Report = report;
+          this.part6Score = report.total;
+
+          document.getElementById('part6-score-num').textContent = `${report.total}/10`;
+          document.getElementById('p6-r-content').textContent = `${report.content}/4`;
+          document.getElementById('p6-r-comm').textContent = `${report.comm}/2`;
+          document.getElementById('p6-r-org').textContent = `${report.org}/2`;
+          document.getElementById('p6-r-lang').textContent = `${report.lang}/2`;
+          document.getElementById('p6-feedback-text').innerHTML = report.feedbackText;
+          Sound.correct();
+        } else {
+          this.part7Text = text;
+          const report = await AiEvaluator.evaluatePart7(text);
+          this.part7Report = report;
+          this.part7Score = report.total;
+
+          document.getElementById('part7-score-num').textContent = `${report.total}/15`;
+          document.getElementById('p7-r-content').textContent = `${report.content}/5`;
+          document.getElementById('p7-r-comm').textContent = `${report.comm}/4`;
+          document.getElementById('p7-r-org').textContent = `${report.org}/3`;
+          document.getElementById('p7-r-lang').textContent = `${report.lang}/3`;
+          document.getElementById('p7-feedback-text').innerHTML = report.feedbackText;
+          Sound.correct();
+        }
+
+        this.updateScores();
+        nextBtn.style.display = 'inline-flex';
+      },
+
+      finishQuest() {
+        document.getElementById('part7-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.add('active');
+
+        const totalScore = this.objectiveScore + this.part6Score + this.part7Score;
+        document.getElementById('result-student-info').textContent = `Calon: ${this.studentName} | Kelas: ${this.studentClass}`;
+        document.getElementById('final-score-display').textContent = `${totalScore} / 50`;
+        document.getElementById('final-breakdown-obj').textContent = `${this.objectiveScore} / 25`;
+        document.getElementById('final-breakdown-p6').textContent = `${this.part6Score} / 10`;
+        document.getElementById('final-breakdown-p7').textContent = `${this.part7Score} / 15`;
+
+        const pct = Math.round((totalScore / 50) * 100);
+        let status = "Needs Practice";
+
+        if (pct >= 80) {
+          document.getElementById('result-medal').textContent = '🏆';
+          document.getElementById('result-title').textContent = 'A-Star Treasure Claimed!';
+          document.getElementById('result-summary').textContent = 'Outstanding result! You demonstrated complete mastery across both Reading and Writing.';
+          status = "Grade A (Excellent)";
+          Confetti.start();
+          Sound.win();
+        } else if (pct >= 65) {
+          document.getElementById('result-medal').textContent = '🥈';
+          document.getElementById('result-title').textContent = 'Great Achievement!';
+          document.getElementById('result-summary').textContent = 'Well done! A solid performance across all sections.';
+          status = "Grade B (Good)";
+        } else {
+          document.getElementById('result-medal').textContent = '🥉';
+          document.getElementById('result-title').textContent = 'Keep Striving!';
+          document.getElementById('result-summary').textContent = 'Good effort! Review the AI feedback to sharpen your vocabulary and writing structure.';
+          status = "Grade C/D (Satisfactory)";
+        }
+
+        // Automatic submission to Google Sheets
+        this.sendScoreToSheet({
+          name: this.studentName,
+          className: this.studentClass,
+          objectiveScore: this.objectiveScore,
+          part6Score: this.part6Score,
+          part6Essay: this.part6Text,
+          part7Score: this.part7Score,
+          part7Essay: this.part7Text,
+          totalScore: totalScore,
+          percentage: pct,
+          status: status
+        });
+      },
+
+      sendScoreToSheet(payload) {
+        const syncLabel = document.getElementById('sheet-sync-status');
+        
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
+          syncLabel.className = 'sync-status sync-error';
+          syncLabel.textContent = '⚠️ Google Script URL not set. (Score not logged to Sheet)';
+          return;
+        }
+
+        syncLabel.className = 'sync-status sync-loading';
+        syncLabel.textContent = '⏳ Syncing 50-mark report to Google Sheets...';
+
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          syncLabel.className = 'sync-status sync-success';
+          syncLabel.textContent = '✅ Full 50-mark report successfully recorded to Google Sheet!';
+        })
+        .catch(err => {
+          syncLabel.className = 'sync-status sync-error';
+          syncLabel.textContent = '❌ Failed to connect to Google Sheet.';
+          console.error(err);
+        });
+      },
+
+      saveAiKey() {
+        const key = document.getElementById('gemini-api-key').value.trim();
+        localStorage.setItem('uasa_gemini_key', key);
+        AiEvaluator.apiKey = key;
+        document.getElementById('ai-modal').style.display = 'none';
+        alert(key ? "Gemini API Key saved successfully!" : "Key cleared. Using Built-in NLP AI Engine.");
+      },
+
+      restart() {
+        Confetti.stop();
+        this.startQuest();
+      }
+    };
+
+    /* =========================================================
+       CONFETTI SYSTEM
+    ========================================================= */
+    const Confetti = {
+      canvas: document.getElementById('confetti-canvas'),
+      particles: [],
+      animId: null,
+      start() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        const ctx = this.canvas.getContext('2d');
+        const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EC4899', '#3B82F6'];
+        this.particles = Array.from({ length: 80 }).map(() => ({
+          x: Math.random() * this.canvas.width,
+          y: Math.random() * this.canvas.height - this.canvas.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: Math.random() * 4 - 2,
+          vy: Math.random() * 4 + 3,
+          rot: Math.random() * 360,
+          vrot: Math.random() * 6 - 3
+        }));
+
+        const loop = () => {
+          ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          this.particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.rot += p.vrot;
+            if (p.y > this.canvas.height) p.y = -10;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rot * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+          });
+          this.animId = requestAnimationFrame(loop);
+        };
+        loop();
+      },
+      stop() {
+        if (this.animId) cancelAnimationFrame(this.animId);
+        const ctx = this.canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    };
+
+    // Listeners
+    document.getElementById('sound-toggle').addEventListener('click', (e) => {
+      Sound.muted = !Sound.muted;
+      e.target.textContent = Sound.muted ? '🔇' : '🔊';
+    });
+
+    document.getElementById('ai-settings-btn').addEventListener('click', () => {
+      document.getElementById('ai-modal').style.display = 'flex';
+      document.getElementById('gemini-api-key').value = AiEvaluator.apiKey;
+    });
+  </script>
+</body>
+</html>
