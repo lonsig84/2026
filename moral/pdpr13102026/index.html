@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>分工合作真欢喜 - 道德互动大闯关</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #A8EDEA 0%, #FED6E3 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --primary: #4F46E5;
+      --secondary: #10B981;
+      --accent: #F59E0B;
+      --pink: #EC4899;
+      --text: #1F2937;
+      --text-muted: #4B5563;
+      --radius: 22px;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", "Comic Sans MS", -apple-system, sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      touch-action: pan-y;
+      position: relative;
+    }
+
+    /* 漂浮动画背景微粒 */
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 顶部导航与计时栏 */
+    header {
+      width: 100%;
+      max-width: 900px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge {
+      background: white;
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 主容器 */
+    main {
+      width: 100%;
+      max-width: 860px;
+      padding: 10px 18px 40px;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .level-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 22px;
+      position: relative;
+      border: 3px solid #EEF2F6;
+      transition: transform 0.2s ease;
+    }
+
+    .level-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .level-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* 关卡 1：喂食大象与猴子 */
+    .feeding-arena {
+      display: flex;
+      justify-content: space-around;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .mascot-box {
+      flex: 1;
+      min-width: 250px;
+      background: #F0FDF4;
+      border: 3px dashed #86EFAC;
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.25s ease;
+      touch-action: none;
+    }
+
+    .mascot-box.danger-target {
+      background: #FEF2F2;
+      border-color: #FCA5A5;
+    }
+
+    .mascot-box.drag-over {
+      transform: scale(1.04);
+      background: #DCFCE7;
+      border-color: #22C55E;
+    }
+
+    .mascot-avatar {
+      width: 80px;
+      height: 80px;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .mascot-name {
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 8px;
+      color: #166534;
+    }
+
+    .danger-target .mascot-name {
+      color: #991B1B;
+    }
+
+    .mascot-desc {
+      font-size: 12px;
+      color: #6B7280;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .mascot-eaten-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      min-height: 34px;
+      justify-content: center;
+    }
+
+    .item-chip {
+      background: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #065F46;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      padding: 14px;
+      background: #F8FAFC;
+      border-radius: 16px;
+      min-height: 80px;
+    }
+
+    .fruit-card {
+      background: #FFFFFF;
+      border: 2px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #334155;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      cursor: grab;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .fruit-card:active {
+      cursor: grabbing;
+      transform: scale(1.08) rotate(-2deg);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    /* 关卡 2：贝塞尔曲线配对 */
+    .matching-container {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px 60px;
+      padding: 20px 10px;
+    }
+
+    .match-canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .match-column {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 6;
+    }
+
+    .match-node {
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      touch-action: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+
+    .match-node.selected {
+      border-color: var(--primary);
+      background: #EEF2FF;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .match-node.connected {
+      border-color: var(--secondary);
+      background: #ECFDF5;
+      color: #065F46;
+    }
+
+    .node-anchor {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #94A3B8;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background 0.2s;
+    }
+
+    .match-node.selected .node-anchor {
+      background: var(--primary);
+    }
+
+    .match-node.connected .node-anchor {
+      background: var(--secondary);
+    }
+
+    /* 关卡 3：气泡乐园 */
+    .bubble-garden {
+      position: relative;
+      height: 250px;
+      background: linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 3px solid #BFDBFE;
+      margin-bottom: 12px;
+    }
+
+    .pop-bubble {
+      position: absolute;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(147, 197, 253, 0.7));
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #1E3A8A;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15), inset 0 4px 8px rgba(255,255,255,0.8);
+      cursor: pointer;
+      touch-action: none;
+      transition: transform 0.15s;
+    }
+
+    .pop-bubble:active {
+      transform: scale(0.92);
+    }
+
+    .pop-bubble.popped {
+      pointer-events: none;
+      animation: bubbleBurst 0.3s forwards ease-out;
+    }
+
+    .bubble-collected-board {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 12px;
+      background: #F8FAFC;
+      border-radius: 14px;
+      min-height: 48px;
+      align-items: center;
+    }
+
+    /* 底部操作区 */
+    .footer-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 14px 38px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: white;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 弹窗与评价卡 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: white;
+      width: 90%;
+      max-width: 440px;
+      border-radius: 28px;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 16px;
+      border: 2px solid #E2E8F0;
+      border-radius: 14px;
+      margin: 10px 0 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+    }
+
+    .star-rack {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 16px 0;
+      font-size: 42px;
+    }
+
+    .star-pop {
+      animation: starBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    .review-details {
+      text-align: left;
+      background: #F8FAFC;
+      padding: 14px 18px;
+      border-radius: 16px;
+      margin: 16px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.4); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes bubbleBurst {
+      0% { transform: scale(1); opacity: 1; }
+      60% { transform: scale(1.3); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    @keyframes starBounce {
+      0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+      70% { transform: scale(1.2) rotate(10deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景粒子与烟花画布 -->
+  <canvas id="particleCanvas"></canvas>
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- 顶部状态栏 -->
+  <header>
+    <div class="badge-bar">
+      <div class="badge">🎒 <span>一年级 道德教育</span></div>
+      <div class="badge">🤝 <span>价值12 合作</span></div>
+    </div>
+    <div class="badge-bar">
+      <div class="badge" id="timerBadge">⏱️ 00:00</div>
+      <div class="badge" id="userBadge">👤 快乐学习</div>
+    </div>
+  </header>
+
+  <!-- 游戏主舞台 -->
+  <main>
+    <!-- 第一关：摘果子喂食归类 -->
+    <section class="level-card" id="level1">
+      <div class="level-title">
+        <span>🍌 第一关：智慧伙伴吃果子</span>
+      </div>
+      <p class="level-subtitle">把代表“合作好处”的甜心果实喂给【合作好搭档】；把“不合作后果”喂给【孤单大树洞】！</p>
+
+      <div class="feeding-arena">
+        <div class="mascot-box" id="targetCoop" data-target="coop">
+          <svg class="mascot-avatar" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="#E0F2FE"/>
+            <circle cx="38" cy="45" r="16" fill="#93C5FD"/>
+            <circle cx="48" cy="62" r="6" fill="#3B82F6"/>
+            <path d="M 40 55 Q 48 70 56 55" stroke="#1E40AF" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="68" cy="42" r="12" fill="#FDE68A"/>
+            <circle cx="68" cy="42" r="6" fill="#D97706"/>
+            <path d="M 64 50 Q 68 56 72 50" stroke="#78350F" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="mascot-name">合作好搭档</div>
+          <div class="mascot-desc">请喂给我：分工合作带来的好处</div>
+          <div class="mascot-eaten-items" id="eatenCoop"></div>
+        </div>
+
+        <div class="mascot-box danger-target" id="targetSolo" data-target="solo">
+          <svg class="mascot-avatar" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="#FEE2E2"/>
+            <circle cx="36" cy="42" r="5" fill="#EF4444"/>
+            <circle cx="64" cy="42" r="5" fill="#EF4444"/>
+            <ellipse cx="50" cy="62" rx="14" ry="10" fill="#991B1B"/>
+          </svg>
+          <div class="mascot-name">孤单大树洞</div>
+          <div class="mascot-desc">请喂给我：一个人独做/不合作的困扰</div>
+          <div class="mascot-eaten-items" id="eatenSolo"></div>
+        </div>
+      </div>
+
+      <div class="card-pool" id="fruitPool"></div>
+    </section>
+
+    <!-- 第二关：平滑贝塞尔曲线连线 -->
+    <section class="level-card" id="level2">
+      <div class="level-title">
+        <span>🌱 第二关：分工合作搭长桥</span>
+      </div>
+      <p class="level-subtitle">点选左边任务，再点选默契配合的右边搭档，连出最美合作之线！</p>
+
+      <div class="matching-container" id="matchArea">
+        <canvas class="match-canvas-overlay" id="matchCanvas"></canvas>
+        <div class="match-column" id="colLeft"></div>
+        <div class="match-column" id="colRight"></div>
+      </div>
+    </section>
+
+    <!-- 第三关：七彩气泡轻弹爆破 -->
+    <section class="level-card" id="level3">
+      <div class="level-title">
+        <span>📚 第三关：图书角美化气泡乐园</span>
+      </div>
+      <p class="level-subtitle">我们要一起把图书角整理好！轻点戳破所有属于【积极分工与合作】的快乐气泡！</p>
+
+      <div class="bubble-garden" id="bubbleGarden"></div>
+      <div class="bubble-collected-board" id="collectedBoard">
+        <span style="font-size:13px; font-weight:700; color:#64748B;">🎉 已收集的合作好表现：</span>
+      </div>
+    </section>
+
+    <!-- 提交按钮 -->
+    <div class="footer-actions">
+      <button class="btn btn-submit" id="btnSubmit">🌟 完成闯关 · 提交答案</button>
+    </div>
+  </main>
+
+  <!-- 欢迎登入弹窗 -->
+  <div class="modal-overlay active" id="loginModal">
+    <div class="modal-card">
+      <div style="font-size: 52px; margin-bottom: 10px;">🌟</div>
+      <h2 style="font-size: 22px; font-weight: 800; color:#1F2937;">分工合作真欢喜</h2>
+      <p style="font-size: 14px; color:#6B7280; margin: 8px 0 16px;">欢迎来到一年级道德教育趣味大闯关！</p>
+
+      <input type="text" id="inputName" class="input-field" placeholder="请输入你的姓名（如：小华）" autocomplete="off">
+      <input type="text" id="inputClass" class="input-field" placeholder="班级（默认：一年级）" value="一年级">
+
+      <button class="btn btn-submit" style="width: 100%; justify-content: center;" id="btnStartGame">
+        🚀 开启快乐挑战
+      </button>
+    </div>
+  </div>
+
+  <!-- 成绩结算弹窗 -->
+  <div class="modal-overlay" id="resultModal">
+    <div class="modal-card">
+      <div style="font-size: 50px;">🏆</div>
+      <h2 style="font-size: 24px; font-weight: 800; margin-top: 6px;">太棒了！闯关完成！</h2>
+
+      <div class="star-rack" id="starRack"></div>
+
+      <div style="font-size: 18px; font-weight: 800; color:#4F46E5; margin-bottom: 6px;" id="scoreSummary">
+        得分: 100 分
+      </div>
+      <div style="font-size: 14px; color:#6B7280;" id="timeSummary">完成用时: 01:25</div>
+
+      <div class="review-details" id="reviewContent"></div>
+
+      <button class="btn btn-submit" style="width: 100%; justify-content: center; margin-top: 10px;" id="btnCloseResult">
+        ❤️ 我学会分工合作了
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       0. 后端配置：请替换为您部署的 Google Apps Script Web App 链接
+       ========================================================= */
+    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyboS-r6YfWYyTZ47BfuGBiyBL74H-1_6GSVgcqbIMElMiWxbDmAdiCTnE0wereT4JBhA/exec";
+
+    /* =========================================================
+       1. Web Audio API 纯代码合成音效
+       ========================================================= */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playPop() {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      }
+      playSnap() {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1046.5, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.14);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playVictory() {
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
+          gain.gain.setValueAtTime(0.25, this.ctx.currentTime + idx * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.1 + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + idx * 0.1);
+          osc.stop(this.ctx.currentTime + idx * 0.1 + 0.45);
+        });
+      }
+    }
+    const sounds = new SoundEngine();
+
+    /* =========================================================
+       2. 工具函数：Fisher-Yates 洗牌算法
+       ========================================================= */
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /* =========================================================
+       3. 漂浮粒子与彩色纸屑 Canvas 引擎
+       ========================================================= */
+    const bgCanvas = document.getElementById('particleCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeBgCanvas() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBgCanvas);
+    resizeBgCanvas();
+
+    for (let i = 0; i < 28; i++) {
+      particles.push({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        r: Math.random() * 8 + 4,
+        dx: (Math.random() - 0.5) * 0.8,
+        dy: (Math.random() - 0.5) * 0.8,
+        color: ['rgba(255,182,193,0.5)', 'rgba(167,243,208,0.5)', 'rgba(191,219,254,0.5)', 'rgba(254,240,138,0.5)'][Math.floor(Math.random()*4)]
+      });
+    }
+
+    function renderBgParticles() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      particles.forEach(p => {
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0) p.x = bgCanvas.width;
+        if (p.x > bgCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = bgCanvas.height;
+        if (p.y > bgCanvas.height) p.y = 0;
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        bgCtx.fillStyle = p.color;
+        bgCtx.fill();
+      });
+      requestAnimationFrame(renderBgParticles);
+    }
+    renderBgParticles();
+
+    const confCanvas = document.getElementById('confettiCanvas');
+    const confCtx = confCanvas.getContext('2d');
+    let confettis = [];
+
+    function triggerConfetti() {
+      confCanvas.width = window.innerWidth;
+      confCanvas.height = window.innerHeight;
+      confettis = [];
+      const colors = ['#EF4444', '#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6'];
+      for (let i = 0; i < 90; i++) {
+        confettis.push({
+          x: confCanvas.width / 2,
+          y: confCanvas.height / 2,
+          w: Math.random() * 10 + 6,
+          h: Math.random() * 6 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 16,
+          vy: (Math.random() - 0.7) * 18,
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10,
+          opacity: 1
+        });
+      }
+      renderConfetti();
+    }
+
+    function renderConfetti() {
+      confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+      let alive = false;
+      confettis.forEach(c => {
+        c.x += c.vx;
+        c.y += c.vy;
+        c.vy += 0.35;
+        c.rotation += c.vRot;
+        c.opacity -= 0.008;
+        if (c.opacity > 0) {
+          alive = true;
+          confCtx.save();
+          confCtx.translate(c.x, c.y);
+          confCtx.rotate((c.rotation * Math.PI) / 180);
+          confCtx.fillStyle = c.color;
+          confCtx.globalAlpha = Math.max(0, c.opacity);
+          confCtx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+          confCtx.restore();
+        }
+      });
+      if (alive) requestAnimationFrame(renderConfetti);
+      else confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+    }
+
+    /* =========================================================
+       4. 游戏数据与核心逻辑
+       ========================================================= */
+    const GAME_DATA = {
+      feedItems: [
+        { id: 'f1', text: '省时省力事半功倍', target: 'coop', icon: '⚡' },
+        { id: 'f2', text: '事情做得又快又好', target: 'coop', icon: '✨' },
+        { id: 'f3', text: '增进同学之间友谊', target: 'coop', icon: '🤝' },
+        { id: 'f4', text: '大家心里乐融融', target: 'coop', icon: '😊' },
+        { id: 'f5', text: '独自搬动很吃力', target: 'solo', icon: '💦' },
+        { id: 'f6', text: '做事费时又容易累', target: 'solo', icon: '⏳' },
+        { id: 'f7', text: '互相争抢任务不开心', target: 'solo', icon: '😠' }
+      ],
+      matchingPairs: [
+        { id: 'm1', left: '我在花园松土 🌸', right: '你在身旁浇水 🚿', pairKey: 'tree' },
+        { id: 'm2', left: '我来擦净窗户 🪟', right: '你来扫地倒垃圾 🧹', pairKey: 'clean' },
+        { id: 'm3', left: '我整理图书封面 📖', right: '你擦拭书柜隔板 🗄️', pairKey: 'library' },
+        { id: 'm4', left: '家里爸爸洗好菜 🥬', right: '妈妈炒出香喷喷的菜 🍳', pairKey: 'home' }
+      ],
+      bubbles: [
+        { id: 'b1', text: '主动擦拭隔板', isGood: true },
+        { id: 'b2', text: '推脱偷懒不理', isGood: false },
+        { id: 'b3', text: '把图书分类排好', isGood: true },
+        { id: 'b4', text: '抢最轻松的任务', isGood: false },
+        { id: 'b5', text: '友好协商做分工', isGood: true },
+        { id: 'b6', text: '互相帮忙贴标签', isGood: true },
+        { id: 'b7', text: '做完一起欢喜笑', isGood: true }
+      ]
+    };
+
+    let studentProfile = { name: '', className: '一年级' };
+    let timerSec = 0;
+    let timerInterval = null;
+
+    let userState = {
+      feedResults: {},
+      matches: [],
+      poppedBubbles: []
+    };
+
+    /* 4.1 初始化关卡 1 */
+    function initLevel1() {
+      const pool = document.getElementById('fruitPool');
+      pool.innerHTML = '';
+      const shuffled = shuffleArray(GAME_DATA.feedItems);
+
+      shuffled.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'fruit-card';
+        card.id = item.id;
+        card.dataset.id = item.id;
+        card.dataset.target = item.target;
+        card.innerHTML = `<span>${item.icon}</span><span>${item.text}</span>`;
+        setupDraggable(card);
+        pool.appendChild(card);
+      });
+    }
+
+    function setupDraggable(elem) {
+      let active = false;
+      let startX, startY;
+
+      elem.addEventListener('pointerdown', e => {
+        sounds.init();
+        sounds.playPop();
+        active = true;
+        elem.setPointerCapture(e.pointerId);
+        startX = e.clientX;
+        startY = e.clientY;
+        elem.style.position = 'relative';
+        elem.style.zIndex = '100';
+      });
+
+      elem.addEventListener('pointermove', e => {
+        if (!active) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        elem.style.transform = `translate(${dx}px, ${dy}px) scale(1.05)`;
+        checkMascotHover(e.clientX, e.clientY);
+      });
+
+      elem.addEventListener('pointerup', e => {
+        if (!active) return;
+        active = false;
+        elem.releasePointerCapture(e.pointerId);
+        elem.style.zIndex = '1';
+        elem.style.transform = '';
+
+        const dropTarget = getDropTarget(e.clientX, e.clientY);
+        if (dropTarget) {
+          dropIntoMascot(elem, dropTarget);
+        }
+        clearMascotHover();
+      });
+    }
+
+    function checkMascotHover(x, y) {
+      const coopRect = document.getElementById('targetCoop').getBoundingClientRect();
+      const soloRect = document.getElementById('targetSolo').getBoundingClientRect();
+      document.getElementById('targetCoop').classList.toggle('drag-over', isInRect(x, y, coopRect));
+      document.getElementById('targetSolo').classList.toggle('drag-over', isInRect(x, y, soloRect));
+    }
+
+    function clearMascotHover() {
+      document.getElementById('targetCoop').classList.remove('drag-over');
+      document.getElementById('targetSolo').classList.remove('drag-over');
+    }
+
+    function isInRect(x, y, r) {
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    }
+
+    function getDropTarget(x, y) {
+      const coopRect = document.getElementById('targetCoop').getBoundingClientRect();
+      const soloRect = document.getElementById('targetSolo').getBoundingClientRect();
+      if (isInRect(x, y, coopRect)) return 'coop';
+      if (isInRect(x, y, soloRect)) return 'solo';
+      return null;
+    }
+
+    function dropIntoMascot(cardElem, targetType) {
+      sounds.playSnap();
+      const id = cardElem.dataset.id;
+      userState.feedResults[id] = targetType;
+
+      const container = targetType === 'coop' ? document.getElementById('eatenCoop') : document.getElementById('eatenSolo');
+      const chip = document.createElement('div');
+      chip.className = 'item-chip';
+      chip.innerText = cardElem.innerText;
+      container.appendChild(chip);
+
+      cardElem.remove();
+    }
+
+    /* 4.2 初始化关卡 2 */
+    let selectedLeftNode = null;
+    const matchCanvas = document.getElementById('matchCanvas');
+    const matchCtx = matchCanvas.getContext('2d');
+
+    function initLevel2() {
+      const colL = document.getElementById('colLeft');
+      const colR = document.getElementById('colRight');
+      colL.innerHTML = '';
+      colR.innerHTML = '';
+
+      const leftItems = shuffleArray(GAME_DATA.matchingPairs);
+      const rightItems = shuffleArray(GAME_DATA.matchingPairs);
+
+      leftItems.forEach(item => {
+        const node = document.createElement('div');
+        node.className = 'match-node';
+        node.dataset.id = item.id;
+        node.dataset.side = 'left';
+        node.dataset.key = item.pairKey;
+        node.innerHTML = `<span>${item.left}</span><div class="node-anchor"></div>`;
+        node.addEventListener('click', () => handleNodeClick(node));
+        colL.appendChild(node);
+      });
+
+      rightItems.forEach(item => {
+        const node = document.createElement('div');
+        node.className = 'match-node';
+        node.dataset.id = item.id;
+        node.dataset.side = 'right';
+        node.dataset.key = item.pairKey;
+        node.innerHTML = `<div class="node-anchor"></div><span>${item.right}</span>`;
+        node.addEventListener('click', () => handleNodeClick(node));
+        colR.appendChild(node);
+      });
+
+      setTimeout(resizeMatchCanvas, 100);
+    }
+
+    function resizeMatchCanvas() {
+      const container = document.getElementById('matchArea');
+      matchCanvas.width = container.offsetWidth;
+      matchCanvas.height = container.offsetHeight;
+      drawBezierLines();
+    }
+    window.addEventListener('resize', resizeMatchCanvas);
+
+    function handleNodeClick(node) {
+      sounds.init();
+      sounds.playPop();
+
+      const side = node.dataset.side;
+      if (side === 'left') {
+        if (selectedLeftNode) selectedLeftNode.classList.remove('selected');
+        selectedLeftNode = node;
+        node.classList.add('selected');
+      } else if (side === 'right' && selectedLeftNode) {
+        const leftId = selectedLeftNode.dataset.id;
+        const rightId = node.dataset.id;
+        const leftKey = selectedLeftNode.dataset.key;
+        const rightKey = node.dataset.key;
+
+        userState.matches = userState.matches.filter(m => m.leftId !== leftId && m.rightId !== rightId);
+
+        userState.matches.push({
+          leftId,
+          rightId,
+          leftKey,
+          rightKey,
+          leftNode: selectedLeftNode,
+          rightNode: node
+        });
+
+        sounds.playSnap();
+        selectedLeftNode.classList.remove('selected');
+        selectedLeftNode.classList.add('connected');
+        node.classList.add('connected');
+        selectedLeftNode = null;
+
+        drawBezierLines();
+      }
+    }
+
+    function drawBezierLines() {
+      matchCtx.clearRect(0, 0, matchCanvas.width, matchCanvas.height);
+      const containerRect = document.getElementById('matchArea').getBoundingClientRect();
+
+      userState.matches.forEach(m => {
+        const lAnchor = m.leftNode.querySelector('.node-anchor').getBoundingClientRect();
+        const rAnchor = m.rightNode.querySelector('.node-anchor').getBoundingClientRect();
+
+        const x1 = lAnchor.left + lAnchor.width / 2 - containerRect.left;
+        const y1 = lAnchor.top + lAnchor.height / 2 - containerRect.top;
+        const x2 = rAnchor.left + rAnchor.width / 2 - containerRect.left;
+        const y2 = rAnchor.top + rAnchor.height / 2 - containerRect.top;
+
+        const cx1 = x1 + (x2 - x1) * 0.5;
+        const cy1 = y1;
+        const cx2 = x1 + (x2 - x1) * 0.5;
+        const cy2 = y2;
+
+        matchCtx.beginPath();
+        matchCtx.moveTo(x1, y1);
+        matchCtx.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2);
+        matchCtx.lineWidth = 4;
+        matchCtx.strokeStyle = '#10B981';
+        matchCtx.lineCap = 'round';
+        matchCtx.stroke();
+      });
+    }
+
+    /* 4.3 初始化关卡 3 */
+    function initLevel3() {
+      const garden = document.getElementById('bubbleGarden');
+      garden.innerHTML = '';
+      const shuffled = shuffleArray(GAME_DATA.bubbles);
+
+      shuffled.forEach((b, idx) => {
+        const bubble = document.createElement('div');
+        bubble.className = 'pop-bubble';
+        bubble.id = b.id;
+        bubble.dataset.id = b.id;
+        bubble.dataset.good = b.isGood;
+        bubble.innerText = b.text;
+
+        const posX = (idx % 4) * 23 + (Math.random() * 8 + 3);
+        const posY = Math.floor(idx / 4) * 44 + (Math.random() * 12 + 10);
+        bubble.style.left = `${posX}%`;
+        bubble.style.top = `${posY}%`;
+
+        bubble.addEventListener('click', () => handleBubblePop(bubble, b));
+        garden.appendChild(bubble);
+      });
+    }
+
+    function handleBubblePop(bubbleElem, bubbleData) {
+      sounds.init();
+      sounds.playPop();
+      bubbleElem.classList.add('popped');
+      userState.poppedBubbles.push(bubbleData.id);
+
+      if (bubbleData.isGood) {
+        sounds.playSnap();
+        const board = document.getElementById('collectedBoard');
+        const badge = document.createElement('span');
+        badge.className = 'item-chip';
+        badge.innerText = `⭐ ${bubbleData.text}`;
+        board.appendChild(badge);
+      }
+    }
+
+    /* =========================================================
+       5. 提交结算与跨域提交至 Google 表格
+       ========================================================= */
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.addEventListener('click', calculateAndSubmit);
+
+    function calculateAndSubmit() {
+      sounds.init();
+      clearInterval(timerInterval);
+      btnSubmit.disabled = true;
+
+      let score = 0;
+      let totalQuestions = 0;
+      let mistakes = [];
+
+      // 评估关卡 1 (7题)
+      GAME_DATA.feedItems.forEach(item => {
+        totalQuestions++;
+        const studentChoice = userState.feedResults[item.id];
+        if (studentChoice === item.target) {
+          score += 10;
+        } else {
+          mistakes.push(`【喂食任务】${item.text} 应该放入 ${item.target === 'coop' ? '合作好搭档' : '孤单大树洞'}`);
+        }
+      });
+
+      // 评估关卡 2 (4组连线)
+      GAME_DATA.matchingPairs.forEach(pair => {
+        totalQuestions++;
+        const matched = userState.matches.find(m => m.leftKey === pair.pairKey && m.rightKey === pair.pairKey);
+        if (matched) {
+          score += 10;
+        } else {
+          mistakes.push(`【搭长桥】“${pair.left}”的最佳分工搭档是“${pair.right}”`);
+        }
+      });
+
+      // 评估关卡 3 (气泡收集)
+      GAME_DATA.bubbles.forEach(b => {
+        totalQuestions++;
+        const isPopped = userState.poppedBubbles.includes(b.id);
+        if (b.isGood && isPopped) {
+          score += 10;
+        } else if (!b.isGood && !isPopped) {
+          score += 10;
+        } else if (b.isGood && !isPopped) {
+          mistakes.push(`【图书角美化】记得收集积极行为：“${b.text}”`);
+        } else if (!b.isGood && isPopped) {
+          mistakes.push(`【图书角美化】“${b.text}”是不合作行为，应避免戳破`);
+        }
+      });
+
+      const maxScore = totalQuestions * 10;
+      const percentage = Math.round((score / maxScore) * 100);
+
+      // 显示星级
+      const starRack = document.getElementById('starRack');
+      starRack.innerHTML = '';
+      let starCount = percentage >= 85 ? 3 : (percentage >= 60 ? 2 : 1);
+      for (let i = 0; i < starCount; i++) {
+        const s = document.createElement('span');
+        s.className = 'star-pop';
+        s.style.animationDelay = `${i * 0.18}s`;
+        s.innerText = '⭐';
+        starRack.appendChild(s);
+      }
+
+      document.getElementById('scoreSummary').innerText = `大获全胜！获得 ${percentage} 分`;
+      document.getElementById('timeSummary').innerText = `闯关用时: ${formatTime(timerSec)}`;
+
+      // 评价展示
+      const reviewBox = document.getElementById('reviewContent');
+      if (mistakes.length === 0) {
+        reviewBox.innerHTML = `
+          <div style="color: #059669; font-weight: 700; margin-bottom: 6px;">🎉 恭喜你，全对通关！</div>
+          <div>你已经完全掌握了“分工合作”的秘诀：心往一处想，劲往一处使，事情做得快又好！</div>
+        `;
+      } else {
+        reviewBox.innerHTML = `
+          <div style="font-weight: 700; color: #4B5563; margin-bottom: 6px;">💡 老师的温馨锦囊：</div>
+          <ul style="padding-left: 20px; color: #4B5563;">
+            ${mistakes.map(m => `<li>${m}</li>`).join('')}
+          </ul>
+        `;
+      }
+
+      sounds.playVictory();
+      triggerConfetti();
+      document.getElementById('resultModal').classList.add('active');
+
+      // 准备上传载荷
+      const payload = {
+        name: studentProfile.name,
+        studentClass: studentProfile.className,
+        score: score,
+        total: maxScore,
+        percentage: percentage,
+        timeSpent: formatTime(timerSec),
+        mistakes: mistakes.length === 0 ? '全对！合作小达人' : mistakes.join('； ')
+      };
+
+      // 跨域提交到 Google Apps Script (使用 fetch + text/plain 防止预检 CORS 拦截)
+      if (GAS_ENDPOINT_URL && !GAS_ENDPOINT_URL.includes("REPLACE_WITH_YOUR_ID")) {
+        fetch(GAS_ENDPOINT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          console.log('数据已成功送出至 Google 表格');
+        })
+        .catch(err => {
+          console.error('上传网络错误:', err);
+        });
+      } else {
+        console.warn('请配置 GAS_ENDPOINT_URL 以同步到 Google 表格。当前离线运行 payload:', payload);
+      }
+    }
+
+    /* =========================================================
+       6. 启动控制与计时系统
+       ========================================================= */
+    document.getElementById('btnStartGame').addEventListener('click', () => {
+      const nameInput = document.getElementById('inputName').value.trim();
+      const classInput = document.getElementById('inputClass').value.trim();
+
+      if (!nameInput) {
+        alert('请先输入你的姓名，再开启闯关哦！');
+        return;
+      }
+
+      studentProfile.name = nameInput;
+      studentProfile.className = classInput || '一年级';
+
+      document.getElementById('userBadge').innerText = `👤 ${studentProfile.name}`;
+      document.getElementById('loginModal').classList.remove('active');
+
+      sounds.init();
+      sounds.playSnap();
+
+      timerInterval = setInterval(() => {
+        timerSec++;
+        document.getElementById('timerBadge').innerText = `⏱️ ${formatTime(timerSec)}`;
+      }, 1000);
+
+      initLevel1();
+      initLevel2();
+      initLevel3();
+    });
+
+    document.getElementById('btnCloseResult').addEventListener('click', () => {
+      document.getElementById('resultModal').classList.remove('active');
+    });
+
+    function formatTime(s) {
+      const min = Math.floor(s / 60).toString().padStart(2, '0');
+      const sec = (s % 60).toString().padStart(2, '0');
+      return `${min}:${sec}`;
+    }
+  </script>
+</body>
+</html>
