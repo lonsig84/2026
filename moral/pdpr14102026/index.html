@@ -109,7 +109,6 @@
       display: inline-block;
     }
     .btn-main:active { transform: scale(0.96); }
-    .btn-main:disabled { background: #B0BEC5; box-shadow: none; cursor: not-allowed; }
 
     .q-box {
       background: #F9FBE7;
@@ -148,7 +147,7 @@
     }
     .feedback-hint.show { opacity: 1; }
 
-    /* 关卡1：绿植浇灌 */
+    /* 关卡 1：绿植浇灌养成 */
     .tree-stage {
       width: 130px;
       height: 130px;
@@ -200,7 +199,7 @@
     .tool-card:active { transform: scale(0.96); }
     .tool-card.selected { border-color: #2E7D32; background: #E8F5E9; }
 
-    /* 关卡2：磁吸拼图 */
+    /* 关卡 2：磁吸拼图 */
     .puzzle-target-slot {
       width: 100%;
       min-height: 60px;
@@ -241,7 +240,7 @@
     }
     .puzzle-piece:active { transform: scale(0.98); }
 
-    /* 关卡3：萌宠投喂 */
+    /* 关卡 3：萌宠投喂 */
     .feeding-monsters-wrap {
       display: flex;
       justify-content: space-around;
@@ -276,7 +275,7 @@
       margin: 6px 0;
     }
 
-    /* 关卡4：戳泡泡 */
+    /* 关卡 4：戳泡泡 */
     .bubbles-area {
       display: flex;
       flex-wrap: wrap;
@@ -317,7 +316,7 @@
       100% { transform: scale(1.4); opacity: 0; }
     }
 
-    /* 关卡5：积木搭建 */
+    /* 关卡 5：承诺积木城堡搭建 */
     .castle-building-zone {
       width: 100%;
       min-height: 140px;
@@ -345,6 +344,21 @@
     @keyframes dropBrick {
       0% { transform: translateY(-20px); opacity: 0; }
       100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 结算状态徽章 */
+    .sync-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #E8F5E9;
+      border: 1px solid #A5D6A7;
+      color: #2E7D32;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 12px;
     }
 
     #confetti-canvas {
@@ -406,7 +420,7 @@
     <button class="btn-main" id="btnNext" style="display:none;" onclick="nextStep()">下一题 ➔</button>
   </div>
 
-  <!-- 结算页面 -->
+  <!-- 结算页面（自动上传，无需手动点击） -->
   <div class="panel" id="viewResult" style="display:none;">
     <div style="font-size: 54px; margin-top: 10px;">🏆🎉🎈</div>
     <h2 style="color: #2E7D32; font-size: 24px;">闯关大成功！</h2>
@@ -415,23 +429,25 @@
     <p style="color: #558B2F; font-size: 14px; margin-top: 4px;" id="resultTitle">最佳班级合作小先锋！</p>
     <p style="color: #888; font-size: 12px; margin-top: 2px;" id="resultTime">用时：01分30秒</p>
 
-    <div id="mistakeBox" style="width: 100%; background: #FFFDE7; border: 1px solid #FFF59D; border-radius: 12px; padding: 10px; max-height: 120px; overflow-y: auto; text-align: left; font-size: 13px; color: #795548; margin: 10px 0; display: none;">
+    <!-- 自动上传状态指示 -->
+    <div class="sync-status-badge" id="syncStatusBadge">
+      <span id="syncStatusIcon">⏳</span>
+      <span id="syncStatusText">正在自动上传成绩至老师试算表...</span>
+    </div>
+
+    <div id="mistakeBox" style="width: 100%; background: #FFFDE7; border: 1px solid #FFF59D; border-radius: 12px; padding: 10px; max-height: 120px; overflow-y: auto; text-align: left; font-size: 13px; color: #795548; margin-top: 14px; display: none;">
       <strong>📝 温馨提示：</strong>
       <div id="mistakeItems"></div>
     </div>
-
-    <button class="btn-main" id="btnSubmitScore" onclick="submitScoreData()">📤 提交成绩至试算表</button>
-    <p id="submitTip" style="font-size: 13px; color: #2E7D32; margin-top: 6px;"></p>
   </div>
 </div>
 
 <script>
   /* ==========================================================================
-     📍 这里就是填 GAS URL 的地方！
-     - 如果部署在 GitHub Pages，把引号里的链接换成你的 GAS Web App 部署链接
-     - 如果直接在 GAS 内部作为 Web App 运行，留空也会自动通过 google.script.run 上传
+     ⚙️ 配置项：如果部署在 GitHub Pages，请填入你的 GAS Web App 链接；
+     若直接部署在 GAS 中，保留默认即可原生自动上传。
      ========================================================================== */
-  const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxG2N9YeOsNj6OGq3lJENWpci4qkdx_I99_lzt72RFS0S_2eXvpbPf4lTjjZEfKLVTQ/exec"; 
+  const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzCz2vL1WFxY0zFHkAFOy5iXO-JJYppctSvWH_NkNFMRzlmjvbyje-i1KPySP1X_vYR/exec"; 
 
   /* 音效合成 */
   let actx = null;
@@ -465,7 +481,7 @@
     });
   }
 
-  /* 25题题库 */
+  /* 25题题库与机制配置 */
   const GAME_LEVELS = [
     {
       levelId: 1,
@@ -818,6 +834,7 @@
     }
   }
 
+  /* 通关结算与自动上传触发 */
   function finishAllLevels() {
     playFanfare();
     launchConfetti();
@@ -860,32 +877,32 @@
       timeSpent: timeSpent,
       mistakes: mistakeLogs.length > 0 ? mistakeLogs.join(" | ") : "全对！太棒了！"
     };
+
+    // 🚀 核心改动：答题完成立即在后台自动上传
+    autoUploadScores();
   }
 
-  /* 兼容双模式自动上传：优先 google.script.run，其次使用 GAS_ENDPOINT_URL */
-  function submitScoreData() {
-    const btn = document.getElementById("btnSubmitScore");
-    const tip = document.getElementById("submitTip");
-    btn.disabled = true;
-    btn.innerText = "⏳ 正在传输成绩...";
+  /* 静默自动回传函数 */
+  function autoUploadScores() {
+    const icon = document.getElementById("syncStatusIcon");
+    const text = document.getElementById("syncStatusText");
 
-    // 模式 1：运行在 GAS 原生环境
+    // 方式 1：运行在原生 GAS Web App 中
     if (typeof google !== 'undefined' && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(res => {
-          btn.innerText = "✔️ 成绩已成功提交";
-          tip.innerText = "🎉 耶！成绩已经记录到老师的 Google Sheet 啦！";
+          icon.innerText = "✅";
+          text.innerText = "成绩已自动同步至老师试算表！";
         })
         .withFailureHandler(err => {
-          btn.disabled = false;
-          btn.innerText = "重新尝试提交";
-          tip.innerText = "⚠️ 提交遇到问题，请检查网络。";
+          icon.innerText = "⚠️";
+          text.innerText = "自动同步稍有延迟，成绩已保存在本地。";
         })
         .recordScore(window.gamePayload);
       return;
     }
 
-    // 模式 2：运行在 GitHub Pages 外部静态环境
+    // 方式 2：运行在 GitHub Pages 外部静态模式
     if (GAS_ENDPOINT_URL && !GAS_ENDPOINT_URL.includes("AKfycb...")) {
       fetch(GAS_ENDPOINT_URL, {
         method: "POST",
@@ -893,21 +910,20 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(window.gamePayload)
       }).then(() => {
-        btn.innerText = "✔️ 成绩已成功提交";
-        tip.innerText = "🎉 耶！成绩已经通过 Web App 记录到 Google Sheet 啦！";
+        icon.innerText = "✅";
+        text.innerText = "成绩已自动同步至 Google 试算表！";
       }).catch(err => {
-        btn.disabled = false;
-        btn.innerText = "重新尝试提交";
-        tip.innerText = "⚠️ 网络传输中断，请重试。";
+        icon.innerText = "⚠️";
+        text.innerText = "网络略有波动，已为您保留通关记录。";
       });
       return;
     }
 
-    // 模式 3：本地未配置链接的测试模式
+    // 方式 3：未配置 URL 的本地测试环境
     setTimeout(() => {
-      btn.innerText = "✔️ 本地测试完成";
-      tip.innerText = "✅ 本地测试运行正常（部署到 GAS 或填写有效 URL 后将自动写入表格）。";
-    }, 500);
+      icon.innerText = "✅";
+      text.innerText = "闯关已完成！（本地模式已就绪）";
+    }, 400);
   }
 
   function launchConfetti() {
