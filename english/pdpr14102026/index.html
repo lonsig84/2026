@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Mary Celeste: Maritime Mystery Investigation</title>
+  <style>
+    :root {
+      --bg-ocean: #0d1b2a;
+      --card-bg: #1b263b;
+      --brass: #e0a96d;
+      --brass-hover: #f3c28c;
+      --parchment: #f4ebd9;
+      --parchment-card: #eadecc;
+      --text-dark: #2c2523;
+      --accent-blue: #415a77;
+      --glow-gold: #ffd166;
+      --success-green: #2ec4b6;
+      --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 30%, #1b263b 0%, #0d1b2a 100%);
+      color: var(--parchment);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(224, 169, 109, 0.3);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-icon {
+      font-size: 28px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+
+    .game-title h1 {
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+      color: var(--brass);
+      text-transform: uppercase;
+    }
+
+    .game-title p {
+      font-size: 0.75rem;
+      color: #8da9c4;
+    }
+
+    .status-hud {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .hud-box {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(224, 169, 109, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 900px;
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Screen Transitions */
+    .screen {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Common Card Styles */
+    .investigation-panel {
+      background: rgba(27, 38, 59, 0.85);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--brass);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .panel-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-header h2 {
+      color: var(--brass);
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+
+    .panel-header p {
+      color: #abc4ff;
+      font-size: 0.9rem;
+    }
+
+    /* Buttons */
+    .btn {
+      background: linear-gradient(135deg, var(--brass) 0%, #b87d3b 100%);
+      color: #1a140d;
+      border: none;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(224, 169, 109, 0.4);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(224, 169, 109, 0.6);
+      background: linear-gradient(135deg, var(--brass-hover) 0%, #c98c47 100%);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.8);
+    }
+
+    /* Screen 0: Welcome / Form */
+    .briefing-box {
+      background: var(--parchment);
+      color: var(--text-dark);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      border-left: 6px solid #8c52ff;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .input-group label {
+      font-size: 0.9rem;
+      color: var(--brass);
+      font-weight: 600;
+    }
+
+    .input-group input, .input-group select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(224, 169, 109, 0.5);
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .input-group input:focus, .input-group select:focus {
+      border-color: var(--glow-gold);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Stage 1: Flow Map Snap-in Blocks */
+    .flowmap-dropzone-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .flow-slot {
+      min-height: 64px;
+      background: rgba(13, 27, 42, 0.6);
+      border: 2px dashed rgba(224, 169, 109, 0.4);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .flow-slot.highlight {
+      border-color: var(--glow-gold);
+      background: rgba(224, 169, 109, 0.15);
+      transform: scale(1.01);
+    }
+
+    .flow-slot-label {
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      background: var(--brass);
+      color: #1a140d;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .bank-blocks-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+    }
+
+    .event-block {
+      background: var(--parchment);
+      color: var(--text-dark);
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      border: 2px solid transparent;
+      transition: transform 0.15s, box-shadow 0.15s;
+      touch-action: none;
+    }
+
+    .event-block:active {
+      cursor: grabbing;
+      transform: scale(0.98);
+    }
+
+    .event-block.snapped {
+      background: #e2f0d9;
+      border-color: #548235;
+      box-shadow: none;
+      width: 100%;
+    }
+
+    /* Stage 2: Spotlight Cabin Clues */
+    .spotlight-wrapper {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--brass);
+      background: #050a12;
+      margin-bottom: 20px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    #spotlightCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .cabin-scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><rect width="800" height="400" fill="%231a2332"/><path d="M0,300 L800,300" stroke="%2330425c" stroke-width="4"/><path d="M0,0 L150,300 M800,0 L650,300" stroke="%23243348" stroke-width="3"/><circle cx="400" cy="140" r="45" fill="none" stroke="%23415a77" stroke-width="6"/></svg>') center/cover;
+      z-index: 1;
+    }
+
+    .hidden-clue-item {
+      position: absolute;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      background: rgba(224, 169, 109, 0.2);
+      border: 2px solid rgba(224, 169, 109, 0.4);
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      z-index: 1;
+    }
+
+    .hidden-clue-item.found {
+      background: rgba(46, 196, 182, 0.3);
+      border-color: var(--success-green);
+      box-shadow: 0 0 15px var(--success-green);
+    }
+
+    .clue-counter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+
+    /* Modal for Clue Question */
+    .clue-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .clue-modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 2px solid var(--brass);
+      border-radius: 16px;
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+      animation: modalPop 0.3s ease;
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .modal-opt-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--parchment);
+      border: 1px solid rgba(224, 169, 109, 0.4);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .modal-opt-btn:hover {
+      background: rgba(224, 169, 109, 0.2);
+      border-color: var(--brass);
+    }
+
+    /* Stage 3: Sentence Builder */
+    .sentence-quest-card {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--brass);
+    }
+
+    .sentence-frame-display {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+
+    .snap-slot {
+      display: inline-block;
+      min-width: 180px;
+      padding: 2px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom: 2px dashed var(--brass);
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--glow-gold);
+      vertical-align: middle;
+      cursor: pointer;
+    }
+
+    .roller-picker-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .roller-chip {
+      background: var(--parchment-card);
+      color: var(--text-dark);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    .roller-chip:hover {
+      background: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* Stage 4: Deductive Balance Scale */
+    .scale-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .scale-beam-visual {
+      position: relative;
+      width: 280px;
+      height: 10px;
+      background: var(--brass);
+      border-radius: 5px;
+      margin: 40px auto 20px;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .scale-fulcrum {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 35px solid #8da9c4;
+    }
+
+    .scale-pan {
+      position: absolute;
+      top: 10px;
+      width: 110px;
+      min-height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid var(--brass);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    .pan-left { left: -10px; }
+    .pan-right { right: -10px; }
+
+    .theory-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .theory-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(224, 169, 109, 0.3);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theory-card:hover {
+      background: rgba(224, 169, 109, 0.15);
+      border-color: var(--brass);
+    }
+
+    .theory-card.selected {
+      border-color: var(--success-green);
+      background: rgba(46, 196, 182, 0.15);
+      box-shadow: 0 0 12px rgba(46, 196, 182, 0.4);
+    }
+
+    /* Screen: Result & Review */
+    .result-score-ring {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 6px solid var(--brass);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 25px rgba(224, 169, 109, 0.3);
+    }
+
+    .result-score-num {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--glow-gold);
+      line-height: 1;
+    }
+
+    .stars-row {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      color: var(--glow-gold);
+      letter-spacing: 6px;
+    }
+
+    .sync-status-card {
+      background: rgba(46, 196, 182, 0.15);
+      border: 1px solid var(--success-green);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 16px 0;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .review-details-list {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      text-align: left;
+      font-size: 0.9rem;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .review-item {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    @media (max-width: 600px) {
+      .theory-cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .panel-header h2 {
+        font-size: 1.15rem;
+      }
+      .spotlight-wrapper {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <div class="badge-icon">🧭</div>
+      <div class="game-title">
+        <h1>Mary Celeste Casebook</h1>
+        <p>Year 6 Investigative Mission • Unit 10</p>
+      </div>
+    </div>
+    <div class="status-hud">
+      <div class="hud-box">⏱️ <span id="timerDisplay">00:00</span></div>
+      <div class="hud-box">🔍 <span id="scoreDisplay">0</span> Pts</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- SCREEN 0: Briefing & Registration -->
+    <section id="screenIntro" class="screen active">
+      <div class="investigation-panel">
+        <div class="panel-header">
+          <h2>Maritime Investigation Warrant</h2>
+          <p>Unravel the greatest nautical puzzle in history (December 1872)</p>
+        </div>
+
+        <div class="briefing-box">
+          <strong>Official Case Dispatch:</strong><br>
+          The merchant brigantine <em>Mary Celeste</em> was discovered sailing unmanned near the Azores Islands. 
+          There was plenty of food, the cargo was untouched, yet all 10 crew members and passengers were missing! 
+          As Year 6 Junior Detectives, reconstruct the voyage timeline, gather strange clues in the cabin, build descriptive evidence frames, and solve the anomaly.
+        </div>
+
+        <div class="input-group">
+          <label for="studentName">Detective Name (学生姓名):</label>
+          <input type="text" id="studentName" placeholder="Enter your full name..." autocomplete="off">
+        </div>
+
+        <div class="input-group">
+          <label for="studentClass">Class (班级):</label>
+          <select id="studentClass">
+            <option value="6 Brilliant">Year 6 Brilliant</option>
+            <option value="6 Creative">Year 6 Creative</option>
+            <option value="6 Dynamic">Year 6 Dynamic</option>
+            <option value="6 Excellence">Year 6 Excellence</option>
+          </select>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+          <button class="btn" onclick="startGame()">
+            <span>⚓ Begin Investigation</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 1: Chronological Flow Map Reconstruction -->
+    <section id="screenStage1" class="screen">
+      <div class="investigation-panel">
+        <div class="panel-header">
+          <h2>Mission 1: Chronological Flow Map</h2>
+          <p>Drag or tap the 4 key voyage milestones into correct chronological order.</p>
+        </div>
+
+        <div class="flowmap-dropzone-container" id="flowSlotsContainer">
+          <!-- Slots rendered dynamically -->
+        </div>
+
+        <div class="bank-blocks-container" id="flowCardsBank">
+          <!-- Shuffled event blocks rendered here -->
+        </div>
+
+        <div style="text-align: right;">
+          <button class="btn" id="stage1NextBtn" disabled onclick="validateStage1()">
+            <span>Next: Search The Cabin 🔦</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 2: Cabin Spotlight Clue Search -->
+    <section id="screenStage2" class="screen">
+      <div class="investigation-panel">
+        <div class="panel-header">
+          <h2>Mission 2: Dark Cabin Spotlight</h2>
+          <p>Move your flashlight across the dark abandoned cabin to discover 4 anomalous clues!</p>
+        </div>
+
+        <div class="clue-counter-bar">
+          <span>Clues Found: <strong id="cluesFoundCount">0</strong> / 4</span>
+          <span style="color: #8da9c4; font-size: 0.8rem;">Tap each glowing discovery to log forensic details</span>
+        </div>
+
+        <div class="spotlight-wrapper" id="spotlightArea">
+          <div class="cabin-scene">
+            <!-- 4 Hidden Clue Items (Absolute coordinates) -->
+            <div class="hidden-clue-item" id="clue1" style="left: 15%; top: 40%;" title="Galley Breakfast">🍳</div>
+            <div class="hidden-clue-item" id="clue2" style="left: 45%; top: 65%;" title="Cargo Hold">📦</div>
+            <div class="hidden-clue-item" id="clue3" style="left: 78%; top: 25%;" title="Empty Davits">🚣</div>
+            <div class="hidden-clue-item" id="clue4" style="left: 60%; top: 45%;" title="Captain's Desk">🧭</div>
+          </div>
+          <canvas id="spotlightCanvas"></canvas>
+        </div>
+
+        <div style="text-align: right;">
+          <button class="btn" id="stage2NextBtn" disabled onclick="goToStage3()">
+            <span>Next: Frame Strange Clues 📝</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 3: Descriptive Experience Frame Builder -->
+    <section id="screenStage3" class="screen">
+      <div class="investigation-panel">
+        <div class="panel-header">
+          <h2>Mission 3: Verbal Evidence Workshop</h2>
+          <p>SP 2.1.2: Complete the target frame: <em>'I discovered that ... and it was strange because ...'</em></p>
+        </div>
+
+        <div id="sentenceQuestsContainer">
+          <!-- Dynamic Sentence Quests -->
+        </div>
+
+        <div style="text-align: right;">
+          <button class="btn" id="stage3NextBtn" disabled onclick="goToStage4()">
+            <span>Next: Deduction Scale ⚖️</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 4: Rational Deduction & Evaluation -->
+    <section id="screenStage4" class="screen">
+      <div class="investigation-panel">
+        <div class="panel-header">
+          <h2>Mission 4: The Rational Deduction Balance</h2>
+          <p>Weigh the historical hypotheses against verifiable facts. (Nilai: Rasional)</p>
+        </div>
+
+        <div class="scale-container">
+          <div class="scale-beam-visual" id="scaleBeam">
+            <div class="scale-fulcrum"></div>
+            <div class="scale-pan pan-left" id="panFacts">
+              <strong style="color:var(--glow-gold)">Facts Found</strong>
+              <span id="panFactsText">4 Physical Clues</span>
+            </div>
+            <div class="scale-pan pan-right" id="panTheory">
+              <strong style="color:var(--glow-gold)">Chosen Theory</strong>
+              <span id="panTheoryText">Select below</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="theory-cards-grid" id="theoriesContainer">
+          <!-- Theories rendered here -->
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn" id="submitAllBtn" disabled onclick="finishAndSubmitGame()">
+            <span>⚖️ Finalize Report & Submit Score</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL SCREEN: Results & Google Sheets Sync -->
+    <section id="screenResult" class="screen">
+      <div class="investigation-panel" style="text-align: center;">
+        <div class="panel-header">
+          <h2>Investigation Debrief</h2>
+          <p>Detective Certification of Merit</p>
+        </div>
+
+        <div class="stars-row" id="starsRow">⭐⭐⭐</div>
+
+        <div class="result-score-ring">
+          <div class="result-score-num" id="finalScoreVal">100</div>
+          <span style="font-size: 0.8rem; color: #abc4ff;">SCORE</span>
+        </div>
+
+        <h3 id="detectiveRankText" style="color: var(--brass); margin-bottom: 8px;">Master Nautical Sleuth</h3>
+        <p id="studentSummaryText" style="color: #cad2c5; font-size: 0.95rem;"></p>
+
+        <div class="sync-status-card" id="syncStatusBox">
+          <span>📡 Synchronizing with Teacher's Google Sheet...</span>
+        </div>
+
+        <div style="text-align: left; margin-top: 20px;">
+          <h4 style="color: var(--brass); margin-bottom: 8px;">📋 Pedagogical Review & Learning Takeaways:</h4>
+          <div class="review-details-list" id="reviewList">
+            <!-- Review items -->
+          </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <button class="btn" onclick="location.reload()">
+            <span>🔄 Play Again (Review)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive Clue Question Modal -->
+  <div class="clue-modal" id="clueModal">
+    <div class="modal-content">
+      <h3 id="modalClueTitle" style="color: var(--brass); margin-bottom: 10px;">Forensic Finding</h3>
+      <p id="modalClueDesc" style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5; margin-bottom: 16px;"></p>
+      <div class="modal-options" id="modalOptionsBox"></div>
+    </div>
+  </div>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <script>
+    /* =========================================================
+       1. TEACHER CONFIGURATION (GAS ENDPOINT URL)
+       Replace the URL below with your deployed Google Apps Script Web App URL.
+       ========================================================= */
+    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycby3QtU8grtkhD-pvd1RvptjFNcRN77fN2dyS7hrxLxf2hMpJ9PvugWlYQr0mjR5aTPDbg/exec";
+
+    /* =========================================================
+       2. ZERO-DEPENDENCY WEB AUDIO API SOUND SYNTHESIZER
+       ========================================================= */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playChirp() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      }
+      playSnap() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1400, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1800, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.12);
+      }
+      playFanfare() {
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const start = this.ctx.currentTime + idx * 0.12;
+          gain.gain.setValueAtTime(0.25, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(start);
+          osc.stop(start + 0.35);
+        });
+      }
+    }
+    const sound = new SoundEngine();
+
+    /* =========================================================
+       3. GAME STATE & PEDAGOGICAL DATA
+       ========================================================= */
+    const gameState = {
+      name: '',
+      studentClass: '',
+      startTime: 0,
+      timerInterval: null,
+      score: 0,
+      mistakes: [],
+      stage1Answers: [null, null, null, null],
+      stage2CluesFound: 0,
+      stage3Selections: [null, null, null],
+      selectedTheoryId: null
+    };
+
+    // Stage 1 Timeline Data (Flow Map)
+    const timelineMilestones = [
+      { id: 1, text: "7 Nov 1872: Captain Briggs sets sail from New York to Genoa with 1,701 barrels of alcohol." },
+      { id: 2, text: "25 Nov 1872: The captain records the final log entry near the Azores. Weather is calm." },
+      { id: 3, text: "5 Dec 1872: British vessel Dei Gratia spots Mary Celeste drifting strangely with shredded sails." },
+      { id: 4, text: "5 Dec 1872 (Boarding): Search party finds untouched food, but the lifeboat and crew are gone!" }
+    ];
+
+    // Stage 2 Clue Modals Data
+    const clueQuestions = [
+      {
+        id: 'clue1',
+        title: "Forensic Clue: Warm Teapot & Untouched Food",
+        desc: "Breakfast plates were set and teacups were half-full on the table. What does this fact prove?",
+        options: [
+          { text: "The crew evacuated in extreme panic, without time to eat.", correct: true },
+          { text: "The crew starved to death because there was no food.", correct: false },
+          { text: "Pirates stayed on board and cooked breakfast.", correct: false }
+        ]
+      },
+      {
+        id: 'clue2',
+        title: "Forensic Clue: Untouched Cargo (1,701 Barrels)",
+        desc: "All alcohol barrels and the captain's valuable personal gold remained safely stored. What does this indicate?",
+        options: [
+          { text: "Violent sea pirates did NOT attack the ship.", correct: true },
+          { text: "The crew sold all the cargo before vanishing.", correct: false },
+          { text: "The ship sank under heavy cargo weight.", correct: false }
+        ]
+      },
+      {
+        id: 'clue3',
+        title: "Forensic Clue: Missing Single Lifeboat & Trailing Rope",
+        desc: "The only small lifeboat was missing, and a deep-sea towline was trailing in the ocean. What is the most rational deduction?",
+        options: [
+          { text: "The 10 people voluntarily escaped into the small boat in a hurry.", correct: true },
+          { text: "A giant sea monster swallowed the lifeboat alone.", correct: false },
+          { text: "The lifeboat fell into the sea accidentally.", correct: false }
+        ]
+      },
+      {
+        id: 'clue4',
+        title: "Forensic Clue: Missing Navigation Instruments",
+        desc: "The ship's chronometer, sextant, and ship's register were gone from the captain's desk. Why did Captain Briggs take them?",
+        options: [
+          { text: "He expected to navigate and steer the lifeboat to a nearby island.", correct: true },
+          { text: "He wanted to sell them at an antique auction.", correct: false },
+          { text: "The instruments were thrown overboard to lighten the ship.", correct: false }
+        ]
+      }
+    ];
+
+    // Stage 3 Sentence Frames (SP 2.1.2)
+    const sentenceQuests = [
+      {
+        id: 0,
+        frameStart: "I discovered that ",
+        slot1Default: "[select discovered clue]",
+        slot1Options: [
+          "all personal belongings and gold were left untouched",
+          "the sails were completely painted black",
+          "cannonballs had destroyed the main deck"
+        ],
+        slot1Correct: "all personal belongings and gold were left untouched",
+        frameMid: " and it was strange because ",
+        slot2Default: "[select rational reason]",
+        slot2Options: [
+          "pirates would have ransacked and stolen every treasure",
+          "sea monsters always eat gold first",
+          "the crew had no clothes left to wear"
+        ],
+        slot2Correct: "pirates would have ransacked and stolen every treasure"
+      },
+      {
+        id: 1,
+        frameStart: "I discovered that ",
+        slot1Default: "[select discovered clue]",
+        slot1Options: [
+          "the captain's logbook contained no distress message",
+          "the captain wrote that ghosts appeared",
+          "the compass was pointing upside down"
+        ],
+        slot1Correct: "the captain's logbook contained no distress message",
+        frameMid: " and it was strange because ",
+        slot2Default: "[select rational reason]",
+        slot2Options: [
+          "the voyage was peaceful and calm right before they vanished",
+          "it was written in ancient hieroglyphics",
+          "captains never write anything in logbooks"
+        ],
+        slot2Correct: "the voyage was peaceful and calm right before they vanished"
+      },
+      {
+        id: 2,
+        frameStart: "I discovered that ",
+        slot1Default: "[select discovered clue]",
+        slot1Options: [
+          "nine porous barrels of alcohol were empty and venting gas",
+          "the ship was full of delicious chocolate cakes",
+          "the anchors were dropped in deep Atlantic ocean"
+        ],
+        slot1Correct: "nine porous barrels of alcohol were empty and venting gas",
+        frameMid: " and it was strange because ",
+        slot2Default: "[select rational reason]",
+        slot2Options: [
+          "fuming alcohol vapors could cause a sudden explosion panic",
+          "alcohol makes the ship sail twice as fast",
+          "it was illegal to transport liquids in 1872"
+        ],
+        slot2Correct: "fuming alcohol vapors could cause a sudden explosion panic"
+      }
+    ];
+
+    // Stage 4 Theories
+    const historicalTheories = [
+      {
+        id: 'vapor',
+        title: "Alcohol Vapor Pressure Scare",
+        emoji: "💨",
+        desc: "Alcohol barrels heated up and vented terrifying gas. The captain feared an imminent explosion, ordered everyone into the lifeboat to trail safely behind, but a sudden gale snapped the towline.",
+        scientific: true
+      },
+      {
+        id: 'pirate',
+        title: "Brutal Pirate Raid",
+        emoji: "🏴‍☠️",
+        desc: "Pirates boarded the Mary Celeste, abducted the crew, and abandoned the ship.",
+        scientific: false,
+        rebuttal: "Contradiction: All 1,701 cargo barrels and valuable valuables were untouched!"
+      },
+      {
+        id: 'kraken',
+        title: "Kraken / Sea Monster Attack",
+        emoji: "🐙",
+        desc: "A gigantic ocean beast pulled the passengers and crew under the waves.",
+        scientific: false,
+        rebuttal: "Mythological: Zero physical claw marks, breakfast undisturbed, lifeboat deliberately unhooked."
+      }
+    ];
+
+    /* =========================================================
+       4. GAME LIFECYCLE & NAVIGATION
+       ========================================================= */
+    function startGame() {
+      const nameInput = document.getElementById('studentName');
+      const name = nameInput.value.trim();
+      if (!name) {
+        alert("Please enter your name to receive your Detective Warrant!");
+        nameInput.focus();
+        return;
+      }
+      gameState.name = name;
+      gameState.studentClass = document.getElementById('studentClass').value;
+      gameState.startTime = Date.now();
+      sound.playSnap();
+
+      // Start Timer
+      gameState.timerInterval = setInterval(updateTimer, 1000);
+
+      // Initialize Stage 1
+      setupStage1();
+      switchScreen('screenStage1');
+    }
+
+    function switchScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateTimer() {
+      const elapsedSec = Math.floor((Date.now() - gameState.startTime) / 1000);
+      const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+      const secs = String(elapsedSec % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+    }
+
+    function addScore(points) {
+      gameState.score += points;
+      document.getElementById('scoreDisplay').innerText = gameState.score;
+      sound.playChirp();
+    }
+
+    /* =========================================================
+       5. STAGE 1: FLOW MAP (SNAP-IN CARDS)
+       ========================================================= */
+    function setupStage1() {
+      const slotsContainer = document.getElementById('flowSlotsContainer');
+      const bankContainer = document.getElementById('flowCardsBank');
+      slotsContainer.innerHTML = '';
+      bankContainer.innerHTML = '';
+
+      // Create 4 slots
+      for (let i = 0; i < 4; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'flow-slot';
+        slot.id = `flowSlot_${i}`;
+        slot.innerHTML = `<div class="flow-slot-label">${i + 1}</div><span style="color:#6c757d; margin-left: 20px;">[Drop or click milestone block here]</span>`;
+        slot.addEventListener('click', () => handleSlotClick(i));
+        slotsContainer.appendChild(slot);
+      }
+
+      // Shuffle Cards Bank (Fisher-Yates)
+      const shuffledCards = [...timelineMilestones].sort(() => Math.random() - 0.5);
+      shuffledCards.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'event-block';
+        card.id = `milestoneCard_${item.id}`;
+        card.innerText = item.text;
+        card.onclick = () => handleCardClick(item, card);
+        bankContainer.appendChild(card);
+      });
+    }
+
+    let selectedBankCard = null;
+
+    function handleCardClick(item, cardElement) {
+      sound.playChirp();
+      // If card already placed in a slot, do nothing
+      if (cardElement.classList.contains('snapped')) return;
+
+      // Find first empty slot
+      const emptySlotIndex = gameState.stage1Answers.findIndex(ans => ans === null);
+      if (emptySlotIndex !== -1) {
+        snapCardToSlot(item, cardElement, emptySlotIndex);
+      }
+    }
+
+    function handleSlotClick(slotIndex) {
+      // If slot has a card, return it to bank
+      const existing = gameState.stage1Answers[slotIndex];
+      if (existing) {
+        sound.playChirp();
+        gameState.stage1Answers[slotIndex] = null;
+        const slot = document.getElementById(`flowSlot_${slotIndex}`);
+        slot.innerHTML = `<div class="flow-slot-label">${slotIndex + 1}</div><span style="color:#6c757d; margin-left: 20px;">[Drop or click milestone block here]</span>`;
+        const cardElement = document.getElementById(`milestoneCard_${existing.id}`);
+        if (cardElement) {
+          cardElement.classList.remove('snapped');
+          document.getElementById('flowCardsBank').appendChild(cardElement);
+        }
+        checkStage1Completion();
+      }
+    }
+
+    function snapCardToSlot(item, cardElement, slotIndex) {
+      sound.playSnap();
+      gameState.stage1Answers[slotIndex] = item;
+      cardElement.classList.add('snapped');
+      const slot = document.getElementById(`flowSlot_${slotIndex}`);
+      slot.innerHTML = `<div class="flow-slot-label">${slotIndex + 1}</div>`;
+      slot.appendChild(cardElement);
+      checkStage1Completion();
+    }
+
+    function checkStage1Completion() {
+      const allFilled = gameState.stage1Answers.every(ans => ans !== null);
+      document.getElementById('stage1NextBtn').disabled = !allFilled;
+    }
+
+    function validateStage1() {
+      // Check correctness
+      let correctCount = 0;
+      gameState.stage1Answers.forEach((ans, idx) => {
+        if (ans && ans.id === (idx + 1)) {
+          correctCount++;
+        } else {
+          gameState.mistakes.push(`Stage 1 Flow Map: Step ${idx + 1} ordered incorrectly.`);
+        }
+      });
+
+      addScore(correctCount * 10); // Max 40
+      setupStage2();
+      switchScreen('screenStage2');
+    }
+
+    /* =========================================================
+       6. STAGE 2: CABIN SPOTLIGHT CLUES
+       ========================================================= */
+    let spotlightCanvas, spotlightCtx;
+    let lightPos = { x: 150, y: 150 };
+
+    function setupStage2() {
+      spotlightCanvas = document.getElementById('spotlightCanvas');
+      spotlightCtx = spotlightCanvas.getContext('2d');
+      resizeSpotlightCanvas();
+      window.addEventListener('resize', resizeSpotlightCanvas);
+
+      const wrapper = document.getElementById('spotlightArea');
+      wrapper.addEventListener('pointermove', handleSpotlightMove);
+      wrapper.addEventListener('pointerdown', handleSpotlightMove);
+
+      // Attach clue clicks
+      clueQuestions.forEach(q => {
+        const clueEl = document.getElementById(q.id);
+        if (clueEl) {
+          clueEl.onclick = (e) => {
+            e.stopPropagation();
+            openClueModal(q);
+          };
+        }
+      });
+
+      drawSpotlight();
+    }
+
+    function resizeSpotlightCanvas() {
+      const wrapper = document.getElementById('spotlightArea');
+      if (!wrapper || !spotlightCanvas) return;
+      spotlightCanvas.width = wrapper.clientWidth;
+      spotlightCanvas.height = wrapper.clientHeight;
+      drawSpotlight();
+    }
+
+    function handleSpotlightMove(e) {
+      const rect = document.getElementById('spotlightArea').getBoundingClientRect();
+      lightPos.x = e.clientX - rect.left;
+      lightPos.y = e.clientY - rect.top;
+      drawSpotlight();
+    }
+
+    function drawSpotlight() {
+      if (!spotlightCtx || !spotlightCanvas) return;
+      const w = spotlightCanvas.width;
+      const h = spotlightCanvas.height;
+
+      spotlightCtx.clearRect(0, 0, w, h);
+      // Dark foggy layer
+      spotlightCtx.fillStyle = 'rgba(5, 10, 18, 0.94)';
+      spotlightCtx.fillRect(0, 0, w, h);
+
+      // Radial cut-out
+      spotlightCtx.save();
+      spotlightCtx.globalCompositeOperation = 'destination-out';
+      const gradient = spotlightCtx.createRadialGradient(lightPos.x, lightPos.y, 20, lightPos.x, lightPos.y, 110);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
+      gradient.addColorStop(0.8, 'rgba(0, 0, 0, 0.85)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      spotlightCtx.fillStyle = gradient;
+      spotlightCtx.beginPath();
+      spotlightCtx.arc(lightPos.x, lightPos.y, 110, 0, Math.PI * 2);
+      spotlightCtx.fill();
+      spotlightCtx.restore();
+    }
+
+    function openClueModal(clueData) {
+      sound.playSnap();
+      document.getElementById('modalClueTitle').innerText = clueData.title;
+      document.getElementById('modalClueDesc').innerText = clueData.desc;
+
+      const optsBox = document.getElementById('modalOptionsBox');
+      optsBox.innerHTML = '';
+
+      // Shuffle options
+      const shuffledOpts = [...clueData.options].sort(() => Math.random() - 0.5);
+      shuffledOpts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'modal-opt-btn';
+        btn.innerText = opt.text;
+        btn.onclick = () => {
+          handleClueAnswer(clueData.id, opt.correct, btn);
+        };
+        optsBox.appendChild(btn);
+      });
+
+      document.getElementById('clueModal').classList.add('active');
+    }
+
+    function handleClueAnswer(clueId, isCorrect, btnElement) {
+      document.getElementById('clueModal').classList.remove('active');
+      const clueElement = document.getElementById(clueId);
+
+      if (!clueElement.classList.contains('found')) {
+        clueElement.classList.add('found');
+        gameState.stage2CluesFound++;
+        document.getElementById('cluesFoundCount').innerText = gameState.stage2CluesFound;
+
+        if (isCorrect) {
+          addScore(10);
+        } else {
+          gameState.mistakes.push(`Stage 2 Clue Question (${clueId}): Incorrect deduction.`);
+        }
+
+        if (gameState.stage2CluesFound >= 4) {
+          document.getElementById('stage2NextBtn').disabled = false;
+          sound.playSnap();
+        }
+      }
+    }
+
+    function goToStage3() {
+      setupStage3();
+      switchScreen('screenStage3');
+    }
+
+    /* =========================================================
+       7. STAGE 3: SENTENCE FRAMES WORKSHOP
+       ========================================================= */
+    function setupStage3() {
+      const container = document.getElementById('sentenceQuestsContainer');
+      container.innerHTML = '';
+
+      sentenceQuests.forEach((quest, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'sentence-quest-card';
+
+        // Sentence display
+        const display = document.createElement('div');
+        display.className = 'sentence-frame-display';
+        display.innerHTML = `
+          <strong>Evidence ${qIdx + 1}:</strong> 
+          ${quest.frameStart}
+          <span class="snap-slot" id="slot1_${qIdx}">${quest.slot1Default}</span>
+          ${quest.frameMid}
+          <span class="snap-slot" id="slot2_${qIdx}">${quest.slot2Default}</span>.
+        `;
+        card.appendChild(display);
+
+        // Pickers Bank 1
+        const pickers1 = document.createElement('div');
+        pickers1.className = 'roller-picker-options';
+        pickers1.innerHTML = `<span style="font-size:0.75rem; color:#8da9c4; width:100%;">Select Fact:</span>`;
+        const shuffled1 = [...quest.slot1Options].sort(() => Math.random() - 0.5);
+        shuffled1.forEach(text => {
+          const chip = document.createElement('div');
+          chip.className = 'roller-chip';
+          chip.innerText = text;
+          chip.onclick = () => {
+            document.getElementById(`slot1_${qIdx}`).innerText = text;
+            sound.playChirp();
+            gameState.stage3Selections[qIdx] = gameState.stage3Selections[qIdx] || {};
+            gameState.stage3Selections[qIdx].part1 = text;
+            checkStage3Completion();
+          };
+          pickers1.appendChild(chip);
+        });
+        card.appendChild(pickers1);
+
+        // Pickers Bank 2
+        const pickers2 = document.createElement('div');
+        pickers2.className = 'roller-picker-options';
+        pickers2.innerHTML = `<span style="font-size:0.75rem; color:#8da9c4; width:100%;">Select Reason:</span>`;
+        const shuffled2 = [...quest.slot2Options].sort(() => Math.random() - 0.5);
+        shuffled2.forEach(text => {
+          const chip = document.createElement('div');
+          chip.className = 'roller-chip';
+          chip.innerText = text;
+          chip.onclick = () => {
+            document.getElementById(`slot2_${qIdx}`).innerText = text;
+            sound.playChirp();
+            gameState.stage3Selections[qIdx] = gameState.stage3Selections[qIdx] || {};
+            gameState.stage3Selections[qIdx].part2 = text;
+            checkStage3Completion();
+          };
+          pickers2.appendChild(chip);
+        });
+        card.appendChild(pickers2);
+
+        container.appendChild(card);
+      });
+    }
+
+    function checkStage3Completion() {
+      const allSelected = gameState.stage3Selections.length === 3 &&
+        gameState.stage3Selections.every(s => s && s.part1 && s.part2);
+      document.getElementById('stage3NextBtn').disabled = !allSelected;
+    }
+
+    function goToStage4() {
+      // Validate Stage 3 Answers
+      let scoreGained = 0;
+      sentenceQuests.forEach((q, idx) => {
+        const sel = gameState.stage3Selections[idx];
+        if (sel.part1 === q.slot1Correct && sel.part2 === q.slot2Correct) {
+          scoreGained += 10;
+        } else {
+          gameState.mistakes.push(`Stage 3 Sentence ${idx + 1}: Unaligned cause-effect sentence frame.`);
+        }
+      });
+      addScore(scoreGained); // Max 30
+
+      setupStage4();
+      switchScreen('screenStage4');
+    }
+
+    /* =========================================================
+       8. STAGE 4: RATIONAL DEDUCTION SCALE
+       ========================================================= */
+    function setupStage4() {
+      const container = document.getElementById('theoriesContainer');
+      container.innerHTML = '';
+
+      historicalTheories.forEach(theory => {
+        const card = document.createElement('div');
+        card.className = 'theory-card';
+        card.id = `theory_${theory.id}`;
+        card.innerHTML = `
+          <div style="font-size: 2.2rem; margin-bottom: 6px;">${theory.emoji}</div>
+          <strong style="color:var(--brass); display:block; margin-bottom:6px;">${theory.title}</strong>
+          <p style="font-size:0.8rem; color:#cbd5e1; line-height:1.4;">${theory.desc}</p>
+        `;
+        card.onclick = () => selectTheory(theory);
+        container.appendChild(card);
+      });
+    }
+
+    function selectTheory(theory) {
+      sound.playSnap();
+      gameState.selectedTheoryId = theory.id;
+
+      document.querySelectorAll('.theory-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById(`theory_${theory.id}`).classList.add('selected');
+
+      const beam = document.getElementById('scaleBeam');
+      const panTheoryText = document.getElementById('panTheoryText');
+      panTheoryText.innerText = theory.title;
+
+      // Visual Balance Beam Physics
+      if (theory.scientific) {
+        beam.style.transform = 'rotate(0deg)'; // Perfect rational balance
+      } else {
+        beam.style.transform = 'rotate(18deg)'; // Heavy contradiction tilt
+      }
+
+      document.getElementById('submitAllBtn').disabled = false;
+    }
+
+    /* =========================================================
+       9. COMPLETION & GOOGLE SHEETS BACKGROUND SYNC
+       ========================================================= */
+    function finishAndSubmitGame() {
+      clearInterval(gameState.timerInterval);
+      const submitBtn = document.getElementById('submitAllBtn');
+      submitBtn.disabled = true;
+
+      // Score final stage
+      if (gameState.selectedTheoryId === 'vapor') {
+        addScore(10);
+      } else {
+        gameState.mistakes.push("Stage 4 Deduction: Chose contradicted hypothesis instead of rational physical evidence.");
+      }
+
+      const totalTimeSpent = document.getElementById('timerDisplay').innerText;
+      const finalScore = Math.min(100, gameState.score);
+      const percentage = finalScore;
+
+      // Detective Rank Evaluation
+      let rank = "Junior Detective (TP3)";
+      let stars = "⭐⭐";
+      if (percentage >= 90) {
+        rank = "Master Historical Sleuth (TP6)";
+        stars = "⭐⭐⭐";
+      } else if (percentage >= 70) {
+        rank = "Senior Maritime Investigator (TP4-TP5)";
+        stars = "⭐⭐⭐";
+      } else {
+        rank = "Cadet Investigator (TP2)";
+        stars = "⭐";
+      }
+
+      // Display Final UI
+      document.getElementById('starsRow').innerText = stars;
+      document.getElementById('finalScoreVal').innerText = finalScore;
+      document.getElementById('detectiveRankText').innerText = rank;
+      document.getElementById('studentSummaryText').innerText = 
+        `Detective: ${gameState.name} | Class: ${gameState.studentClass} | Mission Time: ${totalTimeSpent}`;
+
+      renderReview();
+      switchScreen('screenResult');
+
+      // Trigger Confetti & Fanfare
+      sound.playFanfare();
+      triggerConfetti();
+
+      // Submit score in background
+      const payload = {
+        name: gameState.name,
+        studentClass: gameState.studentClass,
+        score: finalScore,
+        total: 100,
+        percentage: percentage,
+        timeSpent: totalTimeSpent,
+        rank: rank,
+        mistakes: gameState.mistakes.length === 0 ? "Perfect Investigation!" : gameState.mistakes.join(" | ")
+      };
+
+      uploadScoreToSheet(payload);
+    }
+
+    function uploadScoreToSheet(payload) {
+      const syncBox = document.getElementById('syncStatusBox');
+      if (!GAS_ENDPOINT_URL || GAS_ENDPOINT_URL === "YOUR_GAS_WEB_APP_URL_HERE") {
+        syncBox.innerHTML = `<span>⚠️ GAS_ENDPOINT_URL not configured. Running in Local Mode.</span>`;
+        return;
+      }
+
+      fetch(GAS_ENDPOINT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        syncBox.innerHTML = `<span>✅ Mission Accomplished! Score securely saved to Teacher's Google Sheet.</span>`;
+      }).catch(err => {
+        console.warn("Sync error:", err);
+        syncBox.innerHTML = `<span>⚠️ Network error. Local score verified.</span>`;
+      });
+    }
+
+    function renderReview() {
+      const reviewBox = document.getElementById('reviewList');
+      reviewBox.innerHTML = `
+        <div class="review-item"><strong>1. Chronology:</strong> New York departure (7 Nov) ➔ Azores log entry (25 Nov) ➔ Spotted by Dei Gratia (5 Dec) ➔ Search party boards deserted ship.</div>
+        <div class="review-item"><strong>2. Untouched Meals:</strong> Breakfast on table proves crew evacuated in sudden panic, not starvation.</div>
+        <div class="review-item"><strong>3. Untouched Cargo:</strong> 1,701 barrels intact rules out pirate raid.</div>
+        <div class="review-item"><strong>4. Target Frame:</strong> <em>'I discovered that nine barrels of alcohol were empty and venting gas, and it was strange because fuming vapors could cause an explosion scare.'</em></div>
+        <div class="review-item"><strong>5. Rationality (Rasional):</strong> Critical evaluation shows alcohol vapor scare fits all physical evidence without contradiction.</div>
+      `;
+    }
+
+    /* =========================================================
+       10. CANVASES: CONFETTI CELEBRATION
+       ========================================================= */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#e0a96d', '#ffd166', '#2ec4b6', '#e76f51', '#f4ebd9'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          r: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 12,
+          vy: (Math.random() - 0.7) * 14,
+          gravity: 0.25,
+          alpha: 1
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.alpha -= 0.008;
+
+          if (p.alpha > 0) {
+            active = true;
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        if (active) requestAnimationFrame(animate);
+      }
+      animate();
+    }
+  </script>
+</body>
+</html>
