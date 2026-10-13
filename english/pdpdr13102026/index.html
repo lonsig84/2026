@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Unit 10: It's a Mystery! - Detective Lake Investigation</title>
+  <style>
+    :root {
+      --bg-dark: #0d1527;
+      --card-bg: rgba(26, 38, 66, 0.9);
+      --card-border: rgba(94, 234, 212, 0.3);
+      --primary: #14b8a6;
+      --primary-glow: rgba(20, 184, 166, 0.4);
+      --accent-yellow: #fbbf24;
+      --accent-cyan: #38bdf8;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Bubblegum Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(30, 58, 138, 0.35) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(13, 148, 136, 0.25) 0%, transparent 40%),
+        linear-gradient(180deg, #090e1a 0%, #0d1527 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      width: 100%;
+      max-width: 950px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .badge-container {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      color: var(--accent-yellow);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    main {
+      width: 100%;
+      max-width: 950px;
+      padding: 10px 20px 40px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .title-banner {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(56, 189, 248, 0.1));
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 20px 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .title-banner h1 {
+      font-size: 1.85rem;
+      color: #38bdf8;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 10px rgba(56, 189, 248, 0.4);
+    }
+
+    .title-banner p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+    }
+
+    .mission-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+
+    .mission-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-bottom: 12px;
+    }
+
+    .mission-tag {
+      font-size: 0.85rem;
+      background: #0284c7;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .mission-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instruction {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* 录音播放器组件 */
+    .audio-player-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #38bdf8;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-audio {
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      transition: 0.2s;
+    }
+
+    .btn-audio:hover {
+      transform: translateY(-1px);
+    }
+
+    .transcript-toggle {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--accent-yellow);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .audio-transcript-card {
+      background: rgba(30, 41, 59, 0.8);
+      border-left: 4px solid var(--accent-yellow);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      display: none;
+    }
+
+    /* MISSION 1: 雾气探照灯寻证 */
+    .fog-game-area {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      background: #050b14;
+      touch-action: none;
+    }
+
+    #fogCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .lake-scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: linear-gradient(180deg, #102a43 0%, #1e3a5f 70%, #0c1b2f 100%);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 24px;
+      align-content: center;
+      justify-items: center;
+    }
+
+    .clue-spot {
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px dashed #38bdf8;
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      z-index: 3;
+    }
+
+    .clue-spot:hover {
+      transform: scale(1.04);
+      border-color: var(--accent-yellow);
+    }
+
+    .clue-spot.discovered {
+      border: 2px solid #22c55e !important;
+      background: rgba(34, 197, 94, 0.3) !important;
+      color: #86efac !important;
+      font-weight: bold;
+      transform: scale(1.05);
+      box-shadow: 0 0 18px rgba(34, 197, 94, 0.7);
+    }
+
+    .clue-spot.distractor.discovered {
+      border: 2px solid #ef4444 !important;
+      background: rgba(239, 68, 68, 0.25) !important;
+      color: #fca5a5 !important;
+    }
+
+    .fog-hint {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      text-align: right;
+    }
+
+    /* MISSION 2: 侦探文章 + 气泡图 */
+    .case-file-panel {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 20px;
+      line-height: 1.55;
+    }
+
+    .case-file-title {
+      color: var(--accent-yellow);
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .case-file-text {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+    }
+
+    .bubble-map-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .bubble-drop-zones {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .bubble-zone {
+      min-height: 150px;
+      border-radius: 18px;
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .bubble-title {
+      font-size: 0.95rem;
+      color: var(--accent-yellow);
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      padding-bottom: 6px;
+    }
+
+    .bubble-card-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 16px;
+      border-radius: 16px;
+      width: 100%;
+      min-height: 80px;
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+    }
+
+    .pool-instruction {
+      width: 100%;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .drag-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1.5px solid #38bdf8;
+      color: #f1f5f9;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      touch-action: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .drag-card:hover {
+      border-color: var(--accent-yellow);
+      transform: translateY(-2px);
+    }
+
+    .drag-card.placed {
+      background: #0f766e;
+      border-color: #5eead4;
+      box-shadow: 0 0 10px rgba(94, 234, 212, 0.4);
+    }
+
+    /* MISSION 3: 对话选项 */
+    .dialogue-box {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .exchange-block {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .partner-speech {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(30, 41, 59, 0.7);
+      padding: 12px 16px;
+      border-radius: 14px;
+      border-left: 4px solid var(--accent-yellow);
+    }
+
+    .speech-avatar {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .speech-text {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .options-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .choice-btn {
+      background: rgba(30, 41, 59, 0.9);
+      border: 1.5px solid rgba(56, 189, 248, 0.3);
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.35;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary);
+      background: rgba(20, 184, 166, 0.2);
+    }
+
+    .choice-btn.selected {
+      border-color: var(--accent-yellow);
+      background: rgba(251, 191, 36, 0.2);
+      color: #fef08a;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    }
+
+    /* MISSION 4: 密码齿轮锁 */
+    .lock-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dials-container {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .dial-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dial-btn {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      width: 44px;
+      height: 34px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.15s;
+    }
+
+    .dial-btn:active {
+      transform: scale(0.92);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .dial-window {
+      width: 56px;
+      height: 64px;
+      background: linear-gradient(180deg, #090e17, #1e293b, #090e17);
+      border: 2px solid var(--accent-yellow);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #fef08a;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 0 10px rgba(251, 191, 36, 0.2);
+    }
+
+    .lock-hint-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 480px;
+    }
+
+    .submit-section {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #ffffff;
+      border: none;
+      padding: 16px 42px;
+      border-radius: 999px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-submit:disabled {
+      background: #475569;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(5, 11, 20, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 2px solid var(--primary);
+      border-radius: 26px;
+      padding: 32px 28px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-card h2 {
+      font-size: 1.7rem;
+      color: #38bdf8;
+      margin-bottom: 12px;
+    }
+
+    .modal-card p {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      background: rgba(15, 23, 42, 0.9);
+      color: #f8fafc;
+      font-size: 1.05rem;
+      outline: none;
+      margin-bottom: 14px;
+    }
+
+    .btn-start {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .star-row {
+      font-size: 2.8rem;
+      margin-bottom: 14px;
+      letter-spacing: 6px;
+    }
+
+    .score-badge {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: var(--accent-yellow);
+      margin-bottom: 10px;
+    }
+
+    .stat-list {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stat-val {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+
+    .modal-btn-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-review {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn-retry {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .review-banner {
+      display: none;
+      background: rgba(20, 184, 166, 0.15);
+      border: 1px solid var(--primary);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 15px;
+      text-align: left;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particleCanvas"></canvas>
+
+  <header>
+    <div class="badge-container">
+      <div class="badge">
+        <span>🕵️ Detective:</span>
+        <strong id="displayDetectiveName">Guest</strong>
+      </div>
+      <div class="badge">
+        <span>🏫 Year:</span>
+        <strong id="displayClass">Year 6</strong>
+      </div>
+    </div>
+    <div class="badge-container">
+      <div class="badge">
+        <span>⏱️ Timer:</span>
+        <strong id="gameTimer">00:00</strong>
+      </div>
+      <div class="badge">
+        <span>🔍 Clues:</span>
+        <strong id="cluesCounter">0 / 3</strong>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="title-banner">
+      <h1>Unit 10: It's a Mystery!</h1>
+      <p>The Misty Lake Case &bull; Audio Sightings Investigation</p>
+    </div>
+
+    <!-- MISSION 1: 雾气探照灯寻证 -->
+    <section class="mission-card">
+      <div class="mission-header">
+        <div class="mission-title">
+          <span>🔦 Mission 1: The Misty Lake Clue Hunt</span>
+        </div>
+        <div class="mission-tag">Listening Skill 1.2.2</div>
+      </div>
+      <p class="instruction">
+        <strong>What to do:</strong> Click <strong>"Play Detective Audio"</strong>. Then drag your flashlight across the dark lake and <strong>tap the 3 true evidence clues</strong> mentioned in the audio!
+      </p>
+
+      <div class="audio-player-box">
+        <div class="audio-controls">
+          <button class="btn-audio" id="btnPlaySpeech">
+            <span>🔊 Play Detective Audio</span>
+          </button>
+          <button class="transcript-toggle" id="btnToggleTranscript">
+            📜 View Audio Transcript
+          </button>
+        </div>
+        <div class="audio-transcript-card" id="transcriptBox">
+          <strong>🎙️ Audio Recording Transcript (Misty Lake Dispatch):</strong><br>
+          <em>Alex:</em> "Maya, look at the surface of the lake! Do you see those <strong>giant ripples in the water</strong>? Something enormous just moved down there!"<br>
+          <em>Maya:</em> "Wait, Alex! Look at these <strong>blurred photographs</strong> taken by the local villagers yesterday. You can only see a dark shape through the thick fog. Could it just be floating logs?"<br>
+          <em>Alex:</em> "Listen closely! There are <strong>strange echoes</strong> bouncing across the misty cliffs. Many people believe an ancient monster is hiding here, but we must investigate every clue before jumping to conclusions!"
+        </div>
+      </div>
+
+      <div class="fog-game-area" id="fogArea">
+        <div class="lake-scene">
+          <div class="clue-spot" data-target="true" data-clue="Giant ripples in the water">
+            <span>🌊</span> <span>Giant ripples in water</span>
+          </div>
+          <div class="clue-spot distractor" data-target="false" data-clue="A floating red balloon">
+            <span>🎈</span> <span>Red toy balloon</span>
+          </div>
+          <div class="clue-spot" data-target="true" data-clue="Blurred photographs">
+            <span>📷</span> <span>Blurred photographs</span>
+          </div>
+          <div class="clue-spot distractor" data-target="false" data-clue="A discarded plastic bag">
+            <span>🛍️</span> <span>Plastic bag on shore</span>
+          </div>
+          <div class="clue-spot" data-target="true" data-clue="Strange echoes">
+            <span>🔊</span> <span>Strange lake echoes</span>
+          </div>
+        </div>
+        <canvas id="fogCanvas"></canvas>
+      </div>
+      <div class="fog-hint">Swipe or drag across the lake to clear fog. Tap the 3 true clues to collect them!</div>
+    </section>
+
+    <!-- MISSION 2: 侦探文章 + 气泡图 -->
+    <section class="mission-card">
+      <div class="mission-header">
+        <div class="mission-title">
+          <span>💭 Mission 2: Detective Inquiry Bubble Map</span>
+        </div>
+        <div class="mission-tag">Inquiry & Reading</div>
+      </div>
+      <p class="instruction">
+        <strong>What to do:</strong> Read <em>Case File No. 10</em>. Then <strong>click or drag</strong> each card below to place it into the matching Bubble Map zone!
+      </p>
+
+      <div class="case-file-panel">
+        <div class="case-file-title">📁 Case File No. 10: The Mystery at Misty Lake</div>
+        <div class="case-file-text">
+          Late in the afternoon, two young detectives arrived at the misty lake to <strong>investigate</strong> unexplained sightings. Local villagers reported seeing an enormous mythical <strong>creature</strong> with a giant <strong>footprint</strong> along the muddy bank. However, rational investigators look for real evidence. Upon closer inspection, the detectives recorded three physical findings: <em>giant ripples in the water</em>, <em>blurred photographs</em>, and <em>strange echoes</em>. Detective Maya reminded everyone that mist and reflections often create an <em>optical illusion</em>, proving that not every strange story is a real monster!
+        </div>
+      </div>
+
+      <div class="bubble-map-container">
+        <div class="bubble-drop-zones">
+          <div class="bubble-zone" data-category="evidence" id="zone-evidence">
+            <div class="bubble-title">📁 Lake Sightings (Evidence)</div>
+          </div>
+          <div class="bubble-zone" data-category="vocab" id="zone-vocab">
+            <div class="bubble-title">🔎 Investigation Words (Vocabulary)</div>
+          </div>
+          <div class="bubble-zone" data-category="optical" id="zone-optical">
+            <div class="bubble-title">🌫️ Other Possibility (Illusion / Legend)</div>
+          </div>
+        </div>
+
+        <div class="bubble-card-pool" id="cardPool">
+          <div class="pool-instruction">👇 Tap any card below to place it into its matching zone (or tap it inside a zone to return):</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSION 3: 对话选项（乱序） -->
+    <section class="mission-card">
+      <div class="mission-header">
+        <div class="mission-title">
+          <span>💬 Mission 3: Sustaining the Mystery Dialogue</span>
+        </div>
+        <div class="mission-tag">Speaking Skill 2.2.1</div>
+      </div>
+      <p class="instruction">
+        <strong>What to do:</strong> Choose the <strong>most suitable follow-up question</strong> to keep rational inquiry going with your partner.
+      </p>
+
+      <div class="dialogue-box" id="dialogueContainer">
+        <div class="exchange-block" data-qid="q1">
+          <div class="partner-speech">
+            <span class="speech-avatar">🕵️‍♂️</span>
+            <div class="speech-text">
+              <strong>Partner Detective Alex:</strong><br>
+              "Look at those giant ripples rolling across the lake! A massive sea monster must be sleeping underneath right now!"
+            </div>
+          </div>
+          <div class="options-grid" id="opt-q1"></div>
+        </div>
+
+        <div class="exchange-block" data-qid="q2">
+          <div class="partner-speech">
+            <span class="speech-avatar">🕵️‍♀️</span>
+            <div class="speech-text">
+              <strong>Partner Detective Maya:</strong><br>
+              "I managed to capture a shadowy shape on camera, but the photograph came out completely blurred and fuzzy!"
+            </div>
+          </div>
+          <div class="options-grid" id="opt-q2"></div>
+        </div>
+
+        <div class="exchange-block" data-qid="q3">
+          <div class="partner-speech">
+            <span class="speech-avatar">🕵️‍♂️</span>
+            <div class="speech-text">
+              <strong>Partner Detective Alex:</strong><br>
+              "Did you hear that low humming echo coming from the dark misty cave? Everyone in town says it's an ancient Yeti!"
+            </div>
+          </div>
+          <div class="options-grid" id="opt-q3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSION 4: 密码齿轮锁 (A-Z) -->
+    <section class="mission-card">
+      <div class="mission-header">
+        <div class="mission-title">
+          <span>🔐 Mission 4: The Mystery Vault Decryption</span>
+        </div>
+        <div class="mission-tag">Synthesis</div>
+      </div>
+      <p class="instruction">
+        <strong>What to do:</strong> Click ▲ and ▼ to form the keyword: <strong>C - L - U - E</strong>!
+      </p>
+
+      <div class="lock-panel">
+        <div class="dials-container" id="dialsContainer"></div>
+        <p class="lock-hint-text">
+          💡 <em>Hint: What does an investigator look for to solve an unexplained sighting? (C - L - U - E)</em>
+        </p>
+      </div>
+    </section>
+
+    <div class="submit-section">
+      <button class="btn-submit" id="btnSubmit">
+        <span>📜 Submit Case Dossier</span>
+      </button>
+    </div>
+
+    <div class="review-banner" id="reviewBanner"></div>
+  </main>
+
+  <div class="modal-overlay" id="startModal">
+    <div class="modal-card">
+      <div style="font-size: 3rem; margin-bottom: 8px;">🕵️🔎</div>
+      <h2>Detective Briefing</h2>
+      <p>Welcome, Investigator! Put on your detective badge, listen to the lake recordings, and analyze the mystery sightings.</p>
+      <input type="text" id="inputName" class="input-field" placeholder="Enter Detective Name..." maxlength="20" autocomplete="off">
+      <input type="text" id="inputClass" class="input-field" value="Year 6" placeholder="Enter Class (e.g. Year 6)">
+      <button class="btn-start" id="btnStartGame">Commence Investigation</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="scoreModal" style="display: none;">
+    <div class="modal-card">
+      <div class="star-row" id="starDisplay">⭐⭐⭐</div>
+      <h2 id="finalVerdict">Case Solved!</h2>
+      <div class="score-badge" id="scoreVal">100 / 100</div>
+      <div class="stat-list">
+        <div class="stat-item">
+          <span class="stat-label">Accuracy</span>
+          <span class="stat-val" id="statAccuracy">100%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Investigation Time</span>
+          <span class="stat-val" id="statTime">01:30</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Status</span>
+          <span class="stat-val" style="color: #22c55e;">Synced ☁️</span>
+        </div>
+      </div>
+      <p id="scoreComment" style="font-size: 0.9rem; color: #cbd5e1;">Outstanding inquiry! You sustained spoken dialogue and uncovered every key clue with rational deduction!</p>
+      <div class="modal-btn-row">
+        <button class="btn-review" id="btnShowReview">Review Clues 🔍</button>
+        <button class="btn-retry" id="btnRestart">New Case 🔄</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confettiCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 120; display: none;"></canvas>
+
+  <script>
+    /* ==========================================
+       0. 后端配置：请替换为您部署的 Google Apps Script Web App 链接
+       ========================================== */
+    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxFATgFkN9dg0ZaAsFwMk43VMVEHDsPUHuq7LD2vWXfzFPaKQD5R9UT01WXPYwovv81/exec";
+
+    /* ==========================================
+       1. Web Audio API 纯代码合成音效
+       ========================================== */
+    class SoundFX {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playChirp() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.12);
+      }
+      playSnap() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      }
+      playDialClick() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(650, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.04);
+      }
+      playFanfare() {
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = freq;
+          const startTime = this.ctx.currentTime + idx * 0.12;
+          gain.gain.setValueAtTime(0, startTime);
+          gain.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.45);
+        });
+      }
+    }
+    const sfx = new SoundFX();
+
+    const audioDialogueText = 
+      "Alex says: Maya, look at the surface of the lake! Do you see those giant ripples in the water? Something enormous just moved down there! " +
+      "Maya says: Wait, Alex! Look at these blurred photographs taken by local villagers. You can only see a dark shape through the thick fog. Could it just be floating logs? " +
+      "Alex says: Listen closely! There are strange echoes bouncing across the misty cliffs. Many people believe an ancient monster is hiding here, but we must investigate every clue before jumping to conclusions!";
+
+    const btnPlaySpeech = document.getElementById('btnPlaySpeech');
+    const transcriptBox = document.getElementById('transcriptBox');
+    const btnToggleTranscript = document.getElementById('btnToggleTranscript');
+
+    btnPlaySpeech.addEventListener('click', () => {
+      sfx.playChirp();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(audioDialogueText);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.95;
+        
+        btnPlaySpeech.disabled = true;
+        btnPlaySpeech.innerHTML = '<span>🔊 Playing Audio...</span>';
+        
+        utterance.onend = () => {
+          btnPlaySpeech.disabled = false;
+          btnPlaySpeech.innerHTML = '<span>🔊 Replay Detective Audio</span>';
+        };
+        utterance.onerror = () => {
+          btnPlaySpeech.disabled = false;
+          btnPlaySpeech.innerHTML = '<span>🔊 Replay Detective Audio</span>';
+        };
+        window.speechSynthesis.speak(utterance);
+      } else {
+        transcriptBox.style.display = 'block';
+      }
+    });
+
+    btnToggleTranscript.addEventListener('click', () => {
+      sfx.playSnap();
+      if (transcriptBox.style.display === 'block') {
+        transcriptBox.style.display = 'none';
+        btnToggleTranscript.textContent = '📜 View Audio Transcript';
+      } else {
+        transcriptBox.style.display = 'block';
+        btnToggleTranscript.textContent = '🙈 Hide Audio Transcript';
+      }
+    });
+
+    const bgCanvas = document.getElementById('particleCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let bgParticles = [];
+
+    function resizeBgCanvas() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBgCanvas);
+    resizeBgCanvas();
+
+    for (let i = 0; i < 40; i++) {
+      bgParticles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: Math.random() * 2 + 0.8,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -Math.random() * 0.5 - 0.2,
+        alpha: Math.random() * 0.5 + 0.2
+      });
+    }
+
+    function renderBgParticles() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      bgParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.y < 0) p.y = bgCanvas.height;
+        if (p.x < 0) p.x = bgCanvas.width;
+        if (p.x > bgCanvas.width) p.x = 0;
+
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
+        bgCtx.fill();
+      });
+      requestAnimationFrame(renderBgParticles);
+    }
+    renderBgParticles();
+
+    /* ==========================================
+       游戏核心状态
+       ========================================== */
+    const gameState = {
+      name: '',
+      studentClass: 'Year 6',
+      timerSeconds: 0,
+      timerInterval: null,
+      foundClues: new Set(),
+      bubbleMapPlaced: {},
+      dialogueAnswers: { q1: null, q2: null, q3: null },
+      dialLetters: ['A', 'A', 'A', 'A'],
+      dialAlphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      targetWord: 'CLUE'
+    };
+
+    /* ==========================================
+       MISSION 1: 探照灯寻证
+       ========================================== */
+    const fogCanvas = document.getElementById('fogCanvas');
+    const fogCtx = fogCanvas.getContext('2d');
+    const fogArea = document.getElementById('fogArea');
+
+    function initFog() {
+      fogCanvas.width = fogArea.clientWidth;
+      fogCanvas.height = fogArea.clientHeight;
+      drawFullFog();
+    }
+
+    function drawFullFog() {
+      fogCtx.fillStyle = 'rgba(10, 18, 32, 0.94)';
+      fogCtx.fillRect(0, 0, fogCanvas.width, fogCanvas.height);
+    }
+
+    function revealLight(x, y) {
+      fogCtx.globalCompositeOperation = 'destination-out';
+      const gradient = fogCtx.createRadialGradient(x, y, 20, x, y, 90);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
+      gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.85)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      fogCtx.fillStyle = gradient;
+      fogCtx.beginPath();
+      fogCtx.arc(x, y, 90, 0, Math.PI * 2);
+      fogCtx.fill();
+      fogCtx.globalCompositeOperation = 'source-over';
+    }
+
+    fogArea.addEventListener('pointermove', (e) => {
+      const rect = fogArea.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+      revealLight(x, y);
+    });
+
+    document.querySelectorAll('.clue-spot').forEach(spot => {
+      spot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isTarget = spot.getAttribute('data-target') === 'true';
+        const clueName = spot.getAttribute('data-clue');
+
+        if (spot.classList.contains('discovered')) return;
+
+        spot.classList.add('discovered');
+
+        if (isTarget) {
+          gameState.foundClues.add(clueName);
+          sfx.playChirp();
+          document.getElementById('cluesCounter').textContent = `${gameState.foundClues.size} / 3`;
+        } else {
+          sfx.playSnap();
+        }
+      });
+    });
+
+    /* ==========================================
+       MISSION 2: 气泡图分类
+       ========================================== */
+    const rawBubbleCards = [
+      { id: 'c1', text: '🌊 Giant ripples in water', category: 'evidence' },
+      { id: 'c2', text: '📷 Blurred photographs', category: 'evidence' },
+      { id: 'c3', text: '🔊 Strange lake echoes', category: 'evidence' },
+      { id: 'c4', text: '🔎 Investigate & Clue', category: 'vocab' },
+      { id: 'c5', text: '👣 Footprint & Ancient', category: 'vocab' },
+      { id: 'c6', text: '✨ Optical illusion', category: 'optical' },
+      { id: 'c7', text: '🐉 Legendary creature', category: 'optical' }
+    ];
+
+    function shuffleArray(arr) {
+      const newArr = [...arr];
+      for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+      }
+      return newArr;
+    }
+
+    function initBubbleCards() {
+      const pool = document.getElementById('cardPool');
+      const existingCards = pool.querySelectorAll('.drag-card');
+      existingCards.forEach(c => c.remove());
+
+      const shuffled = shuffleArray(rawBubbleCards);
+
+      shuffled.forEach(card => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'drag-card';
+        cardEl.id = card.id;
+        cardEl.textContent = card.text;
+        cardEl.setAttribute('data-target-cat', card.category);
+        cardEl.draggable = true;
+
+        cardEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          handleCardPlacement(cardEl);
+        });
+
+        cardEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', cardEl.id);
+        });
+
+        pool.appendChild(cardEl);
+      });
+    }
+
+    function handleCardPlacement(cardEl) {
+      const currentParent = cardEl.parentElement;
+      const targetCat = cardEl.getAttribute('data-target-cat');
+      const targetZone = document.getElementById(`zone-${targetCat}`);
+
+      if (currentParent.id === 'cardPool') {
+        targetZone.appendChild(cardEl);
+        cardEl.classList.add('placed');
+        gameState.bubbleMapPlaced[cardEl.id] = targetCat;
+        sfx.playSnap();
+      } else {
+        document.getElementById('cardPool').appendChild(cardEl);
+        cardEl.classList.remove('placed');
+        delete gameState.bubbleMapPlaced[cardEl.id];
+        sfx.playSnap();
+      }
+    }
+
+    const dropZones = document.querySelectorAll('.bubble-zone');
+    dropZones.forEach(zone => {
+      zone.addEventListener('dragover', (e) => e.preventDefault());
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const cardId = e.dataTransfer.getData('text/plain');
+        const cardEl = document.getElementById(cardId);
+        if (cardEl) {
+          zone.appendChild(cardEl);
+          cardEl.classList.add('placed');
+          const zoneCategory = zone.getAttribute('data-category');
+          gameState.bubbleMapPlaced[cardEl.id] = zoneCategory;
+          sfx.playSnap();
+        }
+      });
+    });
+
+    /* ==========================================
+       MISSION 3: 对话选项（乱序）
+       ========================================== */
+    const dialogueQuestions = {
+      q1: [
+        { text: "What makes you think that? Could it just be a big boat motor?", isCorrect: true },
+        { text: "Yes, I agree! Let's go home right now.", isCorrect: false },
+        { text: "Water is transparent and has no colour.", isCorrect: false },
+        { text: "I would like to have cheese sandwiches for lunch.", isCorrect: false }
+      ],
+      q2: [
+        { text: "I bought my digital camera three years ago.", isCorrect: false },
+        { text: "Could it be an optical illusion caused by floating tree branches?", isCorrect: true },
+        { text: "Photographs can be printed on glossy paper.", isCorrect: false },
+        { text: "No, stop investigating this mystery.", isCorrect: false }
+      ],
+      q3: [
+        { text: "Echoes bounce off hard cliffs and walls.", isCorrect: false },
+        { text: "I do not like scary stories at all.", isCorrect: false },
+        { text: "Have you heard of any other explanations, like wind whistling through the lake caves?", isCorrect: true },
+        { text: "Goodbye, see you at school tomorrow.", isCorrect: false }
+      ]
+    };
+
+    function renderScrambledDialogues() {
+      ['q1', 'q2', 'q3'].forEach(qid => {
+        const container = document.getElementById(`opt-${qid}`);
+        container.innerHTML = '';
+        const shuffledOptions = shuffleArray(dialogueQuestions[qid]);
+
+        shuffledOptions.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-btn';
+          btn.innerHTML = `<span>💬</span> <span>${opt.text}</span>`;
+          btn.addEventListener('click', () => {
+            container.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            gameState.dialogueAnswers[qid] = opt;
+            sfx.playChirp();
+          });
+          container.appendChild(btn);
+        });
+      });
+    }
+
+    /* ==========================================
+       MISSION 4: 密码齿轮锁 (A-Z)
+       ========================================== */
+    const dialLettersInitial = ['A', 'E', 'O', 'T'];
+    function initDialLock() {
+      const container = document.getElementById('dialsContainer');
+      container.innerHTML = '';
+      gameState.dialLetters = [...dialLettersInitial];
+
+      for (let i = 0; i < 4; i++) {
+        const group = document.createElement('div');
+        group.className = 'dial-group';
+
+        const btnUp = document.createElement('button');
+        btnUp.className = 'dial-btn';
+        btnUp.innerHTML = '▲';
+        btnUp.addEventListener('click', () => rotateDial(i, 1));
+
+        const windowBox = document.createElement('div');
+        windowBox.className = 'dial-window';
+        windowBox.id = `dial-val-${i}`;
+        windowBox.textContent = gameState.dialLetters[i];
+
+        const btnDown = document.createElement('button');
+        btnDown.className = 'dial-btn';
+        btnDown.innerHTML = '▼';
+        btnDown.addEventListener('click', () => rotateDial(i, -1));
+
+        group.appendChild(btnUp);
+        group.appendChild(windowBox);
+        group.appendChild(btnDown);
+        container.appendChild(group);
+      }
+    }
+
+    function rotateDial(index, dir) {
+      const alphabet = gameState.dialAlphabet;
+      let currPos = alphabet.indexOf(gameState.dialLetters[index]);
+      currPos = (currPos + dir + alphabet.length) % alphabet.length;
+      gameState.dialLetters[index] = alphabet[currPos];
+      document.getElementById(`dial-val-${index}`).textContent = alphabet[currPos];
+      sfx.playDialClick();
+    }
+
+    function startTimer() {
+      gameState.timerSeconds = 0;
+      gameState.timerInterval = setInterval(() => {
+        gameState.timerSeconds++;
+        const mins = String(Math.floor(gameState.timerSeconds / 60)).padStart(2, '0');
+        const secs = String(gameState.timerSeconds % 60).padStart(2, '0');
+        document.getElementById('gameTimer').textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    /* ==========================================
+       提交结算与跨域提交至 Google 表格
+       ========================================== */
+    const btnSubmit = document.getElementById('btnSubmit');
+    btnSubmit.addEventListener('click', handleSubmitCase);
+
+    function handleSubmitCase() {
+      let score = 0;
+      let mistakeLogs = [];
+
+      // 1. Mission 1 计分: 3条线索，满分30分
+      const foundCount = gameState.foundClues.size;
+      const m1Score = foundCount * 10;
+      score += m1Score;
+      if (foundCount < 3) {
+        mistakeLogs.push(`Mission 1: Found only ${foundCount}/3 lake sightings`);
+      }
+
+      // 2. Mission 2 计分: 7张卡片，满分28分 (每张4分)
+      let m2Correct = 0;
+      rawBubbleCards.forEach(c => {
+        if (gameState.bubbleMapPlaced[c.id] === c.category) {
+          m2Correct++;
+        }
+      });
+      const m2Score = m2Correct * 4;
+      score += m2Score;
+      if (m2Correct < rawBubbleCards.length) {
+        mistakeLogs.push(`Mission 2: ${m2Correct}/${rawBubbleCards.length} Bubble Map cards sorted correctly`);
+      }
+
+      // 3. Mission 3 计分: 追问对话 (3题，满分30分)
+      ['q1', 'q2', 'q3'].forEach((qid, idx) => {
+        const ans = gameState.dialogueAnswers[qid];
+        if (ans && ans.isCorrect) {
+          score += 10;
+        } else {
+          mistakeLogs.push(`Mission 3: Dialogue ${idx + 1} incomplete or incorrect question frame`);
+        }
+      });
+
+      // 4. Mission 4 计分: 密码锁对准 CLUE 得 12分
+      const currentWord = gameState.dialLetters.join('');
+      if (currentWord === gameState.targetWord) {
+        score += 12;
+      } else {
+        mistakeLogs.push(`Mission 4: Lock set to ${currentWord} (Target: CLUE)`);
+      }
+
+      score = Math.min(100, Math.max(0, score));
+      const percentage = score;
+
+      sfx.playFanfare();
+      launchConfetti();
+
+      let stars = '⭐';
+      if (percentage >= 80) stars = '⭐⭐⭐';
+      else if (percentage >= 60) stars = '⭐⭐';
+      document.getElementById('starDisplay').textContent = stars;
+
+      document.getElementById('scoreVal').textContent = `${score} / 100`;
+      document.getElementById('statAccuracy').textContent = `${percentage}%`;
+      const mins = String(Math.floor(gameState.timerSeconds / 60)).padStart(2, '0');
+      const secs = String(gameState.timerSeconds % 60).padStart(2, '0');
+      const finalTime = `${mins}:${secs}`;
+      document.getElementById('statTime').textContent = finalTime;
+
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<span>✅ Case Dossier Transmitted</span>';
+      clearInterval(gameState.timerInterval);
+
+      document.getElementById('scoreModal').style.display = 'flex';
+
+      const payload = {
+        name: gameState.name || 'Anonymous',
+        studentClass: gameState.studentClass || 'Year 6',
+        score: score,
+        total: 100,
+        percentage: percentage,
+        timeSpent: finalTime,
+        mistakes: mistakeLogs.length > 0 ? mistakeLogs.join('; ') : 'All clues and inquiries solved perfectly!'
+      };
+
+      // 跨域提交到 Google 表格 (fetch + no-cors)
+      if (GAS_ENDPOINT_URL && !GAS_ENDPOINT_URL.includes("REPLACE_WITH_YOUR_ID")) {
+        fetch(GAS_ENDPOINT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          console.log('Case Dossier successfully sent to Google Sheets');
+        })
+        .catch(err => {
+          console.error('Submission error:', err);
+        });
+      } else {
+        console.warn('GAS_ENDPOINT_URL not configured. Local run payload:', payload);
+      }
+
+      const reviewBox = document.getElementById('reviewBanner');
+      reviewBox.innerHTML = `
+        <strong>📋 Detective Case Review & Rationality Check:</strong><br>
+        &bull; <strong>Mission 1 (Sightings):</strong> Found ${foundCount}/3 (Giant ripples, Blurred photographs, Strange echoes).<br>
+        &bull; <strong>Mission 2 (Bubble Map):</strong> Sorted ${m2Correct}/7 cards successfully into Evidence, Vocab, and Other Possibilities.<br>
+        &bull; <strong>Mission 3 (Dialogue):</strong> Sustained inquiry by asking follow-up questions.<br>
+        &bull; <strong>Mission 4 (Safe Code):</strong> <strong>C - L - U - E</strong>.
+      `;
+    }
+
+    document.getElementById('btnShowReview').addEventListener('click', () => {
+      document.getElementById('scoreModal').style.display = 'none';
+      const reviewBox = document.getElementById('reviewBanner');
+      reviewBox.style.display = 'block';
+      reviewBox.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    document.getElementById('btnRestart').addEventListener('click', () => {
+      location.reload();
+    });
+
+    function launchConfetti() {
+      const c = document.getElementById('confettiCanvas');
+      c.style.display = 'block';
+      c.width = window.innerWidth;
+      c.height = window.innerHeight;
+      const ctx = c.getContext('2d');
+      const pieces = [];
+      const colors = ['#38bdf8', '#fbbf24', '#34d399', '#f472b6', '#a78bfa'];
+
+      for (let i = 0; i < 100; i++) {
+        pieces.push({
+          x: Math.random() * c.width,
+          y: Math.random() * c.height - c.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 4,
+          vy: Math.random() * 5 + 3,
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        pieces.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+        frame++;
+        if (frame < 180) {
+          requestAnimationFrame(animate);
+        } else {
+          c.style.display = 'none';
+        }
+      }
+      animate();
+    }
+
+    document.getElementById('btnStartGame').addEventListener('click', () => {
+      const nameInput = document.getElementById('inputName').value.trim();
+      const classInput = document.getElementById('inputClass').value.trim();
+      if (!nameInput) {
+        document.getElementById('inputName').focus();
+        return;
+      }
+      gameState.name = nameInput;
+      gameState.studentClass = classInput || 'Year 6';
+
+      document.getElementById('displayDetectiveName').textContent = gameState.name;
+      document.getElementById('displayClass').textContent = gameState.studentClass;
+      document.getElementById('startModal').style.display = 'none';
+
+      sfx.playChirp();
+      startTimer();
+      initFog();
+      initBubbleCards();
+      renderScrambledDialogues();
+      initDialLock();
+    });
+
+    window.addEventListener('resize', () => {
+      if (fogArea) initFog();
+    });
+  </script>
+</body>
+</html>
