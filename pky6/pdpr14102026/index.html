@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>健康特工队：身体保卫战</title>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #0ea5e9;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --light-bg: #f8fafc;
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 15%, #38bdf8, #1e3a8a);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* 飘浮环境微粒子 */
+    .bg-bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      pointer-events: none;
+      animation: drift linear infinite;
+    }
+    @keyframes drift {
+      0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
+      20% { opacity: 0.6; }
+      100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+    }
+
+    /* 游戏主窗口 */
+    #arcade-stage {
+      width: 100vw;
+      max-width: 760px;
+      height: 100vh;
+      max-height: 880px;
+      background: #f8fafc;
+      border-radius: var(--radius);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      border: 4px solid #ffffff;
+      touch-action: none;
+    }
+
+    /* 顶部仪表盘 HUD */
+    .hud-bar {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+    }
+    .hud-chip {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hud-progress-wrap {
+      flex: 1;
+      height: 12px;
+      background: #334155;
+      border-radius: 999px;
+      margin: 0 12px;
+      overflow: hidden;
+    }
+    .hud-progress-fill {
+      height: 100%;
+      width: 5%;
+      background: linear-gradient(90deg, #10b981, #38bdf8);
+      border-radius: 999px;
+      transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 关卡模式横幅 */
+    .banner-mode {
+      background: #ffffff;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #1e293b;
+    }
+
+    /* 互动玩法竞技场 */
+    .arena-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* --- 玩法 1：萌怪大食堂投喂 --- */
+    .monster-container {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+    .monster-box {
+      width: 140px;
+      height: 155px;
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    }
+    .m-green { background: #dcfce7; border: 3px solid #22c55e; }
+    .m-red { background: #fee2e2; border: 3px solid #ef4444; }
+    .m-avatar { font-size: 3.8rem; }
+    .m-open { transform: scale(1.15) rotate(-3deg); }
+
+    .draggable-card {
+      background: #ffffff;
+      border: 3px solid #0ea5e9;
+      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
+      border-radius: 20px;
+      padding: 14px 22px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 50;
+      touch-action: none;
+      transition: transform 0.1s ease;
+    }
+    .food-dock {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 120px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 20px;
+      border: 3px dashed #cbd5e1;
+      padding: 10px;
+    }
+
+    /* --- 玩法 2：黄金餐盘拼盘吸附 --- */
+    .plate-disc {
+      width: 270px;
+      height: 270px;
+      background: white;
+      border-radius: 50%;
+      border: 8px solid #0ea5e9;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.12), inset 0 0 0 8px #f1f5f9;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .plate-half-vege {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+      background: #dcfce7;
+      border-right: 3px dashed #22c55e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #166534;
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 6px;
+    }
+    .plate-carb {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      background: #fef3c7;
+      border-bottom: 3px dashed #f59e0b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #b45309;
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .plate-protein {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      background: #fee2e2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #991b1b;
+      font-weight: 800;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .zone-active { filter: brightness(1.2); transform: scale(1.03); }
+
+    /* --- 玩法 3：血管透视镜激光排雷 --- */
+    .artery-box {
+      width: 100%;
+      height: 280px;
+      background: radial-gradient(circle at center, #ffe4e6 0%, #f43f5e 120%);
+      border-radius: 22px;
+      border: 4px solid #be123c;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 35px rgba(136, 19, 55, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .plaque-target {
+      background: #fef08a;
+      border: 3px solid #ca8a04;
+      border-radius: 50%;
+      padding: 16px 20px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+      animation: pulse 1.6s infinite ease-in-out;
+      transition: transform 0.25s ease;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* --- 玩法 4：气泡消除置换 --- */
+    .bubble-sea {
+      width: 100%;
+      height: 280px;
+      background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 100%);
+      border-radius: 22px;
+      border: 4px solid #0284c7;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .junk-bubble {
+      background: #ffffff;
+      border: 3px solid #0284c7;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #0369a1;
+      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
+      cursor: pointer;
+      animation: floatMotion 3s infinite ease-in-out;
+      transition: all 0.2s;
+    }
+    @keyframes floatMotion {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-16px); }
+    }
+
+    /* 底部反馈卡 */
+    .dock-feedback {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .tip-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* 全局弹窗 */
+    .modal-cover {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(6px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #ffffff;
+      border-radius: var(--radius);
+      padding: 30px 24px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      border: 4px solid #38bdf8;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin: 18px 0;
+    }
+    .text-input {
+      flex: 1;
+      padding: 12px;
+      font-size: 1.05rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      text-align: center;
+      font-weight: 700;
+      outline: none;
+    }
+    .btn-main {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      border-radius: 999px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+      transition: transform 0.1s;
+    }
+    .btn-main:active { transform: scale(0.96); }
+
+    /* 纸屑画布 */
+    #confetti-cvs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-cvs"></canvas>
+
+  <!-- 登录启程弹窗 -->
+  <div id="start-modal" class="modal-cover">
+    <div class="modal-box">
+      <div style="font-size: 4rem;">🥗🏃‍♂️🏆</div>
+      <h2 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin-top: 8px;">健康特工队：身体保卫战</h2>
+      <p style="color: #64748b; font-size: 0.92rem; margin-top: 4px;">六年级健康教育 · 深度评估外食与高盐糖饮食风险</p>
+      
+      <div class="input-row">
+        <input type="text" id="ipt-class" class="text-input" placeholder="班级 (如 6A)" value="六年级" style="max-width: 110px;">
+        <input type="text" id="ipt-name" class="text-input" placeholder="输入学生姓名" maxlength="20">
+      </div>
+
+      <button class="btn-main" onclick="initStart()">开始保卫战 🚀</button>
+    </div>
+  </div>
+
+  <!-- 游戏主舞台 -->
+  <div id="arcade-stage" style="display: none;">
+    <div class="hud-bar">
+      <div class="hud-chip" id="hud-name">👤 特工</div>
+      <div class="hud-progress-wrap">
+        <div class="hud-progress-fill" id="hud-bar"></div>
+      </div>
+      <div class="hud-chip" id="hud-score">⭐ 0 分</div>
+      <div class="hud-chip" id="hud-time">⏱️ 00:00</div>
+    </div>
+
+    <div class="banner-mode">
+      <span id="banner-title">🍔 模式载入中</span>
+      <span id="banner-count" style="color: #0284c7;">关卡 1/20</span>
+    </div>
+
+    <div class="arena-main" id="arena-box">
+      <!-- 关卡动态注入 -->
+    </div>
+
+    <div class="dock-feedback">
+      <div class="tip-text" id="feedback-tip">观察食物特性，执行健康操作！</div>
+      <div style="font-size: 1.15rem; font-weight: 900; color: #f59e0b;" id="combo-tag">🔥 x0</div>
+    </div>
+  </div>
+
+  <!-- 结算与荣誉卡片 -->
+  <div id="finish-modal" class="modal-cover" style="display: none;">
+    <div class="modal-box">
+      <div style="font-size: 4.5rem;" id="end-emoji">🥇</div>
+      <h2 style="font-size: 1.6rem; font-weight: 900; color: #0f172a;" id="end-title">保卫战大获全胜！</h2>
+      <div style="font-size: 2.5rem; margin: 8px 0;" id="end-stars">⭐⭐⭐</div>
+      <p style="font-size: 1.25rem; font-weight: 800; color: #10b981;" id="end-score">最终战绩：100 分</p>
+      <p style="color: #64748b; font-size: 0.9rem; margin-top: 4px;" id="end-time">用时：02:10</p>
+      <p style="color: #0369a1; font-weight: 700; font-size: 0.88rem; margin: 12px 0;" id="sync-status">📡 正在同步成绩至 Google Sheet...</p>
+
+      <button class="btn-main" onclick="location.reload()">再来一局 🔄</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // ⚙️ 1. 部署配置 (若部署在 GitHub Pages，在此填入 GAS 网址)
+    // ==========================================
+    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxG2N9YeOsNj6OGq3lJENWpci4qkdx_I99_lzt72RFS0S_2eXvpbPf4lTjjZEfKLVTQ/exec"; 
+
+    // ==========================================
+    // 🔊 2. Web Audio API 街机音效系统 (免外部依赖)
+    // ==========================================
+    const SoundFx = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AC();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+      },
+      pop() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.08);
+      },
+      cheer() {
+        this.init();
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.value = f;
+          gain.gain.setValueAtTime(0, now + i * 0.08);
+          gain.gain.linearRampToValueAtTime(0.25, now + i * 0.08 + 0.02);
+          gain.gain.linearRampToValueAtTime(0, now + i * 0.08 + 0.28);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 0.28);
+        });
+      }
+    };
+
+    // ==========================================
+    // 📚 3. 20 个核心关卡任务题库
+    // ==========================================
+    const GAME_LEVELS = [
+      // 玩法 1：萌怪大食堂 (辨析天然 vs 超加工)
+      { mode: 'feed', target: 'green', item: '🍌 鲜采香蕉', desc: '新鲜原型水果，直接获取无化学添加！' },
+      { mode: 'feed', target: 'red',   item: '🌭 罐头热狗肠', desc: '超加工肉类，含有大量防腐剂与人工增鲜剂！' },
+      { mode: 'feed', target: 'green', item: '🥬 现摘有机包菜', desc: '新鲜绿叶蔬菜，富含抗氧化物与膳食纤维！' },
+      { mode: 'feed', target: 'red',   item: '🍟 裹粉炸薯条', desc: '高温油炸食品，潜伏反式脂肪与高精制钠盐！' },
+      { mode: 'feed', target: 'green', item: '🐟 生鲜鲑鱼肉', desc: '优质蛋白质，含丰富不饱和脂肪酸与脑健康DHA！' },
+
+      // 玩法 2：黄金餐盘拼盘 (Suku-Suku Separuh 比例)
+      { mode: 'plate', target: 'vege', item: '🥦 西兰花与彩椒', desc: '卫生部法则：1/2 (一半) 必须是蔬菜与水果！' },
+      { mode: 'plate', target: 'carb', item: '🍚 天然糙米饭', desc: '卫生部法则：1/4 (Suku) 优质碳水提供平稳能量！' },
+      { mode: 'plate', target: 'protein', item: '🥚 水煮蛋与豆腐', desc: '卫生部法则：1/4 (Suku) 优质蛋白修复机体组织！' },
+      { mode: 'plate', target: 'vege', item: '🍎 脆甜红苹果', desc: '1/2 彩虹果蔬区域，富含果胶与多种微量元素！' },
+      { mode: 'plate', target: 'carb', item: '🍞 全麦燕麦吐司', desc: '1/4 粗粮碳水，缓慢释放能量，防止餐后血糖剧增！' },
+
+      // 玩法 3：血管透视镜激光排雷 (病理机制评估)
+      { mode: 'laser', title: '反式脂肪酸', desc: '击碎！反式脂肪堆积血管，严重损害青少年记忆与认知！' },
+      { mode: 'laser', title: '过量精制钠盐', desc: '击碎！高盐外食导致水钠潴留，加重血管硬化引发高血压！' },
+      { mode: 'laser', title: '高果葡糖浆', desc: '击碎！高糖引发细胞胰岛素抵抗，诱发二型糖尿病与肥胖！' },
+      { mode: 'laser', title: '黄色脂质斑块', desc: '击碎！脂代谢紊乱加速动脉粥样硬化，增加心脏病发作风险！' },
+      { mode: 'laser', title: '超加工端粒损耗', desc: '击碎！长期摄入加工食品会加速染色体端粒缩短与细胞早衰！' },
+
+      // 玩法 4：外食大变身消除置换 (餐单改良与饮水)
+      { mode: 'bubble', bad: '🧋 全糖珍珠奶茶', swap: '💧 纯净白开水', desc: '置换成功！多喝纯白开水是维持健康代谢的黄金法则！' },
+      { mode: 'bubble', bad: '🍔 油腻双层汉堡', swap: '🥪 全麦生菜三明治', desc: '置换成功！减少饱和脂肪，补充优质粗纤维碳水！' },
+      { mode: 'bubble', bad: '🍟 大包高盐薯条', swap: '🥗 玉米鲜蔬沙拉', desc: '置换成功！换成果蔬，彻底远离劣质煎炸油！' },
+      { mode: 'bubble', bad: '🧃 高糖风味饮料', swap: '🍊 现切鲜橙水果杯', desc: '置换成功！直接吃新鲜水果能吸收完整活性维生素！' },
+      { mode: 'bubble', bad: '☕ 油条炼乳甜咖啡', swap: '🥛 水煮蛋与无糖纯豆浆', desc: '置换成功！高蛋白少糖低脂，开启活力满满的一天！' }
+    ];
+
+    // ==========================================
+    // 🕹️ 4. 游戏驱动主逻辑
+    // ==========================================
+    let studentName = "";
+    let studentClass = "六年级";
+    let stepIndex = 0;
+    let score = 0;
+    let combo = 0;
+    let timerId = null;
+    let elapsedSeconds = 0;
+
+    function initStart() {
+      const nameIpt = document.getElementById('ipt-name');
+      const val = nameIpt.value.trim();
+      if (!val) {
+        nameIpt.focus();
+        nameIpt.style.borderColor = 'var(--danger)';
+        return;
+      }
+      studentName = val;
+      studentClass = document.getElementById('ipt-class').value.trim() || "六年级";
+
+      document.getElementById('hud-name').innerText = `👤 ${studentName}`;
+      document.getElementById('start-modal').style.display = 'none';
+      document.getElementById('arcade-stage').style.display = 'flex';
+
+      elapsedSeconds = 0;
+      clearInterval(timerId);
+      timerId = setInterval(() => {
+        elapsedSeconds++;
+        const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+        const s = String(elapsedSeconds % 60).padStart(2, '0');
+        document.getElementById('hud-time').innerText = `⏱️ ${m}:${s}`;
+      }, 1000);
+
+      loadStage();
+    }
+
+    function loadStage() {
+      if (stepIndex >= GAME_LEVELS.length) {
+        handleGameOver();
+        return;
+      }
+
+      const cur = GAME_LEVELS[stepIndex];
+      const arena = document.getElementById('arena-box');
+      arena.innerHTML = '';
+
+      // 更新 HUD
+      document.getElementById('hud-score').innerText = `⭐ ${score} 分`;
+      document.getElementById('banner-count').innerText = `关卡 ${stepIndex + 1}/20`;
+      document.getElementById('hud-bar').style.width = `${((stepIndex + 1) / 20) * 100}%`;
+
+      if (cur.mode === 'feed') renderFeedMode(cur, arena);
+      else if (cur.mode === 'plate') renderPlateMode(cur, arena);
+      else if (cur.mode === 'laser') renderLaserMode(cur, arena);
+      else if (cur.mode === 'bubble') renderBubbleMode(cur, arena);
+    }
+
+    // --- 模式 1：投喂 ---
+    function renderFeedMode(itemData, container) {
+      document.getElementById('banner-title').innerText = '🍔 玩法 1：萌怪大食堂 (拖拽分类投喂)';
+      document.getElementById('feedback-tip').innerText = '根据食物类型，拖入【天然食材怪】或【超加工回收箱】！';
+
+      container.innerHTML = `
+        <div class="monster-container">
+          <div class="monster-box m-green" id="box-green">
+            <div class="m-avatar">🥦😋</div>
+            <div style="font-weight:900; color:#166534; font-size:0.95rem;">天然食材怪</div>
+          </div>
+          <div class="monster-box m-red" id="box-red">
+            <div class="m-avatar">🗑️🤖</div>
+            <div style="font-weight:900; color:#991b1b; font-size:0.95rem;">超加工回收箱</div>
+          </div>
+        </div>
+        <div class="food-dock">
+          <div class="draggable-card" id="food-token">${itemData.item}</div>
+        </div>
+      `;
+
+      setupDrag(document.getElementById('food-token'), [
+        { el: document.getElementById('box-green'), id: 'green' },
+        { el: document.getElementById('box-red'), id: 'red' }
+      ], itemData);
+    }
+
+    // --- 模式 2：黄金餐盘 ---
+    function renderPlateMode(itemData, container) {
+      document.getElementById('banner-title').innerText = '🍽️ 玩法 2：黄金餐盘 (Suku-Suku Separuh 拼盘)';
+      document.getElementById('feedback-tip').innerText = '把食物拖入餐盘中对应的营养区域 (1/2果蔬 / 1/4碳水 / 1/4蛋白)！';
+
+      container.innerHTML = `
+        <div class="plate-disc">
+          <div class="plate-half-vege" id="z-vege">
+            <span style="font-size:1.6rem;">🥗</span>
+            1/2 彩虹果蔬
+          </div>
+          <div class="plate-carb" id="z-carb">
+            <span style="font-size:1.4rem;">🍚</span>
+            1/4 优质碳水
+          </div>
+          <div class="plate-protein" id="z-protein">
+            <span style="font-size:1.4rem;">🍳</span>
+            1/4 优质蛋白
+          </div>
+        </div>
+        <div class="food-dock">
+          <div class="draggable-card" id="plate-token">${itemData.item}</div>
+        </div>
+      `;
+
+      setupDrag(document.getElementById('plate-token'), [
+        { el: document.getElementById('z-vege'), id: 'vege' },
+        { el: document.getElementById('z-carb'), id: 'carb' },
+        { el: document.getElementById('z-protein'), id: 'protein' }
+      ], itemData);
+    }
+
+    // 统一触摸与鼠标拖拽控制器
+    function setupDrag(card, targets, itemData) {
+      let startX, startY, isDragging = false;
+
+      function onDown(e) {
+        isDragging = true;
+        startX = e.clientX || (e.touches && e.touches[0].clientX);
+        startY = e.clientY || (e.touches && e.touches[0].clientY);
+        card.setPointerCapture(e.pointerId);
+      }
+
+      function onMove(e) {
+        if (!isDragging) return;
+        const cx = e.clientX || (e.touches && e.touches[0].clientX);
+        const cy = e.clientY || (e.touches && e.touches[0].clientY);
+        const dx = cx - startX;
+        const dy = cy - startY;
+        card.style.transform = `translate(${dx}px, ${dy}px) scale(1.08)`;
+
+        const cardR = card.getBoundingClientRect();
+        targets.forEach(t => {
+          const tR = t.el.getBoundingClientRect();
+          if (hitTest(cardR, tR)) {
+            t.el.classList.add('m-open', 'zone-active');
+          } else {
+            t.el.classList.remove('m-open', 'zone-active');
+          }
+        });
+      }
+
+      function onUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        const cardR = card.getBoundingClientRect();
+        let matched = false;
+
+        targets.forEach(t => {
+          t.el.classList.remove('m-open', 'zone-active');
+          if (hitTest(cardR, t.el.getBoundingClientRect()) && t.id === itemData.target) {
+            matched = true;
+          }
+        });
+
+        if (matched) {
+          triggerSuccess(itemData.desc);
+        } else {
+          card.style.transform = 'translate(0px, 0px)';
+          SoundFx.pop();
+        }
+      }
+
+      card.onpointerdown = onDown;
+      card.onpointermove = onMove;
+      card.onpointerup = onUp;
+    }
+
+    function hitTest(r1, r2) {
+      return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
+    }
+
+    // --- 模式 3：激光排雷 ---
+    function renderLaserMode(itemData, container) {
+      document.getElementById('banner-title').innerText = '🔬 玩法 3：血管透视镜 (激光排雷)';
+      document.getElementById('feedback-tip').innerText = '点击击碎潜伏在血管内壁的高危病理隐患！';
+
+      container.innerHTML = `
+        <div class="artery-box">
+          <div style="position:absolute; top:12px; left:16px; font-weight:800; color:#ffffff;">
+            🚨 血管内皮监测
+          </div>
+          <div class="plaque-target" id="plaque-btn">
+            <div style="font-size:3rem;">⚠️</div>
+            <div style="font-weight:900; color:#854d0e; font-size:1.15rem; margin-top:4px;">${itemData.title}</div>
+          </div>
+        </div>
+      `;
+
+      const p = document.getElementById('plaque-btn');
+      p.onclick = () => {
+        p.style.transform = 'scale(0) rotate(180deg)';
+        setTimeout(() => triggerSuccess(itemData.desc), 250);
+      };
+    }
+
+    // --- 模式 4：气泡置换 ---
+    function renderBubbleMode(itemData, container) {
+      document.getElementById('banner-title').innerText = '🫧 玩法 4：外食大变身 (气泡消除置换)';
+      document.getElementById('feedback-tip').innerText = '戳破不健康的高脂高糖外食气泡，变身天然健康美食！';
+
+      container.innerHTML = `
+        <div class="bubble-sea">
+          <div class="junk-bubble" id="junk-btn">
+            ${itemData.bad}
+          </div>
+        </div>
+      `;
+
+      const b = document.getElementById('junk-btn');
+      b.onclick = () => {
+        b.style.background = '#dcfce7';
+        b.style.borderColor = '#22c55e';
+        b.style.color = '#15803d';
+        b.innerHTML = `✨ 成功置换：${itemData.swap}`;
+        SoundFx.pop();
+        setTimeout(() => triggerSuccess(itemData.desc), 350);
+      };
+    }
+
+    // 通用奖励机制
+    function triggerSuccess(tipMsg) {
+      SoundFx.cheer();
+      score += 5;
+      combo++;
+      document.getElementById('combo-tag').innerText = `🔥 x${combo}`;
+      document.getElementById('feedback-tip').innerText = `💡 ${tipMsg}`;
+      stepIndex++;
+      setTimeout(loadStage, 400);
+    }
+
+    // 游戏通关与成绩上报
+    function handleGameOver() {
+      clearInterval(timerId);
+      document.getElementById('arcade-stage').style.display = 'none';
+      document.getElementById('finish-modal').style.display = 'flex';
+
+      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+      const s = String(elapsedSeconds % 60).padStart(2, '0');
+      const timeStr = `${m}:${s}`;
+
+      document.getElementById('end-score').innerText = `最终战绩：${score} 分`;
+      document.getElementById('end-time').innerText = `完成用时：${timeStr}`;
+
+      let ratingTitle = "五星特级营养师 🏆";
+      if (score < 70) ratingTitle = "初级健康小卫士 🌱";
+      else if (score < 90) ratingTitle = "优秀健康特工 🏅";
+
+      document.getElementById('end-title').innerText = ratingTitle;
+      fireConfetti();
+
+      // 构建同步上报载荷
+      const payload = {
+        name: studentName,
+        studentClass: studentClass,
+        score: score,
+        total: 20,
+        percentage: Math.round((score / 100) * 100),
+        timeSpent: timeStr,
+        rating: ratingTitle,
+        mistakes: '全部通关！'
+      };
+
+      const syncEl = document.getElementById('sync-status');
+
+      // 1. 若在 GAS Web App 环境中
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(() => {
+            syncEl.innerText = "✅ 成绩已实时保存至 Google Sheet！";
+            syncEl.style.color = "#15803d";
+          })
+          .withFailureHandler(() => {
+            syncEl.innerText = "⚠️ 本地已通关（云端暂未写入）";
+          })
+          .recordScore(payload);
+      } 
+      // 2. 若在 GitHub Pages 静态环境并通过 fetch 回传
+      else if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL.startsWith('http')) {
+        fetch(GAS_ENDPOINT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        }).then(() => {
+          syncEl.innerText = "✅ 成绩已实时保存至 Google Sheet！";
+          syncEl.style.color = "#15803d";
+        }).catch(() => {
+          syncEl.innerText = "⚠️ 本地已通关（网络连接离线）";
+        });
+      } else {
+        syncEl.innerText = "✨ 本地挑战模式（未配置云端链接）";
+      }
+    }
+
+    // 纸屑动画
+    function fireConfetti() {
+      const cvs = document.getElementById('confetti-cvs');
+      const ctx = cvs.getContext('2d');
+      cvs.width = window.innerWidth;
+      cvs.height = window.innerHeight;
+      const pieces = Array.from({length: 80}, () => ({
+        x: Math.random() * cvs.width,
+        y: -10,
+        sz: Math.random() * 8 + 6,
+        c: ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'][Math.floor(Math.random()*5)],
+        vy: Math.random() * 5 + 3,
+        vx: Math.random() * 4 - 2
+      }));
+      function draw() {
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+        pieces.forEach(p => {
+          p.y += p.vy;
+          p.x += p.vx;
+          ctx.fillStyle = p.c;
+          ctx.fillRect(p.x, p.y, p.sz, p.sz);
+        });
+        if (pieces.some(p => p.y < cvs.height)) requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // 背景浮动微粒子
+    for (let i = 0; i < 15; i++) {
+      const b = document.createElement('div');
+      b.className = 'bg-bubble';
+      const sz = Math.random() * 30 + 15;
+      b.style.width = sz + 'px';
+      b.style.height = sz + 'px';
+      b.style.left = Math.random() * 100 + 'vw';
+      b.style.animationDuration = (Math.random() * 8 + 8) + 's';
+      b.style.animationDelay = (Math.random() * 4) + 's';
+      document.body.appendChild(b);
+    }
+  </script>
+</body>
+</html>
