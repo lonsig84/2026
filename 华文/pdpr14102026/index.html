@@ -116,6 +116,26 @@
             margin-top: 40px;
             border: 2px dashed var(--primary-color);
         }
+        
+        /* 新增：学生输入名字的输入框样式 */
+        .name-input-group {
+            margin: 20px 0;
+        }
+        
+        .name-input-group input {
+            padding: 10px 15px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            font-family: 'KaiTi', '楷体', sans-serif;
+            width: 250px;
+            text-align: center;
+        }
+        
+        .name-input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
 
         /* 隐藏原本的文件选择框，使用漂亮的按钮替代 */
         input[type="file"] {
@@ -147,11 +167,10 @@
     <div class="step-card">
         <h2 class="step-title">第一步：想一想（导入）</h2>
         <div class="image-placeholder">
-            <!-- 替换为您生成的图片 -->
             <img src="images/1_intro.png" alt="图片提示：小学生紧张地看着一辆自行车，害怕尝试" onerror="this.src='https://via.placeholder.com/600x300/f0f0f0/999999?text=图片区：images/1_intro.png';">
         </div>
         <div class="hints">
-            <p><strong>老师的话：</strong>每个人都有害怕的时候，这很正常。但如果我们一直逃避，就会失去很多成长的机会[cite: 1]。</p>
+            <p><strong>老师的话：</strong>每个人都有害怕的时候，这很正常。但如果我们一直逃避，就会失去很多成长的机会。</p>
             <p>想想看，在生活中，有没有什么事情是你曾经非常害怕，或者不敢去尝试的？</p>
         </div>
     </div>
@@ -163,9 +182,9 @@
             <img src="images/2_cause.png" alt="图片提示：小学生摔倒感到沮丧" onerror="this.src='https://via.placeholder.com/600x300/f0f0f0/999999?text=图片区：images/2_cause.png';">
         </div>
         <div class="hints">
-            <p><strong>写作任务：</strong>简述那次失败或恐惧的经历。你曾经经历过什么让自己害怕或不敢尝试的事？[cite: 2]</p>
+            <p><strong>写作任务：</strong>简述那次失败或恐惧的经历。你曾经经历过什么让自己害怕或不敢尝试的事？</p>
             <p><strong>描写重点：</strong>当时的感受如何？</p>
-            <p><strong>参考词汇：</strong><span class="vocab">失败、害怕、沮丧、缺乏自信</span>[cite: 2]</p>
+            <p><strong>参考词汇：</strong><span class="vocab">失败、害怕、沮丧、缺乏自信</span></p>
         </div>
     </div>
 
@@ -176,9 +195,9 @@
             <img src="images/3_turn.png" alt="图片提示：老师和同学鼓励犹豫的小学生" onerror="this.src='https://via.placeholder.com/600x300/f0f0f0/999999?text=图片区：images/3_turn.png';">
         </div>
         <div class="hints">
-            <p><strong>写作任务：</strong>再次经历这件事时，你为什么决定“再勇敢一次”？是什么促使你改变主意？（是老师的鼓励、同学的帮助、还是自己内心的渴望？）[cite: 2]</p>
-            <p><strong>心理描写：</strong>把内心的挣扎写出来，例如：“要不要去？”“我能行吗？”[cite: 2]</p>
-            <p><strong>参考词汇：</strong><span class="vocab">犹豫、改变、信心</span>[cite: 2]</p>
+            <p><strong>写作任务：</strong>再次经历这件事时，你为什么决定“再勇敢一次”？是什么促使你改变主意？（是老师的鼓励、同学的帮助、还是自己内心的渴望？）</p>
+            <p><strong>心理描写：</strong>把内心的挣扎写出来，例如：“要不要去？”“我能行吗？”</p>
+            <p><strong>参考词汇：</strong><span class="vocab">犹豫、改变、信心</span></p>
         </div>
     </div>
 
@@ -189,9 +208,9 @@
             <img src="images/4_process.png" alt="图片提示：小学生勇敢握着自行车把手，努力向前" onerror="this.src='https://via.placeholder.com/600x300/f0f0f0/999999?text=图片区：images/4_process.png';">
         </div>
         <div class="hints">
-            <p><strong>写作任务：</strong>这个“再勇敢一次”的过程是怎样的？详细描写你是如何克服恐惧的[cite: 2]。</p>
-            <p><strong>动作与神态：</strong>运用动作和神态描写，例如：深吸一口气、手心出汗、双腿发抖但依然向前迈步[cite: 2]。</p>
-            <p><strong>参考词汇：</strong><span class="vocab">克服、迎难而上、勇往直前、突破</span>[cite: 2]</p>
+            <p><strong>写作任务：</strong>这个“再勇敢一次”的过程是怎样的？详细描写你是如何克服恐惧的。</p>
+            <p><strong>动作与神态：</strong>运用动作和神态描写，例如：深吸一口气、手心出汗、双腿发抖但依然向前迈步。</p>
+            <p><strong>参考词汇：</strong><span class="vocab">克服、迎难而上、勇往直前、突破</span></p>
         </div>
     </div>
 
@@ -202,9 +221,9 @@
             <img src="images/5_result.png" alt="图片提示：小学生开心骄傲地骑着自行车，比出胜利手势" onerror="this.src='https://via.placeholder.com/600x300/f0f0f0/999999?text=图片区：images/5_result.png';">
         </div>
         <div class="hints">
-            <p><strong>写作任务：</strong>结果成功了吗？还是虽然失败但战胜了自己？通过这次经历，你有什么收获或感悟？[cite: 2]</p>
-            <p><strong>老师的话：</strong>勇敢不是不害怕，而是害怕却依然前行[cite: 3]。</p>
-            <p><strong>参考词汇：</strong><span class="vocab">勇气、喜悦、新的认识</span>[cite: 2]</p>
+            <p><strong>写作任务：</strong>结果成功了吗？还是虽然失败但战胜了自己？通过这次经历，你有什么收获或感悟？</p>
+            <p><strong>老师的话：</strong>勇敢不是不害怕，而是害怕却依然前行。</p>
+            <p><strong>参考词汇：</strong><span class="vocab">勇气、喜悦、新的认识</span></p>
         </div>
     </div>
 
@@ -212,6 +231,12 @@
     <div class="upload-section">
         <h2>📸 作文写好了吗？交功课啦！</h2>
         <p>请把写好的作文拍下来，上传给老师。</p>
+        
+        <!-- 新增：让学生输入名字的输入框 -->
+        <div class="name-input-group">
+            <label for="student-name" style="font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 8px;">你的姓名：</label>
+            <input type="text" id="student-name" placeholder="请输入你的中英文姓名" required>
+        </div>
         
         <!-- label 关联隐藏的 input 按钮，点击 label 等同于点击 input -->
         <label for="camera-upload" class="btn btn-upload" id="upload-label">
@@ -230,11 +255,21 @@
     const fileInput = document.getElementById('camera-upload');
     const uploadLabel = document.getElementById('upload-label');
     const statusDiv = document.getElementById('upload-status');
+    const nameInput = document.getElementById('student-name');
 
     // ★★★ 重要：这里请替换为您在 Google Apps Script 部署后获得的 Web App URL ★★★
     const gasWebAppUrl = "https://script.google.com/macros/s/AKfycbz_VtN5w3MKeq8RP1UECx3D6v3Vy6XATw2_CY-5_c5uFA9PYi1a9BHAgkVNT2Gc6J8L/exec"; 
 
     fileInput.addEventListener('change', function(event) {
+        // 第一步：检查学生有没有输入名字
+        const studentName = nameInput.value.trim();
+        if (!studentName) {
+            alert("⚠️ 请先在上方输入你的姓名，然后再上传哦！");
+            fileInput.value = ""; // 清空刚刚选择的文件
+            nameInput.focus(); // 自动把光标跳到输入框
+            return;
+        }
+
         const file = event.target.files[0];
         if (!file) return;
 
@@ -248,9 +283,15 @@
         reader.onload = function(e) {
             const base64Data = e.target.result;
 
+            // ★ 核心修改：利用学生输入的名字重命名图片 ★
+            // 例如：彭芯恬_再勇敢一次作文.jpg
+            // 取出原本文件的后缀名 (例如 .jpg 或 .png)
+            const fileExtension = file.name.split('.').pop();
+            const newFilename = studentName + "_再勇敢一次作文." + fileExtension;
+
             // 构造要发送的数据
             const payload = {
-                filename: "学生作文_" + Date.now() + "_" + file.name,
+                filename: newFilename, // 传送自动重命名后的名字
                 mimeType: file.type,
                 base64: base64Data
             };
@@ -260,16 +301,14 @@
             // 发送数据到 Google Apps Script
             fetch(gasWebAppUrl, {
                 method: "POST",
-                // 使用 no-cors 模式防止浏览器跨域报错，但无法读取具体返回值
-                // 若 GAS 端设置了正确的 CORS header，可以去掉 mode: 'no-cors'
                 body: JSON.stringify(payload)
             })
             .then(response => {
                 // 上传成功反馈
-                alert("🎉 上传成功！老师已经收到你的作文啦。");
+                alert("🎉 上传成功！老师已经收到 " + studentName + " 的作文啦。");
                 uploadLabel.innerText = "✅ 上传成功";
                 uploadLabel.style.backgroundColor = "#4CAF50";
-                statusDiv.innerText = "文件已成功提交！";
+                statusDiv.innerText = studentName + " 的文件已成功提交！";
                 statusDiv.style.color = "#4CAF50";
             })
             .catch(error => {
