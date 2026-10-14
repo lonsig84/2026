@@ -12,7 +12,6 @@
       --accent: #f59e0b;
       --danger: #ef4444;
       --dark: #0f172a;
-      --light-bg: #f8fafc;
       --radius: 24px;
     }
 
@@ -33,63 +32,47 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
     }
 
-    /* 飘浮环境微粒子 */
-    .bg-bubble {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.25);
-      pointer-events: none;
-      animation: drift linear infinite;
-    }
-    @keyframes drift {
-      0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
-      20% { opacity: 0.6; }
-      100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
-    }
-
-    /* 游戏主窗口 */
-    #arcade-stage {
+    /* 容器主舞台 */
+    .app-window {
       width: 100vw;
-      max-width: 760px;
+      max-width: 860px;
       height: 100vh;
-      max-height: 880px;
+      max-height: 900px;
       background: #f8fafc;
       border-radius: var(--radius);
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
       border: 4px solid #ffffff;
-      touch-action: none;
     }
 
-    /* 顶部仪表盘 HUD */
+    /* 顶部仪表 HUD */
     .hud-bar {
       background: #0f172a;
       color: #f8fafc;
-      padding: 12px 18px;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 20;
+      z-index: 30;
     }
     .hud-chip {
-      background: rgba(255, 255, 255, 0.12);
-      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 5px 12px;
       border-radius: 999px;
       font-size: 0.88rem;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
     .hud-progress-wrap {
       flex: 1;
-      height: 12px;
+      height: 10px;
       background: #334155;
       border-radius: 999px;
       margin: 0 12px;
@@ -97,27 +80,132 @@
     }
     .hud-progress-fill {
       height: 100%;
-      width: 5%;
+      width: 0%;
       background: linear-gradient(90deg, #10b981, #38bdf8);
       border-radius: 999px;
-      transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: width 0.3s ease;
     }
 
-    /* 关卡模式横幅 */
-    .banner-mode {
+    /* 按钮通用 */
+    .btn-action {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+      transition: transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .btn-action:active { transform: scale(0.96); }
+
+    /* ================= 阶段 1: PPT 研读视窗 ================= */
+    #ppt-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      background: #f1f5f9;
+      position: relative;
+      overflow: hidden;
+    }
+    .ppt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 4px 6px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .ppt-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .ppt-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-fullscreen {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid #7dd3fc;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-fullscreen:hover { background: #bae6fd; }
+    .timer-pill {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid #f87171;
+    }
+
+    /* 课件容器区 */
+    .canva-frame-container {
+      flex: 1;
+      width: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border: 2px solid #cbd5e1;
       background: #ffffff;
-      padding: 10px 16px;
+      position: relative;
+    }
+    .canva-frame-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .ppt-footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 10px;
+    }
+
+    /* ================= 阶段 2: 20题游戏竞技场 ================= */
+    #game-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      touch-action: none;
+    }
+    .mission-subhead {
+      background: #ffffff;
+      padding: 8px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px solid #e2e8f0;
       font-weight: 800;
-      font-size: 1rem;
-      color: #1e293b;
+      font-size: 0.95rem;
     }
-
-    /* 互动玩法竞技场 */
-    .arena-main {
+    .arena-board {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -128,331 +216,189 @@
       overflow: hidden;
     }
 
-    /* --- 玩法 1：萌怪大食堂投喂 --- */
-    .monster-container {
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      margin-top: 10px;
-    }
-    .monster-box {
-      width: 140px;
-      height: 155px;
-      border-radius: 22px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    /* 模式 1: 喂食怪 */
+    .monsters-wrap { display: flex; justify-content: space-around; width: 100%; margin-top: 8px; }
+    .monster-cell {
+      width: 135px; height: 145px; border-radius: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06); transition: transform 0.2s;
     }
     .m-green { background: #dcfce7; border: 3px solid #22c55e; }
     .m-red { background: #fee2e2; border: 3px solid #ef4444; }
-    .m-avatar { font-size: 3.8rem; }
-    .m-open { transform: scale(1.15) rotate(-3deg); }
+    .m-open { transform: scale(1.12) rotate(-3deg); }
 
-    .draggable-card {
-      background: #ffffff;
-      border: 3px solid #0ea5e9;
-      box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
-      border-radius: 20px;
-      padding: 14px 22px;
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #0f172a;
-      cursor: grab;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 50;
-      touch-action: none;
-      transition: transform 0.1s ease;
-    }
     .food-dock {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 120px;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 20px;
-      border: 3px dashed #cbd5e1;
-      padding: 10px;
+      width: 100%; min-height: 110px; border-radius: 18px; border: 3px dashed #cbd5e1;
+      background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center;
+    }
+    .drag-token {
+      background: white; border: 3px solid #0ea5e9; border-radius: 18px;
+      padding: 12px 20px; font-size: 1.2rem; font-weight: 800; color: #0f172a;
+      box-shadow: 0 10px 20px rgba(14,165,233,0.25); cursor: grab; touch-action: none;
     }
 
-    /* --- 玩法 2：黄金餐盘拼盘吸附 --- */
+    /* 模式 2: 餐盘 */
     .plate-disc {
-      width: 270px;
-      height: 270px;
-      background: white;
-      border-radius: 50%;
-      border: 8px solid #0ea5e9;
-      box-shadow: 0 16px 36px rgba(0,0,0,0.12), inset 0 0 0 8px #f1f5f9;
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      overflow: hidden;
-      margin: 10px 0;
+      width: 260px; height: 260px; background: white; border-radius: 50%;
+      border: 8px solid #0ea5e9; box-shadow: 0 16px 36px rgba(0,0,0,0.12);
+      display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+      overflow: hidden; margin: 8px 0;
     }
-    .plate-half-vege {
-      grid-column: 1 / 2;
-      grid-row: 1 / 3;
-      background: #dcfce7;
-      border-right: 3px dashed #22c55e;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #166534;
-      font-weight: 800;
-      font-size: 0.9rem;
-      text-align: center;
-      padding: 6px;
-    }
-    .plate-carb {
-      grid-column: 2 / 3;
-      grid-row: 1 / 2;
-      background: #fef3c7;
-      border-bottom: 3px dashed #f59e0b;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #b45309;
-      font-weight: 800;
-      font-size: 0.85rem;
-      text-align: center;
-    }
-    .plate-protein {
-      grid-column: 2 / 3;
-      grid-row: 2 / 3;
-      background: #fee2e2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #991b1b;
-      font-weight: 800;
-      font-size: 0.85rem;
-      text-align: center;
-    }
-    .zone-active { filter: brightness(1.2); transform: scale(1.03); }
+    .plate-vege { grid-column: 1/2; grid-row: 1/3; background: #dcfce7; border-right: 3px dashed #22c55e; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #166534; font-weight: 800; font-size: 0.88rem; text-align: center; }
+    .plate-carb { grid-column: 2/3; grid-row: 1/2; background: #fef3c7; border-bottom: 3px dashed #f59e0b; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #b45309; font-weight: 800; font-size: 0.82rem; }
+    .plate-protein { grid-column: 2/3; grid-row: 2/3; background: #fee2e2; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #991b1b; font-weight: 800; font-size: 0.82rem; }
+    .plate-active { filter: brightness(1.2); transform: scale(1.03); }
 
-    /* --- 玩法 3：血管透视镜激光排雷 --- */
+    /* 模式 3: 血管 */
     .artery-box {
-      width: 100%;
-      height: 280px;
-      background: radial-gradient(circle at center, #ffe4e6 0%, #f43f5e 120%);
-      border-radius: 22px;
-      border: 4px solid #be123c;
-      position: relative;
-      overflow: hidden;
-      box-shadow: inset 0 0 35px rgba(136, 19, 55, 0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 100%; height: 260px; background: radial-gradient(circle at center, #ffe4e6 0%, #f43f5e 120%);
+      border-radius: 20px; border: 4px solid #be123c; display: flex; justify-content: center; align-items: center; position: relative;
     }
-    .plaque-target {
-      background: #fef08a;
-      border: 3px solid #ca8a04;
-      border-radius: 50%;
-      padding: 16px 20px;
-      text-align: center;
-      cursor: pointer;
+    .plaque-token {
+      background: #fef08a; border: 3px solid #ca8a04; border-radius: 50%;
+      padding: 16px 20px; cursor: pointer; text-align: center; animation: pulse 1.6s infinite ease-in-out;
       box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-      animation: pulse 1.6s infinite ease-in-out;
-      transition: transform 0.25s ease;
     }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-    /* --- 玩法 4：气泡消除置换 --- */
+    /* 模式 4: 气泡 */
     .bubble-sea {
-      width: 100%;
-      height: 280px;
-      background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 100%);
-      border-radius: 22px;
-      border: 4px solid #0284c7;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      width: 100%; height: 260px; background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 100%);
+      border-radius: 20px; border: 4px solid #0284c7; display: flex; justify-content: center; align-items: center;
     }
-    .junk-bubble {
-      background: #ffffff;
-      border: 3px solid #0284c7;
-      border-radius: 999px;
-      padding: 14px 24px;
-      font-weight: 900;
-      font-size: 1.15rem;
-      color: #0369a1;
-      box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
-      cursor: pointer;
-      animation: floatMotion 3s infinite ease-in-out;
-      transition: all 0.2s;
-    }
-    @keyframes floatMotion {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-16px); }
+    .bubble-token {
+      background: white; border: 3px solid #0284c7; border-radius: 999px;
+      padding: 14px 22px; font-weight: 900; font-size: 1.15rem; color: #0369a1;
+      cursor: pointer; box-shadow: 0 10px 24px rgba(2,132,199,0.3);
     }
 
-    /* 底部反馈卡 */
-    .dock-feedback {
-      width: 100%;
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 12px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 2px solid #e2e8f0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-    }
-    .tip-text {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #1e293b;
+    /* 底部提示卡 */
+    .dock-bar {
+      width: 100%; background: white; border-radius: 16px; padding: 10px 16px;
+      display: flex; justify-content: space-between; align-items: center; border: 2px solid #e2e8f0;
     }
 
-    /* 全局弹窗 */
-    .modal-cover {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(6px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      padding: 16px;
+    /* 弹窗遮罩 */
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px);
+      display: flex; justify-content: center; align-items: center; z-index: 100; padding: 16px;
     }
-    .modal-box {
-      background: #ffffff;
-      border-radius: var(--radius);
-      padding: 30px 24px;
-      width: 100%;
-      max-width: 440px;
-      text-align: center;
-      border: 4px solid #38bdf8;
+    .modal-card {
+      background: white; border-radius: var(--radius); padding: 30px 24px;
+      max-width: 440px; width: 100%; text-align: center; border: 4px solid #38bdf8;
       box-shadow: 0 20px 45px rgba(0,0,0,0.3);
     }
-    .input-row {
-      display: flex;
-      gap: 8px;
-      margin: 18px 0;
+    .modal-card input {
+      padding: 12px; font-size: 1.1rem; border: 2px solid #cbd5e1; border-radius: 14px;
+      text-align: center; font-weight: 700; width: 100%; margin: 16px 0; outline: none;
     }
-    .text-input {
-      flex: 1;
-      padding: 12px;
-      font-size: 1.05rem;
-      border: 2px solid #cbd5e1;
-      border-radius: 14px;
-      text-align: center;
-      font-weight: 700;
-      outline: none;
-    }
-    .btn-main {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      border: none;
-      padding: 14px 28px;
-      font-size: 1.15rem;
-      font-weight: 800;
-      border-radius: 999px;
-      cursor: pointer;
-      width: 100%;
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
-      transition: transform 0.1s;
-    }
-    .btn-main:active { transform: scale(0.96); }
-
-    /* 纸屑画布 */
-    #confetti-cvs {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 200;
-    }
+    #confetti-cvs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 200; }
   </style>
 </head>
 <body>
 
   <canvas id="confetti-cvs"></canvas>
 
-  <!-- 登录启程弹窗 -->
-  <div id="start-modal" class="modal-cover">
-    <div class="modal-box">
-      <div style="font-size: 4rem;">🥗🏃‍♂️🏆</div>
-      <h2 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin-top: 8px;">健康特工队：身体保卫战</h2>
-      <p style="color: #64748b; font-size: 0.92rem; margin-top: 4px;">六年级健康教育 · 深度评估外食与高盐糖饮食风险</p>
-      
-      <div class="input-row">
-        <input type="text" id="ipt-class" class="text-input" placeholder="班级 (如 6A)" value="六年级" style="max-width: 110px;">
-        <input type="text" id="ipt-name" class="text-input" placeholder="输入学生姓名" maxlength="20">
-      </div>
-
-      <button class="btn-main" onclick="initStart()">开始保卫战 🚀</button>
+  <!-- 阶段 0: 登录弹窗 -->
+  <div id="login-modal" class="overlay">
+    <div class="modal-card">
+      <div style="font-size: 4rem;">📖🥗🚀</div>
+      <h2 style="font-size: 1.55rem; font-weight: 900; color: #0f172a; margin-top: 6px;">健康特工队：身体保卫战</h2>
+      <p style="color: #64748b; font-size: 0.92rem; margin-top: 4px;">第一步：研读课本 PPT ➔ 第二步：解密闯关</p>
+      <input type="text" id="ipt-name" placeholder="请输入你的姓名开始挑战" maxlength="20">
+      <button class="btn-action" style="width: 100%;" onclick="startReadingPhase()">进入研读 PPT 📖</button>
     </div>
   </div>
 
-  <!-- 游戏主舞台 -->
-  <div id="arcade-stage" style="display: none;">
+  <!-- 主视窗 -->
+  <div class="app-window" id="main-window">
     <div class="hud-bar">
       <div class="hud-chip" id="hud-name">👤 特工</div>
       <div class="hud-progress-wrap">
         <div class="hud-progress-fill" id="hud-bar"></div>
       </div>
       <div class="hud-chip" id="hud-score">⭐ 0 分</div>
-      <div class="hud-chip" id="hud-time">⏱️ 00:00</div>
+      <div class="hud-chip" id="hud-stage-num">阶段：阅读课件</div>
     </div>
 
-    <div class="banner-mode">
-      <span id="banner-title">🍔 模式载入中</span>
-      <span id="banner-count" style="color: #0284c7;">关卡 1/20</span>
+    <!-- ================= 阶段 1: PPT 视窗 ================= -->
+    <div id="ppt-stage" style="display: none;">
+      <div class="ppt-header">
+        <span class="ppt-title">📑 核心知识研读：饮食多样化与外食风险</span>
+        <div class="ppt-header-right">
+          <a href="https://www.canva.com/design/DAHX8qgslTg/EsxzpWjWLRQkoidn6XaNUg/view?embed" 
+             target="_blank" 
+             class="btn-fullscreen">
+            ↗️ 新窗口全屏
+          </a>
+          <div class="timer-pill">
+            <span>⏱️ 阅读计时：</span>
+            <span id="ppt-timer">00:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="canva-frame-container">
+        <iframe src="https://www.canva.com/design/DAHX8qgslTg/EsxzpWjWLRQkoidn6XaNUg/view?embed" 
+                allowfullscreen="allowfullscreen" 
+                allow="fullscreen">
+        </iframe>
+      </div>
+
+      <div class="ppt-footer">
+        <button class="btn-action" onclick="finishReadingAndPlay()">
+          ✅ 我已认真阅读完毕，开始闯关！🚀
+        </button>
+      </div>
     </div>
 
-    <div class="arena-main" id="arena-box">
-      <!-- 关卡动态注入 -->
-    </div>
+    <!-- ================= 阶段 2: 20题游戏闯关视窗 ================= -->
+    <div id="game-stage" style="display: none;">
+      <div class="mission-subhead">
+        <span id="mode-text">🍔 玩法加载中</span>
+        <span id="game-timer" style="color: #0284c7;">闯关用时 00:00</span>
+      </div>
 
-    <div class="dock-feedback">
-      <div class="tip-text" id="feedback-tip">观察食物特性，执行健康操作！</div>
-      <div style="font-size: 1.15rem; font-weight: 900; color: #f59e0b;" id="combo-tag">🔥 x0</div>
+      <div class="arena-board" id="arena-box"></div>
+
+      <div class="dock-bar">
+        <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;" id="tip-desc">观察食材属性，执行特工操作！</div>
+        <div style="font-size: 1.15rem; font-weight: 900; color: #f59e0b;" id="combo-box">🔥 x0</div>
+      </div>
     </div>
   </div>
 
-  <!-- 结算与荣誉卡片 -->
-  <div id="finish-modal" class="modal-cover" style="display: none;">
-    <div class="modal-box">
-      <div style="font-size: 4.5rem;" id="end-emoji">🥇</div>
-      <h2 style="font-size: 1.6rem; font-weight: 900; color: #0f172a;" id="end-title">保卫战大获全胜！</h2>
-      <div style="font-size: 2.5rem; margin: 8px 0;" id="end-stars">⭐⭐⭐</div>
-      <p style="font-size: 1.25rem; font-weight: 800; color: #10b981;" id="end-score">最终战绩：100 分</p>
-      <p style="color: #64748b; font-size: 0.9rem; margin-top: 4px;" id="end-time">用时：02:10</p>
-      <p style="color: #0369a1; font-weight: 700; font-size: 0.88rem; margin: 12px 0;" id="sync-status">📡 正在同步成绩至 Google Sheet...</p>
+  <!-- 阶段 3: 最终结算奖状 -->
+  <div id="result-modal" class="overlay" style="display: none;">
+    <div class="modal-card">
+      <div style="font-size: 4.5rem;" id="res-emoji">🏆</div>
+      <h2 style="font-size: 1.6rem; font-weight: 900; color: #0f172a;" id="res-title">特工挑战大获全胜！</h2>
+      <div style="font-size: 2.5rem; margin: 6px 0;" id="res-stars">⭐⭐⭐</div>
+      <p style="font-size: 1.25rem; font-weight: 800; color: #10b981;" id="res-score">最终战绩：100 分</p>
+      
+      <div style="margin: 12px 0; background: #f8fafc; padding: 12px; border-radius: 14px; text-align: left; font-size: 0.92rem; color: #334155; line-height: 1.6;">
+        <div>📖 <strong>PPT 研读用时：</strong><span id="summary-read">00:00</span></div>
+        <div>🎮 <strong>游戏闯关用时：</strong><span id="summary-game">00:00</span></div>
+        <div>⏱️ <strong>总学习用时：</strong><span id="summary-total">00:00</span></div>
+      </div>
 
-      <button class="btn-main" onclick="location.reload()">再来一局 🔄</button>
+      <p style="color: #0369a1; font-weight: 700; font-size: 0.88rem; margin-bottom: 12px;" id="cloud-status">
+        📡 正在同步成绩与学时至 Google Sheet...
+      </p>
+
+      <button class="btn-action" style="width: 100%;" onclick="location.reload()">重新挑战 🔄</button>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // ⚙️ 1. 部署配置 (若部署在 GitHub Pages，在此填入 GAS 网址)
+    // ⚙️ 1. Google Apps Script 端点配置
     // ==========================================
-    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxG2N9YeOsNj6OGq3lJENWpci4qkdx_I99_lzt72RFS0S_2eXvpbPf4lTjjZEfKLVTQ/exec"; 
+    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxG2N9YeOsNj6OGq3lJENWpci4qkdx_I99_lzt72RFS0S_2eXvpbPf4lTjjZEfKLVTQ/exec";
 
     // ==========================================
-    // 🔊 2. Web Audio API 街机音效系统 (免外部依赖)
+    // 🔊 2. Web Audio API 街机音效系统
     // ==========================================
     const SoundFx = {
       ctx: null,
@@ -467,8 +413,8 @@
         this.init();
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.frequency.setValueAtTime(400, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.08);
+        osc.frequency.setValueAtTime(420, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(840, this.ctx.currentTime + 0.08);
         gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
         gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
         osc.connect(gain);
@@ -498,7 +444,7 @@
     // ==========================================
     // 📚 3. 20 个核心关卡任务题库
     // ==========================================
-    const GAME_LEVELS = [
+    const MISSIONS = [
       // 玩法 1：萌怪大食堂 (辨析天然 vs 超加工)
       { mode: 'feed', target: 'green', item: '🍌 鲜采香蕉', desc: '新鲜原型水果，直接获取无化学添加！' },
       { mode: 'feed', target: 'red',   item: '🌭 罐头热狗肠', desc: '超加工肉类，含有大量防腐剂与人工增鲜剂！' },
@@ -506,7 +452,7 @@
       { mode: 'feed', target: 'red',   item: '🍟 裹粉炸薯条', desc: '高温油炸食品，潜伏反式脂肪与高精制钠盐！' },
       { mode: 'feed', target: 'green', item: '🐟 生鲜鲑鱼肉', desc: '优质蛋白质，含丰富不饱和脂肪酸与脑健康DHA！' },
 
-      // 玩法 2：黄金餐盘拼盘 (Suku-Suku Separuh 比例)
+      // 玩法 2：黄金餐盘 (Suku-Suku Separuh 比例)
       { mode: 'plate', target: 'vege', item: '🥦 西兰花与彩椒', desc: '卫生部法则：1/2 (一半) 必须是蔬菜与水果！' },
       { mode: 'plate', target: 'carb', item: '🍚 天然糙米饭', desc: '卫生部法则：1/4 (Suku) 优质碳水提供平稳能量！' },
       { mode: 'plate', target: 'protein', item: '🥚 水煮蛋与豆腐', desc: '卫生部法则：1/4 (Suku) 优质蛋白修复机体组织！' },
@@ -529,17 +475,29 @@
     ];
 
     // ==========================================
-    // 🕹️ 4. 游戏驱动主逻辑
+    // ⏱️ 4. 时间戳驱动的防休眠计时器
     // ==========================================
     let studentName = "";
-    let studentClass = "六年级";
     let stepIndex = 0;
     let score = 0;
     let combo = 0;
-    let timerId = null;
-    let elapsedSeconds = 0;
 
-    function initStart() {
+    let readStartTime = 0;
+    let readFinalSeconds = 0;
+    let readInterval = null;
+
+    let gameStartTime = 0;
+    let gameFinalSeconds = 0;
+    let gameInterval = null;
+
+    function formatTime(totalSec) {
+      const s = Math.max(0, Math.floor(totalSec));
+      const mins = String(Math.floor(s / 60)).padStart(2, '0');
+      const secs = String(s % 60).padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function startReadingPhase() {
       const nameIpt = document.getElementById('ipt-name');
       const val = nameIpt.value.trim();
       if (!val) {
@@ -548,37 +506,50 @@
         return;
       }
       studentName = val;
-      studentClass = document.getElementById('ipt-class').value.trim() || "六年级";
-
       document.getElementById('hud-name').innerText = `👤 ${studentName}`;
-      document.getElementById('start-modal').style.display = 'none';
-      document.getElementById('arcade-stage').style.display = 'flex';
+      document.getElementById('login-modal').style.display = 'none';
+      document.getElementById('ppt-stage').style.display = 'flex';
 
-      elapsedSeconds = 0;
-      clearInterval(timerId);
-      timerId = setInterval(() => {
-        elapsedSeconds++;
-        const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-        const s = String(elapsedSeconds % 60).padStart(2, '0');
-        document.getElementById('hud-time').innerText = `⏱️ ${m}:${s}`;
-      }, 1000);
+      // 记录真实系统毫秒，不怕切屏休眠
+      readStartTime = Date.now();
+      clearInterval(readInterval);
+      readInterval = setInterval(() => {
+        const sec = Math.floor((Date.now() - readStartTime) / 1000);
+        document.getElementById('ppt-timer').innerText = formatTime(sec);
+      }, 500);
+    }
+
+    function finishReadingAndPlay() {
+      clearInterval(readInterval);
+      readFinalSeconds = Math.max(1, Math.floor((Date.now() - readStartTime) / 1000));
+
+      document.getElementById('ppt-stage').style.display = 'none';
+      document.getElementById('game-stage').style.display = 'flex';
+      document.getElementById('hud-stage-num').innerText = '关卡 1/20';
+
+      // 启动游戏闯关计时
+      gameStartTime = Date.now();
+      clearInterval(gameInterval);
+      gameInterval = setInterval(() => {
+        const sec = Math.floor((Date.now() - gameStartTime) / 1000);
+        document.getElementById('game-timer').innerText = `闯关用时 ${formatTime(sec)}`;
+      }, 500);
 
       loadStage();
     }
 
     function loadStage() {
-      if (stepIndex >= GAME_LEVELS.length) {
+      if (stepIndex >= MISSIONS.length) {
         handleGameOver();
         return;
       }
 
-      const cur = GAME_LEVELS[stepIndex];
+      const cur = MISSIONS[stepIndex];
       const arena = document.getElementById('arena-box');
       arena.innerHTML = '';
 
-      // 更新 HUD
       document.getElementById('hud-score').innerText = `⭐ ${score} 分`;
-      document.getElementById('banner-count').innerText = `关卡 ${stepIndex + 1}/20`;
+      document.getElementById('hud-stage-num').innerText = `关卡 ${stepIndex + 1}/20`;
       document.getElementById('hud-bar').style.width = `${((stepIndex + 1) / 20) * 100}%`;
 
       if (cur.mode === 'feed') renderFeedMode(cur, arena);
@@ -587,66 +558,63 @@
       else if (cur.mode === 'bubble') renderBubbleMode(cur, arena);
     }
 
-    // --- 模式 1：投喂 ---
     function renderFeedMode(itemData, container) {
-      document.getElementById('banner-title').innerText = '🍔 玩法 1：萌怪大食堂 (拖拽分类投喂)';
-      document.getElementById('feedback-tip').innerText = '根据食物类型，拖入【天然食材怪】或【超加工回收箱】！';
+      document.getElementById('mode-text').innerText = '🍔 玩法 1：萌怪大食堂 (拖拽分类投喂)';
+      document.getElementById('tip-desc').innerText = '按属性拖入【天然食材怪】或【超加工回收箱】！';
 
       container.innerHTML = `
-        <div class="monster-container">
-          <div class="monster-box m-green" id="box-green">
-            <div class="m-avatar">🥦😋</div>
+        <div class="monsters-wrap">
+          <div class="monster-cell m-green" id="box-green">
+            <div style="font-size:3.5rem;">🥦😋</div>
             <div style="font-weight:900; color:#166534; font-size:0.95rem;">天然食材怪</div>
           </div>
-          <div class="monster-box m-red" id="box-red">
-            <div class="m-avatar">🗑️🤖</div>
+          <div class="monster-cell m-red" id="box-red">
+            <div style="font-size:3.5rem;">🗑️🤖</div>
             <div style="font-weight:900; color:#991b1b; font-size:0.95rem;">超加工回收箱</div>
           </div>
         </div>
         <div class="food-dock">
-          <div class="draggable-card" id="food-token">${itemData.item}</div>
+          <div class="drag-token" id="drag-food">${itemData.item}</div>
         </div>
       `;
 
-      setupDrag(document.getElementById('food-token'), [
+      setupDrag(document.getElementById('drag-food'), [
         { el: document.getElementById('box-green'), id: 'green' },
         { el: document.getElementById('box-red'), id: 'red' }
       ], itemData);
     }
 
-    // --- 模式 2：黄金餐盘 ---
     function renderPlateMode(itemData, container) {
-      document.getElementById('banner-title').innerText = '🍽️ 玩法 2：黄金餐盘 (Suku-Suku Separuh 拼盘)';
-      document.getElementById('feedback-tip').innerText = '把食物拖入餐盘中对应的营养区域 (1/2果蔬 / 1/4碳水 / 1/4蛋白)！';
+      document.getElementById('mode-text').innerText = '🍽️ 玩法 2：黄金餐盘 (Suku-Suku Separuh 拼盘)';
+      document.getElementById('tip-desc').innerText = '把食物拖入餐盘中对应的区域 (1/2果蔬 / 1/4碳水 / 1/4蛋白)！';
 
       container.innerHTML = `
         <div class="plate-disc">
-          <div class="plate-half-vege" id="z-vege">
+          <div class="plate-vege" id="z-vege">
             <span style="font-size:1.6rem;">🥗</span>
             1/2 彩虹果蔬
           </div>
           <div class="plate-carb" id="z-carb">
-            <span style="font-size:1.4rem;">🍚</span>
+            <span style="font-size:1.3rem;">🍚</span>
             1/4 优质碳水
           </div>
           <div class="plate-protein" id="z-protein">
-            <span style="font-size:1.4rem;">🍳</span>
+            <span style="font-size:1.3rem;">🍳</span>
             1/4 优质蛋白
           </div>
         </div>
         <div class="food-dock">
-          <div class="draggable-card" id="plate-token">${itemData.item}</div>
+          <div class="drag-token" id="drag-plate">${itemData.item}</div>
         </div>
       `;
 
-      setupDrag(document.getElementById('plate-token'), [
+      setupDrag(document.getElementById('drag-plate'), [
         { el: document.getElementById('z-vege'), id: 'vege' },
         { el: document.getElementById('z-carb'), id: 'carb' },
         { el: document.getElementById('z-protein'), id: 'protein' }
       ], itemData);
     }
 
-    // 统一触摸与鼠标拖拽控制器
     function setupDrag(card, targets, itemData) {
       let startX, startY, isDragging = false;
 
@@ -668,11 +636,8 @@
         const cardR = card.getBoundingClientRect();
         targets.forEach(t => {
           const tR = t.el.getBoundingClientRect();
-          if (hitTest(cardR, tR)) {
-            t.el.classList.add('m-open', 'zone-active');
-          } else {
-            t.el.classList.remove('m-open', 'zone-active');
-          }
+          if (hitTest(cardR, tR)) t.el.classList.add('m-open', 'plate-active');
+          else t.el.classList.remove('m-open', 'plate-active');
         });
       }
 
@@ -683,7 +648,7 @@
         let matched = false;
 
         targets.forEach(t => {
-          t.el.classList.remove('m-open', 'zone-active');
+          t.el.classList.remove('m-open', 'plate-active');
           if (hitTest(cardR, t.el.getBoundingClientRect()) && t.id === itemData.target) {
             matched = true;
           }
@@ -706,17 +671,16 @@
       return !(r1.right < r2.left || r1.left > r2.right || r1.bottom < r2.top || r1.top > r2.bottom);
     }
 
-    // --- 模式 3：激光排雷 ---
     function renderLaserMode(itemData, container) {
-      document.getElementById('banner-title').innerText = '🔬 玩法 3：血管透视镜 (激光排雷)';
-      document.getElementById('feedback-tip').innerText = '点击击碎潜伏在血管内壁的高危病理隐患！';
+      document.getElementById('mode-text').innerText = '🔬 玩法 3：血管透视镜 (激光排雷)';
+      document.getElementById('tip-desc').innerText = '点击击碎潜伏在血管内壁的高危病理隐患！';
 
       container.innerHTML = `
         <div class="artery-box">
           <div style="position:absolute; top:12px; left:16px; font-weight:800; color:#ffffff;">
             🚨 血管内皮监测
           </div>
-          <div class="plaque-target" id="plaque-btn">
+          <div class="plaque-token" id="plaque-btn">
             <div style="font-size:3rem;">⚠️</div>
             <div style="font-weight:900; color:#854d0e; font-size:1.15rem; margin-top:4px;">${itemData.title}</div>
           </div>
@@ -730,14 +694,13 @@
       };
     }
 
-    // --- 模式 4：气泡置换 ---
     function renderBubbleMode(itemData, container) {
-      document.getElementById('banner-title').innerText = '🫧 玩法 4：外食大变身 (气泡消除置换)';
-      document.getElementById('feedback-tip').innerText = '戳破不健康的高脂高糖外食气泡，变身天然健康美食！';
+      document.getElementById('mode-text').innerText = '🫧 玩法 4：外食大变身 (气泡消除置换)';
+      document.getElementById('tip-desc').innerText = '戳破高脂高糖外食气泡，变身天然健康美食！';
 
       container.innerHTML = `
         <div class="bubble-sea">
-          <div class="junk-bubble" id="junk-btn">
+          <div class="bubble-token" id="junk-btn">
             ${itemData.bad}
           </div>
         </div>
@@ -754,82 +717,84 @@
       };
     }
 
-    // 通用奖励机制
     function triggerSuccess(tipMsg) {
       SoundFx.cheer();
       score += 5;
       combo++;
-      document.getElementById('combo-tag').innerText = `🔥 x${combo}`;
-      document.getElementById('feedback-tip').innerText = `💡 ${tipMsg}`;
+      document.getElementById('combo-box').innerText = `🔥 x${combo}`;
+      document.getElementById('tip-desc').innerText = `💡 ${tipMsg}`;
       stepIndex++;
       setTimeout(loadStage, 400);
     }
 
-    // 游戏通关与成绩上报
+    // ==========================================
+    // 🏆 5. 修复后的结果渲染与回传
+    // ==========================================
     function handleGameOver() {
-      clearInterval(timerId);
-      document.getElementById('arcade-stage').style.display = 'none';
-      document.getElementById('finish-modal').style.display = 'flex';
+      clearInterval(gameInterval);
+      gameFinalSeconds = Math.max(1, Math.floor((Date.now() - gameStartTime) / 1000));
 
-      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-      const s = String(elapsedSeconds % 60).padStart(2, '0');
-      const timeStr = `${m}:${s}`;
+      document.getElementById('game-stage').style.display = 'none';
+      document.getElementById('result-modal').style.display = 'flex';
 
-      document.getElementById('end-score').innerText = `最终战绩：${score} 分`;
-      document.getElementById('end-time').innerText = `完成用时：${timeStr}`;
+      const readTimeStr = formatTime(readFinalSeconds);
+      const gameTimeStr = formatTime(gameFinalSeconds);
+      const totalTimeStr = formatTime(readFinalSeconds + gameFinalSeconds);
+
+      // 修正 ID：使用 res-score 确保不报错
+      const resScoreEl = document.getElementById('res-score');
+      if (resScoreEl) resScoreEl.innerText = `最终战绩：${score} 分`;
+
+      document.getElementById('summary-read').innerText = readTimeStr;
+      document.getElementById('summary-game').innerText = gameTimeStr;
+      document.getElementById('summary-total').innerText = totalTimeStr;
 
       let ratingTitle = "五星特级营养师 🏆";
       if (score < 70) ratingTitle = "初级健康小卫士 🌱";
       else if (score < 90) ratingTitle = "优秀健康特工 🏅";
 
-      document.getElementById('end-title').innerText = ratingTitle;
+      document.getElementById('res-title').innerText = ratingTitle;
       fireConfetti();
 
-      // 构建同步上报载荷
+      // 构建回传数据
       const payload = {
         name: studentName,
-        studentClass: studentClass,
+        studentClass: "六年级",
         score: score,
         total: 20,
-        percentage: Math.round((score / 100) * 100),
-        timeSpent: timeStr,
+        readTime: readTimeStr,
+        gameTime: gameTimeStr,
         rating: ratingTitle,
-        mistakes: '全部通关！'
+        status: "完整通关"
       };
 
-      const syncEl = document.getElementById('sync-status');
+      const syncEl = document.getElementById('cloud-status');
 
-      // 1. 若在 GAS Web App 环境中
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(() => {
-            syncEl.innerText = "✅ 成绩已实时保存至 Google Sheet！";
+            syncEl.innerText = "✅ 成绩与学时已成功存入 Google Sheet！";
             syncEl.style.color = "#15803d";
           })
           .withFailureHandler(() => {
-            syncEl.innerText = "⚠️ 本地已通关（云端暂未写入）";
+            syncEl.innerText = "⚠️ 成绩已记录（云端写入遇到网络阻碍）";
           })
           .recordScore(payload);
-      } 
-      // 2. 若在 GitHub Pages 静态环境并通过 fetch 回传
-      else if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL.startsWith('http')) {
+      } else if (GAS_ENDPOINT_URL && GAS_ENDPOINT_URL.startsWith('http')) {
         fetch(GAS_ENDPOINT_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         }).then(() => {
-          syncEl.innerText = "✅ 成绩已实时保存至 Google Sheet！";
+          syncEl.innerText = "✅ 成绩与学时已成功存入 Google Sheet！";
           syncEl.style.color = "#15803d";
         }).catch(() => {
-          syncEl.innerText = "⚠️ 本地已通关（网络连接离线）";
+          syncEl.innerText = "⚠️ 成绩已记录（网络波动）";
         });
-      } else {
-        syncEl.innerText = "✨ 本地挑战模式（未配置云端链接）";
       }
     }
 
-    // 纸屑动画
     function fireConfetti() {
       const cvs = document.getElementById('confetti-cvs');
       const ctx = cvs.getContext('2d');
@@ -854,19 +819,6 @@
         if (pieces.some(p => p.y < cvs.height)) requestAnimationFrame(draw);
       }
       draw();
-    }
-
-    // 背景浮动微粒子
-    for (let i = 0; i < 15; i++) {
-      const b = document.createElement('div');
-      b.className = 'bg-bubble';
-      const sz = Math.random() * 30 + 15;
-      b.style.width = sz + 'px';
-      b.style.height = sz + 'px';
-      b.style.left = Math.random() * 100 + 'vw';
-      b.style.animationDuration = (Math.random() * 8 + 8) + 's';
-      b.style.animationDelay = (Math.random() * 4) + 's';
-      document.body.appendChild(b);
     }
   </script>
 </body>
