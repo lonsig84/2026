@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>一年级道德教育：分工合作真欢喜</title>
   <style>
     :root {
@@ -21,120 +21,147 @@
     }
 
     body {
-      font-family: "Comic Sans MS", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Comic Sans MS", "Microsoft YaHei", sans-serif;
       background: linear-gradient(135deg, #A8E6CF 0%, #DCEDC1 50%, #FFD3B6 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 12px;
+      align-items: flex-start;
+      padding: 8px;
       color: var(--text);
     }
 
-    #game-container {
+    #app-container {
       width: 100%;
-      max-width: 650px;
-      max-height: 94vh;
+      max-width: 540px;
       background: #FFFFFF;
-      border-radius: 24px;
-      box-shadow: 0 16px 40px rgba(46, 125, 50, 0.2);
-      border: 4px solid var(--border-color);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(46, 125, 50, 0.2);
+      border: 3px solid var(--border-color);
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;
+      margin: auto 0;
     }
 
-    .top-bar {
+    /* 顶部指示栏与计时器 */
+    .top-stepper {
       background: #F1F8E9;
-      padding: 10px 16px;
+      padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 2px dashed #C8E6C9;
-      position: sticky;
-      top: 0;
-      z-index: 50;
     }
-    .badge {
+    .step-tag {
       background: #4CAF50;
       color: white;
-      padding: 4px 12px;
-      border-radius: 16px;
+      padding: 4px 10px;
+      border-radius: 12px;
       font-size: 13px;
       font-weight: bold;
     }
-    .score-txt {
-      font-size: 14px;
+    .timer-pill {
+      background: #FFF3E0;
+      color: #E65100;
+      border: 1px solid #FFE0B2;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: bold;
-      color: #2E7D32;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: #E0E0E0;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #81C784, #FFB74D);
-      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .panel {
-      padding: 18px 16px;
+    .main-view {
+      padding: 16px 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      flex-grow: 1;
       width: 100%;
     }
 
-    .btn-main {
+    /* 按钮 */
+    .btn-action {
       background: linear-gradient(180deg, #66BB6A, #43A047);
       color: white;
       border: none;
-      padding: 12px 32px;
-      font-size: 17px;
+      padding: 13px 24px;
+      font-size: 16px;
       font-weight: bold;
-      border-radius: 30px;
+      border-radius: 26px;
       cursor: pointer;
-      box-shadow: 0 6px 16px rgba(67, 160, 71, 0.35);
+      box-shadow: 0 5px 15px rgba(67, 160, 71, 0.35);
       touch-action: manipulation;
-      transition: transform 0.1s ease, background 0.2s;
-      z-index: 20;
-      margin: 10px 0;
-      display: inline-block;
+      transition: transform 0.1s;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 14px;
     }
-    .btn-main:active { transform: scale(0.96); }
+    .btn-action:active { transform: scale(0.97); }
 
-    .q-box {
+    /* 手机 16:9 响应式容器 */
+    .media-embed-wrap {
+      width: 100%;
+      position: relative;
+      padding-top: 56.25%;
+      background: #000000;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin: 10px 0;
+    }
+    .media-embed-wrap iframe,
+    .media-embed-wrap div#youtube-player-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: 0;
+    }
+
+    .info-card {
       background: #F9FBE7;
-      border: 2px solid #DCEDC8;
-      border-radius: 16px;
-      padding: 12px 16px;
+      border: 1px solid #DCEDC8;
+      border-radius: 14px;
+      padding: 10px 14px;
+      width: 100%;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #33691E;
+      margin-bottom: 8px;
+    }
+
+    /* 题目展示 */
+    .q-card {
+      background: #F1F8E9;
+      border-left: 5px solid #4CAF50;
+      border-radius: 12px;
+      padding: 12px 14px;
       width: 100%;
       text-align: left;
       margin-bottom: 12px;
     }
-    .q-text {
-      font-size: 16px;
+    .q-title {
+      font-size: 15px;
       font-weight: bold;
-      color: #2E7D32;
+      color: #1B5E20;
       line-height: 1.4;
     }
-    .q-sub {
-      font-size: 13px;
+    .q-tip {
+      font-size: 12px;
       color: #689F38;
       margin-top: 4px;
     }
 
-    .feedback-hint {
-      min-height: 36px;
-      margin: 8px 0;
-      font-size: 14px;
+    .hint-bubble {
+      min-height: 34px;
+      margin: 6px 0;
+      font-size: 13px;
       font-weight: bold;
       color: #2E7D32;
       display: flex;
@@ -145,12 +172,11 @@
       transition: opacity 0.2s;
       width: 100%;
     }
-    .feedback-hint.show { opacity: 1; }
+    .hint-bubble.show { opacity: 1; }
 
-    /* 关卡 1：绿植浇灌养成 */
-    .tree-stage {
-      width: 130px;
-      height: 130px;
+    /* 关卡1：树木 */
+    .tree-box {
+      width: 110px; height: 110px;
       border-radius: 50%;
       background: #FFFDE7;
       border: 3px solid #FFF59D;
@@ -158,296 +184,335 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin: 6px auto 14px auto;
-      box-shadow: inset 0 0 15px rgba(255, 238, 88, 0.4);
+      margin: 4px auto 12px;
+      box-shadow: inset 0 0 12px rgba(255, 238, 88, 0.4);
       transition: transform 0.3s;
     }
-    .tree-emoji { font-size: 52px; line-height: 1; }
-    .tree-label {
-      font-size: 12px;
-      font-weight: bold;
-      color: #558B2F;
-      margin-top: 4px;
-      background: #E8F5E9;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-    .tool-options {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      width: 100%;
-    }
-    .tool-card {
+
+    /* 选项卡片 */
+    .option-card-row { display: flex; gap: 10px; width: 100%; justify-content: center; }
+    .option-card {
       background: #FFFFFF;
-      border: 3px solid #81C784;
-      border-radius: 14px;
-      padding: 12px 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      border: 2px solid #81C784;
+      border-radius: 12px;
+      padding: 12px 10px;
+      font-size: 14px;
       font-weight: bold;
-      font-size: 15px;
       color: #333;
       flex: 1;
-      max-width: 260px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-      transition: transform 0.15s, border-color 0.15s;
-      z-index: 10;
-    }
-    .tool-card:active { transform: scale(0.96); }
-    .tool-card.selected { border-color: #2E7D32; background: #E8F5E9; }
-
-    /* 关卡 2：磁吸拼图 */
-    .puzzle-target-slot {
-      width: 100%;
-      min-height: 60px;
-      border: 3px dashed #81C784;
-      border-radius: 16px;
-      background: #F1F8E9;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 12px;
-      font-weight: bold;
-      color: #689F38;
-      margin: 10px 0;
-      font-size: 15px;
-    }
-    .puzzle-target-slot.snapped {
-      border-style: solid;
-      background: #DCEDC8;
-      color: #1B5E20;
-    }
-    .puzzle-pieces-pool {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-    }
-    .puzzle-piece {
-      background: #FFFFFF;
-      border: 3px solid #A5D6A7;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: bold;
-      text-align: left;
-      cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      z-index: 10;
-    }
-    .puzzle-piece:active { transform: scale(0.98); }
-
-    /* 关卡 3：萌宠投喂 */
-    .feeding-monsters-wrap {
-      display: flex;
-      justify-content: space-around;
-      width: 100%;
-      margin: 10px 0;
-      gap: 12px;
-    }
-    .monster-bin {
-      background: #E8F5E9;
-      border: 3px solid #81C784;
-      border-radius: 18px;
-      padding: 10px;
-      flex: 1;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: transform 0.2s, background 0.2s;
-      z-index: 10;
-    }
-    .monster-bin:active { transform: scale(0.95); }
-    .monster-bin.mouth-open { transform: scale(1.06); background: #C8E6C9; }
-    .feeding-food-card {
-      background: #FFF9C4;
-      border: 2px solid #FBC02D;
-      border-radius: 14px;
-      padding: 12px;
-      font-size: 15px;
-      font-weight: bold;
-      color: #E65100;
-      width: 100%;
-      margin: 6px 0;
-    }
-
-    /* 关卡 4：戳泡泡 */
-    .bubbles-area {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-      margin: 10px 0;
-    }
-    .bubble-item {
-      background: radial-gradient(circle at 30% 30%, #E1F5FE, #81D4FA);
-      border: 3px solid #29B6F6;
-      border-radius: 50%;
-      width: 95px;
-      height: 95px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 6px;
-      font-size: 13px;
-      font-weight: bold;
-      color: #01579B;
-      cursor: pointer;
-      box-shadow: 0 6px 14px rgba(41, 182, 246, 0.3);
-      animation: floatBubble 2.5s ease-in-out infinite alternate;
-      z-index: 10;
-    }
-    .bubble-item.popped {
-      animation: popEffect 0.2s forwards;
-      pointer-events: none;
-    }
-    @keyframes floatBubble {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-8px); }
-    }
-    @keyframes popEffect {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(1.4); opacity: 0; }
-    }
-
-    /* 关卡 5：承诺积木城堡搭建 */
-    .castle-building-zone {
-      width: 100%;
-      min-height: 140px;
-      background: #ECEFF1;
-      border: 2px dashed #90A4AE;
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column-reverse;
-      align-items: center;
-      padding: 8px;
-      gap: 5px;
-      margin-bottom: 8px;
-    }
-    .castle-brick {
-      width: 90%;
-      background: linear-gradient(90deg, #FFB74D, #FFA726);
-      border: 2px solid #F57C00;
-      color: white;
-      font-weight: bold;
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      animation: dropBrick 0.3s ease-out;
-    }
-    @keyframes dropBrick {
-      0% { transform: translateY(-20px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-
-    /* 结算状态徽章 */
-    .sync-status-badge {
-      display: inline-flex;
-      align-items: center;
       gap: 6px;
-      background: #E8F5E9;
-      border: 1px solid #A5D6A7;
-      color: #2E7D32;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: bold;
-      margin-top: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+    .option-card:active { transform: scale(0.96); }
+    .option-card.selected { border-color: #2E7D32; background: #E8F5E9; }
+
+    /* 关卡2：拼图 */
+    .puzzle-slot {
+      width: 100%; min-height: 54px;
+      border: 2px dashed #81C784; border-radius: 14px;
+      background: #F1F8E9; display: flex; align-items: center;
+      justify-content: center; padding: 8px 10px;
+      font-size: 14px; font-weight: bold; color: #558B2F; margin: 8px 0;
+    }
+    .puzzle-slot.snapped { border-style: solid; background: #DCEDC8; color: #1B5E20; }
+    .puzzle-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+    /* 关卡3：投喂 */
+    .feed-wrap { display: flex; gap: 10px; width: 100%; margin: 8px 0; }
+    .feed-box {
+      flex: 1; background: #E8F5E9; border: 2px solid #81C784;
+      border-radius: 14px; padding: 8px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .feed-box.open { transform: scale(1.05); background: #C8E6C9; }
+
+    /* 关卡4：泡泡 */
+    .bubble-wrap { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 8px 0; }
+    .bubble-btn {
+      background: radial-gradient(circle at 30% 30%, #E1F5FE, #81D4FA);
+      border: 2px solid #29B6F6; border-radius: 50%;
+      width: 86px; height: 86px; display: flex; align-items: center;
+      justify-content: center; padding: 6px; font-size: 12px;
+      font-weight: bold; color: #01579B; cursor: pointer;
+      animation: floatB 2.2s ease-in-out infinite alternate;
+    }
+    @keyframes floatB { 0%{transform: translateY(0);} 100%{transform: translateY(-8px);} }
+    .bubble-btn.popped { transform: scale(1.3); opacity: 0; pointer-events: none; transition: 0.2s; }
+
+    /* 关卡5：积木 */
+    .castle-box {
+      width: 100%; min-height: 120px; background: #ECEFF1;
+      border: 2px dashed #90A4AE; border-radius: 12px;
+      display: flex; flex-direction: column-reverse; align-items: center;
+      padding: 6px; gap: 4px; margin-bottom: 6px;
+    }
+    .castle-item {
+      width: 92%; background: linear-gradient(90deg, #FFB74D, #FFA726);
+      border: 1px solid #F57C00; color: white; font-weight: bold;
+      padding: 6px; border-radius: 8px; font-size: 12px;
+      animation: dropB 0.25s ease-out;
+    }
+    @keyframes dropB { 0%{transform: translateY(-15px); opacity:0;} 100%{transform: translateY(0); opacity:1;} }
+
+    /* 报告小票 */
+    .time-receipt {
+      background: #F1F8E9; border: 2px solid #C8E6C9;
+      border-radius: 14px; padding: 12px; width: 100%;
+      margin: 12px 0; text-align: left; font-size: 13px;
+      line-height: 1.8; color: #2E7D32;
     }
 
     #confetti-canvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 99;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; pointer-events: none; z-index: 99;
     }
   </style>
+
+  <!-- 引入官方 YouTube IFrame Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<div id="game-container">
+<div id="app-container">
   <canvas id="confetti-canvas"></canvas>
 
-  <div class="top-bar" id="topBar" style="display:none;">
-    <div class="badge" id="levelNameBadge">关卡 1</div>
-    <div class="score-txt" id="subStepInfo">第 1 / 5 步</div>
-    <div class="score-txt" id="scoreBadge">⭐ 分数: 0</div>
-  </div>
-  <div class="progress-bar" id="progressBar" style="display:none;">
-    <div class="progress-fill" id="progressFill"></div>
+  <div class="top-stepper" id="topStepper" style="display:none;">
+    <div class="step-tag" id="stageTag">第 1 步：阅读课件</div>
+    <div class="timer-pill">
+      <span>⏱️</span>
+      <span id="currentStepTimerText">00:00</span>
+    </div>
   </div>
 
-  <!-- 登录页面 -->
-  <div class="panel" id="viewLogin">
-    <div style="font-size: 54px; margin-top: 10px;">🤝🌱🏰</div>
-    <h1 style="color: #2E7D32; font-size: 24px; margin: 8px 0;">分工合作真欢喜</h1>
-    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
-      一年级道德教育 • 价值 12 合作<br>5 大互动游戏：浇水、磁吸拼图、投喂、戳泡泡、叠积木！
+  <!-- 阶段 0：登记姓名 -->
+  <div class="main-view" id="viewLogin">
+    <div style="font-size: 54px; margin-top: 10px;">🎒🤝📖</div>
+    <h1 style="color: #2E7D32; font-size: 22px; margin: 8px 0;">分工合作真欢喜</h1>
+    <p style="color: #666; font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
+      一年级道德教育 • 线上多维度学习课件<br>
+      流程：阅读课件 ➔ 网页内看视频 ➔ 趣味闯关练习
     </p>
 
     <div style="width: 100%; max-width: 300px; text-align: left;">
       <label style="font-weight: bold; color: #2E7D32; font-size: 13px;">学生姓名 (Nama):</label>
-      <input type="text" id="stuName" placeholder="请输入你的姓名" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 2px solid #81C784; margin: 4px 0 14px; font-size: 15px; outline: none;">
+      <input type="text" id="stuName" placeholder="例如：林子轩 / Siti" style="width: 100%; padding: 11px; border-radius: 10px; border: 2px solid #81C784; margin: 4px 0 14px; font-size: 15px; outline: none;">
 
       <label style="font-weight: bold; color: #2E7D32; font-size: 13px;">班级 (Kelas):</label>
-      <input type="text" id="stuClass" value="一年级" style="width: 100%; padding: 10px 14px; border-radius: 12px; border: 2px solid #81C784; margin-top: 4px; font-size: 15px; outline: none;">
+      <input type="text" id="stuClass" value="一年级" style="width: 100%; padding: 11px; border-radius: 10px; border: 2px solid #81C784; margin-top: 4px; font-size: 15px; outline: none;">
     </div>
 
-    <button class="btn-main" onclick="onStartGame()" style="margin-top: 20px;">🚀 进入游戏乐园</button>
+    <button class="btn-action" onclick="startLearningFlow()">🚀 开始今日学习</button>
   </div>
 
-  <!-- 游戏主舞台 -->
-  <div class="panel" id="viewGame" style="display:none;">
-    <div class="q-box">
-      <div class="q-text" id="qTitle">加载中...</div>
-      <div class="q-sub" id="qSub"></div>
+  <!-- 阶段 1：Canva PPT -->
+  <div class="main-view" id="viewPPT" style="display:none;">
+    <div class="info-card">
+      <b>📖 第一步：仔细阅读道德课件</b><br>
+      请小朋友翻阅 PPT，认真体会分工合作的益处与感受。
     </div>
 
-    <div id="interactiveArea" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;"></div>
+    <div class="media-embed-wrap">
+      <iframe src="https://www.canva.com/design/DAHX82bNGIk/-8uOu62BEZQ5yRjauGZE_A/view?embed" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+    </div>
 
-    <div class="feedback-hint" id="feedbackHint">
+    <button class="btn-action" onclick="finishPPTAndGoVideo()">我读完 PPT 了，下一步：看视频 ➔</button>
+  </div>
+
+  <!-- 阶段 2：网页内直接播放 YouTube 视频 -->
+  <div class="main-view" id="viewVideo" style="display:none;">
+    <div class="info-card">
+      <b>🎬 第二步：观看合作教育动画</b><br>
+      直接在下方点击播放键观看视频，观察小猴与大象是如何合作的！
+    </div>
+
+    <div class="media-embed-wrap">
+      <!-- 动态注入 YouTube 播放器 -->
+      <div id="youtube-player-container"></div>
+    </div>
+
+    <button class="btn-action" onclick="finishVideoAndGoQuiz()">我看完了，下一步：开始闯关练习 ➔</button>
+  </div>
+
+  <!-- 阶段 3：趣味闯关练习 -->
+  <div class="main-view" id="viewQuiz" style="display:none;">
+    <div class="q-card">
+      <div class="q-title" id="qTitle">加载中...</div>
+      <div class="q-tip" id="qTip"></div>
+    </div>
+
+    <div id="gameStage" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+
+    <div class="hint-bubble" id="hintBubble">
       <span id="hintEmoji">💡</span>
       <span id="hintText">一起动手，合作力量大！</span>
     </div>
 
-    <button class="btn-main" id="btnNext" style="display:none;" onclick="nextStep()">下一题 ➔</button>
+    <button class="btn-action" id="btnNextQ" style="display:none;" onclick="nextQuestionStep()">下一题 ➔</button>
   </div>
 
-  <!-- 结算页面（自动上传，无需手动点击） -->
-  <div class="panel" id="viewResult" style="display:none;">
-    <div style="font-size: 54px; margin-top: 10px;">🏆🎉🎈</div>
-    <h2 style="color: #2E7D32; font-size: 24px;">闯关大成功！</h2>
-    <div style="font-size: 36px; margin: 8px 0;" id="resultStars">⭐⭐⭐</div>
-    <div style="font-size: 30px; font-weight: bold; color: #2E7D32;" id="resultScore">25 / 25</div>
-    <p style="color: #558B2F; font-size: 14px; margin-top: 4px;" id="resultTitle">最佳班级合作小先锋！</p>
-    <p style="color: #888; font-size: 12px; margin-top: 2px;" id="resultTime">用时：01分30秒</p>
+  <!-- 阶段 4：自动上传与结算报告 -->
+  <div class="main-view" id="viewResult" style="display:none;">
+    <div style="font-size: 50px;">🏆🎉✨</div>
+    <h2 style="color: #2E7D32; font-size: 22px;">学习大闯关成功！</h2>
+    <div style="font-size: 34px; margin: 4px 0;" id="starDisplay">⭐⭐⭐</div>
+    <div style="font-size: 28px; font-weight: bold; color: #2E7D32;" id="scoreDisplay">25 / 25</div>
 
-    <!-- 自动上传状态指示 -->
-    <div class="sync-status-badge" id="syncStatusBadge">
-      <span id="syncStatusIcon">⏳</span>
-      <span id="syncStatusText">正在自动上传成绩至老师试算表...</span>
+    <div class="time-receipt">
+      <div><b>📊 个人专属学习与用时报告：</b></div>
+      <div>• 学生姓名：<span id="repName">--</span> (<span id="repClass">--</span>)</div>
+      <div>• 📖 PPT 课件阅读：<b id="repPptTime">00:00</b></div>
+      <div>• 🎬 YouTube 视频观看：<b id="repVideoTime">00:00</b></div>
+      <div>• 🎮 闯关练习用时：<b id="repQuizTime">00:00</b></div>
+      <div>• ⏱️ <b>全流程总用时：<span id="repTotalTime" style="color:#E65100;">00:00</span></b></div>
     </div>
 
-    <div id="mistakeBox" style="width: 100%; background: #FFFDE7; border: 1px solid #FFF59D; border-radius: 12px; padding: 10px; max-height: 120px; overflow-y: auto; text-align: left; font-size: 13px; color: #795548; margin-top: 14px; display: none;">
-      <strong>📝 温馨提示：</strong>
-      <div id="mistakeItems"></div>
+    <div style="display:inline-flex; align-items:center; gap:6px; background:#E8F5E9; border:1px solid #A5D6A7; color:#2E7D32; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:bold;">
+      <span id="uploadIcon">⏳</span>
+      <span id="uploadMsg">正在自动同步所有数据至试算表...</span>
     </div>
   </div>
 </div>
 
 <script>
-  /* ==========================================================================
-     ⚙️ 配置项：如果部署在 GitHub Pages，请填入你的 GAS Web App 链接；
-     若直接部署在 GAS 中，保留默认即可原生自动上传。
-     ========================================================================== */
-  const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzCz2vL1WFxY0zFHkAFOy5iXO-JJYppctSvWH_NkNFMRzlmjvbyje-i1KPySP1X_vYR/exec"; 
+  /* ================= 计时状态管理 ================= */
+  let studentName = "", studentClass = "";
+  let pptSeconds = 0, videoSeconds = 0, quizSeconds = 0;
+  let activeTimerInterval = null;
+  let currentStageName = "PPT";
+
+  function formatTime(totalSec) {
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function startStageTimer(stage) {
+    if (activeTimerInterval) clearInterval(activeTimerInterval);
+    currentStageName = stage;
+    const timerEl = document.getElementById("currentStepTimerText");
+    
+    activeTimerInterval = setInterval(() => {
+      if (currentStageName === "PPT") {
+        pptSeconds++;
+        timerEl.innerText = formatTime(pptSeconds);
+      } else if (currentStageName === "VIDEO") {
+        videoSeconds++;
+        timerEl.innerText = formatTime(videoSeconds);
+      } else if (currentStageName === "QUIZ") {
+        quizSeconds++;
+        timerEl.innerText = formatTime(quizSeconds);
+      }
+    }, 1000);
+  }
+
+  /* ================= YouTube 官方 API 动态初始化（彻底消除 Error 153） ================= */
+  let ytPlayer = null;
+  let isYTApiLoaded = false;
+
+  window.onYouTubeIframeAPIReady = function() {
+    isYTApiLoaded = true;
+  };
+
+  function initInlineYouTubePlayer() {
+    const container = document.getElementById("youtube-player-container");
+    if (!container) return;
+
+    // 获取当前实际运行的 Host origin，告知播放器解除跨域限制
+    const safeOrigin = window.location.origin || "https://script.google.com";
+
+    if (window.YT && window.YT.Player) {
+      try {
+        ytPlayer = new YT.Player('youtube-player-container', {
+          height: '100%',
+          width: '100%',
+          videoId: 'CbNs9TQn_F4',
+          host: 'https://www.youtube-nocookie.com',
+          playerVars: {
+            'playsinline': 1,
+            'rel': 0,
+            'modestbranding': 1,
+            'origin': safeOrigin,
+            'enablejsapi': 1
+          },
+          events: {
+            'onError': onPlayerError
+          }
+        });
+      } catch (err) {
+        fallbackIframe();
+      }
+    } else {
+      fallbackIframe();
+    }
+  }
+
+  function onPlayerError(e) {
+    console.warn("API 播放微调中，切换直接沙盒桥接：", e.data);
+    fallbackIframe();
+  }
+
+  // 备用高兼容通道
+  function fallbackIframe() {
+    const container = document.getElementById("youtube-player-container");
+    if (container) {
+      container.innerHTML = `
+        <iframe 
+          width="100%" height="100%" 
+          src="https://www.youtube-nocookie.com/embed/CbNs9TQn_F4?playsinline=1&rel=0" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+  }
+
+  /* ================= 阶段推进逻辑 ================= */
+  function startLearningFlow() {
+    const name = document.getElementById("stuName").value.trim();
+    if (!name) {
+      alert("请小朋友输入名字哦！😊");
+      return;
+    }
+    studentName = name;
+    studentClass = document.getElementById("stuClass").value.trim() || "一年级";
+
+    document.getElementById("viewLogin").style.display = "none";
+    document.getElementById("topStepper").style.display = "flex";
+    document.getElementById("stageTag").innerText = "第 1 步：阅读课件";
+    document.getElementById("viewPPT").style.display = "flex";
+
+    startStageTimer("PPT");
+  }
+
+  function finishPPTAndGoVideo() {
+    document.getElementById("viewPPT").style.display = "none";
+    document.getElementById("stageTag").innerText = "第 2 步：观看视频";
+    document.getElementById("viewVideo").style.display = "flex";
+
+    startStageTimer("VIDEO");
+
+    // 切换到视频界面时立即在当前网页渲染播放器
+    setTimeout(initInlineYouTubePlayer, 150);
+  }
+
+  function finishVideoAndGoQuiz() {
+    // 停止视频播放
+    if (ytPlayer && ytPlayer.stopVideo) {
+      try { ytPlayer.stopVideo(); } catch(e){}
+    }
+    document.getElementById("viewVideo").style.display = "none";
+    document.getElementById("stageTag").innerText = "第 3 步：趣味闯关";
+    document.getElementById("viewQuiz").style.display = "flex";
+
+    startStageTimer("QUIZ");
+    renderCurrentQuestion();
+  }
 
   /* 音效合成 */
   let actx = null;
@@ -481,11 +546,9 @@
     });
   }
 
-  /* 25题题库与机制配置 */
+  /* 题库 */
   const GAME_LEVELS = [
     {
-      levelId: 1,
-      title: "第一关：🌱 梦幻绿植浇灌养成 (课本P.59)",
       mechanic: "bloom",
       questions: [
         { q: "我们要绿化居住环境，伙伴拿铁锹松土，我该拿什么分工配合？", sub: "儿歌：“大家一起来种树，我松土来你……”", choices: [{txt:"拿水壶负责浇水 🚿", cor:true}, {txt:"空手在旁边笑 😆", cor:false}], tip: "我松土来你浇水，小树喝水长得快！" },
@@ -496,8 +559,6 @@
       ]
     },
     {
-      levelId: 2,
-      title: "第二关：🧩 动物渡河磁吸拼图 (课本P.61)",
       mechanic: "snap",
       questions: [
         { q: "河对岸有香甜果子，大象会游泳但摘不到，小猴会爬树但不会游泳，怎么做？", sub: "大象与猴子的寓言任务", choices: [{txt:"大象背小猴过河，小猴爬树摘果 🐘🐒", cor:true}, {txt:"大象和小猴互相嘲笑 🙅", cor:false}], tip: "互相借用长处，难题迎刃而解！" },
@@ -508,8 +569,6 @@
       ]
     },
     {
-      levelId: 3,
-      title: "第三关：🐱 班级茶会萌宠投喂 (课本P.62)",
       mechanic: "feed",
       questions: [
         { q: "准备“儿童节班级茶会”，把这项行为投喂给正确的萌宠：", sub: "行为卡：大家分工排好桌椅和挂气球 🎈", isGood: true, tip: "分工布置课室，茶会又快又漂亮！" },
@@ -520,8 +579,6 @@
       ]
     },
     {
-      levelId: 4,
-      title: "第四关：🫧 大扫除好心情戳泡泡 (课本P.63)",
       mechanic: "bubble",
       questions: [
         { q: "戳破白板圆圈图上【合作带来的好心情】的泡泡：", sub: "白板圆圈图汇总情感", bubbles: [{txt:"快乐开心 😄", cor:true}, {txt:"自私愤怒 😡", cor:false}, {txt:"孤单害怕 🌧️", cor:false}], tip: "合作带来满满的快乐和喜悦！" },
@@ -532,8 +589,6 @@
       ]
     },
     {
-      levelId: 5,
-      title: "第五关：🧱 团结承诺积木塔 (教案目标与承诺)",
       mechanic: "stack",
       questions: [
         { q: "打好团结大厦的地基，选择第一句誓词积木：", sub: "宣读班级团结合作承诺卡", choices: [{txt:"手拉手，心连心 🤝", cor:true}, {txt:"你走你的，我走我的 🚶", cor:false}], tip: "第一层：手拉手，心连心！" },
@@ -545,384 +600,290 @@
     }
   ];
 
-  let currLvlIdx = 0, currQIdx = 0, totalScore = 0;
-  let mistakeLogs = [], startTime = null, studentName = "", studentClass = "";
-  let hasAnsweredCurrent = false, castleBricksBuilt = [];
+  let currLvl = 0, currQ = 0, quizScore = 0;
+  let mistakes = [], hasAnsweredQ = false, bricksStack = [];
 
-  function shuffle(arr) {
-    return [...arr].sort(() => Math.random() - 0.5);
-  }
-
-  function onStartGame() {
-    const n = document.getElementById("stuName").value.trim();
-    if (!n) {
-      alert("请小朋友输入名字哦！😊");
-      return;
-    }
-    studentName = n;
-    studentClass = document.getElementById("stuClass").value.trim() || "一年级";
-    startTime = new Date();
-
-    document.getElementById("viewLogin").style.display = "none";
-    document.getElementById("topBar").style.display = "flex";
-    document.getElementById("progressBar").style.display = "block";
-    document.getElementById("viewGame").style.display = "flex";
-
-    renderCurrentQuestion();
-  }
+  function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
 
   function renderCurrentQuestion() {
-    hasAnsweredCurrent = false;
-    const lvl = GAME_LEVELS[currLvlIdx];
-    const qData = lvl.questions[currQIdx];
-    const globalQNum = currLvlIdx * 5 + currQIdx + 1;
+    hasAnsweredQ = false;
+    const lvl = GAME_LEVELS[currLvl];
+    const qData = lvl.questions[currQ];
+    const totalQNum = currLvl * 5 + currQ + 1;
 
-    document.getElementById("levelNameBadge").innerText = lvl.title;
-    document.getElementById("subStepInfo").innerText = `第 ${currQIdx + 1} / 5 步 (共25题)`;
-    document.getElementById("scoreBadge").innerText = `⭐ 分数: ${totalScore}`;
-    document.getElementById("progressFill").style.width = `${((globalQNum - 1) / 25) * 100}%`;
+    document.getElementById("stageTag").innerText = `关卡 ${currLvl + 1} (第 ${totalQNum}/25 题)`;
+    document.getElementById("qTitle").innerText = `${totalQNum}. ${qData.q}`;
+    document.getElementById("qTip").innerText = qData.sub ? `💡 ${qData.sub}` : "";
 
-    document.getElementById("qTitle").innerText = `${globalQNum}. ${qData.q}`;
-    document.getElementById("qSub").innerText = qData.sub ? `💡 课堂线索：${qData.sub}` : "";
+    document.getElementById("hintBubble").classList.remove("show");
+    document.getElementById("btnNextQ").style.display = "none";
 
-    const hint = document.getElementById("feedbackHint");
-    hint.classList.remove("show");
-    document.getElementById("btnNext").style.display = "none";
+    const stage = document.getElementById("gameStage");
+    stage.innerHTML = "";
 
-    const container = document.getElementById("interactiveArea");
-    container.innerHTML = "";
+    if (lvl.mechanic === "bloom") {
+      const stages = [
+        {e:"🌱", t:"幼苗入土"}, {e:"🌿", t:"抽叶萌芽"}, {e:"🪴", t:"结出花苞"}, {e:"🌸", t:"绽放鲜花"}, {e:"🌳", t:"彩虹硕果"}
+      ];
+      const cur = stages[currQ];
+      const box = document.createElement("div");
+      box.className = "tree-box";
+      box.innerHTML = `<div style="font-size:42px; line-height:1;">${cur.e}</div><div style="font-size:11px; color:#558B2F; margin-top:4px; font-weight:bold;">${cur.t}</div>`;
+      stage.appendChild(box);
 
-    switch (lvl.mechanic) {
-      case "bloom": renderBloomMechanic(container, qData); break;
-      case "snap": renderSnapMechanic(container, qData); break;
-      case "feed": renderFeedMechanic(container, qData); break;
-      case "bubble": renderBubbleMechanic(container, qData); break;
-      case "stack": renderStackMechanic(container, qData); break;
+      const opts = document.createElement("div");
+      opts.className = "option-card-row";
+      shuffle(qData.choices).forEach(c => {
+        const card = document.createElement("div");
+        card.className = "option-card";
+        card.innerText = c.txt;
+        card.onclick = () => {
+          if (hasAnsweredQ) return;
+          hasAnsweredQ = true;
+          card.classList.add("selected");
+          playPop();
+          if (c.cor) {
+            playSnap(); quizScore++;
+            box.style.transform = "scale(1.15)";
+            setTimeout(() => box.style.transform = "scale(1)", 200);
+            giveFeedback("🌟", qData.tip);
+          } else {
+            mistakes.push(`【第1关】${qData.q}`);
+            giveFeedback("🌱", `真棒的探索！其实选“${qData.choices.find(x=>x.cor).txt}”更好！`);
+          }
+          document.getElementById("btnNextQ").style.display = "inline-block";
+        };
+        opts.appendChild(card);
+      });
+      stage.appendChild(opts);
+
+    } else if (lvl.mechanic === "snap") {
+      const slot = document.createElement("div");
+      slot.className = "puzzle-slot";
+      slot.innerText = "📥 点击下方最棒的合作拼图吸附入槽";
+      stage.appendChild(slot);
+
+      const list = document.createElement("div");
+      list.className = "puzzle-list";
+      shuffle(qData.choices).forEach(c => {
+        const piece = document.createElement("div");
+        piece.className = "option-card";
+        piece.style.textAlign = "left";
+        piece.innerText = `🧩 ${c.txt}`;
+        piece.onclick = () => {
+          if (hasAnsweredQ) return;
+          hasAnsweredQ = true;
+          playSnap();
+          slot.classList.add("snapped");
+          slot.innerHTML = `✅ 已吸附：<b>${c.txt}</b>`;
+          if (c.cor) {
+            quizScore++; giveFeedback("🎉", qData.tip);
+          } else {
+            mistakes.push(`【第2关】${qData.q}`);
+            giveFeedback("💡", `小提示：选择“${qData.choices.find(x=>x.cor).txt}”最默契！`);
+          }
+          document.getElementById("btnNextQ").style.display = "inline-block";
+        };
+        list.appendChild(piece);
+      });
+      stage.appendChild(list);
+
+    } else if (lvl.mechanic === "feed") {
+      const food = document.createElement("div");
+      food.className = "info-card";
+      food.style.background = "#FFF9C4";
+      food.style.border = "1px solid #FBC02D";
+      food.style.color = "#E65100";
+      food.innerText = qData.sub;
+      stage.appendChild(food);
+
+      const wrap = document.createElement("div");
+      wrap.className = "feed-wrap";
+      wrap.innerHTML = `
+        <div class="feed-box" id="binCat"><div style="font-size:32px;">🐱</div><b>合作猫</b><small style="color:#2E7D32;">投喂我！</small></div>
+        <div class="feed-box" id="binDog"><div style="font-size:32px;">🐶</div><b>争吵狗</b><small style="color:#C62828;">不要学！</small></div>
+      `;
+      stage.appendChild(wrap);
+
+      document.getElementById("binCat").onclick = () => triggerFeed(true, qData, food, document.getElementById("binCat"));
+      document.getElementById("binDog").onclick = () => triggerFeed(false, qData, food, document.getElementById("binDog"));
+
+    } else if (lvl.mechanic === "bubble") {
+      const bWrap = document.createElement("div");
+      bWrap.className = "bubble-wrap";
+      shuffle(qData.bubbles).forEach(b => {
+        const bubble = document.createElement("div");
+        bubble.className = "bubble-btn";
+        bubble.innerText = b.txt;
+        bubble.onclick = () => {
+          if (hasAnsweredQ) return;
+          hasAnsweredQ = true;
+          playPop();
+          bubble.classList.add("popped");
+          if (b.cor) {
+            playSnap(); quizScore++; giveFeedback("🫧", `啪！${qData.tip}`);
+          } else {
+            mistakes.push(`【第4关】${qData.q}`);
+            giveFeedback("💡", `泡泡飞走啦！其实“${qData.bubbles.find(x=>x.cor).txt}”更合适！`);
+          }
+          document.getElementById("btnNextQ").style.display = "inline-block";
+        };
+        bWrap.appendChild(bubble);
+      });
+      stage.appendChild(bWrap);
+
+    } else if (lvl.mechanic === "stack") {
+      const cZone = document.createElement("div");
+      cZone.className = "castle-box";
+      bricksStack.forEach(txt => {
+        const item = document.createElement("div");
+        item.className = "castle-item";
+        item.innerText = `🧱 ${txt}`;
+        cZone.appendChild(item);
+      });
+      stage.appendChild(cZone);
+
+      const opts = document.createElement("div");
+      opts.style.width = "100%";
+      opts.style.display = "flex";
+      opts.style.flexDirection = "column";
+      opts.style.gap = "6px";
+      shuffle(qData.choices).forEach(c => {
+        const btn = document.createElement("div");
+        btn.className = "option-card";
+        btn.innerText = `🧱 ${c.txt}`;
+        btn.onclick = () => {
+          if (hasAnsweredQ) return;
+          hasAnsweredQ = true;
+          btn.classList.add("selected");
+          playPop();
+          if (c.cor) {
+            playSnap(); quizScore++;
+            bricksStack.push(c.txt);
+            const newItem = document.createElement("div");
+            newItem.className = "castle-item";
+            newItem.innerText = `🧱 ${c.txt}`;
+            cZone.appendChild(newItem);
+            giveFeedback("🏰", qData.tip);
+          } else {
+            mistakes.push(`【第5关】${qData.q}`);
+            giveFeedback("💡", `加油！正确誓词积木是：“${qData.choices.find(x=>x.cor).txt}”！`);
+          }
+          document.getElementById("btnNextQ").style.display = "inline-block";
+        };
+        opts.appendChild(btn);
+      });
+      stage.appendChild(opts);
     }
   }
 
-  function renderBloomMechanic(container, qData) {
-    const treeStages = [
-      { emoji: "🌱", label: "第1阶段：幼苗入土" },
-      { emoji: "🌿", label: "第2阶段：抽叶萌芽" },
-      { emoji: "🪴", label: "第3阶段：结出花苞" },
-      { emoji: "🌸", label: "第4阶段：绽放鲜花" },
-      { emoji: "🌳", label: "第5阶段：彩虹硕果" }
-    ];
-    const currentStage = treeStages[currQIdx] || treeStages[0];
-
-    const stageDiv = document.createElement("div");
-    stageDiv.className = "tree-stage";
-    stageDiv.innerHTML = `
-      <div class="tree-emoji">${currentStage.emoji}</div>
-      <div class="tree-label">${currentStage.label}</div>
-    `;
-    container.appendChild(stageDiv);
-
-    const toolBox = document.createElement("div");
-    toolBox.className = "tool-options";
-    const shuffled = shuffle(qData.choices);
-
-    shuffled.forEach(c => {
-      const card = document.createElement("div");
-      card.className = "tool-card";
-      card.innerHTML = `<span>🛠️</span> <span>${c.txt}</span>`;
-      card.onclick = () => {
-        if (hasAnsweredCurrent) return;
-        hasAnsweredCurrent = true;
-        card.classList.add("selected");
-        playPop();
-        if (c.cor) {
-          playSnap();
-          totalScore++;
-          stageDiv.style.transform = "scale(1.12)";
-          setTimeout(() => stageDiv.style.transform = "scale(1)", 200);
-          showFeedback("🌟", qData.tip);
-        } else {
-          mistakeLogs.push(`【第1关】${qData.q}`);
-          showFeedback("🌱", `真棒的探索！其实选择“${qData.choices.find(x=>x.cor).txt}”能让小树长得更好！`);
-        }
-        document.getElementById("btnNext").style.display = "inline-block";
-      };
-      toolBox.appendChild(card);
-    });
-    container.appendChild(toolBox);
-  }
-
-  function renderSnapMechanic(container, qData) {
-    const slot = document.createElement("div");
-    slot.className = "puzzle-target-slot";
-    slot.innerHTML = "📥 点击下方最棒的合作拼图，吸附入卡槽";
-    container.appendChild(slot);
-
-    const pool = document.createElement("div");
-    pool.className = "puzzle-pieces-pool";
-    const shuffled = shuffle(qData.choices);
-
-    shuffled.forEach(c => {
-      const piece = document.createElement("div");
-      piece.className = "puzzle-piece";
-      piece.innerHTML = `🧩 <span>${c.txt}</span>`;
-      piece.onclick = () => {
-        if (hasAnsweredCurrent) return;
-        hasAnsweredCurrent = true;
-        playSnap();
-        slot.classList.add("snapped");
-        slot.innerHTML = `✅ 已吸附：<b>${c.txt}</b>`;
-        if (c.cor) {
-          totalScore++;
-          showFeedback("🎉", qData.tip);
-        } else {
-          mistakeLogs.push(`【第2关】${qData.q}`);
-          showFeedback("💡", `小提示：选择“${qData.choices.find(x=>x.cor).txt}”才是最默契的合作！`);
-        }
-        document.getElementById("btnNext").style.display = "inline-block";
-      };
-      pool.appendChild(piece);
-    });
-    container.appendChild(pool);
-  }
-
-  function renderFeedMechanic(container, qData) {
-    const food = document.createElement("div");
-    food.className = "feeding-food-card";
-    food.innerText = qData.sub;
-    container.appendChild(food);
-
-    const bins = document.createElement("div");
-    bins.className = "feeding-monsters-wrap";
-
-    const binGood = document.createElement("div");
-    binGood.className = "monster-bin";
-    binGood.innerHTML = `<div style="font-size:38px;">🐱</div><b>分工合作小猫</b><small style="color:#2E7D32;">投喂我！</small>`;
-
-    const binBad = document.createElement("div");
-    binBad.className = "monster-bin";
-    binBad.innerHTML = `<div style="font-size:38px;">🐶</div><b>独霸争吵小狗</b><small style="color:#C62828;">不要学！</small>`;
-
-    binGood.onclick = () => handleFeedAction(true, qData, binGood, food);
-    binBad.onclick = () => handleFeedAction(false, qData, binBad, food);
-
-    bins.appendChild(binGood);
-    bins.appendChild(binBad);
-    container.appendChild(bins);
-  }
-
-  function handleFeedAction(userChoseGood, qData, targetBin, foodEl) {
-    if (hasAnsweredCurrent) return;
-    hasAnsweredCurrent = true;
+  function triggerFeed(isGood, qData, foodEl, binEl) {
+    if (hasAnsweredQ) return;
+    hasAnsweredQ = true;
     playPop();
-    targetBin.classList.add("mouth-open");
-    foodEl.style.transition = "all 0.3s";
+    binEl.classList.add("open");
+    foodEl.style.transition = "0.3s";
     foodEl.style.transform = "scale(0.2)";
     foodEl.style.opacity = "0";
 
     setTimeout(() => {
-      targetBin.classList.remove("mouth-open");
-      if (userChoseGood === qData.isGood) {
-        playSnap();
-        totalScore++;
-        showFeedback("😋", `投喂正确！${qData.tip}`);
+      binEl.classList.remove("open");
+      if (isGood === qData.isGood) {
+        playSnap(); quizScore++; giveFeedback("😋", `投喂正确！${qData.tip}`);
       } else {
-        mistakeLogs.push(`【第3关】${qData.q}`);
-        showFeedback("💡", `没关系！${qData.tip}`);
+        mistakes.push(`【第3关】${qData.q}`); giveFeedback("💡", `没关系！${qData.tip}`);
       }
-      document.getElementById("btnNext").style.display = "inline-block";
+      document.getElementById("btnNextQ").style.display = "inline-block";
     }, 300);
   }
 
-  function renderBubbleMechanic(container, qData) {
-    const bubbleArea = document.createElement("div");
-    bubbleArea.className = "bubbles-area";
-    const shuffled = shuffle(qData.bubbles);
-
-    shuffled.forEach(b => {
-      const bubble = document.createElement("div");
-      bubble.className = "bubble-item";
-      bubble.innerText = b.txt;
-      bubble.onclick = () => {
-        if (hasAnsweredCurrent) return;
-        hasAnsweredCurrent = true;
-        playPop();
-        bubble.classList.add("popped");
-        if (b.cor) {
-          playSnap();
-          totalScore++;
-          showFeedback("🫧", `啪！泡泡破裂：${qData.tip}`);
-        } else {
-          mistakeLogs.push(`【第4关】${qData.q}`);
-          showFeedback("💡", `泡泡飞走啦！其实“${qData.bubbles.find(x=>x.cor).txt}”才是最好的选择！`);
-        }
-        document.getElementById("btnNext").style.display = "inline-block";
-      };
-      bubbleArea.appendChild(bubble);
-    });
-    container.appendChild(bubbleArea);
-  }
-
-  function renderStackMechanic(container, qData) {
-    const castleZone = document.createElement("div");
-    castleZone.className = "castle-building-zone";
-
-    castleBricksBuilt.forEach(txt => {
-      const b = document.createElement("div");
-      b.className = "castle-brick";
-      b.innerText = `🧱 ${txt}`;
-      castleZone.appendChild(b);
-    });
-    container.appendChild(castleZone);
-
-    const choicesWrap = document.createElement("div");
-    choicesWrap.style.width = "100%";
-    choicesWrap.style.display = "flex";
-    choicesWrap.style.flexDirection = "column";
-    choicesWrap.style.gap = "8px";
-    choicesWrap.style.marginTop = "6px";
-
-    const shuffled = shuffle(qData.choices);
-    shuffled.forEach(c => {
-      const btn = document.createElement("button");
-      btn.className = "tool-card";
-      btn.style.maxWidth = "100%";
-      btn.style.width = "100%";
-      btn.innerHTML = `🧱 <span>${c.txt}</span>`;
-      btn.onclick = () => {
-        if (hasAnsweredCurrent) return;
-        hasAnsweredCurrent = true;
-        btn.classList.add("selected");
-        playPop();
-        if (c.cor) {
-          playSnap();
-          totalScore++;
-          castleBricksBuilt.push(c.txt);
-          const newBrick = document.createElement("div");
-          newBrick.className = "castle-brick";
-          newBrick.innerText = `🧱 ${c.txt}`;
-          castleZone.appendChild(newBrick);
-          showFeedback("🏰", qData.tip);
-        } else {
-          mistakeLogs.push(`【第5关】${qData.q}`);
-          showFeedback("💡", `加油！正确誓词积木是：“${qData.choices.find(x=>x.cor).txt}”！`);
-        }
-        document.getElementById("btnNext").style.display = "inline-block";
-      };
-      choicesWrap.appendChild(btn);
-    });
-    container.appendChild(choicesWrap);
-  }
-
-  function showFeedback(emoji, text) {
-    const hint = document.getElementById("feedbackHint");
+  function giveFeedback(emoji, msg) {
+    const b = document.getElementById("hintBubble");
     document.getElementById("hintEmoji").innerText = emoji;
-    document.getElementById("hintText").innerText = text;
-    hint.classList.add("show");
-    document.getElementById("scoreBadge").innerText = `⭐ 分数: ${totalScore}`;
+    document.getElementById("hintText").innerText = msg;
+    b.classList.add("show");
   }
 
-  function nextStep() {
+  function nextQuestionStep() {
     playPop();
-    currQIdx++;
-    if (currQIdx >= 5) {
-      currLvlIdx++;
-      currQIdx = 0;
+    currQ++;
+    if (currQ >= 5) {
+      currLvl++;
+      currQ = 0;
     }
-
-    if (currLvlIdx >= GAME_LEVELS.length) {
-      finishAllLevels();
+    if (currLvl >= GAME_LEVELS.length) {
+      finishWholeCourse();
     } else {
       renderCurrentQuestion();
     }
   }
 
-  /* 通关结算与自动上传触发 */
-  function finishAllLevels() {
+  /* 流程结束并自动上传 */
+  function finishWholeCourse() {
+    if (activeTimerInterval) clearInterval(activeTimerInterval);
     playFanfare();
     launchConfetti();
 
-    document.getElementById("progressFill").style.width = "100%";
-    document.getElementById("viewGame").style.display = "none";
+    document.getElementById("viewQuiz").style.display = "none";
+    document.getElementById("topStepper").style.display = "none";
     document.getElementById("viewResult").style.display = "flex";
 
-    const diffSec = Math.floor((new Date() - startTime) / 1000);
-    const m = String(Math.floor(diffSec / 60)).padStart(2, '0');
-    const s = String(diffSec % 60).padStart(2, '0');
-    const timeSpent = `${m}分${s}秒`;
+    const totalSecs = pptSeconds + videoSeconds + quizSeconds;
+    const pptTimeStr = formatTime(pptSeconds);
+    const videoTimeStr = formatTime(videoSeconds);
+    const quizTimeStr = formatTime(quizSeconds);
+    const totalTimeStr = formatTime(totalSecs);
 
-    document.getElementById("resultScore").innerText = `${totalScore} / 25`;
-    document.getElementById("resultTime").innerText = `⏱️ 闯关总用时：${timeSpent}`;
+    document.getElementById("repName").innerText = studentName;
+    document.getElementById("repClass").innerText = studentClass;
+    document.getElementById("repPptTime").innerText = pptTimeStr;
+    document.getElementById("repVideoTime").innerText = videoTimeStr;
+    document.getElementById("repQuizTime").innerText = quizTimeStr;
+    document.getElementById("repTotalTime").innerText = totalTimeStr;
+    document.getElementById("scoreDisplay").innerText = `${quizScore} / 25`;
 
     let stars = "⭐⭐⭐";
-    let title = "卓越！你是最出色的班级团结合作小标兵！🎉";
-    if (totalScore < 18) {
-      stars = "⭐";
-      title = "继续加油！多体会分工的快乐，你会更棒！🌱";
-    } else if (totalScore < 23) {
-      stars = "⭐⭐";
-      title = "非常优秀！懂得互帮互助、团结友爱！🌸";
-    }
-    document.getElementById("resultStars").innerText = stars;
-    document.getElementById("resultTitle").innerText = title;
+    if (quizScore < 18) stars = "⭐";
+    else if (quizScore < 23) stars = "⭐⭐";
+    document.getElementById("starDisplay").innerText = stars;
 
-    if (mistakeLogs.length > 0) {
-      document.getElementById("mistakeBox").style.display = "block";
-      document.getElementById("mistakeItems").innerHTML = mistakeLogs.map(m => `<div>• ${m}</div>`).join("");
-    }
-
-    window.gamePayload = {
+    const payload = {
       name: studentName,
       studentClass: studentClass,
-      score: totalScore,
+      score: quizScore,
       total: 25,
-      percentage: Math.round((totalScore / 25) * 100),
-      timeSpent: timeSpent,
-      mistakes: mistakeLogs.length > 0 ? mistakeLogs.join(" | ") : "全对！太棒了！"
+      percentage: Math.round((quizScore / 25) * 100),
+      pptTime: pptTimeStr,
+      videoTime: videoTimeStr,
+      quizTime: quizTimeStr,
+      totalTime: totalTimeStr,
+      mistakes: mistakes.length > 0 ? mistakes.join(" | ") : "全对！太棒了！"
     };
 
-    // 🚀 核心改动：答题完成立即在后台自动上传
-    autoUploadScores();
+    autoUploadAllResults(payload);
   }
 
-  /* 静默自动回传函数 */
-  function autoUploadScores() {
-    const icon = document.getElementById("syncStatusIcon");
-    const text = document.getElementById("syncStatusText");
+  function autoUploadAllResults(payload) {
+    const icon = document.getElementById("uploadIcon");
+    const msg = document.getElementById("uploadMsg");
 
-    // 方式 1：运行在原生 GAS Web App 中
     if (typeof google !== 'undefined' && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(res => {
           icon.innerText = "✅";
-          text.innerText = "成绩已自动同步至老师试算表！";
+          msg.innerText = "用时与成绩已自动同步至老师试算表！";
         })
         .withFailureHandler(err => {
           icon.innerText = "⚠️";
-          text.innerText = "自动同步稍有延迟，成绩已保存在本地。";
+          msg.innerText = "自动同步遇到网络延迟，已为您保留本地记录。";
         })
-        .recordScore(window.gamePayload);
+        .recordScore(payload);
       return;
     }
 
-    // 方式 2：运行在 GitHub Pages 外部静态模式
-    if (GAS_ENDPOINT_URL && !GAS_ENDPOINT_URL.includes("AKfycb...")) {
-      fetch(GAS_ENDPOINT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(window.gamePayload)
-      }).then(() => {
-        icon.innerText = "✅";
-        text.innerText = "成绩已自动同步至 Google 试算表！";
-      }).catch(err => {
-        icon.innerText = "⚠️";
-        text.innerText = "网络略有波动，已为您保留通关记录。";
-      });
-      return;
-    }
-
-    // 方式 3：未配置 URL 的本地测试环境
     setTimeout(() => {
       icon.innerText = "✅";
-      text.innerText = "闯关已完成！（本地模式已就绪）";
+      msg.innerText = "学习与用时记录已完成！（本地测试模式）";
     }, 400);
   }
 
@@ -931,10 +892,10 @@
     const ctx = canvas.getContext("2d");
     canvas.width = canvas.parentElement.offsetWidth;
     canvas.height = canvas.parentElement.offsetHeight;
-    const pieces = Array.from({length: 80}, () => ({
+    const pieces = Array.from({length: 70}, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * -canvas.height,
-      size: Math.random() * 8 + 4,
+      size: Math.random() * 7 + 4,
       color: ["#4CAF50", "#FFEB3B", "#FF9800", "#03A9F4", "#E91E63"][Math.floor(Math.random()*5)],
       speed: Math.random() * 3 + 2,
       tilt: Math.random() * 6 - 3
@@ -950,7 +911,7 @@
         ctx.fillRect(p.x, p.y, p.size, p.size);
       });
       f++;
-      if (f < 180) requestAnimationFrame(run);
+      if (f < 160) requestAnimationFrame(run);
       else ctx.clearRect(0,0,canvas.width,canvas.height);
     }
     run();
