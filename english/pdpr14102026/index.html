@@ -41,7 +41,7 @@
 
     header {
       width: 100%;
-      max-width: 900px;
+      max-width: 920px;
       padding: 16px 20px;
       display: flex;
       justify-content: space-between;
@@ -91,7 +91,7 @@
 
     main {
       width: 100%;
-      max-width: 900px;
+      max-width: 920px;
       flex: 1;
       padding: 20px;
       display: flex;
@@ -116,7 +116,7 @@
 
     /* Common Card Styles */
     .investigation-panel {
-      background: rgba(27, 38, 59, 0.85);
+      background: rgba(27, 38, 59, 0.88);
       backdrop-filter: blur(8px);
       border: 2px solid var(--brass);
       border-radius: 16px;
@@ -132,7 +132,7 @@
 
     .panel-header h2 {
       color: var(--brass);
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       margin-bottom: 6px;
     }
 
@@ -175,11 +175,26 @@
       filter: grayscale(0.8);
     }
 
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--parchment);
+      border: 1px solid rgba(224, 169, 109, 0.5);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(224, 169, 109, 0.2);
+    }
+
     /* Screen 0: Welcome / Form */
     .briefing-box {
       background: var(--parchment);
       color: var(--text-dark);
-      padding: 20px;
+      padding: 18px;
       border-radius: 12px;
       margin-bottom: 24px;
       border-left: 6px solid #8c52ff;
@@ -212,35 +227,73 @@
       outline: none;
     }
 
-    .input-group input:focus, .input-group select:focus {
-      border-color: var(--glow-gold);
-      background: rgba(255, 255, 255, 0.15);
+    /* READING DOSSIER ACCORDION (For Mission 1) */
+    .dossier-card {
+      background: #fbf5eb;
+      color: #2b2118;
+      border-radius: 12px;
+      border: 2px solid var(--brass);
+      margin-bottom: 22px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      overflow: hidden;
     }
 
-    /* Stage 1: Flow Map Snap-in Blocks */
+    .dossier-header {
+      background: #ece0cc;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border-bottom: 1px solid #d4c2a5;
+    }
+
+    .dossier-header h3 {
+      font-size: 0.95rem;
+      color: #4a2810;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dossier-body {
+      padding: 16px 20px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      max-height: 230px;
+      overflow-y: auto;
+    }
+
+    .dossier-body p {
+      margin-bottom: 10px;
+    }
+
+    .dossier-body mark {
+      background: #ffe3a8;
+      color: #222;
+      padding: 0 4px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* Stage 1: Flow Map Dropzone */
     .flowmap-dropzone-container {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .flow-slot {
-      min-height: 64px;
+      min-height: 60px;
       background: rgba(13, 27, 42, 0.6);
       border: 2px dashed rgba(224, 169, 109, 0.4);
       border-radius: 12px;
       display: flex;
       align-items: center;
-      padding: 8px 16px;
+      padding: 6px 14px;
       transition: all 0.2s ease;
       position: relative;
-    }
-
-    .flow-slot.highlight {
-      border-color: var(--glow-gold);
-      background: rgba(224, 169, 109, 0.15);
-      transform: scale(1.01);
     }
 
     .flow-slot-label {
@@ -264,9 +317,9 @@
     .bank-blocks-container {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       background: rgba(0, 0, 0, 0.2);
-      padding: 16px;
+      padding: 14px;
       border-radius: 14px;
       margin-bottom: 20px;
     }
@@ -274,23 +327,22 @@
     .event-block {
       background: var(--parchment);
       color: var(--text-dark);
-      padding: 12px 18px;
+      padding: 10px 16px;
       border-radius: 10px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
-      cursor: grab;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      gap: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
       border: 2px solid transparent;
       transition: transform 0.15s, box-shadow 0.15s;
-      touch-action: none;
     }
 
-    .event-block:active {
-      cursor: grabbing;
-      transform: scale(0.98);
+    .event-block:hover {
+      border-color: var(--brass);
+      transform: translateX(4px);
     }
 
     .event-block.snapped {
@@ -298,13 +350,14 @@
       border-color: #548235;
       box-shadow: none;
       width: 100%;
+      margin: 0;
     }
 
     /* Stage 2: Spotlight Cabin Clues */
     .spotlight-wrapper {
       position: relative;
       width: 100%;
-      height: 380px;
+      height: 360px;
       border-radius: 16px;
       overflow: hidden;
       border: 2px solid var(--brass);
@@ -330,19 +383,19 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><rect width="800" height="400" fill="%231a2332"/><path d="M0,300 L800,300" stroke="%2330425c" stroke-width="4"/><path d="M0,0 L150,300 M800,0 L650,300" stroke="%23243348" stroke-width="3"/><circle cx="400" cy="140" r="45" fill="none" stroke="%23415a77" stroke-width="6"/></svg>') center/cover;
+      background: radial-gradient(circle, #223049 0%, #0d1b2a 100%);
       z-index: 1;
     }
 
     .hidden-clue-item {
       position: absolute;
-      width: 58px;
-      height: 58px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 30px;
+      font-size: 28px;
       background: rgba(224, 169, 109, 0.2);
       border: 2px solid rgba(224, 169, 109, 0.4);
       cursor: pointer;
@@ -366,77 +419,35 @@
       border-radius: 10px;
     }
 
-    /* Modal for Clue Question */
-    .clue-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 20px;
-    }
-
-    .clue-modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--card-bg);
-      border: 2px solid var(--brass);
-      border-radius: 16px;
-      max-width: 500px;
-      width: 100%;
-      padding: 24px;
-      text-align: center;
-      animation: modalPop 0.3s ease;
-    }
-
-    @keyframes modalPop {
-      from { transform: scale(0.85); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .modal-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 18px 0;
-    }
-
-    .modal-opt-btn {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--parchment);
-      border: 1px solid rgba(224, 169, 109, 0.4);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s;
-    }
-
-    .modal-opt-btn:hover {
-      background: rgba(224, 169, 109, 0.2);
-      border-color: var(--brass);
-    }
-
-    /* Stage 3: Sentence Builder */
+    /* Stage 3: Sentence Builder with CLUE BANNERS */
     .sentence-quest-card {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 20px;
-      border-left: 4px solid var(--brass);
+      border: 1px solid rgba(224, 169, 109, 0.25);
+    }
+
+    .clue-hint-banner {
+      background: rgba(255, 209, 102, 0.12);
+      border-left: 4px solid var(--glow-gold);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #ffdda1;
+      line-height: 1.4;
+    }
+
+    .clue-hint-banner strong {
+      color: var(--glow-gold);
     }
 
     .sentence-frame-display {
-      font-size: 1.05rem;
+      font-size: 1rem;
       line-height: 1.8;
       margin-bottom: 14px;
       color: #fff;
@@ -444,16 +455,16 @@
 
     .snap-slot {
       display: inline-block;
-      min-width: 180px;
-      padding: 2px 12px;
-      background: rgba(255, 255, 255, 0.1);
+      min-width: 170px;
+      padding: 3px 12px;
+      background: rgba(255, 255, 255, 0.08);
       border-bottom: 2px dashed var(--brass);
       border-radius: 6px;
       text-align: center;
       font-weight: 700;
       color: var(--glow-gold);
       vertical-align: middle;
-      cursor: pointer;
+      font-size: 0.9rem;
     }
 
     .roller-picker-options {
@@ -468,10 +479,10 @@
       color: var(--text-dark);
       padding: 6px 14px;
       border-radius: 20px;
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25);
       transition: all 0.2s;
     }
 
@@ -480,7 +491,13 @@
       transform: translateY(-2px);
     }
 
-    /* Stage 4: Deductive Balance Scale */
+    .roller-chip.active-choice {
+      background: var(--brass);
+      color: #1a140d;
+      box-shadow: 0 0 10px rgba(224, 169, 109, 0.6);
+    }
+
+    /* Stage 4: Balance Scale */
     .scale-container {
       display: flex;
       flex-direction: column;
@@ -557,23 +574,76 @@
       box-shadow: 0 0 12px rgba(46, 196, 182, 0.4);
     }
 
-    /* Screen: Result & Review */
+    /* Modal */
+    .clue-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .clue-modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 2px solid var(--brass);
+      border-radius: 16px;
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .modal-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .modal-opt-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--parchment);
+      border: 1px solid rgba(224, 169, 109, 0.4);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .modal-opt-btn:hover {
+      background: rgba(224, 169, 109, 0.2);
+      border-color: var(--brass);
+    }
+
+    /* Result Screen */
     .result-score-ring {
-      width: 140px;
-      height: 140px;
+      width: 130px;
+      height: 130px;
       border-radius: 50%;
-      border: 6px solid var(--brass);
+      border: 5px solid var(--brass);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px;
+      margin: 0 auto 16px;
       background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 0 25px rgba(224, 169, 109, 0.3);
     }
 
     .result-score-num {
-      font-size: 2.8rem;
+      font-size: 2.6rem;
       font-weight: 800;
       color: var(--glow-gold);
       line-height: 1;
@@ -581,41 +651,33 @@
 
     .stars-row {
       font-size: 2rem;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       color: var(--glow-gold);
-      letter-spacing: 6px;
     }
 
     .sync-status-card {
       background: rgba(46, 196, 182, 0.15);
       border: 1px solid var(--success-green);
       border-radius: 10px;
-      padding: 12px;
+      padding: 10px;
       margin: 16px 0;
       font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
 
     .review-details-list {
       background: rgba(0, 0, 0, 0.25);
       border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-      text-align: left;
-      font-size: 0.9rem;
-      max-height: 240px;
-      overflow-y: auto;
+      padding: 14px;
+      margin-top: 14px;
+      font-size: 0.88rem;
+      line-height: 1.5;
     }
 
     .review-item {
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* Confetti Canvas */
     #confettiCanvas {
       position: fixed;
       top: 0;
@@ -668,7 +730,7 @@
           <strong>Official Case Dispatch:</strong><br>
           The merchant brigantine <em>Mary Celeste</em> was discovered sailing unmanned near the Azores Islands. 
           There was plenty of food, the cargo was untouched, yet all 10 crew members and passengers were missing! 
-          As Year 6 Junior Detectives, reconstruct the voyage timeline, gather strange clues in the cabin, build descriptive evidence frames, and solve the anomaly.
+          Read the investigative dossier carefully, locate the evidence, and construct a logical timeline.
         </div>
 
         <div class="input-group">
@@ -699,7 +761,21 @@
       <div class="investigation-panel">
         <div class="panel-header">
           <h2>Mission 1: Chronological Flow Map</h2>
-          <p>Drag or tap the 4 key voyage milestones into correct chronological order.</p>
+          <p>Read the investigative text below, scan for dates, and reconstruct the timeline.</p>
+        </div>
+
+        <!-- NEW: Full Investigative Article for Reading & Scanning -->
+        <div class="dossier-card">
+          <div class="dossier-header" onclick="toggleDossier()">
+            <h3>📜 Case Dossier: The Ship with No Crew (Textbook pp. 124–125)</h3>
+            <span id="dossierToggleIcon" style="font-size:0.8rem; color:#6b4423;">[Click to Collapse ▲]</span>
+          </div>
+          <div class="dossier-body" id="dossierBody">
+            <p>On <mark>7 November 1872</mark>, the American brigantine <em>Mary Celeste</em> sailed from New York harbour headed for Genoa, Italy. On board were Captain Benjamin Briggs, his wife, their two-year-old daughter Sophia, and seven experienced sailors. The ship carried a valuable industrial cargo of <mark>1,701 barrels of alcohol</mark>.</p>
+            <p>For more than two weeks, the voyage was calm and routine. On <mark>25 November 1872</mark>, Captain Briggs made his final log entry in the ship's logbook near the Azores islands. The weather was fair, and nothing unusual was reported.</p>
+            <p>Ten days later, on the chilly afternoon of <mark>5 December 1872</mark>, another merchant ship named the <em>Dei Gratia</em> spotted the <em>Mary Celeste</em> drifting aimlessly through choppy Atlantic waters with its sails torn and fluttering.</p>
+            <p>First Mate Oliver Deveau led a boarding party onto the ship. They shouted, but no one answered. The decks were deserted. Surprisingly, the ship had a six-month supply of food and fresh water untouched in the galley, but <mark>the single lifeboat was missing</mark>, and a frayed towline was trailing deep into the dark sea. All ten souls had vanished into thin air!</p>
+          </div>
         </div>
 
         <div class="flowmap-dropzone-container" id="flowSlotsContainer">
@@ -733,7 +809,6 @@
 
         <div class="spotlight-wrapper" id="spotlightArea">
           <div class="cabin-scene">
-            <!-- 4 Hidden Clue Items (Absolute coordinates) -->
             <div class="hidden-clue-item" id="clue1" style="left: 15%; top: 40%;" title="Galley Breakfast">🍳</div>
             <div class="hidden-clue-item" id="clue2" style="left: 45%; top: 65%;" title="Cargo Hold">📦</div>
             <div class="hidden-clue-item" id="clue3" style="left: 78%; top: 25%;" title="Empty Davits">🚣</div>
@@ -750,7 +825,7 @@
       </div>
     </section>
 
-    <!-- STAGE 3: Descriptive Experience Frame Builder -->
+    <!-- STAGE 3: Descriptive Experience Frame Builder (WITH CLUES & HINTS) -->
     <section id="screenStage3" class="screen">
       <div class="investigation-panel">
         <div class="panel-header">
@@ -759,7 +834,7 @@
         </div>
 
         <div id="sentenceQuestsContainer">
-          <!-- Dynamic Sentence Quests -->
+          <!-- Dynamic Sentence Quests with Clue Banners -->
         </div>
 
         <div style="text-align: right;">
@@ -855,26 +930,21 @@
 
   <script>
     /* =========================================================
-       1. TEACHER CONFIGURATION (GAS ENDPOINT URL)
-       Replace the URL below with your deployed Google Apps Script Web App URL.
+       1. TEACHER CONFIGURATION
        ========================================================= */
     const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycby3QtU8grtkhD-pvd1RvptjFNcRN77fN2dyS7hrxLxf2hMpJ9PvugWlYQr0mjR5aTPDbg/exec";
 
     /* =========================================================
-       2. ZERO-DEPENDENCY WEB AUDIO API SOUND SYNTHESIZER
+       2. ZERO-DEPENDENCY AUDIO ENGINE
        ========================================================= */
     class SoundEngine {
-      constructor() {
-        this.ctx = null;
-      }
+      constructor() { this.ctx = null; }
       init() {
         if (!this.ctx) {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
           this.ctx = new AudioContext();
         }
-        if (this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
       }
       playChirp() {
         this.init();
@@ -906,7 +976,7 @@
       }
       playFanfare() {
         this.init();
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, idx) => {
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
@@ -940,15 +1010,13 @@
       selectedTheoryId: null
     };
 
-    // Stage 1 Timeline Data (Flow Map)
     const timelineMilestones = [
       { id: 1, text: "7 Nov 1872: Captain Briggs sets sail from New York to Genoa with 1,701 barrels of alcohol." },
-      { id: 2, text: "25 Nov 1872: The captain records the final log entry near the Azores. Weather is calm." },
-      { id: 3, text: "5 Dec 1872: British vessel Dei Gratia spots Mary Celeste drifting strangely with shredded sails." },
-      { id: 4, text: "5 Dec 1872 (Boarding): Search party finds untouched food, but the lifeboat and crew are gone!" }
+      { id: 2, text: "25 Nov 1872: The captain records the final calm log entry near the Azores." },
+      { id: 3, text: "5 Dec 1872: Dei Gratia spots Mary Celeste drifting strangely with shredded sails." },
+      { id: 4, text: "5 Dec 1872 (Boarding): Search crew finds untouched food, but the lifeboat and crew are gone!" }
     ];
 
-    // Stage 2 Clue Modals Data
     const clueQuestions = [
       {
         id: 'clue1',
@@ -992,12 +1060,13 @@
       }
     ];
 
-    // Stage 3 Sentence Frames (SP 2.1.2)
+    // STAGE 3 DATA WITH CLUES & HINTS
     const sentenceQuests = [
       {
         id: 0,
+        clueHint: "💡 Detective Clue: Searchers found all valuable cargo and gold untouched in the hold. If pirates attacked, would they leave money behind?",
         frameStart: "I discovered that ",
-        slot1Default: "[select discovered clue]",
+        slot1Default: "[select discovered fact]",
         slot1Options: [
           "all personal belongings and gold were left untouched",
           "the sails were completely painted black",
@@ -1015,8 +1084,9 @@
       },
       {
         id: 1,
+        clueHint: "💡 Detective Clue: The last logbook entry on 25 November was peaceful. No monsters, storms, or illnesses were ever recorded.",
         frameStart: "I discovered that ",
-        slot1Default: "[select discovered clue]",
+        slot1Default: "[select discovered fact]",
         slot1Options: [
           "the captain's logbook contained no distress message",
           "the captain wrote that ghosts appeared",
@@ -1034,8 +1104,9 @@
       },
       {
         id: 2,
+        clueHint: "💡 Detective Clue: The hold was full of alcohol barrels, and nine were found empty. Alcohol produces dangerous fumes when heated in warm weather.",
         frameStart: "I discovered that ",
-        slot1Default: "[select discovered clue]",
+        slot1Default: "[select discovered fact]",
         slot1Options: [
           "nine porous barrels of alcohol were empty and venting gas",
           "the ship was full of delicious chocolate cakes",
@@ -1053,7 +1124,6 @@
       }
     ];
 
-    // Stage 4 Theories
     const historicalTheories = [
       {
         id: 'vapor',
@@ -1067,21 +1137,19 @@
         title: "Brutal Pirate Raid",
         emoji: "🏴‍☠️",
         desc: "Pirates boarded the Mary Celeste, abducted the crew, and abandoned the ship.",
-        scientific: false,
-        rebuttal: "Contradiction: All 1,701 cargo barrels and valuable valuables were untouched!"
+        scientific: false
       },
       {
         id: 'kraken',
         title: "Kraken / Sea Monster Attack",
         emoji: "🐙",
         desc: "A gigantic ocean beast pulled the passengers and crew under the waves.",
-        scientific: false,
-        rebuttal: "Mythological: Zero physical claw marks, breakfast undisturbed, lifeboat deliberately unhooked."
+        scientific: false
       }
     ];
 
     /* =========================================================
-       4. GAME LIFECYCLE & NAVIGATION
+       4. GAME LIFECYCLE
        ========================================================= */
     function startGame() {
       const nameInput = document.getElementById('studentName');
@@ -1096,10 +1164,7 @@
       gameState.startTime = Date.now();
       sound.playSnap();
 
-      // Start Timer
       gameState.timerInterval = setInterval(updateTimer, 1000);
-
-      // Initialize Stage 1
       setupStage1();
       switchScreen('screenStage1');
     }
@@ -1124,8 +1189,21 @@
       sound.playChirp();
     }
 
+    function toggleDossier() {
+      const body = document.getElementById('dossierBody');
+      const icon = document.getElementById('dossierToggleIcon');
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.innerText = '[Click to Collapse ▲]';
+      } else {
+        body.style.display = 'none';
+        icon.innerText = '[Click to Read Dossier ▼]';
+      }
+      sound.playChirp();
+    }
+
     /* =========================================================
-       5. STAGE 1: FLOW MAP (SNAP-IN CARDS)
+       5. STAGE 1 LOGIC
        ========================================================= */
     function setupStage1() {
       const slotsContainer = document.getElementById('flowSlotsContainer');
@@ -1133,17 +1211,15 @@
       slotsContainer.innerHTML = '';
       bankContainer.innerHTML = '';
 
-      // Create 4 slots
       for (let i = 0; i < 4; i++) {
         const slot = document.createElement('div');
         slot.className = 'flow-slot';
         slot.id = `flowSlot_${i}`;
-        slot.innerHTML = `<div class="flow-slot-label">${i + 1}</div><span style="color:#6c757d; margin-left: 20px;">[Drop or click milestone block here]</span>`;
-        slot.addEventListener('click', () => handleSlotClick(i));
+        slot.innerHTML = `<div class="flow-slot-label">${i + 1}</div><span style="color:#6c757d; margin-left: 20px;">[Tap a milestone card below to insert]</span>`;
+        slot.onclick = () => handleSlotClick(i);
         slotsContainer.appendChild(slot);
       }
 
-      // Shuffle Cards Bank (Fisher-Yates)
       const shuffledCards = [...timelineMilestones].sort(() => Math.random() - 0.5);
       shuffledCards.forEach(item => {
         const card = document.createElement('div');
@@ -1155,28 +1231,27 @@
       });
     }
 
-    let selectedBankCard = null;
-
     function handleCardClick(item, cardElement) {
-      sound.playChirp();
-      // If card already placed in a slot, do nothing
       if (cardElement.classList.contains('snapped')) return;
-
-      // Find first empty slot
       const emptySlotIndex = gameState.stage1Answers.findIndex(ans => ans === null);
       if (emptySlotIndex !== -1) {
-        snapCardToSlot(item, cardElement, emptySlotIndex);
+        sound.playSnap();
+        gameState.stage1Answers[emptySlotIndex] = item;
+        cardElement.classList.add('snapped');
+        const slot = document.getElementById(`flowSlot_${emptySlotIndex}`);
+        slot.innerHTML = `<div class="flow-slot-label">${emptySlotIndex + 1}</div>`;
+        slot.appendChild(cardElement);
+        checkStage1Completion();
       }
     }
 
     function handleSlotClick(slotIndex) {
-      // If slot has a card, return it to bank
       const existing = gameState.stage1Answers[slotIndex];
       if (existing) {
         sound.playChirp();
         gameState.stage1Answers[slotIndex] = null;
         const slot = document.getElementById(`flowSlot_${slotIndex}`);
-        slot.innerHTML = `<div class="flow-slot-label">${slotIndex + 1}</div><span style="color:#6c757d; margin-left: 20px;">[Drop or click milestone block here]</span>`;
+        slot.innerHTML = `<div class="flow-slot-label">${slotIndex + 1}</div><span style="color:#6c757d; margin-left: 20px;">[Tap a milestone card below to insert]</span>`;
         const cardElement = document.getElementById(`milestoneCard_${existing.id}`);
         if (cardElement) {
           cardElement.classList.remove('snapped');
@@ -1186,39 +1261,24 @@
       }
     }
 
-    function snapCardToSlot(item, cardElement, slotIndex) {
-      sound.playSnap();
-      gameState.stage1Answers[slotIndex] = item;
-      cardElement.classList.add('snapped');
-      const slot = document.getElementById(`flowSlot_${slotIndex}`);
-      slot.innerHTML = `<div class="flow-slot-label">${slotIndex + 1}</div>`;
-      slot.appendChild(cardElement);
-      checkStage1Completion();
-    }
-
     function checkStage1Completion() {
       const allFilled = gameState.stage1Answers.every(ans => ans !== null);
       document.getElementById('stage1NextBtn').disabled = !allFilled;
     }
 
     function validateStage1() {
-      // Check correctness
       let correctCount = 0;
       gameState.stage1Answers.forEach((ans, idx) => {
-        if (ans && ans.id === (idx + 1)) {
-          correctCount++;
-        } else {
-          gameState.mistakes.push(`Stage 1 Flow Map: Step ${idx + 1} ordered incorrectly.`);
-        }
+        if (ans && ans.id === (idx + 1)) correctCount++;
+        else gameState.mistakes.push(`Stage 1 Flow Map: Step ${idx + 1} misplaced.`);
       });
-
-      addScore(correctCount * 10); // Max 40
+      addScore(correctCount * 10);
       setupStage2();
       switchScreen('screenStage2');
     }
 
     /* =========================================================
-       6. STAGE 2: CABIN SPOTLIGHT CLUES
+       6. STAGE 2 LOGIC (SPOTLIGHT)
        ========================================================= */
     let spotlightCanvas, spotlightCtx;
     let lightPos = { x: 150, y: 150 };
@@ -1233,7 +1293,6 @@
       wrapper.addEventListener('pointermove', handleSpotlightMove);
       wrapper.addEventListener('pointerdown', handleSpotlightMove);
 
-      // Attach clue clicks
       clueQuestions.forEach(q => {
         const clueEl = document.getElementById(q.id);
         if (clueEl) {
@@ -1243,7 +1302,6 @@
           };
         }
       });
-
       drawSpotlight();
     }
 
@@ -1268,11 +1326,9 @@
       const h = spotlightCanvas.height;
 
       spotlightCtx.clearRect(0, 0, w, h);
-      // Dark foggy layer
       spotlightCtx.fillStyle = 'rgba(5, 10, 18, 0.94)';
       spotlightCtx.fillRect(0, 0, w, h);
 
-      // Radial cut-out
       spotlightCtx.save();
       spotlightCtx.globalCompositeOperation = 'destination-out';
       const gradient = spotlightCtx.createRadialGradient(lightPos.x, lightPos.y, 20, lightPos.x, lightPos.y, 110);
@@ -1294,22 +1350,19 @@
       const optsBox = document.getElementById('modalOptionsBox');
       optsBox.innerHTML = '';
 
-      // Shuffle options
       const shuffledOpts = [...clueData.options].sort(() => Math.random() - 0.5);
       shuffledOpts.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'modal-opt-btn';
         btn.innerText = opt.text;
-        btn.onclick = () => {
-          handleClueAnswer(clueData.id, opt.correct, btn);
-        };
+        btn.onclick = () => handleClueAnswer(clueData.id, opt.correct);
         optsBox.appendChild(btn);
       });
 
       document.getElementById('clueModal').classList.add('active');
     }
 
-    function handleClueAnswer(clueId, isCorrect, btnElement) {
+    function handleClueAnswer(clueId, isCorrect) {
       document.getElementById('clueModal').classList.remove('active');
       const clueElement = document.getElementById(clueId);
 
@@ -1318,11 +1371,8 @@
         gameState.stage2CluesFound++;
         document.getElementById('cluesFoundCount').innerText = gameState.stage2CluesFound;
 
-        if (isCorrect) {
-          addScore(10);
-        } else {
-          gameState.mistakes.push(`Stage 2 Clue Question (${clueId}): Incorrect deduction.`);
-        }
+        if (isCorrect) addScore(10);
+        else gameState.mistakes.push(`Stage 2 Clue (${clueId}): Incorrect deduction.`);
 
         if (gameState.stage2CluesFound >= 4) {
           document.getElementById('stage2NextBtn').disabled = false;
@@ -1337,7 +1387,7 @@
     }
 
     /* =========================================================
-       7. STAGE 3: SENTENCE FRAMES WORKSHOP
+       7. STAGE 3 LOGIC (SENTENCE BUILDER + VISIBLE CLUES)
        ========================================================= */
     function setupStage3() {
       const container = document.getElementById('sentenceQuestsContainer');
@@ -1347,7 +1397,13 @@
         const card = document.createElement('div');
         card.className = 'sentence-quest-card';
 
-        // Sentence display
+        // NEW: Clue Hint Banner for Scaffolding
+        const hintBanner = document.createElement('div');
+        hintBanner.className = 'clue-hint-banner';
+        hintBanner.innerHTML = `<span>${quest.clueHint}</span>`;
+        card.appendChild(hintBanner);
+
+        // Frame Sentence
         const display = document.createElement('div');
         display.className = 'sentence-frame-display';
         display.innerHTML = `
@@ -1359,7 +1415,7 @@
         `;
         card.appendChild(display);
 
-        // Pickers Bank 1
+        // Options 1 (Discovered fact)
         const pickers1 = document.createElement('div');
         pickers1.className = 'roller-picker-options';
         pickers1.innerHTML = `<span style="font-size:0.75rem; color:#8da9c4; width:100%;">Select Fact:</span>`;
@@ -1369,8 +1425,10 @@
           chip.className = 'roller-chip';
           chip.innerText = text;
           chip.onclick = () => {
-            document.getElementById(`slot1_${qIdx}`).innerText = text;
             sound.playChirp();
+            document.getElementById(`slot1_${qIdx}`).innerText = text;
+            pickers1.querySelectorAll('.roller-chip').forEach(c => c.classList.remove('active-choice'));
+            chip.classList.add('active-choice');
             gameState.stage3Selections[qIdx] = gameState.stage3Selections[qIdx] || {};
             gameState.stage3Selections[qIdx].part1 = text;
             checkStage3Completion();
@@ -1379,7 +1437,7 @@
         });
         card.appendChild(pickers1);
 
-        // Pickers Bank 2
+        // Options 2 (Rational cause)
         const pickers2 = document.createElement('div');
         pickers2.className = 'roller-picker-options';
         pickers2.innerHTML = `<span style="font-size:0.75rem; color:#8da9c4; width:100%;">Select Reason:</span>`;
@@ -1389,8 +1447,10 @@
           chip.className = 'roller-chip';
           chip.innerText = text;
           chip.onclick = () => {
-            document.getElementById(`slot2_${qIdx}`).innerText = text;
             sound.playChirp();
+            document.getElementById(`slot2_${qIdx}`).innerText = text;
+            pickers2.querySelectorAll('.roller-chip').forEach(c => c.classList.remove('active-choice'));
+            chip.classList.add('active-choice');
             gameState.stage3Selections[qIdx] = gameState.stage3Selections[qIdx] || {};
             gameState.stage3Selections[qIdx].part2 = text;
             checkStage3Completion();
@@ -1410,24 +1470,19 @@
     }
 
     function goToStage4() {
-      // Validate Stage 3 Answers
       let scoreGained = 0;
       sentenceQuests.forEach((q, idx) => {
         const sel = gameState.stage3Selections[idx];
-        if (sel.part1 === q.slot1Correct && sel.part2 === q.slot2Correct) {
-          scoreGained += 10;
-        } else {
-          gameState.mistakes.push(`Stage 3 Sentence ${idx + 1}: Unaligned cause-effect sentence frame.`);
-        }
+        if (sel.part1 === q.slot1Correct && sel.part2 === q.slot2Correct) scoreGained += 10;
+        else gameState.mistakes.push(`Stage 3 Sentence ${idx + 1}: Unaligned cause-effect pair.`);
       });
-      addScore(scoreGained); // Max 30
-
+      addScore(scoreGained);
       setupStage4();
       switchScreen('screenStage4');
     }
 
     /* =========================================================
-       8. STAGE 4: RATIONAL DEDUCTION SCALE
+       8. STAGE 4 LOGIC (BALANCE)
        ========================================================= */
     function setupStage4() {
       const container = document.getElementById('theoriesContainer');
@@ -1455,39 +1510,31 @@
       document.getElementById(`theory_${theory.id}`).classList.add('selected');
 
       const beam = document.getElementById('scaleBeam');
-      const panTheoryText = document.getElementById('panTheoryText');
-      panTheoryText.innerText = theory.title;
+      document.getElementById('panTheoryText').innerText = theory.title;
 
-      // Visual Balance Beam Physics
       if (theory.scientific) {
-        beam.style.transform = 'rotate(0deg)'; // Perfect rational balance
+        beam.style.transform = 'rotate(0deg)';
       } else {
-        beam.style.transform = 'rotate(18deg)'; // Heavy contradiction tilt
+        beam.style.transform = 'rotate(18deg)';
       }
 
       document.getElementById('submitAllBtn').disabled = false;
     }
 
     /* =========================================================
-       9. COMPLETION & GOOGLE SHEETS BACKGROUND SYNC
+       9. COMPLETION & SUBMISSION
        ========================================================= */
     function finishAndSubmitGame() {
       clearInterval(gameState.timerInterval);
-      const submitBtn = document.getElementById('submitAllBtn');
-      submitBtn.disabled = true;
+      document.getElementById('submitAllBtn').disabled = true;
 
-      // Score final stage
-      if (gameState.selectedTheoryId === 'vapor') {
-        addScore(10);
-      } else {
-        gameState.mistakes.push("Stage 4 Deduction: Chose contradicted hypothesis instead of rational physical evidence.");
-      }
+      if (gameState.selectedTheoryId === 'vapor') addScore(10);
+      else gameState.mistakes.push("Stage 4 Deduction: Contradicted hypothesis chosen.");
 
       const totalTimeSpent = document.getElementById('timerDisplay').innerText;
       const finalScore = Math.min(100, gameState.score);
       const percentage = finalScore;
 
-      // Detective Rank Evaluation
       let rank = "Junior Detective (TP3)";
       let stars = "⭐⭐";
       if (percentage >= 90) {
@@ -1501,7 +1548,6 @@
         stars = "⭐";
       }
 
-      // Display Final UI
       document.getElementById('starsRow').innerText = stars;
       document.getElementById('finalScoreVal').innerText = finalScore;
       document.getElementById('detectiveRankText').innerText = rank;
@@ -1511,11 +1557,9 @@
       renderReview();
       switchScreen('screenResult');
 
-      // Trigger Confetti & Fanfare
       sound.playFanfare();
       triggerConfetti();
 
-      // Submit score in background
       const payload = {
         name: gameState.name,
         studentClass: gameState.studentClass,
@@ -1553,7 +1597,7 @@
     function renderReview() {
       const reviewBox = document.getElementById('reviewList');
       reviewBox.innerHTML = `
-        <div class="review-item"><strong>1. Chronology:</strong> New York departure (7 Nov) ➔ Azores log entry (25 Nov) ➔ Spotted by Dei Gratia (5 Dec) ➔ Search party boards deserted ship.</div>
+        <div class="review-item"><strong>1. Chronology:</strong> Departure from NY (7 Nov) ➔ Calm log entry (25 Nov) ➔ Spotted by Dei Gratia (5 Dec) ➔ Boarding & deserted ship.</div>
         <div class="review-item"><strong>2. Untouched Meals:</strong> Breakfast on table proves crew evacuated in sudden panic, not starvation.</div>
         <div class="review-item"><strong>3. Untouched Cargo:</strong> 1,701 barrels intact rules out pirate raid.</div>
         <div class="review-item"><strong>4. Target Frame:</strong> <em>'I discovered that nine barrels of alcohol were empty and venting gas, and it was strange because fuming vapors could cause an explosion scare.'</em></div>
@@ -1562,7 +1606,7 @@
     }
 
     /* =========================================================
-       10. CANVASES: CONFETTI CELEBRATION
+       10. CONFETTI ANIMATION
        ========================================================= */
     function triggerConfetti() {
       const canvas = document.getElementById('confettiCanvas');
