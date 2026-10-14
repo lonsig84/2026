@@ -175,21 +175,6 @@
       filter: grayscale(0.8);
     }
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--parchment);
-      border: 1px solid rgba(224, 169, 109, 0.5);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(224, 169, 109, 0.2);
-    }
-
     /* Screen 0: Welcome / Form */
     .briefing-box {
       background: var(--parchment);
@@ -225,6 +210,29 @@
       color: #fff;
       font-size: 1rem;
       outline: none;
+    }
+
+    /* CANVA PPT EMBED CONTAINER */
+    .canva-presentation-wrapper {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid var(--brass);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+      background: #000;
+    }
+
+    .canva-presentation-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
     /* READING DOSSIER ACCORDION (For Mission 1) */
@@ -440,10 +448,6 @@
       font-size: 0.85rem;
       color: #ffdda1;
       line-height: 1.4;
-    }
-
-    .clue-hint-banner strong {
-      color: var(--glow-gold);
     }
 
     .sentence-frame-display {
@@ -730,7 +734,7 @@
           <strong>Official Case Dispatch:</strong><br>
           The merchant brigantine <em>Mary Celeste</em> was discovered sailing unmanned near the Azores Islands. 
           There was plenty of food, the cargo was untouched, yet all 10 crew members and passengers were missing! 
-          Read the investigative dossier carefully, locate the evidence, and construct a logical timeline.
+          Please fill in your detective credentials below to begin your mission.
         </div>
 
         <div class="input-group">
@@ -749,8 +753,35 @@
         </div>
 
         <div style="text-align: center; margin-top: 24px;">
-          <button class="btn" onclick="startGame()">
-            <span>⚓ Begin Investigation</span>
+          <button class="btn" onclick="startBriefing()">
+            <span>📖 Review Case Briefing (Slides) ➔</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 1: Canva PPT Presentation Embed -->
+    <section id="screenPresentation" class="screen">
+      <div class="investigation-panel">
+        <div class="panel-header">
+          <h2>Mission Briefing: Lesson Slides</h2>
+          <p>Carefully browse through the lesson slides below before boarding the abandoned ship.</p>
+        </div>
+
+        <!-- Embedded Canva PPT -->
+        <div class="canva-presentation-wrapper">
+          <iframe 
+            loading="lazy" 
+            src="https://www.canva.com/design/DAHX8uxnOyE/zJyV_HwET5TUnPbi6poPZw/view?embed" 
+            allowfullscreen="allowfullscreen" 
+            allow="fullscreen">
+          </iframe>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <span style="font-size: 0.85rem; color: #abc4ff;">💡 Tip: Tap the slides to navigate pages.</span>
+          <button class="btn" onclick="proceedToMission1()">
+            <span>⚓ I'm Ready! Start Mission 1 🚀</span>
           </button>
         </div>
       </div>
@@ -764,7 +795,7 @@
           <p>Read the investigative text below, scan for dates, and reconstruct the timeline.</p>
         </div>
 
-        <!-- NEW: Full Investigative Article for Reading & Scanning -->
+        <!-- Reading Dossier -->
         <div class="dossier-card">
           <div class="dossier-header" onclick="toggleDossier()">
             <h3>📜 Case Dossier: The Ship with No Crew (Textbook pp. 124–125)</h3>
@@ -1060,7 +1091,6 @@
       }
     ];
 
-    // STAGE 3 DATA WITH CLUES & HINTS
     const sentenceQuests = [
       {
         id: 0,
@@ -1149,9 +1179,9 @@
     ];
 
     /* =========================================================
-       4. GAME LIFECYCLE
+       4. GAME LIFECYCLE & NAVIGATION
        ========================================================= */
-    function startGame() {
+    function startBriefing() {
       const nameInput = document.getElementById('studentName');
       const name = nameInput.value.trim();
       if (!name) {
@@ -1161,10 +1191,18 @@
       }
       gameState.name = name;
       gameState.studentClass = document.getElementById('studentClass').value;
-      gameState.startTime = Date.now();
       sound.playSnap();
 
+      // Go to Canva PPT Screen First
+      switchScreen('screenPresentation');
+    }
+
+    function proceedToMission1() {
+      sound.playSnap();
+      // Start Timer upon entering Mission 1
+      gameState.startTime = Date.now();
       gameState.timerInterval = setInterval(updateTimer, 1000);
+
       setupStage1();
       switchScreen('screenStage1');
     }
@@ -1397,13 +1435,11 @@
         const card = document.createElement('div');
         card.className = 'sentence-quest-card';
 
-        // NEW: Clue Hint Banner for Scaffolding
         const hintBanner = document.createElement('div');
         hintBanner.className = 'clue-hint-banner';
         hintBanner.innerHTML = `<span>${quest.clueHint}</span>`;
         card.appendChild(hintBanner);
 
-        // Frame Sentence
         const display = document.createElement('div');
         display.className = 'sentence-frame-display';
         display.innerHTML = `
@@ -1415,7 +1451,7 @@
         `;
         card.appendChild(display);
 
-        // Options 1 (Discovered fact)
+        // Discovered fact
         const pickers1 = document.createElement('div');
         pickers1.className = 'roller-picker-options';
         pickers1.innerHTML = `<span style="font-size:0.75rem; color:#8da9c4; width:100%;">Select Fact:</span>`;
@@ -1437,7 +1473,7 @@
         });
         card.appendChild(pickers1);
 
-        // Options 2 (Rational cause)
+        // Rational cause
         const pickers2 = document.createElement('div');
         pickers2.className = 'roller-picker-options';
         pickers2.innerHTML = `<span style="font-size:0.75rem; color:#8da9c4; width:100%;">Select Reason:</span>`;
