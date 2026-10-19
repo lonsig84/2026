@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>2026年儿童节庆典特刊 | SJKC KG BARU GEDOK</title>
+    <!-- 引入稳定的 page-flip 插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fff8f0; overflow: hidden; }
+
+        #app {
+            display: flex; flex-direction: column;
+            height: 100vh; height: 100dvh; width: 100vw;
+            position: relative;
+        }
+
+        /* 顶部导航：彩虹橙粉渐变 */
+        header {
+            background: linear-gradient(135deg, #ff7675 0%, #fab1a0 100%);
+            color: #ffffff;
+            padding: 10px 16px; text-align: center;
+            box-shadow: 0 3px 8px rgba(255, 118, 117, 0.3); z-index: 10;
+        }
+        header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+        header p { font-size: 0.78rem; opacity: 0.95; margin-top: 3px; font-weight: 500; }
+
+        main {
+            flex: 1; position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            padding: 10px; min-height: 200px;
+        }
+
+        #drag-wrapper {
+            position: absolute; transform-origin: center center;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* 翻书容器及立体阴影 */
+        #flipbook { box-shadow: 0 12px 30px rgba(0,0,0,0.15); border-radius: 4px; }
+        .page { background-color: #fff; border: solid 1px #eee; overflow: hidden; }
+        .page img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
+        .page.--left { border-right: 0; box-shadow: inset -10px 0 25px rgba(0,0,0,0.06); }
+        .page.--right { border-left: 0; box-shadow: inset 10px 0 25px rgba(0,0,0,0.06); }
+
+        footer {
+            background: #ffffff; padding: 10px 8px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            display: flex; justify-content: center; align-items: center;
+            gap: 8px; box-shadow: 0 -3px 15px rgba(0,0,0,0.06);
+            z-index: 10; flex-wrap: wrap;
+        }
+
+        button {
+            background: #fff5eb; border: 1px solid #ffd8a8; border-radius: 20px;
+            padding: 6px 14px; color: #e8590c; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 4px; 
+            font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
+        }
+        button:hover:not(:disabled) { background: #ffe8cc; transform: translateY(-1px); }
+        button:active:not(:disabled) { transform: scale(0.95); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; background: #f1f3f5; border-color: #dee2e6; color: #adb5bd; }
+        button svg { width: 18px; height: 18px; fill: currentColor; }
+
+        #page-info { font-weight: bold; font-variant-numeric: tabular-nums; min-width: 65px; text-align: center; margin: 0 4px; color: #495057; }
+
+        /* --- 飘然升空的慢速摇曳动画系统 --- */
+        #floating-particles-container {
+            position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 90;
+        }
+
+        .slow-float-item {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            opacity: 0;
+            will-change: transform, opacity;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.12));
+            animation: slowWiggleRise ease-in-out forwards;
+        }
+
+        /* 左右摇摆、不规则升空轨迹 */
+        @keyframes slowWiggleRise {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0) rotate(0deg) scale(0.6);
+            }
+            15% {
+                opacity: 0.95;
+                transform: translate(var(--dx1, 15px), -50px) rotate(var(--rot1, 12deg)) scale(1.1);
+            }
+            45% {
+                opacity: 0.9;
+                transform: translate(var(--dx2, -20px), -180px) rotate(var(--rot2, -15deg)) scale(1);
+            }
+            75% {
+                opacity: 0.8;
+                transform: translate(var(--dx3, 25px), -320px) rotate(var(--rot3, 10deg)) scale(0.95);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--dx4, -10px), -460px) rotate(var(--rot4, -20deg)) scale(0.7);
+            }
+        }
+
+        /* 音乐旋转动画 */
+        .rotating { animation: spinBgm 4s linear infinite; }
+        @keyframes spinBgm { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        #loading {
+            position: absolute; inset: 0; background: #fff8f0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 999; color: #e8590c; font-weight: bold; font-size: 1.1rem;
+        }
+        .spinner {
+            width: 44px; height: 44px; margin-bottom: 16px;
+            border: 4px solid rgba(255, 118, 117, 0.2); border-top-color: #ff7675;
+            border-radius: 50%; animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 全屏模式适配 */
+        .fs-only { display: none; }
+        #app.fs-mode {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%; z-index: 99999; background: #1a1a1a;
+        }
+        #app.fs-mode header { display: none; }
+        #app.fs-mode footer { 
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(30, 30, 30, 0.85); color: #fff;
+            border-top: 1px solid #444; backdrop-filter: blur(8px);
+        }
+        #app.fs-mode button { background: #333; color: #ffd8a8; border-color: #555; }
+        #app.fs-mode button:hover:not(:disabled) { background: #444; }
+        #app.fs-mode .fs-only { display: flex; }
+        #app.fs-mode #page-info { color: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <h1>🎈 2026年儿童节庆典特刊</h1>
+        <p>利民济义乐新村华小 SJK(C) KG BARU GEDOK</p>
+    </header>
+
+    <main id="main-area">
+        <div id="loading">
+            <div class="spinner"></div>
+            <div id="loading-text">装载庆典特刊中... 0%</div>
+        </div>
+        
+        <!-- 慢速梦幻飘浮特效层 -->
+        <div id="floating-particles-container"></div>
+
+        <div id="drag-wrapper">
+            <div id="flipbook"></div>
+        </div>
+    </main>
+
+    <footer>
+        <button id="btn-prev" onclick="flipPrev()" title="上一页">
+            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+        </button>
+        <span id="page-info">-- / --</span>
+        <button id="btn-next" onclick="flipNext()" title="下一页">
+            <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+        </button>
+
+        <button class="fs-only" onclick="zoomOut()" title="缩小">-</button>
+        <span class="fs-only" id="zoom-info" style="min-width:45px; text-align:center; font-size:0.85rem;">100%</span>
+        <button class="fs-only" onclick="zoomIn()" title="放大">+</button>
+        <button class="fs-only" onclick="zoomReset()" title="重置位置">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/></svg>
+        </button>
+
+        <!-- 翻页纸张音效开关 -->
+        <button id="btn-sound" onclick="toggleSound()" title="翻页纸张音效">
+            <svg id="icon-sound-on" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
+
+        <!-- 背景音乐 (BGM) 开关 -->
+        <button id="btn-bgm" onclick="toggleBgm()" title="背景音乐开关">
+            <svg id="bgm-icon" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            <span id="bgm-text">音乐</span>
+        </button>
+
+        <!-- 全屏模式 -->
+        <button id="btn-fs" onclick="toggleFullscreen()" title="全屏查看">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+    </footer>
+</div>
+
+<!-- 背景音乐（m4a） -->
+<audio id="bgm-audio" loop preload="auto">
+    <source src="bgm.m4a" type="audio/mp4">
+</audio>
+
+<script>
+    const TOTAL_PAGES = 4;
+    const pageImages = ['page-1.webp', 'page-2.webp', 'page-3.webp', 'page-4.webp'];
+    
+    let book = null;
+    let isMobileMode = false;
+    let currentZoom = 1;
+    const zoomLevels = [1, 1.25, 1.5, 1.75, 2];
+    let isFullscreen = false;
+    let soundEnabled = true;
+    let startPageIdx = 0;
+
+    // --- 不规则晃动慢慢漂浮粒子系统 ---
+    const cuteIcons = ['🎈', '✨', '⭐', '🍬', '🎵', '💖', '🌟', '🍭', '🌈', '🎉', '🌸', '🪄'];
+    const particleContainer = document.getElementById('floating-particles-container');
+
+    function spawnFloatingItems(count = 7, mode = 'bottom') {
+        if (!particleContainer) return;
+        const mainArea = document.getElementById('main-area');
+        const W = mainArea.clientWidth || window.innerWidth;
+        const H = mainArea.clientHeight || window.innerHeight;
+
+        for (let i = 0; i < count; i++) {
+            const span = document.createElement('span');
+            span.className = 'slow-float-item';
+            span.innerText = cuteIcons[Math.floor(Math.random() * cuteIcons.length)];
+
+            // 1. 不规则出现位置：底部、左侧或右侧随机
+            let startX, startY;
+            if (mode === 'bottom') {
+                startX = 8 + Math.random() * 84; // 8% ~ 92% 随机横向位置
+                startY = 15 + Math.random() * 45; // 距离底部高度不同
+            } else {
+                // 翻页时从左右两端或斜上方飘出
+                startX = Math.random() < 0.5 ? (5 + Math.random() * 20) : (75 + Math.random() * 20);
+                startY = 30 + Math.random() * 60;
+            }
+
+            span.style.left = `${startX}%`;
+            span.style.bottom = `${startY}px`;
+
+            // 2. 随机大小（18px 到 36px，错落有致）
+            const size = 18 + Math.floor(Math.random() * 18);
+            span.style.fontSize = `${size}px`;
+
+            // 3. 产生不规则 S 曲线摆动变量
+            span.style.setProperty('--dx1', `${(Math.random() * 40 - 20).toFixed(0)}px`);
+            span.style.setProperty('--dx2', `${(Math.random() * 60 - 30).toFixed(0)}px`);
+            span.style.setProperty('--dx3', `${(Math.random() * 50 - 25).toFixed(0)}px`);
+            span.style.setProperty('--dx4', `${(Math.random() * 30 - 15).toFixed(0)}px`);
+            
+            span.style.setProperty('--rot1', `${(Math.random() * 30 - 15).toFixed(0)}deg`);
+            span.style.setProperty('--rot2', `${(Math.random() * 40 - 20).toFixed(0)}deg`);
+            span.style.setProperty('--rot3', `${(Math.random() * 30 - 15).toFixed(0)}deg`);
+            span.style.setProperty('--rot4', `${(Math.random() * 40 - 20).toFixed(0)}deg`);
+
+            // 4. 慢速上升：4.5秒 ～ 6.5秒（慢慢飘）
+            const duration = 4.5 + Math.random() * 2.0;
+            const delay = (Math.random() * 0.8).toFixed(2);
+            span.style.animationDuration = `${duration.toFixed(2)}s`;
+            span.style.animationDelay = `${delay}s`;
+
+            particleContainer.appendChild(span);
+
+            // 动画结束后自动清理
+            setTimeout(() => {
+                if (span && span.parentNode) {
+                    span.parentNode.removeChild(span);
+                }
+            }, (duration + parseFloat(delay) + 0.5) * 1000);
+        }
+    }
+
+    // --- 背景音乐 (BGM) 全自动播放引擎 ---
+    const bgmAudio = document.getElementById('bgm-audio');
+    let isBgmPlaying = false;
+
+    function playBgm() {
+        if (!bgmAudio || isBgmPlaying) return;
+        const playPromise = bgmAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                isBgmPlaying = true;
+                document.getElementById('bgm-icon').classList.add('rotating');
+                document.getElementById('bgm-text').innerText = '播放中';
+                removeAutoPlayListeners();
+            }).catch(err => {
+                // 浏览器若禁止未触摸自动播放，等待下一次任意触摸
+                console.log("等待手势唤醒播放");
+            });
+        }
+    }
+
+    function pauseBgm() {
+        if (!bgmAudio) return;
+        bgmAudio.pause();
+        isBgmPlaying = false;
+        document.getElementById('bgm-icon').classList.remove('rotating');
+        document.getElementById('bgm-text').innerText = '暂停';
+    }
+
+    function toggleBgm() {
+        if (isBgmPlaying) pauseBgm();
+        else playBgm();
+    }
+
+    // 全局触摸保底：只要手指碰到屏幕任意角落、翻页、划动，马上顺畅启动音乐！
+    function wakeAudioOnAnyTouch() {
+        if (!isBgmPlaying) {
+            playBgm();
+        }
+    }
+
+    function addAutoPlayListeners() {
+        window.addEventListener('click', wakeAudioOnAnyTouch, { passive: true });
+        window.addEventListener('touchstart', wakeAudioOnAnyTouch, { passive: true });
+        window.addEventListener('pointerdown', wakeAudioOnAnyTouch, { passive: true });
+    }
+
+    function removeAutoPlayListeners() {
+        window.removeEventListener('click', wakeAudioOnAnyTouch);
+        window.removeEventListener('touchstart', wakeAudioOnAnyTouch);
+        window.removeEventListener('pointerdown', wakeAudioOnAnyTouch);
+    }
+
+    addAutoPlayListeners();
+
+    // --- 翻书物理拟真音效 ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    function playFlipSound() {
+        if (!soundEnabled) return;
+        try {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const bufferSize = audioCtx.sampleRate * 0.15;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+            const noiseSrc = audioCtx.createBufferSource();
+            noiseSrc.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            filter.frequency.linearRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+            noiseSrc.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination);
+            noiseSrc.start();
+        } catch (e) {}
+    }
+
+    // --- 图片预加载（针对 webp） ---
+    function preloadImages() {
+        let loaded = 0, failed = false;
+        pageImages.forEach(url => {
+            const img = new Image();
+            img.onload = () => {
+                if (failed) return;
+                loaded++;
+                document.getElementById('loading-text').innerText = `装载庆典特刊中... ${Math.round(loaded/4 * 100)}%`;
+                if (loaded === 4) {
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                        scheduleRebuild();
+                        
+                        // 1. 开始时慢慢浮现一批不规则的小可爱们（分成两波错落浮现）
+                        spawnFloatingItems(8, 'bottom');
+                        setTimeout(() => spawnFloatingItems(5, 'bottom'), 1200);
+
+                        // 2. 页面就绪后 1 秒尝试自动播放音频
+                        setTimeout(() => {
+                            playBgm();
+                        }, 1000);
+
+                    }, 300);
+                }
+            };
+            img.onerror = () => { 
+                failed = true; 
+                document.getElementById('loading').innerHTML = `<div style="color:#e03131; padding: 20px; text-align: center;">找不到图片文件，请确保目录中含有：<br>page-1.webp ~ page-4.webp</div>`; 
+            };
+            img.src = url;
+        });
+    }
+
+    // --- 防抖重建 ---
+    let rebuildTimer = null;
+    function scheduleRebuild() {
+        clearTimeout(rebuildTimer);
+        rebuildTimer = setTimeout(() => {
+            zoomReset();
+            initBook();
+        }, 300);
+    }
+
+    // --- 初始化/重建翻书组件 ---
+    function initBook() {
+        const mainArea = document.getElementById('main-area');
+        const dragWrapper = document.getElementById('drag-wrapper');
+
+        if (book) {
+            try {
+                startPageIdx = book.getCurrentPageIndex();
+                book.destroy();
+            } catch (e) { console.warn("组件销毁日志", e); }
+            book = null; 
+        }
+
+        dragWrapper.innerHTML = '<div id="flipbook"></div>';
+        const container = document.getElementById('flipbook');
+
+        // 注入 4 个页面（第 1 页封面硬皮，第 4 页歌词硬皮）
+        container.innerHTML = `
+            <div class="page" data-density="hard"><img src="${pageImages[0]}" alt="封面"></div>
+            <div class="page"><img src="${pageImages[1]}" alt="工委会表"></div>
+            <div class="page"><img src="${pageImages[2]}" alt="流程表"></div>
+            <div class="page" data-density="hard"><img src="${pageImages[3]}" alt="歌词封底"></div>
+        `;
+
+        let W = mainArea.clientWidth;
+        let H = mainArea.clientHeight;
+        if (W < 100) W = window.innerWidth;
+        if (H < 100) H = window.innerHeight - 80;
+
+        const ratio = 0.707; // A4 比例
+        isMobileMode = window.innerWidth < 768;
+        
+        let pWidth, pHeight;
+        if (isMobileMode) {
+            pHeight = H - 20; pWidth = pHeight * ratio;
+            if (pWidth > W - 20) { pWidth = W - 20; pHeight = pWidth / ratio; }
+        } else {
+            pHeight = H - 40; pWidth = pHeight * ratio;
+            if (pWidth * 2 > W - 40) { pWidth = (W - 40) / 2; pHeight = pWidth / ratio; }
+        }
+
+        if (startPageIdx >= TOTAL_PAGES) startPageIdx = 0;
+
+        book = new St.PageFlip(container, {
+            width: Math.max(Math.round(pWidth), 100),
+            height: Math.max(Math.round(pHeight), 141),
+            size: 'fixed',
+            showCover: true,
+            usePortrait: isMobileMode,
+            maxShadowOpacity: 0.5,
+            drawShadow: true,
+            startPage: startPageIdx
+        });
+
+        book.loadFromHTML(container.querySelectorAll('.page'));
+        
+        book.on('flip', (e) => {
+            updatePageInfo(e.data);
+            if (e.data !== startPageIdx) {
+                playFlipSound();
+                // 翻页时伴随不规则飘浮出几颗小星星/彩球
+                spawnFloatingItems(6, 'side');
+            }
+            startPageIdx = e.data;
+        });
+        updatePageInfo(startPageIdx);
+    }
+
+    function updatePageInfo(idx) {
+        const infoEl = document.getElementById('page-info');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        if (isMobileMode) {
+            infoEl.innerText = `${idx + 1} / 4`;
+            btnPrev.disabled = (idx === 0); btnNext.disabled = (idx === 3);
+        } else {
+            if (idx === 0) { infoEl.innerText = '1 / 4'; btnPrev.disabled = true; btnNext.disabled = false; }
+            else if (idx === 1 || idx === 2) { infoEl.innerText = '2–3 / 4'; btnPrev.disabled = false; btnNext.disabled = false; }
+            else if (idx === 3) { infoEl.innerText = '4 / 4'; btnPrev.disabled = false; btnNext.disabled = true; }
+        }
+    }
+
+    function flipPrev() { if(book) book.flipPrev(); }
+    function flipNext() { if(book) book.flipNext(); }
+
+    // --- 响应式与全屏处理 ---
+    let lastW = window.innerWidth;
+    let lastH = window.innerHeight;
+    window.addEventListener('resize', () => {
+        const newW = window.innerWidth; const newH = window.innerHeight;
+        if (Math.abs(newW - lastW) > 20 || Math.abs(newH - lastH) > 60) {
+            lastW = newW; lastH = newH;
+            scheduleRebuild();
+        }
+    });
+
+    function toggleFullscreen() {
+        const app = document.getElementById('app');
+        isFullscreen = !isFullscreen;
+        if (isFullscreen) app.classList.add('fs-mode');
+        else app.classList.remove('fs-mode');
+        scheduleRebuild();
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('btn-sound');
+        btn.innerHTML = soundEnabled 
+            ? `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`
+            : `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.11-.31 2.15-.82 3.08-1.48l3.17 3.17 1.27-1.27L11 10.27 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>`;
+    }
+
+    // --- 缩放与拖拽 ---
+    const dragWrapper = document.getElementById('drag-wrapper');
+    const mainArea = document.getElementById('main-area');
+    let panX = 0, panY = 0, isDragging = false, startMouseX = 0, startMouseY = 0, startPanX = 0, startPanY = 0;
+
+    function applyTransform() {
+        dragWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+        document.getElementById('zoom-info').innerText = `${Math.round(currentZoom * 100)}%`;
+        const flipbookEl = document.getElementById('flipbook');
+        if(flipbookEl) flipbookEl.style.pointerEvents = currentZoom > 1 ? 'none' : 'auto';
+    }
+
+    function zoomIn() {
+        let idx = zoomLevels.indexOf(currentZoom);
+        if(idx < zoomLevels.length - 1) { currentZoom = zoomLevels[idx + 1]; applyTransform(); }
+    }
+    function zoomOut() {
+        let idx = zoomLevels.indexOf(currentZoom);
+        if(idx > 0) { currentZoom = zoomLevels[idx - 1]; applyTransform(); }
+        if(currentZoom === 1) zoomReset();
+    }
+    function zoomReset() {
+        currentZoom = 1; panX = 0; panY = 0;
+        dragWrapper.style.transition = 'transform 0.3s';
+        applyTransform();
+        setTimeout(() => { dragWrapper.style.transition = 'none'; }, 300);
+    }
+    mainArea.addEventListener('dblclick', (e) => {
+        if(!isFullscreen) return;
+        if(currentZoom === 1) { currentZoom = 1.5; applyTransform(); }
+        else { zoomReset(); }
+    });
+    function startDrag(e) {
+        if (currentZoom === 1) return;
+        isDragging = true;
+        startMouseX = e.touches ? e.touches[0].clientX : e.clientX;
+        startMouseY = e.touches ? e.touches[0].clientY : e.clientY;
+        startPanX = panX; startPanY = panY;
+        dragWrapper.style.transition = 'none';
+    }
+    function doDrag(e) {
+        if (!isDragging || currentZoom === 1) return;
+        e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        panX = startPanX + (clientX - startMouseX);
+        panY = startPanY + (clientY - startMouseY);
+        applyTransform();
+    }
+    function endDrag() { isDragging = false; }
+    mainArea.addEventListener('mousedown', startDrag); window.addEventListener('mousemove', doDrag, { passive: false }); window.addEventListener('mouseup', endDrag);
+    mainArea.addEventListener('touchstart', startDrag, { passive: false }); window.addEventListener('touchmove', doDrag, { passive: false }); window.addEventListener('touchend', endDrag);
+    window.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') flipPrev(); else if (e.key === 'ArrowRight') flipNext(); });
+    window.onload = preloadImages;
+</script>
+</body>
+</html>
