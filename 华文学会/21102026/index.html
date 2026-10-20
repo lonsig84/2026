@@ -71,13 +71,15 @@
       transform: scale(0.91);
     }
 
-    @keyframes gentleShake {
+    @keyframes penaltyShake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-6px) rotate(-1deg); }
-      75% { transform: translateX(6px) rotate(1deg); }
+      20% { transform: translateX(-10px) rotate(-1.5deg); }
+      40% { transform: translateX(10px) rotate(1.5deg); }
+      60% { transform: translateX(-8px) rotate(-1deg); }
+      80% { transform: translateX(8px) rotate(1deg); }
     }
-    .gentle-shake {
-      animation: gentleShake 0.35s ease-in-out;
+    .penalty-shake {
+      animation: penaltyShake 0.42s ease-in-out;
     }
 
     @keyframes popIn {
@@ -102,14 +104,22 @@
         🗺️ 华文学会·巨型开放世界RPG 🗺️
       </div>
       <h1 class="serif-title text-3xl font-black text-amber-950 tracking-wider mb-1">文字勇者传</h1>
-      <p class="serif-title text-xs font-bold text-amber-800 mb-3">— 书院·断桥·竹林迷宫·寒冰山洞·鲁班地宫 —</p>
+      <p class="serif-title text-xs font-bold text-amber-800 mb-2.5">— 书院·断桥·竹林迷宫·寒冰山洞·鲁班地宫 —</p>
 
-      <div class="bg-amber-900/10 border border-amber-900/25 rounded-xl p-3 text-left text-xs text-amber-950 space-y-1.5 mb-3.5 leading-relaxed">
-        <p>🏠 <b>第一关（翰林书院内）</b>：推开北面书院大门进入室内，找字源村长闯关。</p>
-        <p>🌿 <b>第二关（南境青竹大迷宫）</b>：穿越层层竹墙迷宫，在中心找到成语猎人。</p>
-        <p>🌉 <b>第三关（西境沧浪断桥）</b>：挥剑砍开森林枯藤，扳动机关修复断桥，登诗仙云崖。</p>
+      <div class="bg-amber-900/10 border border-amber-900/25 rounded-xl p-2.5 text-left text-xs text-amber-950 space-y-1 mb-2.5 leading-relaxed">
+        <p>🏠 <b>第一关（翰林书院内）</b>：推开北面书院大门进入室内，找字源村长。</p>
+        <p>🌿 <b>第二关（南境青竹大迷宫）</b>：穿越层层竹墙迷宫，在中心找成语猎人。</p>
+        <p>🌉 <b>第三关（西境沧浪断桥）</b>：挥剑砍开森林枯藤，扳动机关修复断桥。</p>
         <p>🕳️ <b>第四关（北境深渊山洞）</b>：远征北方雪山进入山洞内部，决战墨境神兽。</p>
-        <p>🔒 <b>隐藏关（东北鲁班地宫）</b>：攒满 <b>600 灵力分</b>（可沿途开5个奇遇宝箱加分）即可推开黄金石门！</p>
+        <p>🔒 <b>隐藏关（东北鲁班地宫）</b>：攒满 <b>600 灵力分</b>（可沿途开5个宝箱加分）即可推开黄金石门！</p>
+      </div>
+
+      <!-- 防乱猜警告横幅 -->
+      <div class="bg-red-950/15 border-2 border-red-800/40 rounded-xl p-2.5 text-left text-[11px] text-red-950 mb-3 leading-snug">
+        <p class="font-black text-red-800 mb-0.5">⚠️ 【墨境天条·严禁乱猜警告】：</p>
+        <p>• 每次进入关卡仅有 <b>3颗文心护盾 (❤️❤️❤️)</b>！</p>
+        <p>• 答错不仅会<b>倒扣灵力分 (-10~15分)</b>、触发<b>5~8秒墨毒冰封锁</b>，还会重新打乱选项！</p>
+        <p>• 若单次闯关<b>累计答错满 3 次</b>，将被神雷<b>直接震飞回出生广场</b>并封锁传送碑，必须重新跑图！</p>
       </div>
 
       <div class="space-y-2.5 text-left mb-4">
@@ -131,7 +141,7 @@
       </div>
 
       <button id="btnStartGame" class="w-full py-3 rounded-xl bg-gradient-to-b from-amber-500 to-amber-700 text-white font-black text-base tracking-wider shadow-lg active:scale-95 transition">
-        🗡️ 踏入墨境大陆 · 开始冒险
+        🗡️ 谨记天条 · 踏入墨境大陆
       </button>
     </div>
   </div>
@@ -168,9 +178,18 @@
       <button id="btnToggleSound" class="w-7 h-7 rounded-lg bg-stone-800 border border-stone-600 text-amber-300 flex items-center justify-center text-xs active:scale-90">
         🔊
       </button>
+      <button id="btnMusicSettings" title="背景音乐设置" aria-label="背景音乐设置" class="w-7 h-7 rounded-lg bg-stone-800 border border-amber-600/70 text-amber-300 flex items-center justify-center text-xs active:scale-90">🎵</button>
       <button id="btnFinishEarly" class="px-2 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-[11px] border border-emerald-400/50 shadow active:scale-95">
         提交成绩
       </button>
+    </div>
+    <div id="musicPanel" class="hidden absolute top-12 right-2 z-50 w-56 rounded-xl border border-amber-600 bg-stone-900 p-3 text-amber-100 shadow-2xl" style="max-width:calc(100vw - 16px)">
+      <div class="text-xs font-black mb-2">🎼 墨境古风配乐</div>
+      <button id="btnMusicToggle" class="w-full rounded-lg bg-amber-700 px-2 py-2 text-xs font-bold text-white mb-2">🎵 关闭背景音乐</button>
+      <label for="musicVolume" class="block text-[11px] mb-1">🎚️ 背景音乐音量 <span id="musicVolumeLabel">35%</span></label>
+      <input type="range" id="musicVolume" min="0" max="100" step="5" value="35" class="w-full accent-amber-500" aria-label="背景音乐音量" />
+      <div id="musicSceneLabel" class="mt-1 text-[10px] text-amber-300">当前：墨境广场</div>
+      <div class="mt-1 text-[10px] text-stone-400">背景音乐由浏览器实时合成，不需要下载音频或连接网络。</div>
     </div>
   </header>
 
@@ -201,7 +220,7 @@
     </button>
   </main>
 
-  <!-- ==================== 4. 底部手机操控台（十字键 + 探索传送阵 + 万能互动键） ==================== -->
+  <!-- ==================== 4. 底部手机操控台 ==================== -->
   <footer class="w-full max-w-lg bg-stone-900/95 border-t border-amber-500/30 px-3 py-2 flex items-center justify-between z-20 shrink-0">
     <!-- 左侧十字方向键 (D-Pad) -->
     <div class="relative w-28 h-28 shrink-0">
@@ -212,9 +231,9 @@
       <div class="absolute top-10 left-10 w-8 h-8 rounded-full bg-stone-800/80 border border-stone-700 flex items-center justify-center text-[9px] text-stone-400">方向</div>
     </div>
 
-    <!-- 中间：已解锁的传送石碑（探索过一次即可随时直达，防迷路） -->
+    <!-- 中间：已解锁的传送石碑 -->
     <div class="flex flex-col items-center space-y-1 px-1.5 flex-1">
-      <div class="text-[10px] text-stone-400 font-bold">⚡ 传送石碑（走过一次即点亮解锁）</div>
+      <div class="text-[10px] text-stone-400 font-bold">⚡ 传送石碑（若乱猜被震飞将暂时封锁）</div>
       <div class="grid grid-cols-3 gap-1 w-full max-w-[195px]">
         <button onclick="useWaypoint('plaza')" class="px-1.5 py-1.5 rounded-lg bg-amber-950/80 border border-amber-600/60 text-[10px] text-amber-200 font-bold active:scale-95">🏠 书院广场</button>
         <button id="wp_stage1" onclick="useWaypoint('stage1')" class="px-1.5 py-1.5 rounded-lg bg-stone-800 border border-stone-700 text-[10px] text-stone-500 font-bold active:scale-95">🔒 1.书院内</button>
@@ -234,8 +253,8 @@
     </div>
   </footer>
 
-  <!-- ==================== 5. 机关/宝箱/石碑剧情提示小弹窗 ==================== -->
-  <div id="dialogModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/75 p-4">
+  <!-- ==================== 5. 机关/宝箱/石碑/震飞警告弹窗 ==================== -->
+  <div id="dialogModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
     <div class="scroll-modal w-full max-w-sm rounded-2xl p-5 text-center pop-in">
       <div id="dialogIcon" class="text-4xl mb-2">🎁</div>
       <h3 id="dialogTitle" class="serif-title text-lg font-black text-amber-950 mb-2">发现奇遇宝箱！</h3>
@@ -246,27 +265,54 @@
     </div>
   </div>
 
-  <!-- ==================== 6. 多样化关卡解谜弹窗 (45题) ==================== -->
-  <div id="quizModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/80 p-3">
-    <div id="quizCard" class="scroll-modal w-full max-w-md rounded-2xl p-4 flex flex-col justify-between max-h-[92dvh] overflow-y-auto pop-in">
+  <!-- ==================== 6. 多样化关卡解谜弹窗 (内置防乱猜护盾与墨毒冰封锁) ==================== -->
+  <div id="quizModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/85 p-3">
+    <div id="quizCard" class="scroll-modal relative w-full max-w-md rounded-2xl p-4 flex flex-col justify-between max-h-[92dvh] overflow-y-auto pop-in">
+      
+      <!-- ❄️ 墨毒冰封冷却遮罩（答错时锁定所有按钮 5~8秒，强迫认真读题） -->
+      <div id="freezeOverlay" class="hidden absolute inset-0 z-30 bg-slate-950/90 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center">
+        <div class="text-5xl mb-2 animate-bounce">❄️</div>
+        <h3 class="serif-title text-xl font-black text-cyan-300 mb-1">墨毒侵蚀 · 冰封静心！</h3>
+        <p id="freezePenaltyTitle" class="text-xs font-bold text-rose-400 mb-3">⚠️ 触发盲猜惩罚：已扣除 10 灵力分 & 碎裂 1 颗文心护盾！</p>
+        
+        <div class="w-full bg-cyan-950/90 border border-cyan-500/50 rounded-xl p-3.5 text-left text-xs text-cyan-100 mb-4 leading-relaxed shadow-inner">
+          <div class="font-black text-amber-300 mb-1">📖 请利用冰封时间仔细重读题目与线索：</div>
+          <div id="freezeQuestionEcho" class="text-white font-bold mb-2 pb-2 border-b border-cyan-800"></div>
+          <div id="freezeHintText" class="text-cyan-200"></div>
+        </div>
+
+        <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden mb-2 border border-slate-600">
+          <div id="freezeProgressBar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-1000" style="width: 100%"></div>
+        </div>
+        <p class="text-xs font-black text-amber-300">⏳ 解封倒计时：<span id="freezeCountdownNum" class="text-base text-white">5</span> 秒（解封后选项将重新打乱）</p>
+      </div>
+
+      <!-- 顶部关卡信息 + 3颗文心护盾 (❤️❤️❤️) -->
       <div>
-        <div class="flex items-center justify-between border-b border-amber-900/20 pb-2 mb-2.5">
+        <div class="flex items-center justify-between border-b border-amber-900/20 pb-2 mb-2">
           <div class="flex items-center space-x-2">
             <span id="npcModalAvatar" class="text-2xl">👴</span>
             <div>
-              <h2 id="npcModalTitle" class="serif-title font-black text-base text-amber-950">第一关：字源村长</h2>
-              <p id="questionTypeBadge" class="text-[11px] font-bold text-amber-700">【机制：磁吸偏旁造字】</p>
+              <h2 id="npcModalTitle" class="serif-title font-black text-sm text-amber-950">第一关：字源村长</h2>
+              <p id="questionTypeBadge" class="text-[10px] font-bold text-amber-700">【机制：磁吸偏旁造字】</p>
             </div>
           </div>
-          <div class="text-right">
-            <span id="questionCounter" class="inline-block px-2.5 py-0.5 rounded-full bg-amber-900 text-amber-100 text-xs font-black">第 1 / 10 题</span>
+
+          <!-- 防乱猜：3颗文心护盾显示 -->
+          <div class="flex flex-col items-end">
+            <div class="flex items-center space-x-1 bg-red-950/15 border border-red-800/30 px-2 py-0.5 rounded-full mb-1">
+              <span class="text-[10px] font-bold text-red-900">护盾:</span>
+              <span id="shieldHeartsDisplay" class="text-xs tracking-tighter">❤️❤️❤️</span>
+            </div>
+            <span id="questionCounter" class="inline-block px-2 py-0.5 rounded-full bg-amber-900 text-amber-100 text-[10px] font-black">第 1 / 10 题</span>
           </div>
         </div>
 
         <!-- 题号切换圆点 -->
-        <div id="stageProgressDots" class="grid grid-cols-10 gap-1 mb-3"></div>
+        <div id="stageProgressDots" class="grid grid-cols-10 gap-1 mb-2.5"></div>
       </div>
 
+      <!-- 题目与互动玩具区 -->
       <div class="my-1">
         <div id="questionPrompt" class="bg-amber-950/10 border border-amber-900/20 rounded-xl p-3 text-sm font-bold text-amber-950 mb-3 leading-relaxed">
           题目加载中...
@@ -275,16 +321,17 @@
         <!-- 动态玩具容器 -->
         <div id="interactiveToyZone" class="min-h-[185px] flex flex-col justify-center"></div>
 
-        <!-- 温和提示反馈区 -->
+        <!-- 提示与解析反馈区 -->
         <div id="feedbackBox" class="hidden mt-2.5 p-2.5 rounded-xl bg-amber-100 border border-amber-500 text-xs font-bold text-amber-900 flex items-start space-x-2">
           <span class="text-base shrink-0">💡</span>
           <span id="feedbackText">提示内容</span>
         </div>
       </div>
 
+      <!-- 底部操作栏：付费思维锦囊 & 暂回地图 -->
       <div class="flex items-center justify-between border-t border-amber-900/20 pt-3 mt-2">
         <button id="btnUseHint" class="px-3 py-2 rounded-xl bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold text-xs border border-amber-500 active:scale-95">
-          💡 长老锦囊提示
+          💡 求助线索 (-5灵力)
         </button>
         <button id="btnCloseQuiz" class="px-3.5 py-2 rounded-xl bg-stone-700 text-stone-100 font-bold text-xs active:scale-95">
           🏃 暂回地图 (进度保留)
@@ -327,6 +374,10 @@
           <span id="certChests" class="font-bold text-amber-700">0 / 5 个</span>
         </div>
         <div class="flex justify-between border-b border-amber-200 pb-1.5">
+          <span class="text-stone-500">作答严谨度：</span>
+          <span id="certPenalty" class="font-bold text-rose-700">0 次受罚</span>
+        </div>
+        <div class="flex justify-between border-b border-amber-200 pb-1.5">
           <span class="text-stone-500">隐藏鲁班秘宝：</span>
           <span id="certSecret" class="font-bold text-purple-700">未解锁</span>
         </div>
@@ -360,7 +411,7 @@
     const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxzL1KE1Ysk9oh3McN7Vq80L_-D-usk41arS9oEJ9H4M3bJR1eZdGrl_au72Xu4H3iq/exec";
 
     // ============================================================================
-    // 🎵 1. 纯代码 Web Audio 合成音效引擎
+    // 🎵 1. 纯代码 Web Audio 合成音效引擎（含冰封与雷霆震飞惩罚音效）
     // ============================================================================
     class SoundEngine {
       constructor() {
@@ -395,121 +446,266 @@
       door() { this.playTone(440, 'sine', 0.15, 0.15); setTimeout(() => this.playTone(587, 'sine', 0.18, 0.15), 90); }
       rollerTick() { this.playTone(950, 'sine', 0.04, 0.08); }
       correct() { [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => setTimeout(() => this.playTone(f, 'triangle', 0.18, 0.18), idx * 70)); }
-      gentleHint() { this.playTone(360, 'sine', 0.15, 0.12); setTimeout(() => this.playTone(420, 'sine', 0.18, 0.12), 110); }
+      // 冰封惩罚警报音
+      freezePenalty() {
+        this.playTone(240, 'sawtooth', 0.22, 0.2);
+        setTimeout(() => this.playTone(175, 'sawtooth', 0.3, 0.22), 140);
+      }
+      // 三振出局雷霆震飞音效
+      thunderBanish() {
+        [190, 150, 115, 85].forEach((f, idx) => setTimeout(() => this.playTone(f, 'sawtooth', 0.26, 0.26), idx * 100));
+      }
       fanfare() { [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((f, idx) => setTimeout(() => this.playTone(f, 'triangle', 0.24, 0.22), idx * 110)); }
     }
     const sfx = new SoundEngine();
 
+    // 🎼 原创五声音阶动态古风配乐：全程 Web Audio 合成，无版权音频/外部请求。
+    // 由用户点击「开始游戏」后才启动，遵守手机浏览器自动播放限制。
+    class InkWorldMusic {
+      constructor() {
+        this.ctx = null;
+        this.master = null;
+        this.enabled = true;
+        this.volume = 0.35;
+        this.active = false;
+        this.scene = 'plaza';
+        this.nextBeat = 0;
+        this.beat = 0;
+        this.scheduler = null;
+        this.scenes = {
+          plaza:   { label:'墨境广场 · 悠然启程', tempo:92, root:60, melody:[0,2,4,7,9,7,4,2, 0,4,7,9,7,4,2,-1], bass:[0,7,9,7] },
+          academy: { label:'翰林书院 · 古琴书香', tempo:82, root:62, melody:[0,4,7,9,7,4,2,0, 2,4,7,12,9,7,4,-1], bass:[0,7,4,7] },
+          bamboo:  { label:'青竹迷宫 · 清风竹影', tempo:108,root:65, melody:[0,2,7,4,9,7,4,2, 0,7,9,12,9,4,2,-1], bass:[0,7,9,7] },
+          bridge:  { label:'沧浪断桥 · 山河行旅', tempo:104,root:57, melody:[0,4,7,9,12,9,7,4, 2,7,9,7,4,2,0,-1], bass:[0,7,5,7] },
+          cave:    { label:'深渊山洞 · 玄秘探险', tempo:76, root:52, melody:[0,-1,7,4,2,-1,4,7, 9,7,4,-1,2,4,0,-1], bass:[0,5,7,5] },
+          luban:   { label:'鲁班地宫 · 黄金机关', tempo:115,root:60, melody:[0,7,9,12,9,7,4,2, 4,9,12,14,12,9,7,-1], bass:[0,7,9,12] }
+        };
+      }
+      init() {
+        if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        this.ctx = new AudioCtx();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0;
+        // Soft filter removes harsh higher partials for classroom listening.
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass'; filter.frequency.value = 3100;
+        this.master.connect(filter); filter.connect(this.ctx.destination);
+        this.setVolume(this.volume);
+      }
+      setVolume(v) {
+        this.volume = Math.max(0, Math.min(1, Number(v) || 0));
+        if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.enabled ? this.volume * 0.19 : 0, this.ctx.currentTime, 0.12);
+      }
+      toggle() {
+        this.enabled = !this.enabled;
+        if (this.enabled) this.start();
+        this.setVolume(this.volume);
+        return this.enabled;
+      }
+      start() {
+        this.init();
+        if (!this.ctx || this.active) return;
+        this.active = true;
+        this.nextBeat = this.ctx.currentTime + 0.08;
+        this.scheduler = setInterval(() => this.tick(), 100);
+      }
+      setScene(scene) {
+        if (!this.scenes[scene] || scene === this.scene) return;
+        this.scene = scene;
+        this.beat = 0;
+        const label = document.getElementById('musicSceneLabel');
+        if (label) label.textContent = '当前：' + this.scenes[scene].label;
+      }
+      note(midi, when, duration, amplitude, timbre = 'pluck') {
+        if (!this.ctx || !this.master || midi < 0) return;
+        const f = 440 * Math.pow(2, (midi - 69) / 12);
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const now = Math.max(when, this.ctx.currentTime + 0.002);
+        osc.type = timbre === 'pad' ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(f, now);
+        const attack = timbre === 'pad' ? 0.13 : 0.009;
+        const release = timbre === 'pad' ? 0.65 : 0.28;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(Math.max(0.001, amplitude), now + attack);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(attack + 0.03, duration + release));
+        osc.connect(gain); gain.connect(this.master);
+        osc.start(now); osc.stop(now + duration + release + 0.04);
+        osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+      }
+      tick() {
+        if (!this.ctx || this.ctx.state !== 'running') return;
+        if (!this.enabled) { this.nextBeat = this.ctx.currentTime + 0.15; return; }
+        // Location is sampled continuously so walking into a scene changes music automatically.
+        if (typeof gameState !== 'undefined') {
+          const id = gameState.currentMapId;
+          const x = gameState.player.x / TILE_SIZE;
+          const y = gameState.player.y / TILE_SIZE;
+          let scene = 'plaza';
+          if (id === 'academy') scene = 'academy';
+          else if (id === 'cave') scene = 'cave';
+          else if (id === 'luban') scene = 'luban';
+          else if (id === 'overworld') {
+            if (y >= 36 && x >= 18 && x <= 43) scene = 'bamboo';
+            else if (x <= 17 && y >= 17 && y <= 37) scene = 'bridge';
+            else if (x >= 44 && y <= 17) scene = 'luban';
+          }
+          this.setScene(scene);
+        }
+        let count = 0;
+        while (this.nextBeat < this.ctx.currentTime + 0.32 && count++ < 6) {
+          const data = this.scenes[this.scene];
+          const interval = 60 / data.tempo / 2; // eighth-note pulse
+          const n = this.beat % data.melody.length;
+          const offset = data.melody[n];
+          if (offset >= 0) this.note(data.root + offset + 12, this.nextBeat, interval * 0.68, 0.115, 'pluck');
+          if (n % 4 === 0) {
+            const bass = data.bass[Math.floor(n / 4) % data.bass.length];
+            this.note(data.root + bass - 12, this.nextBeat, interval * 3.5, 0.09, 'pad');
+          }
+          if (n % 8 === 4) this.note(data.root + 7, this.nextBeat, interval * 3.1, 0.025, 'pad');
+          this.nextBeat += interval;
+          this.beat++;
+        }
+        if (this.nextBeat < this.ctx.currentTime - 1) this.nextBeat = this.ctx.currentTime + 0.08;
+      }
+    }
+    const bgMusic = new InkWorldMusic();
+    document.addEventListener('visibilitychange', () => {
+      if (!bgMusic.ctx) return;
+      if (document.hidden) bgMusic.ctx.suspend();
+      else if (bgMusic.active && bgMusic.enabled) bgMusic.ctx.resume();
+    });
+
+
     // ============================================================================
-    // 📚 2. 完整保留并绑定到大世界与室内场景的 45 道多样化华文题库
+    // 📚 2. 45 道多样化华文题库（每题内置模糊方向线索 clue 与完整解析 explain）
     // ============================================================================
     const STAGES_DATA = [
       {
         id: 'stage1',
+        waypointKey: 'stage1',
         name: '第一关：翰林书院内堂',
         npcName: '字源村长·仓颉后人',
         avatar: '👴',
         orbId: 'orb1',
         orbName: '灵笔宝珠 🖌️',
-        mapId: 'academy', // 位于书院室内子地图
+        mapId: 'academy',
         tileX: 7, tileY: 4,
         color: '#f59e0b',
         questions: [
           {
             type: 'snap', badge: '🧩 磁吸偏旁造字',
-            prompt: '请依次点击下方两个偏旁积木，拼出代表**“眼神明亮、有光彩”**的汉字（明眸善__）：',
+            prompt: '请依次点击下方两个偏旁积木，拼出代表**“眼睛明亮，善于顾盼”**的汉字（明眸善__）：',
             slots: 2, options: ['目', '光', '睐', '来', '米'], answer: ['目', '来'],
+            clue: '想一想：跟“眼睛、眼神”有关的字，左边应该用什么部首？右边则是读音相近的“来”字组合。',
             explain: '“目”加“来”组成“睐”（明眸善睐、青睐），凡与眼睛相关的字多用“目”字旁！'
           },
           {
             type: 'snap', badge: '🧩 磁吸偏旁造字',
             prompt: '请点击两个部件，组合成意为**“水波荡漾、清澈”**的汉字（波光__滟）：',
             slots: 2, options: ['氵', '火', '潋', '佥', '欠'], answer: ['氵', '佥'],
+            clue: '既然形容“水波荡漾”，左边必定是与水相关的偏旁，右边搭配“佥”字。',
             explain: '“氵”（三点水）加上“佥”组成“潋”（波光潋滟）！'
           },
           {
             type: 'roller', badge: '🎰 转轮形近字辨析',
             prompt: '转动下方密码滚轮，为句子选出完全正确的形近字：\n“面对困难，我们绝不能半途而（ ___ ），必须坚持到底！”',
             options: ['废', '费', '沸', '拂'], answer: '废',
+            clue: '这里的意思是“走到一半就停止、放弃了”，是“广字头”表示荒弃的那个字，而不是花费钱财的“贝字底”。',
             explain: '“半途而废”的“废”是停止、放弃的意思；“费”常用于花费、浪费。'
           },
           {
             type: 'roller', badge: '🎰 转轮多音字挑战',
             prompt: '转动滚轮，选出加点字正确的读音：\n“尽管狂风呼啸，边防战士依然【倔】强地挺立在风雪中。”',
             options: ['jué (第二声)', 'juè (第四声)', 'qū (第一声)', 'jùn (第四声)'], answer: 'jué (第二声)',
+            clue: '当这个字和“强（jiàng）”组成双音节词时，声调是往上扬的第二声（阳平）哦！',
             explain: '“倔强”读作 jué jiàng；当单用表示脾气固执（这人真倔）时才读 juè。'
           },
           {
             type: 'crack', badge: '🔨 击碎错别字木牌',
             prompt: '火眼金睛！以下四块木牌中，有一块藏着**错别字**，请点击将它击碎：',
             options: ['松弛有度', '再接再厉', '迫不急待', '谈笑风生'], answer: '迫不急待',
+            clue: '仔细检查含有“等待”意思的那块木牌：是“着急”的急，还是“来得及、赶得上”的及？',
             explain: '正确写法是“迫不及待”（及：赶得上），不是“急”哦！'
           },
           {
             type: 'crack', badge: '🔨 击碎错别字木牌',
             prompt: '继续寻宝！请点击下方含有**错别字**的木牌将它击碎：',
             options: ['金榜题名', '走投无路', '一愁莫展', '直截了当'], answer: '一愁莫展',
+            clue: '古代用竹签代表“计策、办法（竹字头）”，形容一点计策也施展不开，可不是心里发愁的“愁”字！',
             explain: '正确写法是“一筹莫展”（筹：计策、办法），一点计策也施展不开，不是“愁”！'
           },
           {
             type: 'scale', badge: '⚖️ 天平反义词配对',
             prompt: '天平左盘放着【未雨绸缪】（事先做好准备），请为右盘选出它的**反义词**让天平平衡：',
             leftWord: '未雨绸缪', options: ['临渴掘井', '防患未然', '深谋远虑', '有备无患'], answer: '临渴掘井',
+            clue: '注意题目要求选的是【反义词】！左盘是提前准备，右盘要选“口渴了才临时去挖井”的那个词。',
             explain: '“临渴掘井”比喻事到临头才想办法，与“未雨绸缪”正好相反！'
           },
           {
             type: 'scale', badge: '⚖️ 天平近义词配对',
             prompt: '天平左盘放着【专心致志】，请为右盘选出意思最相近的**近义词**：',
             leftWord: '专心致志', options: ['聚精会神', '三心二意', '心猿意马', '漫不经心'], answer: '聚精会神',
+            clue: '这次要选【近义词】！另外三个词都表示分心走神，只有一个表示把精神和注意力都集中起来。',
             explain: '“聚精会神”与“专心致志”都形容精神高度集中！'
           },
           {
             type: 'bamboo', badge: '📜 字谜竹简破译',
             prompt: '字谜：“一口咬掉牛尾巴”（打一汉字）。请按正确顺序点击竹简，拼出谜底的解释口诀：',
             segments: ['牛字去尾', '加上一口', '合成告字'], answer: ['牛字去尾', '加上一口', '合成告字'],
+            clue: '按照拆字解谜的先后顺序：先说把“牛”怎么处理，再说加上什么部件，最后得出合成什么字！',
             explain: '“牛”去掉下面的尾巴（一竖），下面加上“口”，就是告诉的“告”字！'
           },
           {
             type: 'roller', badge: '🎰 部首含义终极试炼',
             prompt: '古汉字中，凡是带有“贝”字旁的汉字（如：财、货、贵、赐），最初大多与什么有关？',
             options: ['钱币与财富', '海洋与捕鱼', '兵器与战争', '祭祀与神明'], answer: '钱币与财富',
+            clue: '想想看，“财、货、贵、贫、贩”这些字在日常生活里都跟买东西和什么有关？',
             explain: '古代曾用海贝作为货币，因此“贝”部字大多与财富、交易相关！'
           }
         ]
       },
       {
         id: 'stage2',
+        waypointKey: 'stage2',
         name: '第二关：青竹迷宫深处',
         npcName: '修辞猎人·青林客',
         avatar: '🧝‍♂️',
         orbId: 'orb2',
         orbName: '玄墨宝珠 🖤',
-        mapId: 'overworld', // 位于大地图南境竹林迷宫核心
+        mapId: 'overworld',
         tileX: 30, tileY: 47,
         color: '#10b981',
         questions: [
           {
             type: 'snap', badge: '🧩 成语字块拼合',
-            prompt: '比喻“在别人急需的时候给予雪中送炭般的帮助”，请点击两个字块补全成语：【雪 中 __ __】',
+            prompt: '比喻“在别人遇到困难或急需帮助时，及时给予援助”，请点击两个字块补全成语：【雪 中 __ __】',
             slots: 2, options: ['送', '炭', '添', '花', '冰'], answer: ['送', '炭'],
+            clue: '大雪天里人们最冷，最需要别人送来什么取暖？',
             explain: '“雪中送炭”比喻在他人急需时给予物质或精神上的帮助！'
           },
           {
             type: 'snap', badge: '🧩 成语字块拼合',
             prompt: '形容“技艺或文章达到极其纯熟、完美的境界”，请补全成语：【__ 火 __ 青】',
             slots: 2, options: ['炉', '纯', '烈', '真', '青'], answer: ['炉', '纯'],
+            clue: '古代炼丹炉里的火焰由红变成了纯正的青色，第一个字是“火”字旁的器具，第二个字表示纯粹。',
             explain: '“炉火纯青”原指道家炼丹火焰由红转青即为成功，后比喻学问或技术达到纯熟完美境界！'
           },
           {
             type: 'roller', badge: '🎰 历史典故寻踪',
             prompt: '成语【卧薪尝胆】讲述的是春秋时期哪一位历史人物发愤图强的故事？',
             options: ['越王勾践', '楚霸王项羽', '汉高祖刘邦', '赵国廉颇'], answer: '越王勾践',
+            clue: '这位君主是春秋时期“越国”的国王，曾被吴王夫差打败，后来睡柴草、尝苦胆最终复国。',
             explain: '越王勾践战败后睡在柴草上，每日舔尝苦胆以警醒自己，终成霸业！'
           },
           {
             type: 'roller', badge: '🎰 修辞手法法眼',
             prompt: '判断修辞手法：“那盛开的荷花挺立在池塘中，像一位位亭亭玉立的少女，微风吹来便害羞地低下了头。”句中同时运用了：',
             options: ['比喻与拟人', '夸张与排比', '反问与设问', '借代与反复'], answer: '比喻与拟人',
+            clue: '前半句把荷花比作“少女”，后半句说荷花会像人一样“害羞地低下头”。',
             explain: '“像少女”是比喻，“害羞地低下头”赋予荷花人的神态，是拟人！'
           },
           {
@@ -522,49 +718,56 @@
               '音乐会上响起了【震耳欲聋】的掌声。'
             ],
             answer: '小偷们【处心积虑】地做好了扶老奶奶过马路的计划。',
+            clue: '找一找哪一句话里把专门形容“费尽心机干坏事”的贬义成语，用在了“扶老奶奶过马路”这种好事上？',
             explain: '“处心积虑”是贬义词（费尽心机做坏事），做好事应当用“千方百计”或“热心助人”！'
           },
           {
             type: 'crack', badge: '🔨 击碎错字成语牌',
             prompt: '找出林间石碑上写错的成语木牌并将它击碎：',
             options: ['世外桃源', '川流不息', '变本加利', '栩栩如生'], answer: '变本加利',
+            clue: '形容情况变得比原来更加严重、更加猛烈（厉），可不是做生意赚取“利益”的利！',
             explain: '正确写法是“变本加厉”（厉：猛烈、加剧），不是利益的“利”！'
           },
           {
             type: 'scale', badge: '⚖️ 谚语与成语配平',
             prompt: '天平左盘是俗语【打开天窗说亮话】，请为右盘选出意思对应的四字成语：',
             leftWord: '打开天窗说亮话', options: ['直言不讳', '指桑骂槐', '吞吞吐吐', '拐弯抹角'], answer: '直言不讳',
+            clue: '“打开天窗说亮话”就是痛痛快快、直接说出来，毫不隐瞒避讳！',
             explain: '“打开天窗说亮话”意思就是毫无隐瞒、直截了当地说，对应“直言不讳”！'
           },
           {
             type: 'scale', badge: '⚖️ 俗语与成语配平',
             prompt: '天平左盘是俗语【前人栽树，后人乘凉】，请为右盘选出感恩前人付出的对应成语：',
             leftWord: '前人栽树后人乘凉', options: ['饮水思源', '过河拆桥', '忘恩负义', '得寸进尺'], answer: '饮水思源',
+            clue: '另外三个都是贬义词，只有一个成语表示“喝水的时候想一想水是从哪个源头流出来的”。',
             explain: '喝水时想起水源，比喻享受成果时不忘前人栽树的恩泽！'
           },
           {
             type: 'bamboo', badge: '📜 排比句气势连缀',
-            prompt: '请按由浅入深、从小到大的逻辑顺序点击竹简，拼出一句充满气势的华文佳句：',
-            segments: ['积水滴以成沧海', '垒微石以成崇山', '聚寸功以创辉煌'],
-            answer: ['积水滴以成沧海', '垒微石以成崇山', '聚寸功以创辉煌'],
-            explain: '水滴成海、微石成山，最终引申到人“聚寸功以创辉煌”，层层递进！'
+            prompt: '请先按自然现象、后谈人的努力的顺序，点击竹简拼出一组排比句：',
+            segments: ['汇滴水而成江海', '积细土而成高山', '聚点滴努力而获成功'],
+            answer: ['汇滴水而成江海', '积细土而成高山', '聚点滴努力而获成功'],
+            clue: '先写水滴汇聚成江海，再写细土堆积成高山，最后联想到人的点滴努力。',
+            explain: '从积累自然界的水滴、细土，联想到积累努力获得成功，构成层层推进的排比。'
           },
           {
             type: 'roller', badge: '🎰 歇后语妙解',
             prompt: '歇后语“竹篮打水 —— （ ___ ）”，请转动滚轮选出下半句：',
             options: ['一场空', '节节高', '七上八下', '里外不是人'], answer: '一场空',
+            clue: '竹子编的篮子到处都是洞，拿它去河里提水，提上来篮子里还剩什么呢？',
             explain: '竹篮子满是孔洞，打水自然漏光，比喻白费力气“一场空”！'
           }
         ]
       },
       {
         id: 'stage3',
+        waypointKey: 'stage3',
         name: '第三关：沧浪断桥·诗仙崖',
         npcName: '诗仙太白·云游书圣',
         avatar: '🧙‍♂️',
         orbId: 'orb3',
         orbName: '澄纸宝珠 📜',
-        mapId: 'overworld', // 位于西境过河后的诗仙云崖
+        mapId: 'overworld',
         tileX: 7, tileY: 28,
         color: '#38bdf8',
         questions: [
@@ -572,30 +775,35 @@
             type: 'bamboo', badge: '📜 古诗竹简还原',
             prompt: '请按正确顺序点击词块，还原王之涣《登鹳雀楼》中的千古哲理名句：',
             segments: ['欲穷', '千里目', '更上', '一层楼'], answer: ['欲穷', '千里目', '更上', '一层楼'],
+            clue: '前一句是五言“想要看尽千里之外的景物（欲穷…）”，后一句是“就要再登上一层高楼（更上…）”。',
             explain: '“欲穷千里目，更上一层楼”激励人们不断进取、站得更高看得更远！'
           },
           {
             type: 'bamboo', badge: '📜 古诗竹简还原',
             prompt: '请按正确顺序点击词块，还原李白《静夜思》的后两句：',
             segments: ['举头', '望明月', '低头', '思故乡'], answer: ['举头', '望明月', '低头', '思故乡'],
+            clue: '先抬起头（举头）看着天上的月亮，再低下头（低头）思念远方的故乡。',
             explain: '“举头望明月，低头思故乡”，简洁质朴却道尽游子思乡之情！'
           },
           {
             type: 'snap', badge: '🧩 诗眼炼字填空',
             prompt: '王安石《泊船瓜洲》名句：“春风又 __ 江南岸，明月何时 __ 我还？”请依次选出两个精妙动词：',
             slots: 2, options: ['绿', '吹', '照', '送', '到'], answer: ['绿', '照'],
+            clue: '王安石改了十几次，最终用一个表示颜色的字写活了江南春草发芽，第二个空则是明月的光芒洒在身上。',
             explain: '“春风又绿江南岸，明月何时照我还”，一个“绿”字将春风吹绿江南的动态写活了！'
           },
           {
             type: 'roller', badge: '🎰 古诗意象解码',
             prompt: '在古典诗词中，古人常借“折柳”（如“此夜曲中闻折柳”）来表达什么情感？',
             options: ['惜别与留恋故人', '庆祝丰收喜悦', '出征沙场的豪迈', '隐居山林的闲适'], answer: '惜别与留恋故人',
+            clue: '读一读“柳”字的读音，它和“挽留、留恋”的“留”字读音十分相近哦！',
             explain: '“柳”谐音“留”，古人送别亲友时常折柳相赠，表达依依惜别与挽留之意！'
           },
           {
             type: 'roller', badge: '🎰 名著常识寻踪',
             prompt: '中国古典四大名著中，“三顾茅庐”、“草船借箭”、“空城计”出自哪一部作品？',
             options: ['《三国演义》', '《水浒传》', '《西游记》', '《红楼梦》'], answer: '《三国演义》',
+            clue: '这三个故事都与三国时期的人物及谋略有关，尤其与诸葛亮有关。',
             explain: '这些都是《三国演义》中围绕诸葛亮智慧展开的经典篇章！'
           },
           {
@@ -608,42 +816,48 @@
               '谁知盘中餐，粒粒皆辛苦。'
             ],
             answer: '野火烧不尽，春风吹又深。',
+            clue: '仔细看描写小草顽强生命力的那句诗：春风吹来后，小草是重新“生长”出来，还是变“深”了？',
             explain: '白居易《赋得古原草送别》原句是“野火烧不尽，春风吹又【生】”（生长的生）！'
           },
           {
             type: 'scale', badge: '⚖️ 诗人与雅号配平',
             prompt: '天平左盘是唐代大诗人【李白】，请为右盘选出他在文学史上的专属尊称：',
             leftWord: '唐代诗人·李白', options: ['诗仙', '诗圣', '诗鬼', '诗佛'], answer: '诗仙',
+            clue: '咱们这个关卡就叫“诗仙云崖”，NPC名字叫“诗仙太白”，答案就在题目场景里！',
             explain: '李白诗风豪放飘逸，被称为“诗仙”；杜甫被称为“诗圣”，王维被称为“诗佛”！'
           },
           {
             type: 'scale', badge: '⚖️ 传统节俗配平',
             prompt: '王维诗云：“独在异乡为异客，每逢佳节倍思亲。遥知兄弟登高处，遍插茱萸少一人。”诗中写的是哪个传统节日？',
             leftWord: '登高·插茱萸', options: ['重阳节 (九月初九)', '端午节 (五月初五)', '中秋节 (八月十五)', '元宵节 (正月十五)'], answer: '重阳节 (九月初九)',
+            clue: '古语云“九月九日望遥空，秋水秋天生夕风”，秋天登高、敬老、插茱萸是农历九月初九的节日。',
             explain: '登高望远、插戴茱萸、饮菊花酒是重阳节的经典习俗！'
           },
           {
             type: 'snap', badge: '🧩 文房四宝归位',
             prompt: '中华传统文化中的“文房四宝”是指笔、墨、纸、砚。其中最负盛名的“宣纸”与“徽墨”之外，请选出另外两宝的代表：【湖 __】与【端 __】',
             slots: 2, options: ['笔', '砚', '刀', '尺', '印'], answer: ['笔', '砚'],
+            clue: '题目已经提示了“文房四宝是笔、墨、纸、砚”，既然有了纸和墨，剩下的自然是另外两宝！',
             explain: '文房四宝之首品：湖笔（浙江湖州）、徽墨、宣纸、端砚（广东肇庆）！'
           },
           {
             type: 'bamboo', badge: '📜 格言警句排序',
             prompt: '请按正确顺序点击竹简，拼出勉励大家珍惜光阴的经典名句：',
             segments: ['少壮', '不努力', '老大', '徒伤悲'], answer: ['少壮', '不努力', '老大', '徒伤悲'],
+            clue: '先说年轻力壮的时候（少壮）如果不努力，等到年老的时候（老大）就只能白白伤悲了。',
             explain: '出自《长歌行》：“少壮不努力，老大徒伤悲”，劝勉少年惜时勤学！'
           }
         ]
       },
       {
         id: 'stage4',
+        waypointKey: 'stage4',
         name: '第四关：北境深渊山洞',
         npcName: '终极守护·墨境神兽',
         avatar: '🐉',
         orbId: 'orb4',
         orbName: '端砚宝珠 🪨',
-        mapId: 'cave', // 位于北境山洞内部子地图
+        mapId: 'cave',
         tileX: 7, tileY: 4,
         color: '#a855f7',
         questions: [
@@ -651,12 +865,14 @@
             type: 'snap', badge: '🧩 关联词双槽配对',
             prompt: '请选择恰当的关联词填入句中：\n“（ __ ）明天下大雨，我们班的线上华文学会活动（ __ ）会照常举行。”',
             slots: 2, options: ['即使', '也', '因为', '所以', '只有'], answer: ['即使', '也'],
+            clue: '明天下大雨还没发生，这是一种“假设情况”，后半句说“照常举行”，应选表假设让步的一对关联词。',
             explain: '“即使……也……”表示假设让步关系，说明无论天气如何活动都照常进行！'
           },
           {
             type: 'snap', badge: '🧩 关联词双槽配对',
             prompt: '请选择恰当的关联词填入句中：\n“（ __ ）平时勤加阅读与积累，写作时（ __ ）能文思泉涌、下笔有神。”',
             slots: 2, options: ['只有', '才', '虽然', '但是', '与其'], answer: ['只有', '才'],
+            clue: '“平时勤加阅读”是达成“下笔有神”必不可少的条件，应选表示“必要条件关系”的关联词组。',
             explain: '“只有……才……”表示必要条件关系，强调平时积累是写好文章的前提！'
           },
           {
@@ -669,7 +885,8 @@
               '图书馆里安静极了，同学们都在专心阅读。'
             ],
             answer: '这次华文学会活动，全班同学基本上全部都准时出席了。',
-            explain: '“基本上”和“全部都”前后矛盾，删去其中一个句子就通顺啦！'
+            clue: '找一找哪一句话里同时出现了“基本上（大多数）”和“全部都（100%）”这两个互相打架的词？',
+            explain: '“基本上”和“全部都”意思矛盾，删去其中一个词语即可，如“全班同学全部都准时出席了”。'
           },
           {
             type: 'crack', badge: '🔨 病句名医诊脉',
@@ -681,30 +898,35 @@
               '他敏锐地察觉到了藏在竹林里的神秘线索。'
             ],
             answer: '通过这次文字勇者大冒险，让我学到了许多丰富的成语知识。',
+            clue: '造句大忌：“通过……，让（使）我……”连用会把句子的主人吃掉！快找出同时带有这两个词的句子。',
             explain: '“通过……让……”同时使用导致句子没有了主语，去掉“通过”或去掉“让”即可修复！'
           },
           {
             type: 'roller', badge: '🎰 标点符号神机',
             prompt: '妈妈笑着问我（ ___ ）“今天的线上华文学会闯关好玩吗？”括号处应填入什么标点？',
             options: ['冒号 ( ：)', '句号 ( 。)', '逗号 ( ，)', '感叹号 ( ！)'], answer: '冒号 ( ：)',
+            clue: '当“某某说 / 某某问”放在双引号前面时，为了提示下面即将引用原话，要用上下两个小圆点的标点！',
             explain: '提示语“妈妈笑着问我”在引语前面，后面应使用冒号（：）引出所说的话！'
           },
           {
             type: 'roller', badge: '🎰 古今礼貌谦敬词',
-            prompt: '在中华传统礼仪用语中，初次见面称“久仰”，请人原谅称“包涵”，那么**请人帮忙修改文章**应谦称什么？',
+            prompt: '在中华传统礼仪用语中，初次见面称“久仰”，请人原谅称“包涵”，那么**请人帮忙修改文章**，可使用哪个敬辞？',
             options: ['斧正', '赐教', '笑纳', '留步'], answer: '斧正',
+            clue: '古人把修改文章比作木匠师傅用“斧头”把歪斜的木料削平端正。',
             explain: '“斧正”原指请匠人用斧头削正木头，后专门用作请人修改诗文的高雅敬辞！'
           },
           {
-            type: 'scale', badge: '⚖️ 借代修辞解密',
-            prompt: '苏轼词云：“但愿人长久，千里共婵娟。”天平左盘的【婵娟】在诗中借代的是什么？',
+            type: 'scale', badge: '⚖️ 古诗词词义理解',
+            prompt: '苏轼词云：“但愿人长久，千里共婵娟。”天平左盘的【婵娟】在这句词中指什么？',
             leftWord: '千里共【婵娟】', options: ['明月', '太阳', '春风', '美酒'], answer: '明月',
+            clue: '苏轼这首《水调歌头》写于中秋之夜，相隔千里的人抬头共同凝望夜空中的什么呢？',
             explain: '“婵娟”本义形容姿态美好，在古诗词中常用来指代明月！'
           },
           {
             type: 'scale', badge: '⚖️ 年龄雅称配平',
             prompt: '古人常以特定雅称代表年龄，天平左盘的【弱冠之年】指的是男子多少岁？',
             leftWord: '男子【弱冠】', options: ['二十岁 (20岁)', '三十岁 (30岁)', '六十岁 (60岁)', '百岁 (100岁)'], answer: '二十岁 (20岁)',
+            clue: '古代男子刚满二十岁时要举行戴帽子的成人礼（冠礼），此时体格还不算强壮，故称“弱冠”。',
             explain: '古代男子二十岁行冠礼，体犹未壮故称“弱冠”；三十岁称“而立”，六十岁称“花甲”！'
           },
           {
@@ -712,6 +934,7 @@
             prompt: '请按合理的先后逻辑顺序点击竹简，排列阅读一篇文章的正确步骤：',
             segments: ['先通读全文知大意', '再细品词句悟情感', '最后归纳总结谈体会'],
             answer: ['先通读全文知大意', '再细品词句悟情感', '最后归纳总结谈体会'],
+            clue: '认真看每块竹简开头的连接词：“先……” → “再……” → “最后……”！',
             explain: '阅读理解遵循“整体感知（通读）→ 局部赏析（细品）→ 升华总结（归纳）”的黄金步骤！'
           },
           {
@@ -719,18 +942,20 @@
             prompt: '最后一击！请按顺序拼出本次华文学会的终极勇者真言，彻底封印混沌墨魔：',
             segments: ['品中华字句之美', '承千年文化之魂', '做博学笃行少年'],
             answer: ['品中华字句之美', '承千年文化之魂', '做博学笃行少年'],
+            clue: '先“品”字句之美，再“承”文化之魂，最终落实到我们自己“做”博学笃行少年！',
             explain: '真言成，金光现！恭喜你完成墨神殿全部 10 道终极试炼！'
           }
         ]
       },
       {
         id: 'stageSecret',
+        waypointKey: 'secret',
         name: '🌟 隐藏关：鲁班黄金地宫',
         npcName: '隐世机关师·鲁班传人',
         avatar: '🦊',
         orbId: 'orb5',
         orbName: '黄金神装光环 ⚙️',
-        mapId: 'luban', // 位于东北角满 600 分解锁的鲁班地宫内部
+        mapId: 'luban',
         tileX: 7, tileY: 4,
         isSecret: true,
         color: '#facc15',
@@ -739,12 +964,14 @@
             type: 'roller', badge: '⚙️ 鲁班机关字谜 (一)',
             prompt: '【机关字谜】：“一人一张口，下面长只手。”（打一常见汉字）',
             options: ['拿', '合', '拾', '哈'], answer: '拿',
+            clue: '地宫左边的石碑上有写哦！上面是“合（人+一+口）”，下面加上一只“手”。',
             explain: '“人”+“一”+“口”= 合，下面再加一只“手”，合起来正是“拿”字！'
           },
           {
             type: 'snap', badge: '⚙️ 鲁班拆字密码 (二)',
             prompt: '【机关字谜】：“左边绿，右边红；左右相遇起凉风。绿的喜欢及时雨，红的最怕水来攻。”请选出左右两个部件拼出谜底：',
             slots: 2, options: ['禾', '火', '木', '日', '水'], answer: ['禾', '火'],
+            clue: '田里绿油油喜欢春雨的是什么苗？红通通最怕水浇灭的又是什么？合起来就是凉爽的“秋”字！',
             explain: '禾苗绿（喜雨），火焰红（怕水），“禾”与“火”相遇便是凉风习习的“秋”字！'
           },
           {
@@ -757,12 +984,14 @@
               '雾锁山头山锁雾'
             ],
             answer: '书山有路勤为径',
-            explain: '其他三句倒过来读字音字义完全对称，是精妙的汉字“回文联”！'
+            clue: '把四句话从最后一个字倒着往前读一遍，找出倒过来读完全不通顺的那一句！',
+            explain: '其余三项都具有回文特点；其中有的是回文句，有的是回文对联。'
           },
           {
             type: 'scale', badge: '⚙️ 鲁班五行字阵 (四)',
             prompt: '【四象字阵】汉字“森、淼、焱、垚”都是由三个相同独体字叠成。左盘是【三水为淼（水多）】，那么右盘【三土为垚（yáo）】代表什么？',
             leftWord: '三土为【垚】', options: ['山高土多之貌', '烈火熊熊燃烧', '树木茂密成林', '金银堆积如山'], answer: '山高土多之貌',
+            clue: '三个“土”字高高垒在一起，自然跟泥土高耸、山高土多有关啦！',
             explain: '三个土叠成“垚”（yáo），形容土高突起、山高之貌！'
           },
           {
@@ -770,6 +999,7 @@
             prompt: '请按顺序点击开启鲁班秘宝箱的机关口诀：',
             segments: ['字里乾坤大', '笔下日月长', '金光护吾身'],
             answer: ['字里乾坤大', '笔下日月长', '金光护吾身'],
+            clue: '先赞叹“字里乾坤大”，再对仗“笔下日月长”，最后召唤“金光护吾身”！',
             explain: '轰隆隆——鲁班秘宝开启！你的角色已获得【浩然黄金光环】与额外 200 灵力奖励！'
           }
         ]
@@ -777,16 +1007,7 @@
     ];
 
     // ============================================================================
-    // 🗺️ 3. 巨型大世界 (60x60格 = 2400x2400px) 与 3个独立室内子地图构建器
-    // 瓦片编号定义：
-    //   0: 草地/室内地板 (可通行)
-    //   1: 石板大道/红毯 (可通行)
-    //   2: 深水河流/熔岩 (不可通行)
-    //   3: 高山岩壁/院墙 (不可通行)
-    //   4: 茂密森林/竹林迷宫墙 (不可通行)
-    //   5: 木桥/石桥 (可通行)
-    //   6: 断桥缺口 (未修好前不可通行，扳动拉杆后变为5可通行)
-    //   7: 枯木藤蔓障碍 (未砍除前不可通行，靠近按互动键砍除后变为0)
+    // 🗺️ 3. 巨型大世界 (60x60格) 与 3个独立室内子地图构建器
     // ============================================================================
     const TILE_SIZE = 44;
     const maps = {};
@@ -804,156 +1025,96 @@
     }
 
     function initAllMaps() {
-      // --------------------------------------------------------------------------
-      // A. 主大陆 (overworld: 60x60)
-      // --------------------------------------------------------------------------
       const ow = createEmptyGrid(60, 60, 0);
-      // 四周边界高山与密林围合
       fillRect(ow, 0, 0, 59, 1, 3);
       fillRect(ow, 0, 58, 59, 59, 4);
       fillRect(ow, 0, 0, 1, 59, 3);
       fillRect(ow, 58, 0, 59, 59, 4);
 
-      // 1) 中央广场与北面【翰林书院】外墙 (x:24..36, y:16..24)
-      fillRect(ow, 25, 25, 35, 33, 1); // 中央石板广场
-      fillRect(ow, 25, 17, 35, 22, 3); // 书院宏伟红墙建筑
-      ow[22][30] = 1; // 书院正门入口位置 (30, 22)
+      // 1) 中央广场与北面【翰林书院】
+      fillRect(ow, 25, 25, 35, 33, 1);
+      fillRect(ow, 25, 17, 35, 22, 3);
+      ow[22][30] = 1; // 书院入口 (30, 22)
 
-      // 2) 西境：南北走向的宽阔【沧浪大河】 (x:13..15, y:2..57)
+      // 2) 西境：【沧浪大河】与【断桥】
       fillRect(ow, 13, 2, 15, 57, 2);
-      // 西境通往河岸的主干道
       fillRect(ow, 16, 28, 25, 29, 1);
       fillRect(ow, 6, 28, 12, 29, 1);
-      // 沧浪河上的【断桥】 (x:13..15, y:28..29) -> 初始为6(断桥)
-      fillRect(ow, 13, 28, 15, 29, 6);
+      fillRect(ow, 13, 28, 15, 29, 6); // 断桥
 
-      // 河东岸森林小迷阵：藏着【修桥机关拉杆 (19, 22)】与挡路【枯木藤蔓】
+      // 河东岸森林小迷阵：藏着【修桥机关拉杆 (19, 22)】与挡路【枯木藤蔓 (19, 25)】
       fillRect(ow, 17, 19, 22, 25, 4);
-      fillRect(ow, 18, 20, 20, 24, 0); // 林间空地
-      ow[25][19] = 7; // 挡住进入拉杆小路的枯木藤蔓 (19, 25)
+      fillRect(ow, 18, 20, 20, 24, 0);
+      ow[25][19] = 7;
 
-      // 3) 南境：【八卦青竹大迷宫】 (x:20..40, y:37..55)
-      fillRect(ow, 29, 33, 31, 37, 1); // 广场往南到迷宫入口的大道
-      fillRect(ow, 20, 37, 40, 55, 4); // 先填满竹墙
-      // 雕刻九曲回环迷宫通道（保证有趣味岔路但一定能走到中心 30,47）
-      fillRect(ow, 29, 37, 31, 40, 0); // 迷宫北口进入
-      fillRect(ow, 22, 39, 38, 40, 0); // 第一横廊
-      fillRect(ow, 22, 39, 23, 52, 0); // 西侧长廊
-      fillRect(ow, 37, 39, 38, 46, 0); // 东侧诱饵长廊（尽头放奇遇宝箱）
-      fillRect(ow, 22, 51, 38, 52, 0); // 南侧底廊
-      fillRect(ow, 37, 49, 38, 53, 0); // 东南角通道
-      fillRect(ow, 33, 43, 38, 44, 0); // 中东横廊
-      fillRect(ow, 26, 43, 27, 49, 0); // 内圈左廊
-      fillRect(ow, 26, 43, 34, 44, 0); // 内圈北廊
-      fillRect(ow, 28, 46, 33, 49, 1); // 迷宫核心高台 (30, 47)
-      ow[49][30] = 0; ow[50][30] = 0;  // 连通南底廊与中心高台的入口！
-      // 在进入迷宫中心前放一道可砍除的荆棘藤蔓增加互动感
-      ow[50][30] = 7;
+      // 3) 南境：【八卦青竹大迷宫】
+      fillRect(ow, 29, 33, 31, 37, 1);
+      fillRect(ow, 20, 37, 40, 55, 4);
+      fillRect(ow, 29, 37, 31, 40, 0);
+      fillRect(ow, 22, 39, 38, 40, 0);
+      fillRect(ow, 22, 39, 23, 52, 0);
+      fillRect(ow, 37, 39, 38, 46, 0);
+      fillRect(ow, 22, 51, 38, 52, 0);
+      fillRect(ow, 37, 49, 38, 53, 0);
+      fillRect(ow, 33, 43, 38, 44, 0);
+      fillRect(ow, 26, 43, 27, 49, 0);
+      fillRect(ow, 26, 43, 34, 44, 0);
+      fillRect(ow, 28, 46, 33, 49, 1);
+      ow[49][30] = 0;
+      ow[50][30] = 7; // 迷宫中心前荆棘门
 
-      // 4) 北境：【寒冰山脉与蜿蜒山道】 (x:18..42, y:2..14)
-      fillRect(ow, 18, 2, 42, 13, 3); // 连绵高山
-      // 左侧绕过书院往北的山路
+      // 4) 北境：【寒冰山脉与蜿蜒山道】
+      fillRect(ow, 18, 2, 42, 13, 3);
       fillRect(ow, 22, 14, 24, 28, 1);
-      // 凿出蜿蜒曲折的登山峡谷通道
       fillRect(ow, 22, 10, 36, 12, 1);
       fillRect(ow, 35, 6, 37, 12, 1);
       fillRect(ow, 27, 5, 37, 7, 1);
-      ow[5][28] = 1; // 北境深渊山洞洞口位置 (28, 5)
+      ow[5][28] = 1; // 北境深渊山洞洞口 (28, 5)
 
       // 5) 东境与东北角：【远古幽暗森林】与【鲁班黄金封印石门】
-      fillRect(ow, 35, 28, 52, 29, 1); // 往东大道
-      fillRect(ow, 43, 4, 56, 35, 4);  // 东部浩瀚森林
-      // 森林内部曲折探险小径
+      fillRect(ow, 35, 28, 52, 29, 1);
+      fillRect(ow, 43, 4, 56, 35, 4);
       fillRect(ow, 45, 16, 47, 29, 0);
       fillRect(ow, 45, 16, 53, 18, 0);
       fillRect(ow, 51, 8, 53, 18, 0);
-      fillRect(ow, 47, 7, 53, 9, 1);   // 鲁班黄金石门前广场 (49, 7)
-      // 森林小径上的两处枯木障碍
+      fillRect(ow, 47, 7, 53, 9, 1);
       ow[23][46] = 7;
       ow[13][52] = 7;
 
-      maps.overworld = {
-        id: 'overworld',
-        name: '墨境大陆',
-        width: 60, height: 60,
-        grid: ow,
-        bgColor: '#1c2819'
-      };
+      maps.overworld = { id: 'overworld', name: '墨境大陆', width: 60, height: 60, grid: ow, bgColor: '#1c2819' };
 
-      // --------------------------------------------------------------------------
-      // B. 子地图 1：【翰林书院内堂】 (15x12)
-      // --------------------------------------------------------------------------
       const acad = createEmptyGrid(15, 12, 0);
-      fillRect(acad, 0, 0, 14, 1, 3);
-      fillRect(acad, 0, 11, 14, 11, 3);
-      fillRect(acad, 0, 0, 0, 11, 3);
-      fillRect(acad, 14, 0, 14, 11, 3);
-      fillRect(acad, 6, 2, 8, 10, 1); // 室内红毯
-      acad[11][7] = 1; // 出口门 (7, 11)
-      maps.academy = {
-        id: 'academy',
-        name: '翰林书院·内堂',
-        width: 15, height: 12,
-        grid: acad,
-        bgColor: '#2e1d12'
-      };
+      fillRect(acad, 0, 0, 14, 1, 3); fillRect(acad, 0, 11, 14, 11, 3);
+      fillRect(acad, 0, 0, 0, 11, 3); fillRect(acad, 14, 0, 14, 11, 3);
+      fillRect(acad, 6, 2, 8, 10, 1); acad[11][7] = 1;
+      maps.academy = { id: 'academy', name: '翰林书院·内堂', width: 15, height: 12, grid: acad, bgColor: '#2e1d12' };
 
-      // --------------------------------------------------------------------------
-      // C. 子地图 2：【北境深渊山洞】 (15x12)
-      // --------------------------------------------------------------------------
       const cave = createEmptyGrid(15, 12, 0);
-      fillRect(cave, 0, 0, 14, 1, 3);
-      fillRect(cave, 0, 11, 14, 11, 3);
-      fillRect(cave, 0, 0, 1, 11, 3);
-      fillRect(cave, 13, 0, 14, 11, 3);
-      // 洞内两侧熔岩池
-      fillRect(cave, 2, 3, 4, 8, 2);
-      fillRect(cave, 10, 3, 12, 8, 2);
-      fillRect(cave, 6, 2, 8, 10, 1);
-      cave[11][7] = 1; // 出口 (7, 11)
-      maps.cave = {
-        id: 'cave',
-        name: '北境深渊山洞',
-        width: 15, height: 12,
-        grid: cave,
-        bgColor: '#181824'
-      };
+      fillRect(cave, 0, 0, 14, 1, 3); fillRect(cave, 0, 11, 14, 11, 3);
+      fillRect(cave, 0, 0, 1, 11, 3); fillRect(cave, 13, 0, 14, 11, 3);
+      fillRect(cave, 2, 3, 4, 8, 2); fillRect(cave, 10, 3, 12, 8, 2);
+      fillRect(cave, 6, 2, 8, 10, 1); cave[11][7] = 1;
+      maps.cave = { id: 'cave', name: '北境深渊山洞', width: 15, height: 12, grid: cave, bgColor: '#181824' };
 
-      // --------------------------------------------------------------------------
-      // D. 子地图 3：【鲁班黄金地宫】 (15x12)
-      // --------------------------------------------------------------------------
       const luban = createEmptyGrid(15, 12, 0);
-      fillRect(luban, 0, 0, 14, 1, 3);
-      fillRect(luban, 0, 11, 14, 11, 3);
-      fillRect(luban, 0, 0, 0, 11, 3);
-      fillRect(luban, 14, 0, 14, 11, 3);
-      fillRect(luban, 5, 2, 9, 10, 1); // 黄金甬道
-      luban[11][7] = 1; // 出口 (7, 11)
-      maps.luban = {
-        id: 'luban',
-        name: '🌟 鲁班黄金地宫',
-        width: 15, height: 12,
-        grid: luban,
-        bgColor: '#2c2208'
-      };
+      fillRect(luban, 0, 0, 14, 1, 3); fillRect(luban, 0, 11, 14, 11, 3);
+      fillRect(luban, 0, 0, 0, 11, 3); fillRect(luban, 14, 0, 14, 11, 3);
+      fillRect(luban, 5, 2, 9, 10, 1); luban[11][7] = 1;
+      maps.luban = { id: 'luban', name: '🌟 鲁班黄金地宫', width: 15, height: 12, grid: luban, bgColor: '#2c2208' };
     }
 
     // ============================================================================
-    // 🎁 4. 传送门、机关拉杆、提示石碑与 5 个奇遇加分宝箱定义
+    // 🎁 4. 传送门、机关拉杆、提示石碑与 5 个奇遇加分宝箱
     // ============================================================================
     const PORTALS = [
-      // 书院进出
       { fromMap: 'overworld', tx: 30, ty: 22, toMap: 'academy', targetX: 7, targetY: 9.5, label: '🚪 推门进入【翰林书院】' },
       { fromMap: 'academy', tx: 7, ty: 11, toMap: 'overworld', targetX: 30, targetY: 23.5, label: '🚪 离开书院返回大陆' },
-      // 北境山洞进出
       { fromMap: 'overworld', tx: 28, ty: 5, toMap: 'cave', targetX: 7, targetY: 9.5, label: '🕳️ 进入【北境深渊山洞】' },
       { fromMap: 'cave', tx: 7, ty: 11, toMap: 'overworld', targetX: 28, targetY: 6.5, label: '🕳️ 走出山洞返回大陆' },
-      // 东北角鲁班黄金地宫进出（需 600 灵力分条件验证）
       { fromMap: 'overworld', tx: 49, ty: 7, toMap: 'luban', targetX: 7, targetY: 9.5, label: '🔒 开启【鲁班黄金封印门】', reqScore: 600 },
       { fromMap: 'luban', tx: 7, ty: 11, toMap: 'overworld', targetX: 49, targetY: 8.5, label: '🚪 离开鲁班地宫' }
     ];
 
-    // 5个散落在迷宫死角、河岸、森林、书院角落的奇遇宝箱（每个 +50 灵力分，助3-6年级学生轻松冲上600分）
     const CHESTS = [
       { id: 'c1', mapId: 'academy', tx: 2, ty: 3, opened: false, title: '书院藏书阁宝箱', tip: '💡 仓颉秘诀：看到“目”旁想眼睛（明眸善睐），看到“氵”旁想水波（波光潋滟）！\n\n✨ 获得【+50 灵力分】！' },
       { id: 'c2', mapId: 'overworld', tx: 37, ty: 45, opened: false, title: '竹林迷宫奇遇宝箱', tip: '💡 迷宫引路：往西走到底再往南绕，就能找到通往迷宫中心的荆棘小门啦！\n\n✨ 获得【+50 灵力分】！' },
@@ -962,7 +1123,6 @@
       { id: 'c5', mapId: 'cave', tx: 7, ty: 8, opened: false, title: '深渊山洞勇者宝箱', tip: '💡 病句诊脉秘诀：“基本上”和“全部”不能同时出现在一句话里哦！\n\n✨ 获得【+50 灵力分】！' }
     ];
 
-    // 鲁班地宫内的提示石碑（满足“在隐藏关卡里给提示”的要求）
     const LORE_TABLETS = [
       {
         mapId: 'luban', tx: 3, ty: 5,
@@ -977,7 +1137,7 @@
     ];
 
     // ============================================================================
-    // 🎮 5. 玩家状态与全局管理
+    // 🎮 5. 玩家状态与防乱猜惩罚计数器
     // ============================================================================
     const gameState = {
       playerName: '',
@@ -997,9 +1157,16 @@
         stageSecret: new Set()
       },
       mistakesLog: new Map(),
+      // 防乱猜核心统计
+      stageShields: 3,               // 当前进入关卡剩余的文心护盾 (3颗心)
+      currentQuestionWrongCount: 0,  // 当前单道题累计答错次数
+      questionWrongCounts: new Map(), // 记录每题的答错次数，防止切换题号清零
+      totalPenaltyCount: 0,          // 整局游戏累计触发盲猜扣分/冰封次数
+      banishCount: 0,                // 整局游戏因连错3次被雷霆震飞回城的次数
+      isFrozen: false,               // 是否正处于墨毒冰封冷却中
+      freezeTimerId: null,
       activeStageIndex: null,
       activeQuestionIndex: 0,
-      firstTryOnCurrentQ: true,
       player: {
         x: 30 * TILE_SIZE + TILE_SIZE / 2,
         y: 28 * TILE_SIZE + TILE_SIZE / 2,
@@ -1047,15 +1214,15 @@
     });
 
     // ============================================================================
-    // ⚡ 6. 探索传送石碑系统（走过一次自动点亮，支持随时传送）
+    // ⚡ 6. 探索传送石碑系统（支持乱猜被震飞时重新封锁石碑！）
     // ============================================================================
     const WAYPOINT_COORDS = {
       plaza:  { mapId: 'overworld', tx: 30, ty: 28, name: '1.书院外' },
-      stage1: { mapId: 'academy',   tx: 7,  ty: 8,  name: '1.书院内', btnId: 'wp_stage1', label: '🖌️ 1.书院内' },
-      stage2: { mapId: 'overworld', tx: 30, ty: 48, name: '2.竹迷宫', btnId: 'wp_stage2', label: '🖤 2.竹迷宫' },
-      stage3: { mapId: 'overworld', tx: 9,  ty: 28, name: '3.断桥崖', btnId: 'wp_stage3', label: '📜 3.断桥崖' },
-      stage4: { mapId: 'cave',      tx: 7,  ty: 8,  name: '4.山洞内', btnId: 'wp_stage4', label: '🪨 4.山洞内' },
-      secret: { mapId: 'overworld', tx: 49, ty: 8,  name: '5.鲁班门', btnId: 'wp_secret', label: '⚙️ 5.鲁班门' }
+      stage1: { mapId: 'academy',   tx: 7,  ty: 8,  name: '1.书院内', btnId: 'wp_stage1', unlockedLabel: '🖌️ 1.书院内', lockedLabel: '🔒 1.书院内' },
+      stage2: { mapId: 'overworld', tx: 30, ty: 48, name: '2.竹迷宫', btnId: 'wp_stage2', unlockedLabel: '🖤 2.竹迷宫', lockedLabel: '🔒 2.竹迷宫' },
+      stage3: { mapId: 'overworld', tx: 9,  ty: 28, name: '3.断桥崖', btnId: 'wp_stage3', unlockedLabel: '📜 3.断桥崖', lockedLabel: '🔒 3.断桥崖' },
+      stage4: { mapId: 'cave',      tx: 7,  ty: 8,  name: '4.山洞内', btnId: 'wp_stage4', unlockedLabel: '🪨 4.山洞内', lockedLabel: '🔒 4.山洞内' },
+      secret: { mapId: 'overworld', tx: 49, ty: 8,  name: '5.鲁班门', btnId: 'wp_secret', unlockedLabel: '⚙️ 5.鲁班门', lockedLabel: '🔒 5.鲁班门' }
     };
 
     function unlockWaypoint(key) {
@@ -1065,8 +1232,22 @@
       if (wp && wp.btnId) {
         const btn = document.getElementById(wp.btnId);
         if (btn) {
-          btn.textContent = wp.label;
+          btn.textContent = wp.unlockedLabel;
           btn.className = 'px-1.5 py-1.5 rounded-lg bg-amber-950/85 border border-amber-500/70 text-[10px] text-amber-200 font-bold active:scale-95';
+        }
+      }
+    }
+
+    // 乱猜满3次被震飞时，重新封锁该区域的传送碑，迫使学生重新走路过去！
+    function relockWaypoint(key) {
+      if (!key || key === 'plaza') return;
+      gameState.unlockedWaypoints.delete(key);
+      const wp = WAYPOINT_COORDS[key];
+      if (wp && wp.btnId) {
+        const btn = document.getElementById(wp.btnId);
+        if (btn) {
+          btn.textContent = wp.lockedLabel;
+          btn.className = 'px-1.5 py-1.5 rounded-lg bg-stone-800 border border-stone-700 text-[10px] text-stone-500 font-bold active:scale-95';
         }
       }
     }
@@ -1074,8 +1255,8 @@
     window.useWaypoint = function(key) {
       sfx.init();
       if (!gameState.unlockedWaypoints.has(key)) {
-        sfx.gentleHint();
-        showDialog('🧭', '传送石碑尚未点亮', '这座远方区域的传送石碑还处于迷雾中！\n请先操控勇者亲自走过去探索一次，即可永久解锁一键传送！');
+        sfx.freezePenalty();
+        showDialog('🔒', '传送石碑未点亮或已被封锁', '该区域的传送石碑尚未点亮（或因刚才乱猜受罚被暂时封锁）！\n请亲自操控勇者走过去探索，即可重新点亮传送石碑！');
         return;
       }
       sfx.door();
@@ -1098,7 +1279,7 @@
     }
 
     function canMoveTo(mapObj, px, py) {
-      const r = 11; // 玩家碰撞盒半径
+      const r = 11;
       const corners = [
         { x: px - r, y: py - r },
         { x: px + r, y: py - r },
@@ -1112,7 +1293,6 @@
       });
     }
 
-    // 扫描玩家身边是否有可互动的：1.长老NPC 2.传送大门/洞口 3.断桥拉杆 4.挡路枯藤 5.宝箱 6.提示石碑
     function scanNearbyInteraction() {
       const p = gameState.player;
       const mapId = gameState.currentMapId;
@@ -1120,7 +1300,6 @@
       const ptx = Math.floor(p.x / TILE_SIZE);
       const pty = Math.floor(p.y / TILE_SIZE);
 
-      // 1. 检查是否到达各地标自动解锁传送石碑
       if (mapId === 'academy') unlockWaypoint('stage1');
       if (mapId === 'cave') unlockWaypoint('stage4');
       if (mapId === 'overworld') {
@@ -1129,7 +1308,6 @@
         if (Math.hypot(ptx - 49, pty - 7) < 4) unlockWaypoint('secret');
       }
 
-      // 2. 检查守护长老 NPC
       for (let i = 0; i < STAGES_DATA.length; i++) {
         const st = STAGES_DATA[i];
         if (st.mapId === mapId) {
@@ -1147,7 +1325,6 @@
         }
       }
 
-      // 3. 检查房间大门 / 山洞口 / 鲁班黄金封印门
       for (const portal of PORTALS) {
         if (portal.fromMap === mapId) {
           const px = portal.tx * TILE_SIZE + TILE_SIZE / 2;
@@ -1164,7 +1341,6 @@
         }
       }
 
-      // 4. 检查西境【修桥机关拉杆】 (overworld: 19, 22)
       if (mapId === 'overworld' && !gameState.bridgeRepaired) {
         const lx = 19 * TILE_SIZE + TILE_SIZE / 2;
         const ly = 22 * TILE_SIZE + TILE_SIZE / 2;
@@ -1178,7 +1354,6 @@
         }
       }
 
-      // 5. 检查玩家周围紧邻格子的【枯木藤蔓障碍 (tile=7)】
       const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0],[-1,-1],[1,-1],[-1,1],[1,1]];
       for (const [dx, dy] of dirs) {
         const nx = ptx + dx, ny = pty + dy;
@@ -1195,7 +1370,6 @@
         }
       }
 
-      // 6. 检查未开启的【奇遇宝箱】
       for (const ch of CHESTS) {
         if (ch.mapId === mapId && !ch.opened) {
           const cx = ch.tx * TILE_SIZE + TILE_SIZE / 2;
@@ -1212,7 +1386,6 @@
         }
       }
 
-      // 7. 检查鲁班地宫内的【提示石碑】
       for (const tb of LORE_TABLETS) {
         if (tb.mapId === mapId) {
           const tx = tb.tx * TILE_SIZE + TILE_SIZE / 2;
@@ -1232,13 +1405,12 @@
       return null;
     }
 
-    // 执行当前互动动作
     function executeInteraction() {
       sfx.init();
       const inter = gameState.currentInteraction;
       if (!inter) {
         sfx.tap();
-        showDialog('🧭', '探险指南', '请使用左下角方向键（或直接点击地面）移动勇者：\n• 北面进【书院房间】\n• 南面闯【青竹大迷宫】\n• 西面砍开树藤扳动拉杆过【沧浪断桥】\n• 远方北境进【深渊山洞】\n• 满 600 分去东北森林开【鲁班黄金地宫】！');
+        showDialog('🧭', '探险指南 & 天条提醒', '• 北面进【书院房间】\n• 南面闯【青竹大迷宫】\n• 西面砍开树藤扳动拉杆过【沧浪断桥】\n• 远方北境进【深渊山洞】\n• 满 600 分去东北森林开【鲁班黄金地宫】！\n\n⚠️ 注意：答题时切勿胡乱猜测，答错将扣分并触发冰封冷却！');
         return;
       }
 
@@ -1248,11 +1420,11 @@
       } else if (inter.type === 'portal') {
         const pt = inter.portal;
         if (pt.reqScore && gameState.score < pt.reqScore) {
-          sfx.gentleHint();
+          sfx.freezePenalty();
           showDialog(
             '🔒',
             '鲁班黄金封印未解',
-            `石门上的古老铭文闪烁着金光：\n“唯有灵力达到 【${pt.reqScore} 分】 的勇者方能推开此门！”\n\n📊 你当前的灵力：${gameState.score} / ${pt.reqScore} 分\n💡 提示：快去闯四大主线关卡，或者寻找散落在迷宫、河岸、森林里的 5 个【奇遇宝箱（每个+50分）】吧！`
+            `石门上的古老铭文闪烁着金光：\n“唯有灵力达到 【${pt.reqScore} 分】 的勇者方能推开此门！”\n\n📊 你当前的灵力：${gameState.score} / ${pt.reqScore} 分\n💡 提示：认真答题避免因乱猜被扣分，并寻找地图上的 5 个【奇遇宝箱（每个+50分）】吧！`
           );
           return;
         }
@@ -1270,7 +1442,7 @@
       } else if (inter.type === 'lever') {
         sfx.bridge();
         gameState.bridgeRepaired = true;
-        fillRect(maps.overworld.grid, 13, 28, 15, 29, 5); // 断桥变为木桥
+        fillRect(maps.overworld.grid, 13, 28, 15, 29, 5);
         showDialog('🌉', '机关启动·断桥修复！', '轰隆隆——！\n西境沧浪河上的断桥已经成功架起木板！现在你可以过桥前往河对岸的【诗仙云崖】了！');
       } else if (inter.type === 'chest') {
         sfx.fanfare();
@@ -1326,14 +1498,13 @@
         }
       }
 
-      // 绘制主线与隐藏关位置标记
       if (mapObj.id === 'overworld') {
         const markers = [
-          { x: 30, y: 22, color: '#f59e0b' }, // 1.书院门
-          { x: 30, y: 47, color: '#10b981' }, // 2.迷宫中心
-          { x: 7,  y: 28, color: '#38bdf8' }, // 3.断桥西岸
-          { x: 28, y: 5,  color: '#a855f7' }, // 4.北境山洞口
-          { x: 49, y: 7,  color: '#facc15' }  // 5.鲁班地宫门
+          { x: 30, y: 22, color: '#f59e0b' },
+          { x: 30, y: 47, color: '#10b981' },
+          { x: 7,  y: 28, color: '#38bdf8' },
+          { x: 28, y: 5,  color: '#a855f7' },
+          { x: 49, y: 7,  color: '#facc15' }
         ];
         markers.forEach(m => {
           miniCtx.fillStyle = m.color;
@@ -1343,7 +1514,6 @@
         });
       }
 
-      // 绘制玩家实时绿点
       const px = (gameState.player.x / TILE_SIZE) * scaleX;
       const py = (gameState.player.y / TILE_SIZE) * scaleY;
       miniCtx.fillStyle = '#ffffff';
@@ -1362,7 +1532,6 @@
       const worldW = mapObj.width * TILE_SIZE;
       const worldH = mapObj.height * TILE_SIZE;
 
-      // 1. 处理移动与滑墙碰撞
       let dx = 0, dy = 0;
       if (gameState.keys.up) dy -= 1;
       if (gameState.keys.down) dy += 1;
@@ -1396,7 +1565,6 @@
         }
       }
 
-      // 2. 计算视口裁剪与相机跟随
       const viewW = canvas.width / (window.devicePixelRatio || 1);
       const viewH = canvas.height / (window.devicePixelRatio || 1);
       let camX = p.x - viewW / 2;
@@ -1410,11 +1578,9 @@
       ctx.save();
       ctx.translate(-camX, -camY);
 
-      // 背景底色
       ctx.fillStyle = mapObj.bgColor;
       ctx.fillRect(0, 0, worldW, worldH);
 
-      // 仅渲染视口可见范围内的瓦片，保证手机端 60帧 丝滑流畅
       const startCol = Math.max(0, Math.floor(camX / TILE_SIZE) - 1);
       const endCol = Math.min(mapObj.width - 1, Math.ceil((camX + viewW) / TILE_SIZE) + 1);
       const startRow = Math.max(0, Math.floor(camY / TILE_SIZE) - 1);
@@ -1429,7 +1595,6 @@
           const y = r * TILE_SIZE;
 
           if (t === 0) {
-            // 草地或室内砖地细节
             ctx.strokeStyle = 'rgba(255,255,255,0.03)';
             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
             if ((r * 7 + c * 13) % 11 === 0 && mapObj.id === 'overworld') {
@@ -1437,20 +1602,17 @@
               ctx.fillRect(x + 14, y + 14, 6, 6);
             }
           } else if (t === 1) {
-            // 石板大道 / 室内红毯
             ctx.fillStyle = mapObj.id === 'overworld' ? '#78552b' : '#991b1b';
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.strokeStyle = 'rgba(254, 243, 199, 0.14)';
             ctx.strokeRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
           } else if (t === 2) {
-            // 河流 / 熔岩
             ctx.fillStyle = mapObj.id === 'cave' ? '#b91c1c' : '#0369a1';
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.fillStyle = mapObj.id === 'cave' ? 'rgba(253, 224, 71, 0.3)' : 'rgba(125, 211, 252, 0.25)';
             const waveOffset = Math.sin(timeNow * 2 + r + c) * 4;
             ctx.fillRect(x + 8 + waveOffset, y + 18, 22, 4);
           } else if (t === 3) {
-            // 岩壁 / 书院红墙
             ctx.fillStyle = (mapObj.id === 'overworld' && r >= 17 && r <= 22 && c >= 25 && c <= 35) ? '#7f1d1d' : '#44403c';
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.strokeStyle = '#292524';
@@ -1464,7 +1626,6 @@
               ctx.fillText('⛰️', x + 22, y + 29);
             }
           } else if (t === 4) {
-            // 森林树木 / 青竹迷宫墙
             ctx.fillStyle = '#14331b';
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.font = '26px sans-serif';
@@ -1472,7 +1633,6 @@
             const isMazeZone = (r >= 37 && r <= 55 && c >= 20 && c <= 40);
             ctx.fillText(isMazeZone ? '🎋' : '🌲', x + 22, y + 31);
           } else if (t === 5) {
-            // 坚固木桥
             ctx.fillStyle = '#92400e';
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.strokeStyle = '#fde68a';
@@ -1481,14 +1641,12 @@
               ctx.beginPath(); ctx.moveTo(x + b, y); ctx.lineTo(x + b, y + TILE_SIZE); ctx.stroke();
             }
           } else if (t === 6) {
-            // 断桥缺口
             ctx.fillStyle = '#0369a1';
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.font = '20px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('⚠️', x + 22, y + 28);
           } else if (t === 7) {
-            // 可砍除的枯木藤蔓障碍
             ctx.fillStyle = '#3f2e18';
             ctx.fillRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
             ctx.font = '25px sans-serif';
@@ -1498,10 +1656,8 @@
         }
       }
 
-      // 3. 绘制大世界区域地面指引文字与建筑牌匾
       ctx.textAlign = 'center';
       if (mapObj.id === 'overworld') {
-        // 翰林书院牌匾
         ctx.fillStyle = '#451a03';
         ctx.fillRect(30 * TILE_SIZE - 70, 21 * TILE_SIZE - 12, 140, 24);
         ctx.strokeStyle = '#fbbf24';
@@ -1510,7 +1666,6 @@
         ctx.fillStyle = '#fde68a';
         ctx.fillText('🚪【第一关：翰林书院】', 30 * TILE_SIZE + 22, 21 * TILE_SIZE + 5);
 
-        // 广场四向路牌
         ctx.font = 'bold 12px "Noto Sans SC"';
         ctx.fillStyle = 'rgba(253, 230, 138, 0.75)';
         ctx.fillText('⬆️ 北通：翰林书院 & 远方深渊山洞', 30 * TILE_SIZE + 22, 26.5 * TILE_SIZE);
@@ -1518,7 +1673,6 @@
         ctx.fillText('⬅️ 西通：沧浪断桥 (第三关)', 26.5 * TILE_SIZE, 29 * TILE_SIZE);
         ctx.fillText('➡️ 东通：远古森林 & 鲁班秘洞(600分)', 34 * TILE_SIZE, 29 * TILE_SIZE);
 
-        // 西境修桥机关拉杆绘制 (19, 22)
         const lx = 19 * TILE_SIZE + 22, ly = 22 * TILE_SIZE + 22;
         ctx.fillStyle = gameState.bridgeRepaired ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)';
         ctx.beginPath(); ctx.arc(lx, ly, 22, 0, Math.PI * 2); ctx.fill();
@@ -1529,7 +1683,6 @@
         ctx.fillText(gameState.bridgeRepaired ? '断桥已修复' : '修桥机关拉杆', lx, ly - 18);
       }
 
-      // 4. 绘制传送门 / 洞口光圈
       PORTALS.filter(pt => pt.fromMap === mapObj.id).forEach(pt => {
         const px = pt.tx * TILE_SIZE + 22;
         const py = pt.ty * TILE_SIZE + 22;
@@ -1549,7 +1702,6 @@
         ctx.restore();
       });
 
-      // 5. 绘制奇遇宝箱
       CHESTS.filter(ch => ch.mapId === mapObj.id).forEach(ch => {
         const cx = ch.tx * TILE_SIZE + 22;
         const cy = ch.ty * TILE_SIZE + 22;
@@ -1562,7 +1714,6 @@
         }
       });
 
-      // 6. 绘制鲁班地宫内的提示石碑
       LORE_TABLETS.filter(tb => tb.mapId === mapObj.id).forEach(tb => {
         const tx = tb.tx * TILE_SIZE + 22;
         const ty = tb.ty * TILE_SIZE + 22;
@@ -1573,7 +1724,6 @@
         ctx.fillText('提示石碑', tx, ty - 18);
       });
 
-      // 7. 绘制当前地图上的守护长老 NPC
       STAGES_DATA.forEach((st, idx) => {
         if (st.mapId !== mapObj.id) return;
         const sx = st.tileX * TILE_SIZE + 22;
@@ -1613,7 +1763,6 @@
         ctx.restore();
       });
 
-      // 8. 绘制点击寻路光圈
       if (p.targetX !== null && p.targetY !== null) {
         ctx.beginPath();
         ctx.arc(p.targetX, p.targetY, 10 + Math.sin(timeNow * 4) * 3, 0, Math.PI * 2);
@@ -1622,7 +1771,6 @@
         ctx.stroke();
       }
 
-      // 9. 绘制玩家勇者
       ctx.save();
       if (p.goldenAura) {
         ctx.beginPath();
@@ -1649,7 +1797,6 @@
 
       ctx.restore();
 
-      // 10. 更新右上角实时雷达与周边互动按钮状态
       renderMiniMap(mapObj);
       const inter = scanNearbyInteraction();
       gameState.currentInteraction = inter;
@@ -1672,7 +1819,6 @@
       requestAnimationFrame(updateAndDraw);
     }
 
-    // 支持手指点击画布地面移动或直接点击身边交互物
     canvas.addEventListener('pointerdown', (e) => {
       sfx.init();
       const rect = canvas.getBoundingClientRect();
@@ -1695,7 +1841,6 @@
       const worldX = clickX + camX;
       const worldY = clickY + camY;
 
-      // 若身边已有可互动对象且点击位置靠近玩家，直接触发互动
       if (gameState.currentInteraction && Math.hypot(worldX - gameState.player.x, worldY - gameState.player.y) < 64) {
         executeInteraction();
         return;
@@ -1705,7 +1850,6 @@
       gameState.player.targetY = worldY;
     });
 
-    // 虚拟方向键与键盘事件
     document.querySelectorAll('.dpad-btn').forEach(btn => {
       const dir = btn.dataset.dir;
       const startMove = (e) => { e.preventDefault(); sfx.init(); gameState.keys[dir] = true; btn.classList.add('active'); };
@@ -1731,10 +1875,20 @@
     });
 
     // ============================================================================
-    // 🧩 9. 五大玩具题型渲染与零挫败感判定系统
+    // 🛡️ 9. 五大玩具题型渲染 + 防乱猜四重惩罚核心系统
     // ============================================================================
+    function updateShieldHeartsUI() {
+      const s = gameState.stageShields;
+      const full = '❤️'.repeat(Math.max(0, s));
+      const broken = '💔'.repeat(Math.max(0, 3 - s));
+      document.getElementById('shieldHeartsDisplay').textContent = full + broken;
+    }
+
     function openStageModal(stageIdx) {
       gameState.activeStageIndex = stageIdx;
+      gameState.stageShields = 3; // 每次进入关卡重置 3 颗文心护盾
+      updateShieldHeartsUI();
+
       const stage = STAGES_DATA[stageIdx];
       const doneSet = gameState.completedMap[stage.id];
 
@@ -1743,24 +1897,34 @@
         if (!doneSet.has(i)) { firstUndone = i; break; }
       }
       gameState.activeQuestionIndex = firstUndone;
+      gameState.currentQuestionWrongCount = gameState.questionWrongCounts.get(`${stage.id}:${firstUndone}`) || 0;
       document.getElementById('quizModal').classList.remove('hidden');
-      renderCurrentQuestion();
+      renderCurrentQuestion(false);
     }
 
-    function renderCurrentQuestion() {
+    // keepWrongCount=true 表示答错解封后重新打乱选项渲染，保留本题已错次数
+    function formatQuestionPrompt(raw) {
+      return String(raw).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    }
+
+    function renderCurrentQuestion(keepWrongCount = false) {
       const stage = STAGES_DATA[gameState.activeStageIndex];
       const qIdx = gameState.activeQuestionIndex;
       const q = stage.questions[qIdx];
       const doneSet = gameState.completedMap[stage.id];
 
-      gameState.firstTryOnCurrentQ = true;
+      if (!keepWrongCount) {
+        gameState.currentQuestionWrongCount = gameState.questionWrongCounts.get(`${stage.id}:${qIdx}`) || 0;
+      }
       document.getElementById('feedbackBox').classList.add('hidden');
+      updateShieldHeartsUI();
 
       document.getElementById('npcModalAvatar').textContent = stage.avatar;
       document.getElementById('npcModalTitle').textContent = stage.name;
       document.getElementById('questionTypeBadge').textContent = q.badge;
       document.getElementById('questionCounter').textContent = `第 ${qIdx + 1} / ${stage.questions.length} 题`;
-      document.getElementById('questionPrompt').innerHTML = q.prompt.replace(/\n/g, '<br/>');
+      document.getElementById('questionPrompt').innerHTML = formatQuestionPrompt(q.prompt);
 
       const dotsContainer = document.getElementById('stageProgressDots');
       dotsContainer.innerHTML = '';
@@ -1776,7 +1940,12 @@
             : 'bg-amber-900/15 text-amber-900 border-amber-700/30'
         }`;
         btn.textContent = isDone ? '✓' : idx + 1;
-        btn.onclick = () => { sfx.tap(); gameState.activeQuestionIndex = idx; renderCurrentQuestion(); };
+        btn.onclick = () => {
+          if (gameState.isFrozen) return;
+          sfx.tap();
+          gameState.activeQuestionIndex = idx;
+          renderCurrentQuestion(false);
+        };
         dotsContainer.appendChild(btn);
       });
 
@@ -1805,6 +1974,7 @@
         slot.className = 'snap-slot w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-amber-950';
         slot.textContent = '？';
         slot.onclick = () => {
+          if (gameState.isFrozen) return;
           if (filled[i] !== null) { sfx.tap(); filled[i] = null; updateSnapUI(); }
         };
         slotEls.push(slot);
@@ -1825,6 +1995,7 @@
         btn.className = 'toy-block px-4 py-3 rounded-xl font-black text-base text-amber-950 min-w-[60px]';
         btn.textContent = word;
         btn.onclick = () => {
+          if (gameState.isFrozen) return;
           sfx.tap();
           const emptyIdx = filled.indexOf(null);
           if (emptyIdx !== -1) {
@@ -1833,9 +2004,6 @@
             if (!filled.includes(null)) {
               const isRight = filled.every((val, idx) => val === q.answer[idx]);
               handleAnswerCheck(isRight, q, wrapper);
-              if (!isRight) {
-                setTimeout(() => { filled.fill(null); updateSnapUI(); }, 650);
-              }
             }
           }
         };
@@ -1888,8 +2056,8 @@
         labelHint.textContent = `拨动滚轮切换 (${currentIdx + 1}/${shuffledOpts.length})`;
       }
 
-      btnPrev.onclick = () => { currentIdx = (currentIdx - 1 + shuffledOpts.length) % shuffledOpts.length; updateDial(); };
-      btnNext.onclick = () => { currentIdx = (currentIdx + 1) % shuffledOpts.length; updateDial(); };
+      btnPrev.onclick = () => { if (!gameState.isFrozen) { currentIdx = (currentIdx - 1 + shuffledOpts.length) % shuffledOpts.length; updateDial(); } };
+      btnNext.onclick = () => { if (!gameState.isFrozen) { currentIdx = (currentIdx + 1) % shuffledOpts.length; updateDial(); } };
 
       dialBox.appendChild(btnPrev);
       dialBox.appendChild(displayCenter);
@@ -1902,6 +2070,7 @@
         pill.className = 'toy-block py-2 px-2.5 rounded-xl text-xs font-bold text-amber-950 truncate';
         pill.textContent = opt;
         pill.onclick = () => {
+          if (gameState.isFrozen) return;
           currentIdx = idx;
           updateDial();
           handleAnswerCheck(shuffledOpts[currentIdx] === q.answer, q, wrapper);
@@ -1912,7 +2081,9 @@
       const confirmBtn = document.createElement('button');
       confirmBtn.className = 'w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-black text-sm shadow active:scale-95';
       confirmBtn.textContent = '🔒 锁定当前滚轮答案';
-      confirmBtn.onclick = () => handleAnswerCheck(shuffledOpts[currentIdx] === q.answer, q, wrapper);
+      confirmBtn.onclick = () => {
+        if (!gameState.isFrozen) handleAnswerCheck(shuffledOpts[currentIdx] === q.answer, q, wrapper);
+      };
 
       wrapper.appendChild(dialBox);
       wrapper.appendChild(quickRow);
@@ -1930,6 +2101,7 @@
         tablet.className = 'toy-block w-full py-2.5 px-3.5 rounded-xl text-left font-bold text-xs text-amber-950 flex items-center justify-between';
         tablet.innerHTML = `<span class="pr-2">🪵 ${opt}</span><span class="text-[11px] text-amber-700 font-black shrink-0">🔨 击碎</span>`;
         tablet.onclick = () => {
+          if (gameState.isFrozen) return;
           const isRight = opt === q.answer;
           if (isRight) {
             tablet.innerHTML = `<span class="line-through text-red-700 pr-2">💥 ${opt}</span><span class="text-[11px] text-emerald-700 font-black shrink-0">✅ 成功揪出！</span>`;
@@ -1978,14 +2150,14 @@
         btn.className = 'toy-block py-2.5 px-3 rounded-xl font-black text-xs text-amber-950';
         btn.textContent = `⚖️ ${opt}`;
         btn.onclick = () => {
+          if (gameState.isFrozen) return;
           rightPan.textContent = opt;
           const isRight = opt === q.answer;
           if (isRight) {
             beam.style.transform = 'rotate(0deg)';
             rightPan.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-black text-xs shadow';
           } else {
-            beam.style.transform = 'rotate(10deg)';
-            setTimeout(() => { beam.style.transform = 'rotate(-8deg)'; }, 500);
+            beam.style.transform = 'rotate(12deg)';
           }
           handleAnswerCheck(isRight, q, wrapper);
         };
@@ -2019,7 +2191,7 @@
         btn.className = 'toy-block px-3.5 py-2.5 rounded-xl font-black text-xs text-amber-950';
         btn.textContent = `🎋 ${seg}`;
         btn.onclick = () => {
-          if (picked.includes(idx)) return;
+          if (gameState.isFrozen || picked.includes(idx)) return;
           sfx.tap();
           picked.push(idx);
           btn.classList.add('opacity-30', 'pointer-events-none');
@@ -2029,13 +2201,6 @@
             const userOrder = picked.map(i => shuffled[i]);
             const isRight = userOrder.every((val, i) => val === q.answer[i]);
             handleAnswerCheck(isRight, q, wrapper);
-            if (!isRight) {
-              setTimeout(() => {
-                picked = [];
-                segBtns.forEach(b => b.classList.remove('opacity-30', 'pointer-events-none'));
-                refreshBambooUI();
-              }, 700);
-            }
           }
         };
         poolBox.appendChild(btn);
@@ -2053,6 +2218,7 @@
           chip.className = 'px-3 py-1.5 rounded-lg bg-amber-800 text-amber-100 font-bold text-xs shadow';
           chip.textContent = shuffled[sIdx];
           chip.onclick = () => {
+            if (gameState.isFrozen) return;
             sfx.tap();
             picked.splice(orderPos, 1);
             segBtns[sIdx].classList.remove('opacity-30', 'pointer-events-none');
@@ -2067,7 +2233,12 @@
       zone.appendChild(wrapper);
     }
 
+    // ----------------------------------------------------------------------------
+    // ⚖️ 核心判题与防乱猜四重惩罚逻辑
+    // ----------------------------------------------------------------------------
     function handleAnswerCheck(isRight, questionObj, containerEl) {
+      if (gameState.isFrozen) return;
+
       const stage = STAGES_DATA[gameState.activeStageIndex];
       const qIdx = gameState.activeQuestionIndex;
       const doneSet = gameState.completedMap[stage.id];
@@ -2078,12 +2249,13 @@
         sfx.correct();
         if (!doneSet.has(qIdx)) {
           doneSet.add(qIdx);
-          const pts = gameState.firstTryOnCurrentQ ? 25 : 15;
+          // 一次答对+25分；错1次后答对+15分；错2次以上+10分
+          const pts = gameState.currentQuestionWrongCount === 0 ? 25 : (gameState.currentQuestionWrongCount === 1 ? 15 : 10);
           gameState.score += pts;
         }
 
         feedbackBox.className = 'mt-2.5 p-2.5 rounded-xl bg-emerald-100 border border-emerald-600 text-xs font-bold text-emerald-950 flex items-start space-x-2';
-        feedbackText.innerHTML = `<b>太棒了！完全正确！</b> ${questionObj.explain}`;
+        feedbackText.innerHTML = `<b>✅ 完全正确！</b> ${questionObj.explain}`;
         feedbackBox.classList.remove('hidden');
 
         updateHUD();
@@ -2096,40 +2268,132 @@
               const nextI = (qIdx + step) % stage.questions.length;
               if (!doneSet.has(nextI)) {
                 gameState.activeQuestionIndex = nextI;
-                renderCurrentQuestion();
+                renderCurrentQuestion(false);
                 break;
               }
             }
           }
-        }, 1100);
+        }, 1150);
+
       } else {
-        sfx.gentleHint();
-        gameState.firstTryOnCurrentQ = false;
+        // ❌ 答错惩罚触发！
+        gameState.currentQuestionWrongCount++;
+        gameState.questionWrongCounts.set(`${stage.id}:${qIdx}`, gameState.currentQuestionWrongCount);
+        gameState.totalPenaltyCount++;
+        gameState.stageShields--;
+        updateShieldHeartsUI();
+
         const mistakeKey = `${stage.name}第${qIdx + 1}题`;
         gameState.mistakesLog.set(mistakeKey, questionObj.explain);
 
-        containerEl.classList.remove('gentle-shake');
-        void containerEl.offsetWidth;
-        containerEl.classList.add('gentle-shake');
+        // 阶梯扣分：第1次错扣10分，同一题连错第2次及以上扣15分
+        const deduct = gameState.currentQuestionWrongCount === 1 ? 10 : 15;
+        gameState.score = Math.max(0, gameState.score - deduct);
+        updateHUD();
 
-        feedbackBox.className = 'mt-2.5 p-2.5 rounded-xl bg-amber-100 border border-amber-500 text-xs font-bold text-amber-900 flex items-start space-x-2';
-        feedbackText.innerHTML = `<b>再仔细想想看：</b>${questionObj.explain}`;
-        feedbackBox.classList.remove('hidden');
+        const quizCard = document.getElementById('quizCard');
+        quizCard.classList.remove('penalty-shake');
+        void quizCard.offsetWidth;
+        quizCard.classList.add('penalty-shake');
+
+        // 检查是否 3 颗文心护盾全碎（触发“三振出局·雷霆震飞回城”终极惩罚）
+        if (gameState.stageShields <= 0) {
+          triggerThunderBanishment(stage);
+          return;
+        }
+
+        // 否则触发 5秒（连错则 8秒）【❄️ 墨毒冰封冷却锁】并重新洗牌选项
+        const freezeSecs = gameState.currentQuestionWrongCount === 1 ? 5 : 8;
+        triggerFreezeCooldown(questionObj, deduct, freezeSecs);
       }
     }
 
+    // ❄️ 墨毒冰封冷却倒计时遮罩
+    function triggerFreezeCooldown(questionObj, deductPts, seconds) {
+      sfx.freezePenalty();
+      gameState.isFrozen = true;
+
+      const overlay = document.getElementById('freezeOverlay');
+      const penaltyTitle = document.getElementById('freezePenaltyTitle');
+      const qEcho = document.getElementById('freezeQuestionEcho');
+      const hintText = document.getElementById('freezeHintText');
+      const bar = document.getElementById('freezeProgressBar');
+      const numEl = document.getElementById('freezeCountdownNum');
+
+      penaltyTitle.textContent = `⚠️ 答错受罚：已扣除 ${deductPts} 灵力分 & 碎裂 1 颗护盾！（剩余 ${gameState.stageShields} 颗❤️）`;
+      qEcho.innerHTML = formatQuestionPrompt(questionObj.prompt);
+      hintText.innerHTML = `💡 <b>思考线索</b>：${questionObj.clue || '请仔细审题，切勿盲目乱猜！'}`;
+
+      let remaining = seconds;
+      numEl.textContent = remaining;
+      bar.style.width = '100%';
+      overlay.classList.remove('hidden');
+
+      if (gameState.freezeTimerId) clearInterval(gameState.freezeTimerId);
+      gameState.freezeTimerId = setInterval(() => {
+        remaining--;
+        numEl.textContent = Math.max(0, remaining);
+        bar.style.width = `${(Math.max(0, remaining) / seconds) * 100}%`;
+
+        if (remaining <= 0) {
+          clearInterval(gameState.freezeTimerId);
+          gameState.isFrozen = false;
+          overlay.classList.add('hidden');
+          // 关键防盲猜设计：解封后立即重新洗牌打乱当前题目的所有选项位置！
+          renderCurrentQuestion(true);
+        }
+      }, 1000);
+    }
+
+    // ⚡ 三振出局：雷霆震飞回中央书院出生广场 + 封锁该关卡传送石碑！
+    function triggerThunderBanishment(stage) {
+      sfx.thunderBanish();
+      gameState.banishCount++;
+      gameState.score = Math.max(0, gameState.score - 20); // 额外扣除20分震飞惩罚
+      updateHUD();
+
+      document.getElementById('quizModal').classList.add('hidden');
+
+      // 封锁该关卡已激活的传送石碑，迫使学生必须自己重新走过去！
+      relockWaypoint(stage.waypointKey);
+
+      // 将玩家强制传回中央书院广场 (30, 28)
+      gameState.currentMapId = 'overworld';
+      gameState.player.x = 30 * TILE_SIZE + TILE_SIZE / 2;
+      gameState.player.y = 28 * TILE_SIZE + TILE_SIZE / 2;
+      gameState.player.targetX = null;
+      gameState.player.targetY = null;
+      document.getElementById('hudLocationBadge').textContent = maps.overworld.name;
+
+      showDialog(
+        '⚡',
+        '文心护盾全碎 · 雷霆震飞！',
+        `你在【${stage.name}】中累计答错 3 次，触发了墨境天条惩罚！\n\n💔 惩罚结果：\n1. 额外扣除 20 灵力分！\n2. 你已被神雷直接震飞回【中央书院广场】！\n3. 该区域的【快捷传送碑】已被封锁，请平复心情、认真思考后再重新走过去挑战！`
+      );
+    }
+
+    // 💡 付费求助线索按钮（消耗 5 灵力分，只给模糊思维方向 clue，不直接给答案）
     document.getElementById('btnUseHint').addEventListener('click', () => {
+      if (gameState.isFrozen) return;
       sfx.tap();
       const stage = STAGES_DATA[gameState.activeStageIndex];
       const q = stage.questions[gameState.activeQuestionIndex];
       const feedbackBox = document.getElementById('feedbackBox');
       const feedbackText = document.getElementById('feedbackText');
+
+      if (!q._hintPurchased) {
+        q._hintPurchased = true;
+        gameState.score = Math.max(0, gameState.score - 5);
+        updateHUD();
+      }
+
       feedbackBox.className = 'mt-2.5 p-2.5 rounded-xl bg-amber-100 border border-amber-500 text-xs font-bold text-amber-900 flex items-start space-x-2';
-      feedbackText.innerHTML = `<b>长老锦囊：</b>${q.explain}`;
+      feedbackText.innerHTML = `<b>🧭 长老思维指引（已耗5灵力）：</b>${q.clue || '仔细观察题干中的关键词哦！'}`;
       feedbackBox.classList.remove('hidden');
     });
 
     document.getElementById('btnCloseQuiz').addEventListener('click', () => {
+      if (gameState.isFrozen) return;
       sfx.tap();
       document.getElementById('quizModal').classList.add('hidden');
     });
@@ -2178,12 +2442,16 @@
       const secretCleared = gameState.completedMap.stageSecret.size >= 5;
       const openedChests = CHESTS.filter(c => c.opened).length;
       const timeStr = formatTime(gameState.elapsedSeconds);
+      const penaltyStr = gameState.totalPenaltyCount === 0
+        ? '🌟 0次受罚 (极度严谨)'
+        : `答错受罚 ${gameState.totalPenaltyCount} 次 / 震飞 ${gameState.banishCount} 次`;
 
       document.getElementById('certName').textContent = gameState.playerName;
       document.getElementById('certClass').textContent = gameState.playerClass;
       document.getElementById('certScore').textContent = `${gameState.score} 灵力分`;
       document.getElementById('certProgress').textContent = `${totalDone} / 45 题 (${percentage}%)`;
       document.getElementById('certChests').textContent = `${openedChests} / 5 个`;
+      document.getElementById('certPenalty').textContent = penaltyStr;
       document.getElementById('certSecret').textContent = secretCleared ? '🌟 已夺得【浩然黄金神装】' : '未完全解锁';
       document.getElementById('certTime').textContent = timeStr;
 
@@ -2216,6 +2484,7 @@
         mainCleared: mainCleared,
         secretCleared: secretCleared,
         chestsOpened: `${openedChests}/5`,
+        penaltySummary: penaltyStr,
         timeSpent: timeStr,
         mistakes: mistakesSummary
       };
@@ -2260,7 +2529,7 @@
       const totalDone = getTotalCompletedCount();
       const secretCleared = gameState.completedMap.stageSecret.size >= 5;
       const openedChests = CHESTS.filter(c => c.opened).length;
-      const reportText = `⚔️【华文学会·文字勇者传大世界战报】⚔️\n👤 勇者：${gameState.playerName} (${gameState.playerClass})\n✨ 灵力总分：${gameState.score} 分\n📜 破解关卡：${totalDone} / 45 题\n🎁 发现宝箱：${openedChests} / 5 个\n🌟 鲁班地宫：${secretCleared ? '已解锁黄金神装👑' : '探索中'}\n⏱️ 用时：${formatTime(gameState.elapsedSeconds)}`;
+      const reportText = `⚔️【华文学会·文字勇者传大世界战报】⚔️\n👤 勇者：${gameState.playerName} (${gameState.playerClass})\n✨ 灵力总分：${gameState.score} 分\n📜 破解关卡：${totalDone} / 45 题\n🎁 发现宝箱：${openedChests} / 5 个\n🛡️ 受罚次数：${gameState.totalPenaltyCount} 次\n🌟 鲁班地宫：${secretCleared ? '已解锁黄金神装👑' : '探索中'}\n⏱️ 用时：${formatTime(gameState.elapsedSeconds)}`;
       navigator.clipboard.writeText(reportText).then(() => {
         const btn = document.getElementById('btnCopyReport');
         btn.textContent = '✅ 已复制！快去群里粘贴吧';
@@ -2278,7 +2547,20 @@
       e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
     });
 
-    // 启动游戏
+    document.getElementById('btnMusicSettings').addEventListener('click', () => {
+      document.getElementById('musicPanel').classList.toggle('hidden');
+    });
+    document.getElementById('btnMusicToggle').addEventListener('click', (e) => {
+      bgMusic.toggle();
+      e.currentTarget.textContent = bgMusic.enabled ? '🎵 关闭背景音乐' : '🔇 开启背景音乐';
+      document.getElementById('btnMusicSettings').textContent = bgMusic.enabled ? '🎵' : '🎼';
+    });
+    document.getElementById('musicVolume').addEventListener('input', (e) => {
+      const v = Number(e.target.value);
+      bgMusic.setVolume(v / 100);
+      document.getElementById('musicVolumeLabel').textContent = v + '%';
+    });
+
     document.getElementById('btnStartGame').addEventListener('click', () => {
       const nameVal = document.getElementById('inputName').value.trim();
       const classVal = document.getElementById('inputClass').value.trim();
@@ -2287,6 +2569,7 @@
 
       sfx.init();
       sfx.fanfare();
+      bgMusic.start();
       initAllMaps();
 
       gameState.playerName = nameVal;
