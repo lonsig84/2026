@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五年级华文 UASA 试卷精讲与词汇助手 (026)</title>
+  <style>
+    :root {
+      --primary: #1A56DB;
+      --secondary: #FF6B35;
+      --success: #059669;
+      --accent-purple: #7C3AED;
+      --accent-yellow: #D97706;
+      --bg-main: #F0F4F8;
+      --card-bg: #FFFFFF;
+      --text-dark: #1E293B;
+      --text-gray: #475569;
+      --border-color: #CBD5E1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", "PingFang SC", sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      border: 3px solid #E2E8F0;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1A56DB 0%, #7C3AED 100%);
+      color: #FFFFFF;
+      padding: 30px 25px;
+      text-align: center;
+      border-bottom: 5px solid #F59E0B;
+    }
+
+    header h1 {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 19px;
+      opacity: 0.95;
+      font-weight: 500;
+    }
+
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      background-color: #E2E8F0;
+      padding: 8px 8px 0 8px;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 180px;
+      padding: 16px 12px;
+      font-size: 19px;
+      font-weight: 700;
+      border: none;
+      background-color: #CBD5E1;
+      color: #334155;
+      cursor: pointer;
+      border-radius: 14px 14px 0 0;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      background-color: #94A3B8;
+      color: #FFFFFF;
+    }
+
+    .tab-btn.active {
+      background-color: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+      border-top: 5px solid var(--secondary);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .passage-card {
+      background: #F8FAFC;
+      border-left: 8px solid var(--primary);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .passage-card h2 {
+      font-size: 24px;
+      color: var(--primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .passage-text {
+      font-size: 19px;
+      line-height: 1.8;
+      color: #1E293B;
+      text-indent: 2em;
+    }
+
+    .passage-text p {
+      margin-bottom: 14px;
+    }
+
+    /* 图片展示与占位容器 */
+    .img-slot {
+      margin: 20px 0;
+      border: 3px dashed #93C5FD;
+      background-color: #EFF6FF;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .img-slot.has-image {
+      border: 2px solid #BFDBFE;
+      background-color: #FFFFFF;
+      padding: 12px;
+    }
+
+    .img-slot .preview-img {
+      max-width: 100%;
+      max-height: 520px;
+      width: auto;
+      height: auto;
+      border-radius: 12px;
+      margin: 0 auto;
+      display: block;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      object-fit: cover;
+    }
+
+    .img-slot .slot-header {
+      font-weight: 700;
+      font-size: 18px;
+      color: #1E40AF;
+      margin-bottom: 6px;
+    }
+
+    .img-slot .slot-prompt {
+      background: #FFFFFF;
+      border: 1px solid #BFDBFE;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #1E3A8A;
+      text-align: left;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .img-slot .upload-trigger {
+      margin-top: 12px;
+      display: inline-block;
+      padding: 8px 16px;
+      font-size: 15px;
+      background: #2563EB;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .img-slot input[type="file"] {
+      display: none;
+    }
+
+    /* 题目卡片 */
+    .question-card {
+      background: #FFFFFF;
+      border: 2px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      transition: border-color 0.2s;
+    }
+
+    .question-card:hover {
+      border-color: #93C5FD;
+    }
+
+    .q-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .q-tag {
+      background: #FEF3C7;
+      color: #B45309;
+      font-size: 15px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-right: 8px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #F8FAFC;
+      border: 2px solid #E2E8F0;
+      padding: 14px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 19px;
+      transition: all 0.2s;
+    }
+
+    .option-item:hover {
+      background-color: #F1F5F9;
+      border-color: #94A3B8;
+    }
+
+    .option-item.correct {
+      background-color: #ECFDF5 !important;
+      border-color: var(--success) !important;
+      color: #065F46;
+      font-weight: 700;
+    }
+
+    .option-item.wrong {
+      background-color: #FEF2F2 !important;
+      border-color: #EF4444 !important;
+      color: #991B1B;
+    }
+
+    .opt-label {
+      font-weight: 800;
+      color: var(--primary);
+      min-width: 28px;
+    }
+
+    .opt-content {
+      flex: 1;
+    }
+
+    .opt-bm-meaning {
+      display: block;
+      font-size: 16px;
+      color: #64748B;
+      margin-top: 4px;
+      font-weight: normal;
+    }
+
+    .accordion-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+      border-top: 2px dashed #E2E8F0;
+      padding-top: 15px;
+    }
+
+    .acc-btn {
+      background: #EEF2F6;
+      border: 2px solid #CBD5E1;
+      padding: 12px 18px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1E293B;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .acc-btn:hover {
+      background: #E2E8F0;
+    }
+
+    .acc-btn.vocab-theme {
+      background-color: #EFF6FF;
+      border-color: #BFDBFE;
+      color: #1D4ED8;
+    }
+
+    .acc-btn.vocab-theme:hover {
+      background-color: #DBEAFE;
+    }
+
+    .acc-btn.explain-theme {
+      background-color: #FAF5FF;
+      border-color: #E9D5FF;
+      color: #7E22CE;
+    }
+
+    .acc-btn.explain-theme:hover {
+      background-color: #F3E8FF;
+    }
+
+    .acc-panel {
+      display: none;
+      padding: 16px;
+      background: #FFFFFF;
+      border: 2px solid #E2E8F0;
+      border-radius: 10px;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .acc-panel.show {
+      display: block;
+    }
+
+    .word-pills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .word-pill {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      min-width: 120px;
+    }
+
+    .word-pill .zh-word {
+      font-weight: 700;
+      color: #0F172A;
+      font-size: 17px;
+    }
+
+    .word-pill .bm-word {
+      color: #2563EB;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .subjective-box {
+      background: #FFFBEB;
+      border: 2px solid #FDE68A;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 15px 0;
+      font-size: 18px;
+    }
+
+    .subjective-box h4 {
+      color: #92400E;
+      margin-bottom: 8px;
+      font-size: 19px;
+    }
+
+    .badge-mark {
+      background: #EF4444;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>五年级华文 UASA 试卷精讲与学习平台 (026)</h1>
+    <p>⚡ 题目逐词对照 · 选项精准释义 · 名师深度解析 · 自动配图互动</p>
+  </header>
+
+  <!-- Tab 导航栏 -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-jia')">📘 甲组：理解文 (10分)</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-yi')">📗 乙组：理解文 (15分)</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-bing')">📙 丙组：供料作文 (10分)</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-ding')">📕 丁组：命题作文 (15分)</button>
+  </nav>
+
+  <!-- ==================== TAB 1: 甲组 ==================== -->
+  <div id="tab-jia" class="tab-content active">
+    
+    <!-- 课文插图 -->
+    <div class="img-slot" id="slot-jia-banner">
+      <img class="preview-img" src="images/jia-story-banner.webp" alt="甲组课文插图" onload="imageLoaded(this)" onerror="imageLoadFailed(this)">
+      <div class="slot-info">
+        <div class="slot-header">🖼️ 课文插图：images/jia-story-banner.webp</div>
+        <div class="slot-prompt">
+          <strong>🎨 中文生图提示词：</strong>色彩艳丽饱满的现代国风少儿神话插画，十三岁少年沉香身着深蓝色武术劲装，双目如炬，双手高举一把散发璀璨纯金神光的巨大宣花神斧，正从半空中以雷霆万钧之势劈向云雾缭绕的高耸华山！巨山中央裂开一道金光万丈的深谷深渊，天地震动，祥云缭绕，色彩明亮浓郁，儿童适读风格，横版 16:9。
+        </div>
+        <label class="upload-trigger">📁 手动选择本地图片
+          <input type="file" accept="image/webp,.webp" onchange="previewImage(event, 'slot-jia-banner')">
+        </label>
+      </div>
+    </div>
+
+    <!-- 课文阅读卡 -->
+    <div class="passage-card">
+      <h2>📖 甲组：阅读理解《沉香劈山救母》</h2>
+      <div class="passage-text">
+        <p>古时候，有个名叫沉香的孩子，自幼与父亲在山村相依为命。沉香聪明懂事，勤快孝顺，可是每当看到别的孩子依偎在母亲身旁时，他心里总有一种说不出的失落。父亲从不主动提起母亲的事，只告诉他要好好做人、认真读书。沉香虽然懂事，却一直想知道自己的母亲究竟去了哪里。</p>
+        <p>直到七岁那年，沉香偶然从长辈口中得知了一个惊人的秘密——原来自己的亲生母亲三圣母并没有离世。她因为违反天规、执意留在人间，被二郎神压在险峻高耸的华山之下受苦。沉香听后悲愤交加，立刻跑到母亲受难的石碑前，暗暗立誓：“不管前路多么艰难，我一定要把母亲救出来！”</p>
+        <p>为了实现心愿，沉香辞别了年迈的父亲，背上简单的行囊，独自踏上寻师学艺的道路。他走过崎岖的山路，渡过湍急的河流，也曾在荒凉的山林里迷失方向。一路上，他遇到不少困难，却从未想过放弃。后来，一位隐居深山的仙人被他的赤诚纯孝所感动，终于答应收他为徒，传授武艺与法术。</p>
+        <p>学艺的生活十分艰苦。不论是数九寒冬还是盛夏酷暑，沉香总是天未亮便起身练剑习武。刚开始时，他常常因为动作不熟练而跌倒，有时手掌磨破了皮，鲜血直流；有时累得连筷子都拿不稳。师父劝他休息，他却只是擦掉汗水，继续练习。日子一天天过去，他的双掌磨出了厚厚的老茧，身上也添了不少伤痕，但他从不叫苦。</p>
+        <p>春去秋来，整整八年过去了，沉香终于练就了一身超群的本领。临别之际，师父将一把重逾千斤、闪耀着金色光芒的宣花神斧赠给他，并叮嘱他说：“真正强大的力量，不只是来自兵器，更来自坚定的信念和一颗善良的心。”沉香把师父的话牢牢记在心里，随后踏上前往华山的路。</p>
+        <p>沉香一路跋涉来到华山脚下。面对手持兵刃、凶神恶煞的天兵天将以及神通广大的二郎神，他毫无惧色。经过数天数夜的激战，沉香凭着顽强的毅力和救母的决心，终于迫使对手退让。他飞身跃上华山绝顶，双手紧握宣花神斧，凝聚全身力气朝大山狠狠劈去。只听“轰隆”一声震天巨响，地动山摇，万丈巨峰竟硬生生裂开了一道深渊。被囚禁多年的三圣母终于重见天日。母子紧紧相拥，热泪盈眶。沉香明白，正是多年来不放弃的坚持与孝心，让他完成了看似不可能的事情。</p>
+      </div>
+    </div>
+
+    <!-- 第1题 -->
+    <div class="question-card" id="q1">
+      <div class="q-title"><span class="q-tag">第 1 题</span> 沉香在七岁那年得知了什么秘密，促使他下定决心离家？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q1')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            得知父亲患上重病，必须寻找仙丹良药。
+            <span class="opt-bm-meaning">Maksud: Mengetahui bapanya sakit tenat dan perlu mencari ubat mujarab.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q1')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            得知母亲被压在华山之下受苦，立誓要救出母亲。
+            <span class="opt-bm-meaning">Maksud: Mengetahui ibunya dihukum di bawah Gunung Hua dan berikrar untuk menyelamatkannya.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q1')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            得知自己身怀绝技，必须到深山去惩恶扬善。
+            <span class="opt-bm-meaning">Maksud: Mengetahui dirinya mempunyai kemahiran hebat dan perlu menghapuskan kejahatan di pergunungan.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q1')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            得知二郎神要捉拿父亲，不得不远走高飞。
+            <span class="opt-bm-meaning">Maksud: Mengetahui Erlang Shen mahu menangkap bapanya lalu terpaksa melarikan diri jauh.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">七岁那年</span><span class="bm-word">pada tahun berumur 7 tahun</span></div>
+            <div class="word-pill"><span class="zh-word">得知</span><span class="bm-word">mengetahui / dapat tahu</span></div>
+            <div class="word-pill"><span class="zh-word">秘密</span><span class="bm-word">rahsia</span></div>
+            <div class="word-pill"><span class="zh-word">促使</span><span class="bm-word">mendorong / menyebabkan</span></div>
+            <div class="word-pill"><span class="zh-word">下定决心</span><span class="bm-word">bertekad / membuat keputusan bulat</span></div>
+            <div class="word-pill"><span class="zh-word">离家</span><span class="bm-word">meninggalkan rumah</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：B】</strong><br>
+          <strong>解析：</strong>依据课文第二自然段首句：“沉香偶然从长辈口中得知了一个惊人的秘密——原来自己的亲生母亲三圣母并没有离世……被二郎神压在险峻高耸的华山之下受苦”，于是他立刻立誓救母，辞别父亲寻师学艺。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第2题 -->
+    <div class="question-card" id="q2">
+      <div class="q-title"><span class="q-tag">第 2 题</span> 文中描写沉香“双掌磨出了老茧，身上添了伤痕却不叫苦”，主要是为了说明他：</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q2')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            意志坚定，一丝不苟
+            <span class="opt-bm-meaning">Maksud: Tekad yang teguh dan sangat teliti tanpa sedikit kecuaian pun.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q2')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            性格倔强，不听劝告
+            <span class="opt-bm-meaning">Maksud: Berperwatakan degil dan enggan mendengar nasihat orang lain.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q2')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            意志坚强，不畏艰辛
+            <span class="opt-bm-meaning">Maksud: Bersemangat kental dan tidak takut akan segala kesusahan mahupun kepayahan.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q2')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            求胜心强，不甘落后
+            <span class="opt-bm-meaning">Maksud: Keinginan menang yang amat kuat dan tidak rela ketinggalan di belakang.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 题目插图 -->
+      <div class="img-slot" id="slot-jia-q2">
+        <img class="preview-img" src="images/jia-q02-practice.webp" alt="沉香苦练" onload="imageLoaded(this)" onerror="imageLoadFailed(this)">
+        <div class="slot-info">
+          <div class="slot-header">🖼️ 题目插图：images/jia-q02-practice.webp</div>
+          <div class="slot-prompt">
+            <strong>🎨 中文生图提示词：</strong>高饱和度国风绘本插图，寒风呼啸的数九寒冬清晨，少年沉香一个人在悬崖古松下的空地上手持木剑刻苦练习剑法。他的双手磨出老茧，额头流下汗水，眼神却充满不服输的顽强毅力，身姿挺拔矫健。背景是落雪的青松与刚露出一角的红日，画面色彩鲜明，冷暖色调强烈对比，突出坚韧不拔的刻苦精神，4:3。
+          </div>
+          <label class="upload-trigger">📁 手动选择本地图片
+            <input type="file" accept="image/webp,.webp" onchange="previewImage(event, 'slot-jia-q2')">
+          </label>
+        </div>
+      </div>
+
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">文中</span><span class="bm-word">dalam petikan</span></div>
+            <div class="word-pill"><span class="zh-word">描写</span><span class="bm-word">menggambarkan</span></div>
+            <div class="word-pill"><span class="zh-word">双掌</span><span class="bm-word">kedua-dua tapak tangan</span></div>
+            <div class="word-pill"><span class="zh-word">磨出</span><span class="bm-word">melecet / menghasilkan</span></div>
+            <div class="word-pill"><span class="zh-word">老茧</span><span class="bm-word">kapalan / kulit tebal</span></div>
+            <div class="word-pill"><span class="zh-word">身上</span><span class="bm-word">pada badan</span></div>
+            <div class="word-pill"><span class="zh-word">添了</span><span class="bm-word">bertambah</span></div>
+            <div class="word-pill"><span class="zh-word">伤痕</span><span class="bm-word">kesan luka / parut</span></div>
+            <div class="word-pill"><span class="zh-word">不叫苦</span><span class="bm-word">tidak mengeluh susah</span></div>
+            <div class="word-pill"><span class="zh-word">主要是为了</span><span class="bm-word">terutamanya bertujuan untuk</span></div>
+            <div class="word-pill"><span class="zh-word">说明</span><span class="bm-word">menjelaskan / menunjukkan</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：C】</strong><br>
+          <strong>解析：</strong>“双掌磨出老茧，身上添了伤痕”说明学艺生活充满困难与考验；“不叫苦”则突显出沉香在艰苦环境面前坚韧不拔的意志，最贴切的概括是“意志坚强，不畏艰辛”。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第3题 -->
+    <div class="question-card" id="q3">
+      <div class="q-title"><span class="q-tag">第 3 题</span> 沉香最终能够战胜强大对手、劈开华山的关键原因是什么？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, true, 'q3')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            拥有宣花神斧，凭孝心毅力救母。
+            <span class="opt-bm-meaning">Maksud: Memiliki kapak sakti dan bergantung pada kasih sayang sejati serta ketabahan hati demi menyelamatkan ibu.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q3')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            得到天兵相助，齐心协力救母。
+            <span class="opt-bm-meaning">Maksud: Mendapat bantuan daripada tentera syurga dan bekerjasama menyelamatkan ibu.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q3')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            得到父亲相助，共同对抗二郎神。
+            <span class="opt-bm-meaning">Maksud: Mendapat pertolongan bapanya dan bersama-sama menentang Erlang Shen.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q3')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            得到二郎神相助，顺利劈开华山。
+            <span class="opt-bm-meaning">Maksud: Mendapat bantuan daripada Erlang Shen lalu berjaya membelah Gunung Hua dengan lancar.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">最终</span><span class="bm-word">akhirnya</span></div>
+            <div class="word-pill"><span class="zh-word">能够</span><span class="bm-word">dapat / mampu</span></div>
+            <div class="word-pill"><span class="zh-word">战胜</span><span class="bm-word">menewaskan / mengalahkan</span></div>
+            <div class="word-pill"><span class="zh-word">强大</span><span class="bm-word">amat kuat / perkasa</span></div>
+            <div class="word-pill"><span class="zh-word">对手</span><span class="bm-word">pihak lawan / musuh</span></div>
+            <div class="word-pill"><span class="zh-word">劈开</span><span class="bm-word">membelah</span></div>
+            <div class="word-pill"><span class="zh-word">华山</span><span class="bm-word">Gunung Hua</span></div>
+            <div class="word-pill"><span class="zh-word">关键原因</span><span class="bm-word">punca utama / faktor kunci</span></div>
+            <div class="word-pill"><span class="zh-word">是什么</span><span class="bm-word">ialah apa</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：A】</strong><br>
+          <strong>解析：</strong>师父赠斧时指出“强大的力量来自坚定的信念和善良的心”，结尾也点出“正是多年来不放弃的坚持与孝心，让他完成了看似不可能的事情”。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第4题 -->
+    <div class="question-card" id="q4">
+      <div class="q-title"><span class="q-tag">第 4 题</span> 《沉香劈山救母》的故事主要颂扬了中华传统文化中的哪一项美德？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q4')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            勤俭与节约
+            <span class="opt-bm-meaning">Maksud: Kerajinan dan sikap berjimat cermat.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q4')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            纯孝与坚韧
+            <span class="opt-bm-meaning">Maksud: Ketaatan dan kasih tulus kepada ibu bapa serta ketabahan jiwa yang tidak goyah.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q4')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            谦虚与谨慎
+            <span class="opt-bm-meaning">Maksud: Sikap rendah hati dan berhati-hati dalam setiap tindakan.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q4')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            诚实与守信
+            <span class="opt-bm-meaning">Maksud: Kejujuran dan menepati janji.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">故事</span><span class="bm-word">cerita / kisah</span></div>
+            <div class="word-pill"><span class="zh-word">主要</span><span class="bm-word">utamanya / secara teras</span></div>
+            <div class="word-pill"><span class="zh-word">颂扬</span><span class="bm-word">memuji / menyanjung</span></div>
+            <div class="word-pill"><span class="zh-word">中华传统文化</span><span class="bm-word">budaya tradisional Cina</span></div>
+            <div class="word-pill"><span class="zh-word">哪一项</span><span class="bm-word">yang manakah</span></div>
+            <div class="word-pill"><span class="zh-word">美德</span><span class="bm-word">nilai murni / amalan terpuji</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：B】</strong><br>
+          <strong>解析：</strong>沉香为救母亲历经八年磨砺，体现了纯真炽热的“孝道”与百折不挠的“坚韧精神”。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第5题 -->
+    <div class="question-card" id="q5">
+      <div class="q-title"><span class="q-tag">第 5 题</span> “只听‘轰隆’一声震天巨响，地动山摇，万丈巨峰竟硬生生裂开了一道深渊。”这句话主要采用了什么修辞手法？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q5')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            比喻
+            <span class="opt-bm-meaning">Maksud: Kiasan / Perumpamaan (Simile/Metaphor).</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q5')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            夸张
+            <span class="opt-bm-meaning">Maksud: Hiperbola / Melebih-lebihkan keadaan sebenar (Hyperbole).</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q5')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            拟人
+            <span class="opt-bm-meaning">Maksud: Personifikasi / Memanusiakan benda bukan manusia (Personification).</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q5')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            引用
+            <span class="opt-bm-meaning">Maksud: Memetik kata-kata hikmat atau peribahasa (Quotation).</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 题目插图 -->
+      <div class="img-slot" id="slot-jia-q5">
+        <img class="preview-img" src="images/jia-q05-mountain-split.webp" alt="巨峰劈开" onload="imageLoaded(this)" onerror="imageLoadFailed(this)">
+        <div class="slot-info">
+          <div class="slot-header">🖼️ 题目插图：images/jia-q05-mountain-split.webp</div>
+          <div class="slot-prompt">
+            <strong>🎨 中文生图提示词：</strong>电影质感的神话插画，夸张壮观的场面：高耸入云霄的万丈巨大石峰在轰隆巨响中裂开一条深不见底的巨大峡谷裂缝，金色与白色的神圣光芒从山脉裂缝中如火山喷发般直冲云霄，碎石飞扬，山岚震荡，极具震撼的视觉表现力，色彩艳丽炫目，宏伟壮丽，4:3。
+          </div>
+          <label class="upload-trigger">📁 手动选择本地图片
+            <input type="file" accept="image/webp,.webp" onchange="previewImage(event, 'slot-jia-q5')">
+          </label>
+        </div>
+      </div>
+
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">这句话</span><span class="bm-word">ayat ini</span></div>
+            <div class="word-pill"><span class="zh-word">主要</span><span class="bm-word">secara utama</span></div>
+            <div class="word-pill"><span class="zh-word">采用了</span><span class="bm-word">menggunakan</span></div>
+            <div class="word-pill"><span class="zh-word">什么</span><span class="bm-word">apakah</span></div>
+            <div class="word-pill"><span class="zh-word">修辞手法</span><span class="bm-word">gaya bahasa (retorik)</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：B】</strong><br>
+          <strong>解析：</strong>“震天巨响”（声音震动天空）、“万丈巨峰”（一万丈高）运用了超现实的放大描写，属于典型的<strong>夸张修辞手法</strong>（Hiperbola）。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第6题 -->
+    <div class="question-card" id="q6">
+      <div class="q-title"><span class="q-tag">第 6 题</span> “得知真相的沉香悲愤交加”，其中“悲愤交加”最符合以下哪一种意思？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, true, 'q6')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            又伤心又愤怒，两种情绪同时涌上心头。
+            <span class="opt-bm-meaning">Maksud: Berasa amat sedih dan sangat marah, kedua-dua perasaan ini muncul serentak dalam hati.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q6')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            又伤心又无奈，两种情绪同时涌上心头。
+            <span class="opt-bm-meaning">Maksud: Berasa amat sedih dan tidak berdaya, kedua-dua perasaan ini muncul serentak dalam hati.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q6')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            又害怕又紧张，两种情绪同时涌上心头。
+            <span class="opt-bm-meaning">Maksud: Berasa amat takut dan cemas, kedua-dua perasaan ini muncul serentak dalam hati.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q6')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            又失望又沮丧，两种情绪同时涌上心头。
+            <span class="opt-bm-meaning">Maksud: Berasa sangat kecewa dan murung, kedua-dua perasaan ini muncul serentak dalam hati.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">得知</span><span class="bm-word">dapat tahu / mengetahui</span></div>
+            <div class="word-pill"><span class="zh-word">真相</span><span class="bm-word">kebenaran hal sebenar</span></div>
+            <div class="word-pill"><span class="zh-word">的</span><span class="bm-word">yang</span></div>
+            <div class="word-pill"><span class="zh-word">其中</span><span class="bm-word">antaranya / di dalamnya</span></div>
+            <div class="word-pill"><span class="zh-word">最符合</span><span class="bm-word">paling bertepatan dengan</span></div>
+            <div class="word-pill"><span class="zh-word">以下哪一种</span><span class="bm-word">yang manakah antara berikut</span></div>
+            <div class="word-pill"><span class="zh-word">意思</span><span class="bm-word">maksud</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：A】</strong><br>
+          <strong>词素拆解：</strong>“悲”是伤心悲痛；“愤”是气愤愤怒；“交加”指两种感受同时交汇在心中，因此选 A。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第7题 -->
+    <div class="question-card" id="q7">
+      <div class="q-title"><span class="q-tag">第 7 题</span> 以下哪项成语与文中“毫无惧色”的意思相反？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q7')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            从容不迫
+            <span class="opt-bm-meaning">Maksud: Tenang dan tidak tergesa-gesa dalam menghadapi situasi genting.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q7')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            胆战心惊
+            <span class="opt-bm-meaning">Maksud: Takut dan gementar sampai hati berdegup kencang / sangat ketakutan.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q7')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            临危不惧
+            <span class="opt-bm-meaning">Maksud: Berhadapan bahaya tanpa menunjukkan rasa takut sedikit pun.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q7')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            镇定自若
+            <span class="opt-bm-meaning">Maksud: Tenang dan bersahaja seolah-olah tiada apa yang berlaku.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">以下哪项</span><span class="bm-word">pilihan yang manakah berikut</span></div>
+            <div class="word-pill"><span class="zh-word">成语</span><span class="bm-word">simpulan bahasa / simpulan 4 huruf</span></div>
+            <div class="word-pill"><span class="zh-word">与</span><span class="bm-word">dengan</span></div>
+            <div class="word-pill"><span class="zh-word">文中</span><span class="bm-word">dalam petikan</span></div>
+            <div class="word-pill"><span class="zh-word">意思相反</span><span class="bm-word">berlawanan maksud (antonim)</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：B】</strong><br>
+          <strong>解析：</strong>“毫无惧色”表示完全不害怕、非常勇敢。A、C、D 都是沉着冷静的近义词；只有 B“胆战心惊”是形容胆怯惊恐，互为反义词。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第8题 -->
+    <div class="question-card" id="q8">
+      <div class="q-title"><span class="q-tag">第 8 题</span> 文中“辞别了年迈的父亲”的“辞别”是什么意思？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, true, 'q8')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            告别
+            <span class="opt-bm-meaning">Maksud: Mengucapkan selamat tinggal / berpisah untuk bertolak pergi.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q8')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            推辞
+            <span class="opt-bm-meaning">Maksud: Menolak sesuatu pelawaan atau tanggungjawab secara sopan.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q8')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            责备
+            <span class="opt-bm-meaning">Maksud: Memarahi atau menegur kesalahan orang lain.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q8')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            相逢
+            <span class="opt-bm-meaning">Maksud: Bertemu / berjumpa semula.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">辞别了</span><span class="bm-word">telah berpisah / meminta diri</span></div>
+            <div class="word-pill"><span class="zh-word">年迈的</span><span class="bm-word">yang sudah tua</span></div>
+            <div class="word-pill"><span class="zh-word">父亲</span><span class="bm-word">bapa</span></div>
+            <div class="word-pill"><span class="zh-word">是什么意思</span><span class="bm-word">apakah maksudnya</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：A】</strong><br>
+          <strong>解析：</strong>“辞别”是敬辞，即告别、向长辈或亲友道别离去。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第9题 -->
+    <div class="question-card" id="q9">
+      <div class="q-title"><span class="q-tag">第 9 题</span> 文中“沉香一路跋涉来到华山脚下”的“跋涉”最适合解释为：</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q9')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            轻松地散步游玩。
+            <span class="opt-bm-meaning">Maksud: Bersiar-siar sambil bermain dengan santai.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q9')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            艰苦地走过很长的路程。
+            <span class="opt-bm-meaning">Maksud: Menempuh perjalanan yang jauh dan penuh kepayahan dengan berjalan kaki.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q9')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            快速地乘车前往。
+            <span class="opt-bm-meaning">Maksud: Pergi dengan menaiki kenderaan secara pantas.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q9')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            冷静地在原地等待别人。
+            <span class="opt-bm-meaning">Maksud: Menunggu orang lain di tempat yang sama dengan tenang.</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">一路</span><span class="bm-word">sepanjang jalan</span></div>
+            <div class="word-pill"><span class="zh-word">来到</span><span class="bm-word">tiba di / sampai ke</span></div>
+            <div class="word-pill"><span class="zh-word">华山脚下</span><span class="bm-word">kaki Gunung Hua</span></div>
+            <div class="word-pill"><span class="zh-word">最适合</span><span class="bm-word">paling sesuai</span></div>
+            <div class="word-pill"><span class="zh-word">解释为</span><span class="bm-word">diterangkan sebagai</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：B】</strong><br>
+          <strong>词义解析：</strong>“跋涉”特指翻山越岭、趟水过河，形容路途漫长且非常艰苦。
+        </div>
+      </div>
+    </div>
+
+    <!-- 第10题 -->
+    <div class="question-card" id="q10">
+      <div class="q-title"><span class="q-tag">第 10 题</span> 哪项中“重”字的读音与“重逾千斤”的“重”字读音不同？</div>
+      <div class="options-grid">
+        <div class="option-item" onclick="checkOption(this, false, 'q10')">
+          <span class="opt-label">A</span>
+          <div class="opt-content">
+            重量 (zhòng liàng)
+            <span class="opt-bm-meaning">Maksud: Berat jisim sesuatu objek.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q10')">
+          <span class="opt-label">B</span>
+          <div class="opt-content">
+            重点 (zhòng diǎn)
+            <span class="opt-bm-meaning">Maksud: Perkara penting / fokus utama.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, true, 'q10')">
+          <span class="opt-label">C</span>
+          <div class="opt-content">
+            重新 (chóng xīn)
+            <span class="opt-bm-meaning">Maksud: Semula / sekali lagi daripada permulaan.</span>
+          </div>
+        </div>
+        <div class="option-item" onclick="checkOption(this, false, 'q10')">
+          <span class="opt-label">D</span>
+          <div class="opt-content">
+            沉重 (chén zhòng)
+            <span class="opt-bm-meaning">Maksud: Amat berat (beban fizikal mahupun perasaan).</span>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">哪项中</span><span class="bm-word">dalam pilihan manakah</span></div>
+            <div class="word-pill"><span class="zh-word">读音</span><span class="bm-word">sebutan pinyin</span></div>
+            <div class="word-pill"><span class="zh-word">与...不同</span><span class="bm-word">berbeza daripada...</span></div>
+            <div class="word-pill"><span class="zh-word">重逾千斤</span><span class="bm-word">beratnya melebihi ribuan kati (zhòng)</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 题目解析与作答思路 (Penjelasan Jawapan) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【答案：C】</strong><br>
+          <strong>多音字辨析：</strong>“重逾千斤”的“重”读 <strong>zhòng</strong>（分量沉）。A重量、B重点、D沉重皆读 <strong>zhòng</strong>；唯独 C“重新”读 <strong>chóng</strong>（再、重头），故选 C。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== TAB 2: 乙组 ==================== -->
+  <div id="tab-yi" class="tab-content">
+
+    <!-- 课文插图 -->
+    <div class="img-slot" id="slot-yi-banner">
+      <img class="preview-img" src="images/yi-story-banner.webp" alt="四个好朋友" onload="imageLoaded(this)" onerror="imageLoadFailed(this)">
+      <div class="slot-info">
+        <div class="slot-header">🖼️ 课文插图：images/yi-story-banner.webp</div>
+        <div class="slot-prompt">
+          <strong>🎨 中文生图提示词：</strong>高饱和度鲜艳童话手绘插画，阳光穿透苍翠茂密的森林树冠，四个动物好朋友和谐相处：一只矫健美丽的梅花鹿、一只背着坚硬外壳沉稳微笑的陆龟、一只机灵乖巧灰色小老鼠、一只羽毛泛着光泽停在树枝上的黑色乌鸦。森林中鲜花盛开，清溪潺潺，温暖互助，色彩明快生动，横版 16:9。
+        </div>
+        <label class="upload-trigger">📁 手动选择本地图片
+          <input type="file" accept="image/webp,.webp" onchange="previewImage(event, 'slot-yi-banner')">
+        </label>
+      </div>
+    </div>
+
+    <div class="passage-card">
+      <h2>📖 乙组：阅读理解《四个好朋友》</h2>
+      <div class="passage-text">
+        <p>鹿、乌龟、老鼠和乌鸦住在一片茂密的树林里。它们虽然外形不同、生活习惯也不一样，却一直互相关心，是形影不离的好朋友。平日里，鹿跑得快，常替大家寻找远处的食物；乌鸦飞得高，能够观察四周的动静；老鼠身体小巧，牙齿锋利；乌龟虽然行动缓慢，却十分稳重，遇到事情从不轻易放弃。</p>
+        <p>一天，鹿在林间奔跑时不慎被猎人设下的绳套紧紧困住。它越挣扎，绳子勒得越紧，只好大声呼救。乌鸦听见叫声后，立刻飞回树林报信。老鼠闻讯急忙赶去相救。乌龟也十分担心朋友，便一步一步朝鹿被困的地方赶去。</p>
+        <p>乌鸦和老鼠看到乌龟慢慢爬过来，都吃了一惊。老鼠急切地说：“你行动这么慢，怎么也跑到这么危险的地方来？我牙齿锋利，可以咬断绳子；乌鸦会飞，遇到危险可以马上飞走；可你要是被猎人发现，怎么逃得掉呢？”乌龟坚定地回答：“我知道自己跑不快，可朋友有困难，我不能只顾自己的安全。我宁可冒一点危险，也要来看看能不能帮上忙。”</p>
+        <p>就在这时，猎人手持弓箭大步走来。老鼠赶紧咬断绳套，鹿立刻跃入灌木丛逃跑，乌鸦也振翅飞上大树。猎人赶来时发现绳子被咬断，猎物也不见了，气得直跺脚。正当他懊恼时，低头看见了行动缓慢的乌龟，便把乌龟用草绳牢牢捆住，提在手里带走。</p>
+        <p>老鼠躲在暗处看见这一幕，焦急地说：“乌龟是为了帮助我们才遇到危险，我们一定要把它救回来！”它很快想出一个办法：让鹿跑到前方河边躺下装死，让乌鸦落在鹿身上假装啄食。猎人如果看到“死鹿”，一定会把乌龟放下，跑过去查看。到时候，老鼠就趁机咬断草绳，让乌龟逃进水里。</p>
+        <p>大家立刻按照计划行动。猎人果然看见河滩上躺着一只一动不动的肥鹿，乌鸦还在上面不停啄着。他高兴极了，随手把乌龟丢在地上，拿着木棒向鹿跑去。等猎人走远后，老鼠飞快地咬断捆绑乌龟的草绳，乌龟马上爬进河里。就在猎人快要接近鹿时，鹿突然一跃而起，飞奔进树林，乌鸦也拍着翅膀飞上天空。</p>
+        <p>猎人无奈地折回原处，却发现草绳已经断了，乌龟也不见踪影。他困惑地抓着头，怎么也想不明白发生了什么事。最终，四个好朋友在安全的地方重新相聚。它们更加明白，每个人都有自己的长处和不足，只要彼此信任、互相帮助，就能一起克服困难。</p>
+      </div>
+    </div>
+
+    <!-- 乙组第1(a)题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (1)(a) 题</span> 鹿被绳套困住后，谁最先飞回树林报信？ <span class="badge-mark">1分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">绳套</span><span class="bm-word">jerat tali pemburu</span></div>
+            <div class="word-pill"><span class="zh-word">困住后</span><span class="bm-word">selepas terperangkap</span></div>
+            <div class="word-pill"><span class="zh-word">谁</span><span class="bm-word">siapakah</span></div>
+            <div class="word-pill"><span class="zh-word">最先</span><span class="bm-word">paling awal / yang pertama</span></div>
+            <div class="word-pill"><span class="zh-word">飞回</span><span class="bm-word">terbang balik ke</span></div>
+            <div class="word-pill"><span class="zh-word">树林</span><span class="bm-word">hutan rimba</span></div>
+            <div class="word-pill"><span class="zh-word">报信</span><span class="bm-word">menyampaikan berita kecemasan</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          乌鸦最先飞回树林报信。<br>
+          <small style="color: #64748B;">（原句对照："乌鸦听见叫声后，立刻飞回树林报信。"）</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙组第1(b)题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (1)(b) 题</span> 老鼠为什么担心乌龟靠近危险的地方？ <span class="badge-mark">1分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">老鼠</span><span class="bm-word">tikus</span></div>
+            <div class="word-pill"><span class="zh-word">为什么</span><span class="bm-word">mengapakah</span></div>
+            <div class="word-pill"><span class="zh-word">担心</span><span class="bm-word">bimbang / risau</span></div>
+            <div class="word-pill"><span class="zh-word">乌龟</span><span class="bm-word">kura-kura</span></div>
+            <div class="word-pill"><span class="zh-word">靠近</span><span class="bm-word">mendekati / menghampiri</span></div>
+            <div class="word-pill"><span class="zh-word">危险的地方</span><span class="bm-word">tempat yang berbahaya</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          因为乌龟行动缓慢（爬得慢），一旦被猎人发现便无法及时逃脱。
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙组第2(a)题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (2)(a) 题</span> 老鼠为了营救乌龟，想出了什么办法？ <span class="badge-mark">2分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">为了</span><span class="bm-word">demi / untuk</span></div>
+            <div class="word-pill"><span class="zh-word">营救</span><span class="bm-word">menyelamatkan</span></div>
+            <div class="word-pill"><span class="zh-word">想出了</span><span class="bm-word">memikirkan / mendapat idea</span></div>
+            <div class="word-pill"><span class="zh-word">什么办法</span><span class="bm-word">cara/kaedah apakah</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          老鼠想出的办法是让鹿在河边装死，让乌鸦假装啄食以引开猎人（1分）；老鼠则趁机咬断捆绑乌龟的草绳，让乌龟逃进水里（1分）。
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙组第2(b)题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (2)(b) 题</span> 鹿和乌鸦分别怎样配合老鼠的计划？ <span class="badge-mark">2分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">分别</span><span class="bm-word">masing-masing</span></div>
+            <div class="word-pill"><span class="zh-word">怎样</span><span class="bm-word">bagaimanakah</span></div>
+            <div class="word-pill"><span class="zh-word">配合</span><span class="bm-word">bekerjasama / menyelaraskan tindakan</span></div>
+            <div class="word-pill"><span class="zh-word">计划</span><span class="bm-word">rancangan</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          鹿跑到前方的河边躺下一动不动装死（1分）；乌鸦落在鹿身上假装啄食吸引猎人注意（1分）。
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙组第3题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (3) 题</span> 猎人为什么会感到困惑？请根据故事内容说明。 <span class="badge-mark">3分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">猎人</span><span class="bm-word">pemburu</span></div>
+            <div class="word-pill"><span class="zh-word">感到困惑</span><span class="bm-word">berasa hairan / keliru</span></div>
+            <div class="word-pill"><span class="zh-word">请根据</span><span class="bm-word">sila berdasarkan</span></div>
+            <div class="word-pill"><span class="zh-word">故事内容</span><span class="bm-word">kandungan cerita</span></div>
+            <div class="word-pill"><span class="zh-word">说明</span><span class="bm-word">jelaskan</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          因为猎人发现原本以为死掉的鹿突然跃起逃跑（1分）；当他折返回原处时，又发现草绳断了（1分），行动缓慢的乌龟也完全不见踪影，两头落空，因此感到困惑（1分）。
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙组第4题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (4) 题</span> 从乌龟坚持赶去帮助鹿的行为，可以看出乌龟有什么性格特点？请写出一点，并说明理由。 <span class="badge-mark">3分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">从...行为</span><span class="bm-word">daripada tindakan...</span></div>
+            <div class="word-pill"><span class="zh-word">坚持</span><span class="bm-word">berkeras / tabah meneruskan</span></div>
+            <div class="word-pill"><span class="zh-word">赶去帮助</span><span class="bm-word">bergegas pergi membantu</span></div>
+            <div class="word-pill"><span class="zh-word">性格特点</span><span class="bm-word">ciri-ciri peribadi / sifat watak</span></div>
+            <div class="word-pill"><span class="zh-word">说明理由</span><span class="bm-word">terangkan sebabnya</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          乌龟具有<strong>重视友情 / 舍己为人 / 勇敢善良</strong>的性格特点（1分）。<br>
+          <strong>理由：</strong>因为即使明知自己跑得慢、可能会被猎人抓住，但它宁可冒生命危险，也不肯自私逃避，依然坚持去帮助遇险的朋友（2分）。
+        </div>
+      </div>
+    </div>
+
+    <!-- 乙组第5题 -->
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">第 (5) 题</span> 读完这篇故事，你学到了什么与朋友相处的道理？请结合日常生活中的一个简单例子说明。 <span class="badge-mark">3分</span></div>
+      <div class="accordion-group">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 题目词汇对照 (Kosa Kata Soalan) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">读完这篇故事</span><span class="bm-word">selepas membaca cerita ini</span></div>
+            <div class="word-pill"><span class="zh-word">学到了</span><span class="bm-word">mempelajari</span></div>
+            <div class="word-pill"><span class="zh-word">与朋友相处</span><span class="bm-word">bergaul sesama rakan</span></div>
+            <div class="word-pill"><span class="zh-word">道理</span><span class="bm-word">pengajaran / teladan</span></div>
+            <div class="word-pill"><span class="zh-word">结合</span><span class="bm-word">mengaitkan dengan</span></div>
+            <div class="word-pill"><span class="zh-word">日常生活例子</span><span class="bm-word">contoh dalam kehidupan seharian</span></div>
+          </div>
+        </div>
+        <button class="acc-btn explain-theme" onclick="toggleAcc(this)">💡 参考答案与答题关键 (Jawapan & Analisis) <span>▼</span></button>
+        <div class="acc-panel">
+          <strong>【参考标准答案】：</strong><br>
+          <strong>道理（1分）：</strong>我学到了朋友之间应该互相关心，各自发挥长处，团结合作才能克服困难。<br>
+          <strong>生活例子（2分）：</strong>例如在学校做小组手抄报时，擅长画画的同学负责插图，写字工整的同学负责抄写，大家互相配合，就能又快又好地完成作业。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== TAB 3: 丙组 ==================== -->
+  <div id="tab-bing" class="tab-content">
+    
+    <div class="img-slot" id="slot-bing-banner">
+      <img class="preview-img" src="images/bing-healthy-internet.webp" alt="健康上网习惯" onload="imageLoaded(this)" onerror="imageLoadFailed(this)">
+      <div class="slot-info">
+        <div class="slot-header">🖼️ 供料插图：images/bing-healthy-internet.webp</div>
+        <div class="slot-prompt">
+          <strong>🎨 中文生图提示词：</strong>现代明亮科技风少儿手绘插画，一位五年级的小学生端正坐在明亮整洁的书桌前，健康使用平板电脑查阅科学知识。书桌上放着护眼台灯、绿色小盆栽和闹钟（显示控制时间），小男孩脸上洋溢着开心的笑容。画面周围环绕着4个色彩鲜艳的半透明气泡图标：闹钟时钟（控制时间）、书本百科（善用网络）、护眼眼镜与绿叶（保护视力）、安全盾牌与锁（个人隐私）。配色清爽活泼、高饱和度，4:3。
+        </div>
+        <label class="upload-trigger">📁 手动选择本地图片
+          <input type="file" accept="image/webp,.webp" onchange="previewImage(event, 'slot-bing-banner')">
+        </label>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">丙组</span> 根据所提供的资料，写一段有关“健康上网的好习惯”的文字，字数不可少过40字。<span class="badge-mark">10分</span></div>
+      
+      <div class="accordion-group" style="margin-bottom: 20px;">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 丙组题目与思维导图词汇对照 (Kosa Kata) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">控制上网时间</span><span class="bm-word">mengawal masa melayari internet</span></div>
+            <div class="word-pill"><span class="zh-word">善用网络资源</span><span class="bm-word">memanfaatkan sumber internet secara bijak</span></div>
+            <div class="word-pill"><span class="zh-word">保护视力</span><span class="bm-word">menjaga daya penglihatan mata</span></div>
+            <div class="word-pill"><span class="zh-word">保护个人隐私</span><span class="bm-word">melindungi privasi dan maklumat peribadi</span></div>
+            <div class="word-pill"><span class="zh-word">不少过40字</span><span class="bm-word">tidak kurang daripada 40 patah perkataan</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subjective-box">
+        <h4>📝 范文展示（已涵盖4个要点，语言通顺，字数约70字）：</h4>
+        <p style="text-indent: 2em; line-height: 1.8;">
+          在日常生活中，我们应该养成<strong>健康上网的好习惯</strong>。首先，我们必须<strong>控制上网时间</strong>，适时休息以<strong>保护视力</strong>。此外，我们要<strong>善用网络资源</strong>来搜索有益的学习资料，并时刻提高警惕，不随意透露个人资料，切实<strong>保护个人隐私</strong>。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 4: 丁组 ==================== -->
+  <div id="tab-ding" class="tab-content">
+    
+    <div class="img-slot" id="slot-ding-banner">
+      <img class="preview-img" src="images/ding-composition-choice.webp" alt="作文插图" onload="imageLoaded(this)" onerror="imageLoadFailed(this)">
+      <div class="slot-info">
+        <div class="slot-header">🖼️ 写作插图：images/ding-composition-choice.webp</div>
+        <div class="slot-prompt">
+          <strong>🎨 中文生图提示词：</strong>左右双拼对比概念的儿童励志插画，画面分割为两半，色彩鲜明艳丽。左侧主题《那一刻，我长大了》：黄昏温暖的厨房里，五年级学生站在小板凳上认真帮生病的妈妈煮一碗热气腾腾的面条，神情懂事自豪；右侧主题《有你，真好》：雨天放学路上，好友撑着一把大雨伞遮在两人头顶，两人在雨幕中踩着水坑相视大笑，温暖治愈。充满故事感与情感深度，横版 16:9。
+        </div>
+        <label class="upload-trigger">📁 手动选择本地图片
+          <input type="file" accept="image/webp,.webp" onchange="previewImage(event, 'slot-ding-banner')">
+        </label>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="q-title"><span class="q-tag">丁组</span> 任选一题，书写一篇文章，字数不少于150字。<span class="badge-mark">15分</span></div>
+
+      <div class="accordion-group" style="margin-bottom: 20px;">
+        <button class="acc-btn vocab-theme" onclick="toggleAcc(this)">🔤 作文题目词汇对照 (Kosa Kata Tajuk) <span>▼</span></button>
+        <div class="acc-panel">
+          <div class="word-pills-container">
+            <div class="word-pill"><span class="zh-word">任选一题</span><span class="bm-word">pilih mana-mana satu tajuk</span></div>
+            <div class="word-pill"><span class="zh-word">书写一篇文章</span><span class="bm-word">tuliskan sebuah karangan</span></div>
+            <div class="word-pill"><span class="zh-word">字数不少于150字</span><span class="bm-word">tidak kurang daripada 150 patah perkataan</span></div>
+            <div class="word-pill"><span class="zh-word">那一刻</span><span class="bm-word">saat/ketika itu</span></div>
+            <div class="word-pill"><span class="zh-word">我长大了</span><span class="bm-word">saya telah matang/dewasa</span></div>
+            <div class="word-pill"><span class="zh-word">有你，真好</span><span class="bm-word">alangkah baiknya ada kamu di sisi</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subjective-box">
+        <h4>💡 题目一指导与大纲点拨：《那一刻，我长大了》</h4>
+        <p><strong>写作核心：</strong>抓住“那一刻”的瞬间转变（学会承担责任、关爱家人、勇敢面对挫折等），说明自己心态如何变得成熟懂事。</p>
+        <p><strong>推荐构思：</strong>妈妈生病卧床时，自己不再任性看电视，而是主动洗碗、煮面、细心照顾父母的一件事。</p>
+      </div>
+
+      <div class="subjective-box" style="background:#F0FDF4; border-color:#BBF7D0;">
+        <h4 style="color:#166534;">💡 题目二指导与大纲点拨：《有你，真好》</h4>
+        <p><strong>写作核心：</strong>抒发对某个人的感恩与依恋（朋友、老师、父母、祖父母），详写一件对方给予自己关爱、鼓励或帮助的具体事件。</p>
+        <p><strong>推荐构思：</strong>自己在华文演讲比赛落选落泪时，同桌好友陪伴在身边递纸巾、鼓励自己振作起来的温馨经历。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Tab 切换逻辑
+  function openTab(evt, tabId) {
+    const tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) {
+      tabContents[i].classList.remove("active");
+    }
+    const tabBtns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tabBtns.length; i++) {
+      tabBtns[i].classList.remove("active");
+    }
+    document.getElementById(tabId).classList.add("active");
+    evt.currentTarget.classList.add("active");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 折叠手风琴逻辑
+  function toggleAcc(btn) {
+    const panel = btn.nextElementSibling;
+    const arrow = btn.querySelector("span");
+    if (panel.classList.contains("show")) {
+      panel.classList.remove("show");
+      arrow.textContent = "▼";
+    } else {
+      panel.classList.add("show");
+      arrow.textContent = "▲";
+    }
+  }
+
+  // 选择题作答判断
+  function checkOption(elem, isCorrect, qId) {
+    const parent = elem.closest(".options-grid");
+    const allOptions = parent.querySelectorAll(".option-item");
+    allOptions.forEach(opt => {
+      opt.classList.remove("correct", "wrong");
+    });
+    if (isCorrect) {
+      elem.classList.add("correct");
+    } else {
+      elem.classList.add("wrong");
+    }
+  }
+
+  // 图片加载成功：显示图片并隐藏占位文本
+  function imageLoaded(img) {
+    img.style.display = 'block';
+    const parentSlot = img.closest('.img-slot');
+    if (parentSlot) {
+      parentSlot.classList.add('has-image');
+      const infoBox = parentSlot.querySelector('.slot-info');
+      if (infoBox) {
+        infoBox.style.display = 'none';
+      }
+    }
+  }
+
+  // 图片加载失败：隐藏破损图标并显示占位提示
+  function imageLoadFailed(img) {
+    img.style.display = 'none';
+    const parentSlot = img.closest('.img-slot');
+    if (parentSlot) {
+      parentSlot.classList.remove('has-image');
+      const infoBox = parentSlot.querySelector('.slot-info');
+      if (infoBox) {
+        infoBox.style.display = 'block';
+      }
+    }
+  }
+
+  // 手动本地选择预览
+  function previewImage(event, slotId) {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.type !== 'image/webp' && !file.name.toLowerCase().endsWith('.webp')) {
+        alert('请选择 WebP 格式的图片（.webp）。');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const slot = document.getElementById(slotId);
+        const img = slot.querySelector(".preview-img");
+        img.src = e.target.result;
+        imageLoaded(img);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+</script>
+
+</body>
+</html>
