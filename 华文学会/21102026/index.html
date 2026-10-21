@@ -408,7 +408,7 @@
     // ============================================================================
     // 🔗 老师配置区：将下方引号内的网址替换为你部署好的 Google Apps Script Web App URL
     // ============================================================================
-    const GAS_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxzL1KE1Ysk9oh3McN7Vq80L_-D-usk41arS9oEJ9H4M3bJR1eZdGrl_au72Xu4H3iq/exec";
+    const GAS_ENDPOINT_URL = "YOUR_GAS_WEB_APP_URL_HERE";
 
     // ============================================================================
     // 🎵 1. 纯代码 Web Audio 合成音效引擎（含冰封与雷霆震飞惩罚音效）
@@ -1067,6 +1067,8 @@
       fillRect(ow, 18, 2, 42, 13, 3);
       fillRect(ow, 22, 14, 24, 28, 1);
       fillRect(ow, 22, 10, 36, 12, 1);
+      // 修复：原始地图 y=13 的雪山挡住南北山道，打通3格确保第四关可到达。
+      fillRect(ow, 22, 13, 24, 13, 1);
       fillRect(ow, 35, 6, 37, 12, 1);
       fillRect(ow, 27, 5, 37, 7, 1);
       ow[5][28] = 1; // 北境深渊山洞洞口 (28, 5)
@@ -1668,7 +1670,7 @@
 
         ctx.font = 'bold 12px "Noto Sans SC"';
         ctx.fillStyle = 'rgba(253, 230, 138, 0.75)';
-        ctx.fillText('⬆️ 北通：翰林书院 & 远方深渊山洞', 30 * TILE_SIZE + 22, 26.5 * TILE_SIZE);
+        ctx.fillText('⬆️ 第四关：书院西侧绕行，沿雪山山道进入山洞', 30 * TILE_SIZE + 22, 26.5 * TILE_SIZE);
         ctx.fillText('⬇️ 南通：八卦青竹大迷宫 (第二关)', 30 * TILE_SIZE + 22, 32.5 * TILE_SIZE);
         ctx.fillText('⬅️ 西通：沧浪断桥 (第三关)', 26.5 * TILE_SIZE, 29 * TILE_SIZE);
         ctx.fillText('➡️ 东通：远古森林 & 鲁班秘洞(600分)', 34 * TILE_SIZE, 29 * TILE_SIZE);
