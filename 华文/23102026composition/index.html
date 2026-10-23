@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="zh-MY">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小学华文高阶写作互动课件 ——《令我敬佩的人》</title>
+  <style>
+    :root {
+      --font-main: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+      --bg-gradient: linear-gradient(135deg, #FFF0F5 0%, #E6F7FF 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --primary: #FF007F;
+      --secondary: #00F0FF;
+      --accent: #FFE600;
+      --dark-text: #2D3748;
+      --light-text: #718096;
+      --border-color: #E2E8F0;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.12);
+      --hl-verb-bg: rgba(255, 0, 127, 0.14);
+      --hl-verb-color: #D80064;
+    }
+
+    /* 4 套超艳丽多巴胺主题 */
+    body.theme-candy {
+      --primary: #FF007F;
+      --secondary: #00D2FF;
+      --accent: #FFD200;
+      --bg-gradient: linear-gradient(135deg, #FFF1F6 0%, #E8F9FF 50%, #FFFDEB 100%);
+      --hl-verb-bg: rgba(255, 0, 127, 0.14);
+      --hl-verb-color: #C70059;
+    }
+
+    body.theme-cyber {
+      --primary: #00FF88;
+      --secondary: #00F0FF;
+      --accent: #FF007F;
+      --card-bg: rgba(20, 24, 45, 0.95);
+      --dark-text: #F0F4FF;
+      --light-text: #A0AEC0;
+      --border-color: #2D3748;
+      --bg-gradient: linear-gradient(135deg, #090B14 0%, #111827 50%, #1A102F 100%);
+      --hl-verb-bg: rgba(0, 255, 136, 0.2);
+      --hl-verb-color: #00FFAA;
+    }
+
+    body.theme-jungle {
+      --primary: #10B981;
+      --secondary: #F59E0B;
+      --accent: #EF4444;
+      --bg-gradient: linear-gradient(135deg, #ECFDF5 0%, #FEF3C7 50%, #F0FDF4 100%);
+      --hl-verb-bg: rgba(16, 185, 129, 0.16);
+      --hl-verb-color: #047857;
+    }
+
+    body.theme-flame {
+      --primary: #FF3366;
+      --secondary: #FF9900;
+      --accent: #9900FF;
+      --bg-gradient: linear-gradient(135deg, #FFF5F5 0%, #FFF0EB 50%, #FAF5FF 100%);
+      --hl-verb-bg: rgba(255, 51, 102, 0.15);
+      --hl-verb-color: #D60036;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-gradient);
+      color: var(--dark-text);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+      transition: background 0.4s ease, color 0.3s ease;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+
+    /* 顶部导航与主题切换 */
+    .top-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--border-color);
+    }
+
+    .header-title-box h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box span.badge {
+      font-size: 0.8rem;
+      background: var(--primary);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .theme-switcher {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      border: 2px solid var(--border-color);
+      background: #fff;
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .theme-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-btn.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* 通用卡片容器 */
+    .section-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 28px 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+      border: 2px solid var(--border-color);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .section-card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px dashed var(--border-color);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-tag {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      font-weight: 900;
+      color: #fff;
+      background: var(--primary);
+      padding: 4px 12px;
+      border-radius: 8px;
+      letter-spacing: 1px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 语音按钮通用样式 */
+    .btn-speak {
+      background: #FFF;
+      color: var(--dark-text);
+      border: 2px solid var(--border-color);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-speak:hover {
+      background: var(--accent);
+      color: #111;
+      transform: scale(1.05);
+    }
+
+    .btn-speak.speaking {
+      background: #FF0055 !important;
+      color: #FFF !important;
+      border-color: #FF0055 !important;
+      animation: pulse-red 1s infinite alternate;
+    }
+
+    @keyframes pulse-red {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 0, 85, 0.4); }
+      100% { transform: scale(1.06); box-shadow: 0 0 16px rgba(255, 0, 85, 0.6); }
+    }
+
+    /* 关卡一：审题透视镜 */
+    .topic-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .topic-breakdown { grid-template-columns: 1fr; }
+    }
+
+    .capsule-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .word-capsule {
+      background: linear-gradient(135deg, #FFE600 0%, #FF9900 100%);
+      color: #111;
+      font-size: 1.15rem;
+      font-weight: 900;
+      padding: 10px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(255, 153, 0, 0.3);
+      user-select: none;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .word-capsule:hover {
+      transform: translateY(-4px) scale(1.04);
+    }
+
+    .guide-box {
+      background: rgba(0, 240, 255, 0.08);
+      border-left: 5px solid var(--secondary);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .guide-box strong {
+      color: var(--primary);
+    }
+
+    .img-placeholder-box {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 3px dashed var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(255,0,127,0.06), rgba(0,240,255,0.06));
+      position: relative;
+    }
+
+    .img-placeholder-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .img-fallback-text {
+      padding: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--light-text);
+    }
+
+    /* 高能词汇与武器库 */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .vocab-card {
+      background: #FFF;
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    body.theme-cyber .vocab-card {
+      background: #1A2035;
+    }
+
+    .vocab-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    }
+
+    .vocab-term {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .vocab-meaning {
+      font-size: 0.85rem;
+      color: var(--light-text);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .vocab-sample {
+      font-size: 0.88rem;
+      color: var(--dark-text);
+      background: rgba(0,0,0,0.03);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+    }
+
+    /* 叠词与修辞胶囊 */
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .pill-item {
+      background: rgba(0, 210, 255, 0.12);
+      border: 1px solid var(--secondary);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--dark-text);
+    }
+
+    /* 对话提示语魔法台 */
+    .dialogue-stage {
+      background: rgba(255, 230, 0, 0.1);
+      border: 2px dashed var(--accent);
+      border-radius: 18px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .dialogue-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .dialogue-tab {
+      padding: 6px 16px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: #FFF;
+      border: 2px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    body.theme-cyber .dialogue-tab {
+      background: #252D4A;
+    }
+
+    .dialogue-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .dialogue-display {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      padding: 16px;
+      background: #FFF;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    body.theme-cyber .dialogue-display {
+      background: #161B2E;
+    }
+
+    .hl-punct {
+      color: #FF0055;
+      font-weight: 900;
+      font-size: 1.25rem;
+      background: rgba(255,0,85,0.12);
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+    .hl-action {
+      color: #0077FF;
+      font-weight: 800;
+      text-decoration: underline;
+    }
+
+    /* 关卡二：故事城堡三列卡片并排 */
+    .story-castle-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 880px) {
+      .story-castle-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .castle-col {
+      background: #FFF;
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+
+    body.theme-cyber .castle-col {
+      background: #171C30;
+    }
+
+    .castle-col:hover {
+      transform: translateY(-4px);
+    }
+
+    .castle-col::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: var(--primary);
+    }
+
+    .castle-col:nth-child(2)::before {
+      background: var(--secondary);
+    }
+
+    .castle-col:nth-child(3)::before {
+      background: var(--accent);
+    }
+
+    .col-header {
+      font-size: 1.15rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-role {
+      font-size: 0.8rem;
+      background: rgba(0,0,0,0.06);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: normal;
+    }
+
+    .col-content {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+
+    .col-sample {
+      background: rgba(0,0,0,0.02);
+      border-left: 3px solid var(--primary);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* 关卡三：名场面慢镜头拓展 (方案 B 双轨胶囊复合规范) */
+    .scene-block {
+      background: #FFF;
+      border: 2px solid var(--border-color);
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+
+    body.theme-cyber .scene-block {
+      background: #171C30;
+    }
+
+    .scene-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .capsule-twin-track {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .capsule-question {
+      background: linear-gradient(135deg, #FF007F 0%, #FF5500 100%);
+      color: #FFF;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: 0 3px 8px rgba(255, 0, 127, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .capsule-verb {
+      background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%);
+      color: #FFF;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: 0 3px 8px rgba(0, 180, 216, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .scene-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 22px;
+    }
+
+    @media (max-width: 860px) {
+      .scene-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scene-media {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .scene-details h3 {
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    /* 五感微标签 */
+    .sense-tag-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .sense-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(0,0,0,0.05);
+      color: var(--light-text);
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    body.theme-cyber .sense-tag {
+      background: rgba(255,255,255,0.08);
+      color: #CBD5E0;
+    }
+
+    /* 动词高亮示范段落 */
+    .scene-text-sample {
+      font-size: 0.98rem;
+      line-height: 1.85;
+      background: rgba(0,0,0,0.02);
+      border-left: 4px solid var(--primary);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .hl-verb {
+      background: var(--hl-verb-bg);
+      color: var(--hl-verb-color);
+      font-weight: 900;
+      padding: 2px 5px;
+      border-radius: 4px;
+      border-bottom: 2px solid var(--hl-verb-color);
+    }
+
+    /* 折叠魔法蜕变对比 */
+    .magic-toggle-btn {
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 230, 0, 0.15);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--dark-text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      transition: background 0.2s;
+    }
+
+    .magic-toggle-btn:hover {
+      background: rgba(255, 230, 0, 0.3);
+    }
+
+    .magic-content {
+      display: none;
+      padding: 14px;
+      background: #FFF;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    body.theme-cyber .magic-content {
+      background: #121626;
+    }
+
+    .magic-content.open {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .diff-bad {
+      color: #E53E3E;
+      background: rgba(229, 62, 62, 0.08);
+      padding: 8px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .diff-tip {
+      color: #319795;
+      background: rgba(49, 151, 149, 0.08);
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    /* 随堂互动支架 */
+    .interactive-shelf {
+      background: rgba(0, 240, 255, 0.06);
+      border: 1px dashed var(--secondary);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .shelf-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--dark-text);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .shelf-input {
+      width: 100%;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #FFF;
+      color: var(--dark-text);
+    }
+
+    body.theme-cyber .shelf-input {
+      background: #1C233D;
+      border-color: #374151;
+    }
+
+    .shelf-input:focus {
+      border-color: var(--primary);
+    }
+
+    /* 通关挑战与自检 */
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 16px 0 24px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      background: rgba(0,0,0,0.03);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .action-btn-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .big-btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .big-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .btn-build {
+      background: linear-gradient(135deg, #00F0FF 0%, #0077FF 100%);
+      color: #FFF;
+    }
+
+    .btn-exemplar {
+      background: linear-gradient(135deg, #FF007F 0%, #FF9900 100%);
+      color: #FFF;
+    }
+
+    /* 成果展示框 */
+    .result-display-area {
+      display: none;
+      margin-top: 24px;
+      padding: 24px;
+      background: #FFF;
+      border-radius: 20px;
+      border: 3px solid var(--primary);
+      animation: fadeIn 0.4s ease;
+    }
+
+    body.theme-cyber .result-display-area {
+      background: #141A2E;
+    }
+
+    .result-text {
+      white-space: pre-wrap;
+      font-size: 1.05rem;
+      line-height: 2.1;
+      margin: 16px 0;
+    }
+
+    /* Canvas 纸屑粒子 */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body class="theme-candy">
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="container">
+    <!-- 顶部标题与多巴胺主题切换器 -->
+    <header class="top-header">
+      <div class="header-title-box">
+        <h1>✨ 华文高阶写作思维工坊 <span class="badge">UASA 满分支架</span></h1>
+      </div>
+      <div class="theme-switcher">
+        <button class="theme-btn active" onclick="setTheme('candy')">🍭 糖果乐园</button>
+        <button class="theme-btn" onclick="setTheme('cyber')">🚀 赛博星际</button>
+        <button class="theme-btn" onclick="setTheme('jungle')">🌴 热带雨林</button>
+        <button class="theme-btn" onclick="setTheme('flame')">⚡ 烈焰狂欢</button>
+      </div>
+    </header>
+
+    <!-- 关卡一：灵感透视镜 -->
+    <section class="section-card">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="section-tag">关卡一</span>
+          <h2>🔍 灵感透视镜：分词审题与立意破局</h2>
+        </div>
+        <button class="btn-speak" onclick="speakText('审题锦囊：题目《令我敬佩的人》，写人记叙文。令我，代表第一人称真实情感；敬佩，代表人物具备让人折服的品质；人，可以身兼平凡与伟大。重点在写具体感人事迹，切忌流水账！')">
+          📢 审题指导朗读
+        </button>
+      </div>
+
+      <div class="topic-breakdown">
+        <div>
+          <p style="font-size: 0.95rem; color: var(--light-text); font-weight: 700;">点击词语胶囊，击碎思维盲区：</p>
+          <div class="capsule-box">
+            <div class="word-capsule" onclick="playPop(); speakText('令我：第一人称我，必须融入自己的真情实感、亲眼所见与亲身感悟！')">
+              👉 【令我】
+            </div>
+            <div class="word-capsule" onclick="playPop(); speakText('敬佩：题眼与核心立意！敬重佩服。必须有令人动容的品格、专注与付出！')">
+              🌟 【敬佩】
+            </div>
+            <div class="word-capsule" onclick="playPop(); speakText('的人：明确写作对象，可以是一个人，如清洁工、教师、父母、交警或伙伴。')">
+              👤 【的人】
+            </div>
+          </div>
+          <div class="guide-box">
+            <p><strong>🚦 避坑红绿灯：</strong></p>
+            <p>❌ <strong>红灯避坑：</strong> 罗列生平（“他早上扫地，中午吃饭，晚上睡觉”），毫无波澜与动作细节的“流水账”。</p>
+            <p>✅ <strong>绿灯通行：</strong> 紧扣<strong>“敬佩”</strong>两字，精选<strong>1～2件典型事件</strong>，用连环动词特写与五感描写，突出他在平凡中绽放出的不凡精神！</p>
+          </div>
+        </div>
+
+        <div>
+          <div class="img-placeholder-box">
+            <img src="images/step1_topic.webp" alt="审题插图" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="img-fallback-text" style="display: none;">
+              🎨 [插图：images/step1_topic.webp]<br>
+              清晨金光洒向街道，一位小学生满怀敬意地注视着坚守岗位的平凡劳动者
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 高能词汇与修辞武器库 -->
+    <section class="section-card">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="section-tag">武器库</span>
+          <h2>💎 高能词汇与修辞武器库</h2>
+        </div>
+        <span style="font-size: 0.85rem; color: var(--light-text); font-weight: 700;">点击成语卡片听示范造句</span>
+      </div>
+
+      <!-- 成语卡片库 -->
+      <div class="vocab-grid">
+        <div class="vocab-card" onclick="playPop(); speakText('任劳任怨：做事不怕辛劳，不计较怨言。造句：李叔叔在清洁工岗位上任劳任怨工作了二十年，深受邻里爱戴。')">
+          <div class="vocab-term"><span>任劳任怨</span> <span>🔊</span></div>
+          <div class="vocab-meaning">做事不辞劳苦，不怕抱怨。</div>
+          <div class="vocab-sample">李叔叔在岗位上任劳任怨工作了二十年。</div>
+        </div>
+
+        <div class="vocab-card" onclick="playPop(); speakText('坚持不懈：坚持到底，毫不松懈。造句：哪怕狂风骤雨，他也坚持不懈地坚守在岗位第一线。')">
+          <div class="vocab-term"><span>坚持不懈</span> <span>🔊</span></div>
+          <div class="vocab-meaning">坚决保持，丝毫没有松懈。</div>
+          <div class="vocab-sample">哪怕狂风暴雨，他也坚持不懈地清扫道路。</div>
+        </div>
+
+        <div class="vocab-card" onclick="playPop(); speakText('默默无闻：没有名气，不为人知。造句：许多默默无闻的劳动者，用汗水筑起了城市的整洁与美丽。')">
+          <div class="vocab-term"><span>默默无闻</span> <span>🔊</span></div>
+          <div class="vocab-meaning">不张扬，不为人所知。</div>
+          <div class="vocab-sample">默默无闻的劳动者，用汗水装点着城市。</div>
+        </div>
+
+        <div class="vocab-card" onclick="playPop(); speakText('肃然起敬：形容产生严肃敬仰的感情。造句：看着他那双布满老茧却坚实有力的双手，我心中肃然起敬。')">
+          <div class="vocab-term"><span>肃然起敬</span> <span>🔊</span></div>
+          <div class="vocab-meaning">因受感动而油然而生敬佩。</div>
+          <div class="vocab-sample">看着他布满老茧的双手，我不禁肃然起敬。</div>
+        </div>
+      </div>
+
+      <!-- 生动叠词与标点特种兵 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 8px;">💫 生动叠词增色条：</h4>
+          <div class="pill-group">
+            <span class="pill-item">汗津津（神态状态）</span>
+            <span class="pill-item">沉甸甸（分量情感）</span>
+            <span class="pill-item">认认真真（动作专注）</span>
+            <span class="pill-item">踏踏实实（处事品格）</span>
+          </div>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; margin-bottom: 8px;">🎯 标点特种兵（情感与节律）：</h4>
+          <div class="pill-group">
+            <span class="pill-item">—— 破折号（语意转折/声音拖长）</span>
+            <span class="pill-item">…… 省略号（思绪悠长/余韵未尽）</span>
+            <span class="pill-item">； 分号（排比分句结构并列）</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 对话提示语魔法台 -->
+      <div class="dialogue-stage">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
+          <h4 style="font-size: 1rem; font-weight: 900;">🎭 人物对话提示语魔法台（打破单一的“他说”）</h4>
+          <div class="dialogue-nav">
+            <button class="dialogue-tab active" onclick="switchDialogue('front')">提示语在前</button>
+            <button class="dialogue-tab" onclick="switchDialogue('mid')">提示语在中（高分）</button>
+            <button class="dialogue-tab" onclick="switchDialogue('back')">提示语在后</button>
+          </div>
+        </div>
+
+        <div id="dialogueDisplay" class="dialogue-display">
+          李叔叔<span class="hl-action">抹了一把额头上的汗珠，爽朗地笑着</span><span class="hl-punct">：“</span>小同学，只要街道干净了，大伙儿走得舒心，我这心里就踏实！<span class="hl-punct">”</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关卡二：故事城堡 - 黄金三段骨架 -->
+    <section class="section-card">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="section-tag">关卡二</span>
+          <h2>🏰 故事城堡：黄金三段骨架卡片</h2>
+        </div>
+        <span style="font-size: 0.85rem; color: var(--light-text); font-weight: 700;">起承转合，三列并排构筑文章大厦</span>
+      </div>
+
+      <div class="story-castle-grid">
+        <!-- 卡片1：开头 -->
+        <div class="castle-col">
+          <div>
+            <div class="col-header">
+              <span>🚀 开头：点火破题</span>
+              <span class="col-role">开门见山</span>
+            </div>
+            <div class="col-content">
+              <strong>构思秘诀：</strong> 拒绝千篇一律的“在我生活中，有很多人”。利用<strong>人物外貌特写</strong>或<strong>难忘的特定声音</strong>未见其人、先闻其声，瞬间抓住读者！
+              <div class="col-sample">
+                “唰——唰——”清晨五点，整座小镇还在沉睡，那富有节奏的竹扫帚划过地面的沙沙声，又准时在晨曦中响起。
+              </div>
+            </div>
+          </div>
+          <button class="btn-speak" onclick="speakText('开头点火范例：唰——唰——清晨五点，整座小镇还在沉睡，那富有节奏的竹扫帚划过地面的沙沙声，又准时在晨曦中响起。')">
+            📢 听开头范例
+          </button>
+        </div>
+
+        <!-- 卡片2：主体 -->
+        <div class="castle-col">
+          <div>
+            <div class="col-header">
+              <span>⚔️ 主体：核心战场</span>
+              <span class="col-role">特写慢动作</span>
+            </div>
+            <div class="col-content">
+              <strong>构思秘诀：</strong> 抓住核心场景放大放慢！融入<strong>恶劣环境反衬</strong>与<strong>连环动词特写</strong>，展现人物不畏艰险的坚毅与敬业担当。
+              <div class="col-sample">
+                狂风夹杂着大雨倾泻而下，下水道口被杂物堵塞。只见他毫不犹豫地弯下腰，双手伸入泥泞污水中……
+              </div>
+            </div>
+          </div>
+          <button class="btn-speak" onclick="speakText('主体构思启发：主体是展现人物敬佩品格的核心战场。务必运用慢动作镜头，通过一连串具体的动作描写，让人物跃然纸上！')">
+            📢 听构思启发
+          </button>
+        </div>
+
+        <!-- 卡片3：结尾 -->
+        <div class="castle-col">
+          <div>
+            <div class="col-header">
+              <span>🌟 结尾：依依升华</span>
+              <span class="col-role">首尾呼应</span>
+            </div>
+            <div class="col-content">
+              <strong>构思秘诀：</strong> 回扣题目中的“敬佩”，由表象动作升华到精神风骨，抒发自己的成长感悟与由衷赞美。
+              <div class="col-sample">
+                他虽然只是一名普通的清洁工，但那份甘于奉献的精神，却像一盏明灯，照亮了我前行的每一步。
+              </div>
+            </div>
+          </div>
+          <button class="btn-speak" onclick="speakText('结尾升华范例：他虽然只是一名普通的清洁工，但那份甘于奉献的精神，却像一盏明灯，照亮了我前行的每一步。')">
+            📢 听结尾范例
+          </button>
+        </div>
+      </div>
+
+      <!-- 构思小练笔提示框 -->
+      <div class="interactive-shelf" style="margin-top: 14px;">
+        <label class="shelf-label">✍️ 我的构思小脚印（输入你想写的人物与核心闪光点）：</label>
+        <input type="text" id="castleInput" class="shelf-input" placeholder="例如：我想写每天清晨准时在校门口指挥交通的校工伯伯，敬佩他的风雨无阻与细心关怀……">
+      </div>
+    </section>
+
+    <!-- 关卡三：名场面慢镜头拓展 (方案 B 复合标准) -->
+    <section class="section-card">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="section-tag">关卡三</span>
+          <h2>🎬 名场面慢镜头拓展（疑问词 + 动词双轨思维胶囊）</h2>
+        </div>
+        <span style="font-size: 0.85rem; color: var(--light-text); font-weight: 700;">五感雷达 × 连环动词多巴胺特写</span>
+      </div>
+
+      <!-- 场景一 -->
+      <div class="scene-block">
+        <div class="scene-top-bar">
+          <div class="capsule-twin-track">
+            <span class="capsule-question">【在什么时候？（疑问词）】</span>
+            <span class="capsule-verb">【默默坚守（动词）】</span>
+          </div>
+          <button class="btn-speak" onclick="speakScene(1, '只见他双手紧攥竹扫帚，双臂左右挥展，将散落一地的枯黄落叶利落地聚拢成堆。豆大的汗珠从他额头滚落，他却顾不上擦拭，只是专注地清扫着每一个路口死角。')">
+            📢 朗读场景一示范
+          </button>
+        </div>
+
+        <div class="scene-layout">
+          <div class="scene-media">
+            <div class="img-placeholder-box">
+              <img src="images/step3_scene1.webp" alt="场景一插图" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <div class="img-fallback-text" style="display: none;">
+                🎨 [插图：images/step3_scene1.png]<br>清晨薄雾中挥动竹扫帚的坚毅背影
+              </div>
+            </div>
+          </div>
+          <div class="scene-details">
+            <h3>场景一：环境反衬中的坚毅身影（时间特写 + 专注动作）</h3>
+            <div class="sense-tag-bar">
+              <span class="sense-tag">👁️ 晨曦微光</span>
+              <span class="sense-tag">❄️ 寒气逼人</span>
+              <span class="sense-tag">✋ 双手紧攥</span>
+              <span class="sense-tag">👂 沙沙落叶声</span>
+            </div>
+
+            <div class="scene-text-sample">
+              只见他<span class="hl-verb">双手紧攥</span>竹扫帚，双臂左右<span class="hl-verb">挥展</span>，将散落一地的枯黄落叶利落地<span class="hl-verb">聚拢</span>成堆。豆大的汗珠从他额头<span class="hl-verb">滚落</span>，他却顾不上擦拭，只是专注地<span class="hl-verb">清扫</span>着每一个路口死角。
+            </div>
+
+            <!-- 魔法蜕变折叠 -->
+            <button class="magic-toggle-btn" onclick="toggleMagic(1)">
+              <span>💡 点击展开：白开水句 VS 惊艳句 魔法蜕变</span>
+              <span id="magicIcon1">▼</span>
+            </button>
+            <div id="magicContent1" class="magic-content">
+              <div class="diff-bad">❌ <strong>白开水句：</strong> 早上很冷，清洁工在路边很认真地扫地，流了很多汗。</div>
+              <div class="diff-tip">✨ <strong>升级秘诀：</strong> 拒绝笼统的一个“扫”字！用“双手紧攥”、“双臂挥展”、“聚拢成堆”分解动作连环镜头，画面瞬间鲜活立体！</div>
+            </div>
+
+            <!-- 随堂互动支架 -->
+            <div class="interactive-shelf">
+              <label class="shelf-label">✍️ 随堂仿写支架：换成你敬佩的人，他是在【何时/何地】专注地【做什么连贯动作】？</label>
+              <input type="text" id="sceneInput1" class="shelf-input" placeholder="例：烈日当空的午后，母亲系着围裙，双手不停地翻炒着热锅里的菜肴……">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景二 -->
+      <div class="scene-block">
+        <div class="scene-top-bar">
+          <div class="capsule-twin-track">
+            <span class="capsule-question">【面对怎样考验？（疑问词）】</span>
+            <span class="capsule-verb">【咬牙迎难而上（动词）】</span>
+          </div>
+          <button class="btn-speak" onclick="speakScene(2, '暴风雨骤然而至，积水漫过街道。他毫不犹豫地甩掉雨伞，一把挽起湿透的衣袖，双膝稳稳跪在污浊的积水中，咬紧牙关，徒手将死死卡在排水孔中的枯枝烂叶硬生生抠扯出来！')">
+            📢 朗读场景二示范
+          </button>
+        </div>
+
+        <div class="scene-layout">
+          <div class="scene-media">
+            <div class="img-placeholder-box">
+              <img src="images/step3_scene2.webp" alt="场景二插图" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <div class="img-fallback-text" style="display: none;">
+                🎨 [插图：images/step3_scene2.png]<br>暴雨中跪地疏通下水道排水口的英勇瞬间
+              </div>
+            </div>
+          </div>
+          <div class="scene-details">
+            <h3>场景二：面对困境时的英勇抉择（困难阻碍 + 连环动作）</h3>
+            <div class="sense-tag-bar">
+              <span class="sense-tag">🌧️ 狂风暴雨</span>
+              <span class="sense-tag">👂 哗哗水流声</span>
+              <span class="sense-tag">💪 青筋暴起</span>
+              <span class="sense-tag">❄️ 冰凉刺骨污水</span>
+            </div>
+
+            <div class="scene-text-sample">
+              暴风雨骤然而至，积水漫过街道。他毫不犹豫地<span class="hl-verb">甩掉</span>雨伞，一把<span class="hl-verb">挽起</span>湿透的衣袖，双膝稳稳<span class="hl-verb">跪在</span>污浊的积水中，咬紧牙关，徒手将死死卡在排水孔中的枯枝烂叶硬生生<span class="hl-verb">抠扯</span>出来！
+            </div>
+
+            <!-- 魔法蜕变折叠 -->
+            <button class="magic-toggle-btn" onclick="toggleMagic(2)">
+              <span>💡 点击展开：白开水句 VS 惊艳句 魔法蜕变</span>
+              <span id="magicIcon2">▼</span>
+            </button>
+            <div id="magicContent2" class="magic-content">
+              <div class="diff-bad">❌ <strong>白开水句：</strong> 后来下大雨了，水排不出去，他走过去把垃圾捡起来。</div>
+              <div class="diff-tip">✨ <strong>升级秘诀：</strong> 融入阻碍感与触觉冲击！用“甩掉”、“挽起”、“跪在”、“抠扯”四连动词，凸显人物毫不退缩的果敢与责任心！</div>
+            </div>
+
+            <!-- 随堂互动支架 -->
+            <div class="interactive-shelf">
+              <label class="shelf-label">✍️ 随堂仿写支架：他遇到了什么【困难阻碍】？他是怎样【咬牙迎难而上】的？</label>
+              <input type="text" id="sceneInput2" class="shelf-input" placeholder="例：面对繁复晦涩的竞赛题，哥哥揉了揉疲惫的双眼，咬着笔头在草稿纸上反复演算……">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景三 -->
+      <div class="scene-block">
+        <div class="scene-top-bar">
+          <div class="capsule-twin-track">
+            <span class="capsule-question">【怎样触动心灵？（疑问词）】</span>
+            <span class="capsule-verb">【言传身教启发（动词）】</span>
+          </div>
+          <button class="btn-speak" onclick="speakScene(3, '水流欢快地旋转排空，他缓缓直起身，粗糙黝黑的手掌抹去满脸雨水，布满血丝的眼角洋溢着舒心的笑意。那一刻，一股敬意从我心底油然而生。')">
+            📢 朗读场景三示范
+          </button>
+        </div>
+
+        <div class="scene-layout">
+          <div class="scene-media">
+            <div class="img-placeholder-box">
+              <img src="images/step3_scene3.webp" alt="场景三插图" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+              <div class="img-fallback-text" style="display: none;">
+                🎨 [插图：images/step3_scene3.png]<br>雨过天晴，老人舒心的微笑与小学生感动的目光
+              </div>
+            </div>
+          </div>
+          <div class="scene-details">
+            <h3>场景三：言语与神态的深情震撼（神态语言 + 心灵蜕变）</h3>
+            <div class="sense-tag-bar">
+              <span class="sense-tag">☀️ 云开日出</span>
+              <span class="sense-tag">😊 舒心笑意</span>
+              <span class="sense-tag">❤️ 暖流涌动</span>
+              <span class="sense-tag">👀 崇敬目光</span>
+            </div>
+
+            <div class="scene-text-sample">
+              水流欢快地旋转排空，他缓缓<span class="hl-verb">直起身</span>，粗糙黝黑的手掌<span class="hl-verb">抹去</span>满脸雨水，布满血丝的眼角<span class="hl-verb">舒展</span>开来，<span class="hl-verb">漾起</span>一抹朴实而灿烂的微笑。那一刻，一股敬意从我心底油然而生。
+            </div>
+
+            <!-- 魔法蜕变折叠 -->
+            <button class="magic-toggle-btn" onclick="toggleMagic(3)">
+              <span>💡 点击展开：白开水句 VS 惊艳句 魔法蜕变</span>
+              <span id="magicIcon3">▼</span>
+            </button>
+            <div id="magicContent3" class="magic-content">
+              <div class="diff-bad">❌ <strong>白开水句：</strong> 问题解决了，他笑了，我也觉得他是一个很好的人。</div>
+              <div class="diff-tip">✨ <strong>升级秘诀：</strong> 抓住神态特写与内心触动！写出人物外貌的沧桑与笑容的纯粹反差，自然完成由“事”到“敬佩之情”的心理升华。</div>
+            </div>
+
+            <!-- 随堂互动支架 -->
+            <div class="interactive-shelf">
+              <label class="shelf-label">✍️ 随堂仿写支架：那一刻，他的【神态或言语】是怎样的？带给你怎样的【心灵触动】？</label>
+              <input type="text" id="sceneInput3" class="shelf-input" placeholder="例：老师轻轻拍了拍我的肩膀，温柔的目光像春风拂过，驱散了我心中的沮丧……">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关卡四：小作家通关挑战 -->
+    <section class="section-card">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="section-tag">大闯关</span>
+          <h2>🏆 小作家通关挑战：自检、拼装与高分范文</h2>
+        </div>
+      </div>
+
+      <!-- UASA 评分自检表 -->
+      <h4 style="font-size: 1rem; margin-bottom: 8px;">📋 UASA 高阶记叙文标准自检（勾选属于你的写作亮点）：</h4>
+      <div class="checklist-grid">
+        <label class="check-item"><input type="checkbox" checked> <span>🎯 紧扣“敬佩”立意</span></label>
+        <label class="check-item"><input type="checkbox" checked> <span>💎 融入成语与生动叠词</span></label>
+        <label class="check-item"><input type="checkbox" checked> <span>🏰 骨架完整（点火-战场-升华）</span></label>
+        <label class="check-item"><input type="checkbox" checked> <span>🎭 对话提示语神态到位</span></label>
+        <label class="check-item"><input type="checkbox" checked> <span>🎬 连环动词与五感微特写</span></label>
+      </div>
+
+      <div class="action-btn-row">
+        <button class="big-btn btn-build" onclick="assembleEssay()">
+          ✨ 拼装我的专属习作
+        </button>
+        <button class="big-btn btn-exemplar" onclick="showExemplar()">
+          📖 一键点开高分范文
+        </button>
+      </div>
+
+      <!-- 习作/范文成果展示区 -->
+      <div id="resultDisplayArea" class="result-display-area">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed var(--border-color); padding-bottom: 10px;">
+          <h3 id="resultTitle" style="font-size: 1.3rem; font-weight: 900;"></h3>
+          <button class="btn-speak" id="btnSpeakResult" onclick="speakCurrentResult()">
+            📢 朗读整篇作文
+          </button>
+        </div>
+        <div id="resultContent" class="result-text"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* ==========================================
+       1. 纯原生 Web Audio API 合成音效引擎
+       ========================================== */
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Q弹 Pop 音效 (400Hz -> 800Hz 正弦波)
+    function playPop() {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        const now = ctx.currentTime;
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(840, now + 0.07);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } catch (e) {
+        console.warn('AudioContext not allowed yet', e);
+      }
+    }
+
+    // 平滑展开 Whoosh 音效 (280Hz -> 80Hz 三角波)
+    function playWhoosh() {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        const now = ctx.currentTime;
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.16);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.17);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // 主题切换双音音效 (523Hz -> 659Hz)
+    function playSwitch() {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // 庆祝大三和弦琶音 Fanfare (Do-Mi-Sol-Do)
+    function playFanfare() {
+      try {
+        const ctx = getAudioContext();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime + idx * 0.09;
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    /* ==========================================
+       2. 马来西亚中文朗读语音引擎 (Web Speech API)
+       ========================================== */
+    let currentSpeakingBtn = null;
+
+    function stopSpeaking() {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      if (currentSpeakingBtn) {
+        currentSpeakingBtn.classList.remove('speaking');
+        currentSpeakingBtn.innerHTML = currentSpeakingBtn.getAttribute('data-original-html') || '📢 朗读示范';
+        currentSpeakingBtn = null;
+      }
+    }
+
+    function speakText(text, btnElement) {
+      if (!('speechSynthesis' in window)) {
+        alert('您的浏览器暂不支持语音合成朗读功能。');
+        return;
+      }
+
+      // 如果当前正在朗读且点击的是同一按钮，则执行停止
+      if (currentSpeakingBtn === btnElement && window.speechSynthesis.speaking) {
+        stopSpeaking();
+        return;
+      }
+
+      stopSpeaking();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.92;
+      utterance.pitch = 1.0;
+
+      // 智能优先匹配马来西亚中文 (zh-MY)，次选 zh-SG，再退选通用 zh
+      const voices = window.speechSynthesis.getVoices();
+      let chosenVoice = voices.find(v => v.lang === 'zh-MY') ||
+                          voices.find(v => v.lang === 'zh-SG') ||
+                          voices.find(v => v.lang.startsWith('zh'));
+      if (chosenVoice) {
+        utterance.voice = chosenVoice;
+      }
+
+      if (btnElement) {
+        currentSpeakingBtn = btnElement;
+        if (!btnElement.getAttribute('data-original-html')) {
+          btnElement.setAttribute('data-original-html', btnElement.innerHTML);
+        }
+        btnElement.classList.add('speaking');
+        btnElement.innerHTML = '⏹️ 停止朗读';
+      }
+
+      utterance.onend = () => {
+        stopSpeaking();
+      };
+
+      utterance.onerror = () => {
+        stopSpeaking();
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // 辅助场景朗读调用
+    function speakScene(sceneNum, text) {
+      playPop();
+      const btn = event.currentTarget;
+      speakText(text, btn);
+    }
+
+    /* ==========================================
+       3. 多巴胺 4 套主题切换系统
+       ========================================= */
+    function setTheme(themeName) {
+      playSwitch();
+      document.body.className = 'theme-' + themeName;
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(themeName));
+      });
+    }
+
+    /* ==========================================
+       4. 对话提示语模式切换
+       ========================================== */
+    const dialogueModes = {
+      front: '李叔叔<span class="hl-action">抹了一把额头上的汗珠，爽朗地笑着</span><span class="hl-punct">：“</span>小同学，只要街道干净了，大伙儿走得舒心，我这心里就踏实！<span class="hl-punct">”</span>',
+      mid: '<span class="hl-punct">“</span>小同学，<span class="hl-punct">”</span>李叔叔<span class="hl-action">把扫帚靠在路旁，笑吟吟地递过来一把雨伞</span><span class="hl-punct">，“</span>雨天路滑，赶紧回家吧，别让妈妈挂念。<span class="hl-punct">”</span>',
+      back: '<span class="hl-punct">“</span>把每一件平凡小事做好，那就是不平凡！<span class="hl-punct">”</span>李叔叔<span class="hl-action">拍了拍身上的落叶，目光坚定地说道</span><span class="hl-punct">。</span>'
+    };
+
+    function switchDialogue(mode) {
+      playPop();
+      document.querySelectorAll('.dialogue-tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('dialogueDisplay').innerHTML = dialogueModes[mode];
+    }
+
+    /* ==========================================
+       5. 关卡三魔法蜕变面板折叠交互
+       ========================================== */
+    function toggleMagic(index) {
+      playWhoosh();
+      const content = document.getElementById('magicContent' + index);
+      const icon = document.getElementById('magicIcon' + index);
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        icon.textContent = '▼';
+      } else {
+        content.classList.add('open');
+        icon.textContent = '▲';
+      }
+    }
+
+    /* ==========================================
+       6. 纯原生 Canvas 礼花彩纸喷发粒子引擎
+       ========================================== */
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+    let animationFrameId = null;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerConfetti() {
+      confettiParticles = [];
+      const colors = ['#FF007F', '#00F0FF', '#FFE600', '#00FF88', '#FF3366', '#9900FF'];
+      for (let i = 0; i < 130; i++) {
+        confettiParticles.push({
+          x: window.innerWidth * 0.5 + (Math.random() - 0.5) * 350,
+          y: window.innerHeight * 0.85,
+          vx: (Math.random() - 0.5) * 16,
+          vy: -(Math.random() * 16 + 10),
+          size: Math.random() * 8 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 12,
+          gravity: 0.38,
+          opacity: 1
+        });
+      }
+
+      if (!animationFrameId) {
+        animateConfetti();
+      }
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiParticles.forEach((p, idx) => {
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.vRot;
+        p.opacity -= 0.007;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      });
+
+      confettiParticles = confettiParticles.filter(p => p.opacity > 0 && p.y < window.innerHeight + 50);
+
+      if (confettiParticles.length > 0) {
+        animationFrameId = requestAnimationFrame(animateConfetti);
+      } else {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    /* ==========================================
+       7. 拼装专属习作与展示高分范文
+       ========================================== */
+    function assembleEssay() {
+      playFanfare();
+      triggerConfetti();
+
+      const castleNote = document.getElementById('castleInput').value.trim() || '我立志以默默付出的奉献者为榜样。';
+      const scene1 = document.getElementById('sceneInput1').value.trim() || '破晓时分，李叔叔双手紧攥着竹扫帚，双臂左右挥展，将散落一地的落叶利落地聚拢成堆。';
+      const scene2 = document.getElementById('sceneInput2').value.trim() || '倾盆暴雨中，积水漫过街道，李叔叔毫不犹豫地跪在浑浊的积水中，咬牙将堵塞排水口的树枝抠扯出来。';
+      const scene3 = document.getElementById('sceneInput3').value.trim() || '雨过天晴，他抹去脸上的雨水，嘴角漾起欣慰而朴实的笑意，那坚定的目光让我深深感动。';
+
+      const fullText = `《令我敬佩的人》\n\n` +
+        `    “唰——唰——”清晨五点，整座小镇还在香甜的睡梦中沉睡，那富有节奏的竹扫帚划过地面的沙沙声，又准时在黎明的微光中响起。\n\n` +
+        `    ${scene1}\n\n` +
+        `    ${scene2}\n\n` +
+        `    ${scene3}\n\n` +
+        `    ${castleNote}\n\n` +
+        `    他虽然只是一名平凡的清洁工，没有轰轰烈烈的壮举，但他那份在风雨中默默坚守、任劳任怨的奉献精神，却像一盏熠熠生辉的明灯，永远值得我崇敬与学习！`;
+
+      document.getElementById('resultTitle').innerHTML = '🎉 你的专属通关习作已拼装完成！';
+      document.getElementById('resultContent').innerText = fullText;
+      const area = document.getElementById('resultDisplayArea');
+      area.style.display = 'block';
+      area.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showExemplar() {
+      playFanfare();
+      triggerConfetti();
+
+      const exemplarText = `《令我敬佩的人》\n\n` +
+        `    “唰——唰——”清晨五点，整座小镇还在香甜的睡梦中沉睡，那富有节奏的竹扫帚划过地面的沙沙声，又准时在黎明的微光中响起。每当我透过窗户望向楼下街道，总能看见那个身穿橙黄色反光马甲的熟悉身影——他，就是我们社区默默无闻的清洁工李叔叔。\n\n` +
+        `    破晓时分，晨曦微露，空气中弥漫着清冷的寒气。只见李叔叔双手紧攥着竹扫帚，双臂左右挥展，将散落一地的枯黄落叶利落地聚拢成堆。豆大的汗珠从他黝黑的额头上滚落，他却全然顾不上擦拭，只是全神贯注地清扫着每一个死角。哪怕是石缝间夹杂的小纸屑，他也弯下腰，细心地用手抠出，绝不漏掉一处脏污。\n\n` +
+        `    最令我肃然起敬的，是上个月那场突如其来的暴风雨。狂风大作，暴雨倾盆而下，路旁的下水道被狂风吹落的断枝落叶死死堵住，浑浊的雨水迅速蔓延，几乎漫上了人行道。过往的行人纷纷撑伞退避，唯独李叔叔顶着狂风逆行而来！他一把甩掉手中的雨伞，利落地挽起湿透的衣袖，双膝稳稳跪在冰凉刺骨的积水中。他咬紧牙关，双手青筋暴起，徒手伸入恶臭淤积的排水孔，将堵在篦子上的烂泥与树枝硬生生抠扯出来！\n\n` +
+        `    “咕嘟咕嘟——”伴随着一声清脆的声响，积水如巨龙吸水般欢快地旋转排空，整条街道恢复了畅通。李叔叔缓缓直起身，用粗糙的手掌抹了一把满脸的雨水，布满血丝的眼角舒展开来，漾起一抹踏实而灿烂的微笑。那一刻，浑身湿透的他，在阳光破云而出的光芒下，显得无比高大。\n\n` +
+        `    李叔叔没有惊天动地的伟业，只是一名在平凡岗位上任劳任怨的城市美容师。但他身上那份坚持不懈的担当与甘于奉献的风骨，却深深印刻在我的心底。李叔叔，您就是我心中最敬佩的人！`;
+
+      document.getElementById('resultTitle').innerHTML = '📖 官方 UASA 满分示范范文（赏析模仿）';
+      document.getElementById('resultContent').innerText = exemplarText;
+      const area = document.getElementById('resultDisplayArea');
+      area.style.display = 'block';
+      area.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function speakCurrentResult() {
+      const text = document.getElementById('resultContent').innerText;
+      const btn = document.getElementById('btnSpeakResult');
+      speakText(text, btn);
+    }
+  </script>
+</body>
+</html>
