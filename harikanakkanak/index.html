@@ -202,8 +202,8 @@
 </audio>
 
 <script>
-    const TOTAL_PAGES = 4;
-    const pageImages = ['page-1.webp', 'page-2.webp', 'page-3.webp', 'page-4.webp'];
+    const TOTAL_PAGES = 6;
+    const pageImages = ['page-1.webp', 'page-2.webp', 'page-3.webp', 'page-4.webp', 'page-5.webp', 'page-6.webp'];
     
     let book = null;
     let isMobileMode = false;
@@ -420,7 +420,9 @@
             <div class="page" data-density="hard"><img src="${pageImages[0]}" alt="封面"></div>
             <div class="page"><img src="${pageImages[1]}" alt="工委会表"></div>
             <div class="page"><img src="${pageImages[2]}" alt="流程表"></div>
-            <div class="page" data-density="hard"><img src="${pageImages[3]}" alt="歌词封底"></div>
+            <div class="page"><img src="${pageImages[3]}" alt="歌词封底"></div>
+            <div class="page"><img src="${pageImages[4]}" alt="征信录1"></div>
+            <div class="page" data-density="hard"><img src="${pageImages[5]}" alt="征信录2"></div>
         `;
 
         let W = mainArea.clientWidth;
@@ -468,18 +470,35 @@
     }
 
     function updatePageInfo(idx) {
-        const infoEl = document.getElementById('page-info');
-        const btnPrev = document.getElementById('btn-prev');
-        const btnNext = document.getElementById('btn-next');
-        if (isMobileMode) {
-            infoEl.innerText = `${idx + 1} / 4`;
-            btnPrev.disabled = (idx === 0); btnNext.disabled = (idx === 3);
+    const infoEl = document.getElementById('page-info');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    
+    if (isMobileMode) {
+        // 手机单页模式
+        infoEl.innerText = `${idx + 1} / ${TOTAL_PAGES}`;
+        btnPrev.disabled = (idx === 0);
+        btnNext.disabled = (idx === TOTAL_PAGES - 1);
+    } else {
+        // 电脑双页展开模式
+        if (idx === 0) {
+            infoEl.innerText = `1 / ${TOTAL_PAGES}`;
+            btnPrev.disabled = true;
+            btnNext.disabled = false;
+        } else if (idx >= TOTAL_PAGES - 1) {
+            infoEl.innerText = `${TOTAL_PAGES} / ${TOTAL_PAGES}`;
+            btnPrev.disabled = false;
+            btnNext.disabled = true;
         } else {
-            if (idx === 0) { infoEl.innerText = '1 / 4'; btnPrev.disabled = true; btnNext.disabled = false; }
-            else if (idx === 1 || idx === 2) { infoEl.innerText = '2–3 / 4'; btnPrev.disabled = false; btnNext.disabled = false; }
-            else if (idx === 3) { infoEl.innerText = '4 / 4'; btnPrev.disabled = false; btnNext.disabled = true; }
+            // 中间展开对页：显示如 2–3 / 6, 4–5 / 6
+            const leftP = (idx % 2 === 0) ? idx : idx + 1;
+            const rightP = leftP + 1;
+            infoEl.innerText = `${leftP}–${rightP} / ${TOTAL_PAGES}`;
+            btnPrev.disabled = false;
+            btnNext.disabled = false;
         }
     }
+}
 
     function flipPrev() { if(book) book.flipPrev(); }
     function flipNext() { if(book) book.flipNext(); }
