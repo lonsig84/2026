@@ -42,6 +42,31 @@
       100% { transform: scale(1); }
     }
     .animate-bounce-in { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    @keyframes sakuraFall {
+      0% { transform: translate(0, -24px) rotate(0deg) scale(0.9); opacity: 0; }
+      15% { opacity: 0.9; }
+      50% { transform: translate(14px, 110px) rotate(140deg) scale(1); opacity: 0.85; }
+      85% { opacity: 0.8; }
+      100% { transform: translate(-8px, 235px) rotate(280deg) scale(0.85); opacity: 0; }
+    }
+    @keyframes starTwinkle {
+      0%, 100% { transform: scale(0.45) rotate(0deg); opacity: 0.15; }
+      50% { transform: scale(1.15) rotate(25deg); opacity: 0.95; }
+    }
+    @keyframes bubbleFloat {
+      0% { transform: translate(0, 225px) scale(0.75); opacity: 0; }
+      15% { opacity: 0.8; }
+      50% { transform: translate(-8px, 105px) scale(1); opacity: 0.75; }
+      85% { opacity: 0.65; }
+      100% { transform: translate(8px, -25px) scale(1.1); opacity: 0; }
+    }
+    @keyframes snowFall {
+      0% { transform: translate(0, -20px) rotate(0deg); opacity: 0; }
+      15% { opacity: 0.9; }
+      50% { transform: translate(-10px, 110px) rotate(120deg); opacity: 0.85; }
+      85% { opacity: 0.8; }
+      100% { transform: translate(10px, 235px) rotate(240deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -53,7 +78,7 @@
     // 🚀 核心基建：全栈分离后的 API 通信引擎
     // ========================================================
     // ⚠️ 请在这里填入你部署后获取到的 Google Apps Script Web App URL
-    const API_URL = "https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbwJLflmdQOACJuWt_SlMVes_eO7nKoe435D7MD5JLGA_RuLzDCcJEOuSrraGgyWzQIdTQ/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbxSFTuc0k3E2T_lcfiFmXayVvcRAOWxrMJL5zOxXmkcrepvYCBksMgGwdS4dmzWANScjw/exec"; 
 
     // 统一的 fetchGAS 通信引擎，完美替代 google.script.run
     const fetchGAS = async (action, payload = {}) => {
@@ -1880,7 +1905,8 @@
         ground: null,
         foreground: null,
         frame: null,
-        sceneObject: null
+        sceneObject: null,
+        ability: null
       });
       const [inventoryLoading, setInventoryLoading] = useState(false);
       const [equippingSlot, setEquippingSlot] = useState(null);
@@ -1902,6 +1928,32 @@
       const [updateHistory, setUpdateHistory] = useState([]);
       const [lastSeenUpdate, setLastSeenUpdate] = useState('');
       const [updateLoading, setUpdateLoading] = useState(false);
+
+      // 💬 宠物 AI 对话聊天（道具能力解锁 + 记忆 + 性格）
+      const [showPetChat, setShowPetChat] = useState(false);
+      const [chatMessages, setChatMessages] = useState([]);
+      const [chatInput, setChatInput] = useState('');
+      const [chatLoading, setChatLoading] = useState(false);
+      const [chatQuota, setChatQuota] = useState({ limit: 0, used: 0, remaining: 0 });
+      const [chatStatus, setChatStatus] = useState({
+        unlocked: false,
+        tier: 0,
+        abilityName: '',
+        baseLimit: 0,
+        permanentBonus: 0,
+        permanentBonusCount: 0,
+        maxPermanentBonusCount: 3,
+        dailyBonus: 0,
+        limit: 0,
+        used: 0,
+        remaining: 0,
+        hasRecentMemory: false,
+        memoryUnlocked: false,
+        longTermMemory: '',
+        personality: 'default'
+      });
+      const [usingItemId, setUsingItemId] = useState(null);
+      const chatEndRef = useRef(null);
 
       const [activeGift, setActiveGift] = useState(null);
       const [hearts, setHearts] = useState([]);
@@ -2063,10 +2115,237 @@
         );
       };
 
+      const EFFECT_PREVIEW_MAP = {
+        sakura_fall: { icon: '🌸', bg: 'bg-gradient-to-br from-pink-50 via-rose-50 to-amber-50', text: 'text-rose-400', label: '动态飘落' },
+        star_twinkle: { icon: '✨', bg: 'bg-gradient-to-br from-indigo-50 via-purple-50 to-amber-50', text: 'text-amber-500', label: '星光闪烁' },
+        bubble_float: { icon: '🫧', bg: 'bg-gradient-to-br from-sky-50 via-cyan-50 to-indigo-50', text: 'text-sky-500', label: '梦幻气泡' },
+        snow_fall: { icon: '❄️', bg: 'bg-gradient-to-br from-slate-50 via-sky-50 to-blue-50', text: 'text-blue-400', label: '冬日飞雪' }
+      };
+
+      const ABILITY_PREVIEW_MAP = {
+        pet_chat_1: { icon: '📢', label: '初级聊天 · 3句/天', bg: 'bg-gradient-to-br from-sky-100 to-indigo-100', text: 'text-sky-700' },
+        pet_chat_2: { icon: '🔔', label: '中级聊天 · 5句/天', bg: 'bg-gradient-to-br from-violet-100 to-fuchsia-100', text: 'text-violet-700' },
+        pet_chat_3: { icon: '👑', label: '高级聊天 · 8句/天', bg: 'bg-gradient-to-br from-amber-100 via-yellow-100 to-orange-100', text: 'text-amber-700' },
+        unlock_long_memory: { icon: '🔮', label: '开启长期记忆', bg: 'bg-gradient-to-br from-purple-100 to-indigo-100', text: 'text-purple-700' },
+        chat_daily_bonus: { icon: '🍬', label: '今日次数 +3', bg: 'bg-gradient-to-br from-pink-100 to-rose-100', text: 'text-rose-700' },
+        chat_permanent_bonus: { icon: '💾', label: '永久上限 +2', bg: 'bg-gradient-to-br from-emerald-100 to-teal-100', text: 'text-emerald-700' },
+        persona_sunny: { icon: '☀️', label: '元气小太阳', bg: 'bg-gradient-to-br from-amber-100 to-orange-100', text: 'text-orange-700' },
+        persona_mentor: { icon: '📖', label: '温柔小导师', bg: 'bg-gradient-to-br from-emerald-100 to-cyan-100', text: 'text-teal-700' },
+        persona_tsundere: { icon: '😼', label: '傲娇学霸', bg: 'bg-gradient-to-br from-indigo-100 to-purple-100', text: 'text-indigo-700' },
+        persona_funny: { icon: '🤡', label: '幽默小逗比', bg: 'bg-gradient-to-br from-yellow-100 to-lime-100', text: 'text-lime-700' }
+      };
+
+      const PERSONALITY_LABELS = {
+        default: '🐾 默认温柔',
+        sunny: '☀️ 元气小太阳',
+        mentor: '📖 温柔小导师',
+        tsundere: '😼 傲娇学霸',
+        funny: '🤡 幽默小逗比'
+      };
+
+      const renderItemThumbnail = (item, isGround = false) => {
+        if (item?.assetUrl) {
+          return <img src={item.assetUrl} alt={item.name} className={`w-full h-full ${isGround ? 'object-contain p-2' : 'object-cover'}`} />;
+        }
+        const preset = item?.renderMode === 'effect' ? EFFECT_PREVIEW_MAP[item.effectType] : null;
+        if (preset) {
+          return (
+            <div className={`w-full h-full flex flex-col items-center justify-center ${preset.bg}`}>
+              <span className="text-3xl drop-shadow-sm">{preset.icon}</span>
+              <span className={`text-[9px] font-black mt-1 ${preset.text}`}>{preset.label}</span>
+            </div>
+          );
+        }
+        let abilityKey = item?.effectType;
+        if (item?.effectType === 'pet_chat') {
+          abilityKey = `pet_chat_${Number(item.effectValue) || 1}`;
+        } else if (item?.effectType === 'pet_personality') {
+          abilityKey = `persona_${item.effectValue}`;
+        }
+        const abilityPreset = ABILITY_PREVIEW_MAP[abilityKey];
+        if (abilityPreset) {
+          return (
+            <div className={`w-full h-full flex flex-col items-center justify-center ${abilityPreset.bg}`}>
+              <span className="text-3xl drop-shadow-sm">{abilityPreset.icon}</span>
+              <span className={`text-[9px] font-black mt-1 ${abilityPreset.text}`}>{abilityPreset.label}</span>
+            </div>
+          );
+        }
+        return <span className="text-3xl">🎁</span>;
+      };
+
+      const SAKURA_PETALS = [
+        { left: '8%', size: 12, duration: '4.8s', delay: '-0.5s' },
+        { left: '20%', size: 10, duration: '5.6s', delay: '-2.1s' },
+        { left: '34%', size: 13, duration: '4.5s', delay: '-3.4s' },
+        { left: '48%', size: 11, duration: '6.1s', delay: '-1.2s' },
+        { left: '63%', size: 13, duration: '5.0s', delay: '-4.0s' },
+        { left: '76%', size: 10, duration: '5.8s', delay: '-2.7s' },
+        { left: '88%', size: 12, duration: '4.6s', delay: '-0.9s' },
+        { left: '14%', size: 9, duration: '6.4s', delay: '-5.1s' },
+        { left: '55%', size: 11, duration: '5.3s', delay: '-3.8s' },
+        { left: '82%', size: 10, duration: '6.0s', delay: '-1.7s' }
+      ];
+
+      const TWINKLE_STARS = [
+        { left: '10%', top: '12%', size: 14, color: '#fde047', duration: '2.2s', delay: '-0.2s' },
+        { left: '24%', top: '26%', size: 10, color: '#fef08a', duration: '2.8s', delay: '-1.1s' },
+        { left: '78%', top: '14%', size: 15, color: '#fde047', duration: '2.4s', delay: '-0.6s' },
+        { left: '86%', top: '34%', size: 11, color: '#e9d5ff', duration: '3.0s', delay: '-1.8s' },
+        { left: '12%', top: '58%', size: 12, color: '#fef08a', duration: '2.6s', delay: '-1.5s' },
+        { left: '84%', top: '62%', size: 13, color: '#fde047', duration: '2.1s', delay: '-0.9s' },
+        { left: '38%', top: '10%', size: 10, color: '#e9d5ff', duration: '2.9s', delay: '-2.0s' },
+        { left: '64%', top: '20%', size: 12, color: '#fef08a', duration: '2.3s', delay: '-1.3s' },
+        { left: '18%', top: '78%', size: 11, color: '#fde047', duration: '2.7s', delay: '-0.4s' },
+        { left: '74%', top: '80%', size: 10, color: '#e9d5ff', duration: '2.5s', delay: '-1.7s' }
+      ];
+
+      const FLOAT_BUBBLES = [
+        { left: '10%', size: 14, duration: '5.2s', delay: '-0.8s' },
+        { left: '24%', size: 10, duration: '6.0s', delay: '-2.5s' },
+        { left: '40%', size: 16, duration: '4.9s', delay: '-3.7s' },
+        { left: '58%', size: 11, duration: '5.8s', delay: '-1.4s' },
+        { left: '74%', size: 15, duration: '5.0s', delay: '-4.2s' },
+        { left: '86%', size: 12, duration: '6.3s', delay: '-2.9s' },
+        { left: '16%', size: 9, duration: '6.5s', delay: '-5.0s' },
+        { left: '68%', size: 13, duration: '5.4s', delay: '-1.9s' }
+      ];
+
+      const SNOW_FLAKES = [
+        { left: '7%', size: 10, duration: '5.0s', delay: '-0.4s' },
+        { left: '18%', size: 8, duration: '6.2s', delay: '-2.2s' },
+        { left: '29%', size: 11, duration: '4.8s', delay: '-3.6s' },
+        { left: '42%', size: 9, duration: '5.9s', delay: '-1.1s' },
+        { left: '54%', size: 12, duration: '5.1s', delay: '-4.3s' },
+        { left: '66%', size: 8, duration: '6.4s', delay: '-2.8s' },
+        { left: '79%', size: 11, duration: '4.9s', delay: '-0.7s' },
+        { left: '90%', size: 9, duration: '5.7s', delay: '-1.9s' },
+        { left: '13%', size: 7, duration: '6.6s', delay: '-5.2s' },
+        { left: '73%', size: 10, duration: '5.4s', delay: '-3.3s' }
+      ];
+
+      const renderEquippedForeground = () => {
+        const item = findItemById(equippedItems.foreground);
+        if (!item || item.subtype !== 'foreground') return null;
+        if (item.renderMode === 'image' && item.assetUrl) {
+          return (
+            <img
+              src={item.assetUrl}
+              alt={item.name}
+              draggable="false"
+              className="w-full h-full object-cover select-none pointer-events-none"
+            />
+          );
+        }
+        if (item.renderMode !== 'effect') return null;
+
+        if (item.effectType === 'sakura_fall') {
+          return (
+            <div className="relative w-full h-full">
+              {SAKURA_PETALS.map((p, idx) => (
+                <svg
+                  key={idx}
+                  viewBox="0 0 24 24"
+                  className="absolute top-0 pointer-events-none drop-shadow-sm"
+                  style={{ left: p.left, width: `${p.size}px`, height: `${p.size}px`, animation: `sakuraFall ${p.duration} linear infinite ${p.delay}` }}
+                >
+                  <path d="M12 2C15 5 18 9 16 14C14.8 17 13 18.5 12 21C11 18.5 9.2 17 8 14C6 9 9 5 12 2Z" fill="#fbcfe8" stroke="#f472b6" strokeWidth="1.4" />
+                </svg>
+              ))}
+            </div>
+          );
+        }
+
+        if (item.effectType === 'star_twinkle') {
+          return (
+            <div className="relative w-full h-full">
+              {TWINKLE_STARS.map((s, idx) => (
+                <svg
+                  key={idx}
+                  viewBox="0 0 24 24"
+                  className="absolute pointer-events-none drop-shadow-sm"
+                  style={{ left: s.left, top: s.top, width: `${s.size}px`, height: `${s.size}px`, animation: `starTwinkle ${s.duration} ease-in-out infinite ${s.delay}` }}
+                >
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5Z" fill={s.color} stroke="#f59e0b" strokeWidth="1" />
+                </svg>
+              ))}
+            </div>
+          );
+        }
+
+        if (item.effectType === 'bubble_float') {
+          return (
+            <div className="relative w-full h-full">
+              {FLOAT_BUBBLES.map((b, idx) => (
+                <div
+                  key={idx}
+                  className="absolute top-0 rounded-full pointer-events-none border border-white/80 bg-gradient-to-br from-white/50 via-sky-200/35 to-pink-200/35 shadow-sm"
+                  style={{ left: b.left, width: `${b.size}px`, height: `${b.size}px`, animation: `bubbleFloat ${b.duration} ease-in-out infinite ${b.delay}` }}
+                />
+              ))}
+            </div>
+          );
+        }
+
+        if (item.effectType === 'snow_fall') {
+          return (
+            <div className="relative w-full h-full">
+              {SNOW_FLAKES.map((f, idx) => (
+                <div
+                  key={idx}
+                  className="absolute top-0 rounded-full pointer-events-none bg-white/90 border border-sky-200/70 shadow-sm"
+                  style={{ left: f.left, width: `${f.size}px`, height: `${f.size}px`, animation: `snowFall ${f.duration} linear infinite ${f.delay}` }}
+                />
+              ))}
+            </div>
+          );
+        }
+
+        return null;
+      };
+
+      const applyChatStatus = (status, syncHistory = false) => {
+        if (!status) return;
+        const limit = Number(status.limit || 0);
+        const used = Number(status.used || 0);
+        const remaining = typeof status.remaining === 'number' ? status.remaining : Math.max(0, limit - used);
+        setChatQuota({ limit, used, remaining });
+        setChatStatus({
+          unlocked: Boolean(status.unlocked),
+          tier: Number(status.tier || 0),
+          abilityName: String(status.abilityName || ''),
+          baseLimit: Number(status.baseLimit || 0),
+          permanentBonus: Number(status.permanentBonus || 0),
+          permanentBonusCount: Number(status.permanentBonusCount || 0),
+          maxPermanentBonusCount: Number(status.maxPermanentBonusCount || 3),
+          dailyBonus: Number(status.dailyBonus || 0),
+          limit,
+          used,
+          remaining,
+          hasRecentMemory: Boolean(status.hasRecentMemory),
+          memoryUnlocked: Boolean(status.memoryUnlocked),
+          longTermMemory: String(status.longTermMemory || ''),
+          personality: String(status.personality || 'default')
+        });
+        if (syncHistory && Array.isArray(status.recentHistory) && status.recentHistory.length > 0) {
+          setChatMessages(status.recentHistory);
+        }
+      };
+
+      const refreshPetChatStatus = async (username, syncHistory = false) => {
+        if (!username) return;
+        try {
+          const status = await fetchGAS('getPetChatStatus', { username });
+          applyChatStatus(status, syncHistory);
+        } catch (err) {
+          console.error('读取聊天状态失败:', err);
+        }
+      };
+
       const handleEquipItem = async (item) => {
         if (!item || !student.id) return;
         const slot = item.subtype;
-        if (!['background', 'ground', 'foreground', 'frame', 'sceneObject'].includes(slot)) return;
+        if (!['background', 'ground', 'foreground', 'frame', 'sceneObject', 'ability'].includes(slot)) return;
         if (!ownedItemIds.has(String(item.itemId))) {
           alert('这个道具还没有进入你的背包。');
           return;
@@ -2081,6 +2360,9 @@
             username: student.id,
             equippedItems: next
           });
+          if (slot === 'ability') {
+            await refreshPetChatStatus(student.id, true);
+          }
         } catch (err) {
           console.error('装备保存失败:', err);
           setEquippedItems(previous);
@@ -2098,12 +2380,53 @@
         setEquippedItems(next);
         try {
           await fetchGAS('updateEquippedItems', { username: student.id, equippedItems: next });
+          if (slot === 'ability') {
+            await refreshPetChatStatus(student.id, false);
+          }
         } catch (err) {
           console.error('卸下装备失败:', err);
           setEquippedItems(previous);
           alert('保存失败，请稍后再试。');
         } finally {
           setEquippingSlot(null);
+        }
+      };
+
+      const handleUseChatItem = async (item) => {
+        if (!item || !student.id || usingItemId) return;
+        setUsingItemId(item.itemId);
+        try {
+          const res = await fetchGAS('useChatItem', { username: student.id, itemId: item.itemId });
+          if (res?.success) {
+            if (Array.isArray(res.inventory)) setStudentInventory(res.inventory);
+            if (res.chatStatus) applyChatStatus(res.chatStatus, false);
+            alert(res.message || '使用成功！');
+          } else {
+            alert(res?.message || '使用失败，请稍后再试。');
+          }
+        } catch (err) {
+          console.error('使用道具失败:', err);
+          alert('使用失败，请稍后再试。');
+        } finally {
+          setUsingItemId(null);
+        }
+      };
+
+      const handleSetPersonality = async (personalityKey) => {
+        if (!student.id || usingItemId) return;
+        setUsingItemId('persona_' + personalityKey);
+        try {
+          const res = await fetchGAS('setPetPersonality', { username: student.id, personality: personalityKey });
+          if (res?.success) {
+            if (res.chatStatus) applyChatStatus(res.chatStatus, false);
+          } else {
+            alert(res?.message || '切换性格失败。');
+          }
+        } catch (err) {
+          console.error('切换性格失败:', err);
+          alert('切换性格失败，请稍后再试。');
+        } finally {
+          setUsingItemId(null);
         }
       };
 
@@ -2190,6 +2513,63 @@
         } catch (err) {
           console.error('标记更新已读失败:', err);
           setLastSeenUpdate('');
+        }
+      };
+
+      // 💬 打开宠物聊天弹窗并同步今日剩余次数与记忆状态
+      const openPetChat = async () => {
+        if (!chatStatus.unlocked) {
+          alert('请先在「🎒 我的宠物背包 → ✨ 宠物能力」中装备聊天道具（如小小传声筒），才能开启和宠物聊天哦~');
+          setShowBackpack(true);
+          return;
+        }
+        setShowPetChat(true);
+        if (chatMessages.length === 0) {
+          setChatMessages([
+            { role: 'assistant', content: `嗨 ${student.name}！今天在学校学了什么有趣的事呀？快跟我聊聊吧~ 🐾` }
+          ]);
+        }
+        if (!student.id) return;
+        await refreshPetChatStatus(student.id, true);
+      };
+
+      const handleSendPetChat = async () => {
+        const text = chatInput.trim();
+        if (!text || chatLoading || !student.id || !chatStatus.unlocked || chatQuota.remaining <= 0) return;
+        const userTurn = { role: 'user', content: text.slice(0, 120) };
+        const historyPayload = chatMessages.filter(m => m.role === 'user' || m.role === 'assistant').slice(-6);
+        setChatMessages(prev => [...prev, userTurn]);
+        setChatInput('');
+        setChatLoading(true);
+        try {
+          const res = await fetchGAS('chatWithPet', {
+            username: student.id,
+            message: userTurn.content,
+            history: historyPayload
+          });
+          if (typeof res?.remaining === 'number') {
+            const limit = Number(res.limit || chatQuota.limit || 0);
+            const used = Number(res.used || 0);
+            setChatQuota({ limit, used, remaining: res.remaining });
+            setChatStatus(prev => ({
+              ...prev,
+              limit,
+              used,
+              remaining: res.remaining,
+              longTermMemory: typeof res.longTermMemory === 'string' ? res.longTermMemory : prev.longTermMemory
+            }));
+          }
+          if (res?.success && res?.reply) {
+            setChatMessages(prev => [...prev, { role: 'assistant', content: res.reply }]);
+          } else {
+            setChatMessages(prev => [...prev, { role: 'assistant', content: res?.message || '宠物刚才有点忙，请稍后再试一次~' }]);
+          }
+        } catch (err) {
+          console.error('宠物对话失败:', err);
+          setChatMessages(prev => [...prev, { role: 'assistant', content: '网络有点小卡顿，请稍后再试一次（本次不扣次数）~' }]);
+        } finally {
+          setChatLoading(false);
+          setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 60);
         }
       };
 
@@ -2420,14 +2800,34 @@
 
                         {/* 第4层：全画面特效 */}
                         <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden">
-                          {/* foreground 特效位已预留，未来从 Items 读取 */}
+                          {renderEquippedForeground()}
                         </div>
 
                         {/* 原有即时奖励/扣分动画维持在最前 */}
                         {hearts.map(heart => <span key={heart.id} className="absolute text-2xl md:text-3xl pointer-events-none drop-shadow-md z-40" style={{ left: heart.left, top: heart.top, animation: `floatUpBurst ${heart.duration} ease-out ${heart.delay} forwards` }}>{heart.emoji}</span>)}
                         {badMarks.map(bad => <div key={bad.id} className="absolute text-center z-50 pointer-events-none left-1/2 -translate-x-1/2" style={{ top: '20%', animation: 'dropDown 1.2s ease-in forwards' }}><div className="text-4xl drop-shadow-md">💔</div><div className="text-red-600 font-black text-xl drop-shadow-sm mt-1">-{bad.points}</div></div>)}
                       </div>
-                      <div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-4 transition-all max-w-full truncate">Lv. {currentLevel} 【{levelTitles[currentLevel] || "元宇宙小萌新"}】</div>
+                      <div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-2 transition-all max-w-full truncate">Lv. {currentLevel} 【{levelTitles[currentLevel] || "元宇宙小萌新"}】</div>
+                      <button
+                        type="button"
+                        onClick={openPetChat}
+                        className={`mb-4 px-4 py-1.5 rounded-full text-xs font-black shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-1.5 ${
+                          !chatStatus.unlocked
+                            ? 'bg-slate-200 text-slate-500 border border-slate-300'
+                            : chatStatus.tier >= 3
+                              ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-white'
+                              : 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white'
+                        }`}
+                      >
+                        {!chatStatus.unlocked ? (
+                          <span>🔒 宠物聊天（需装备能力道具）</span>
+                        ) : (
+                          <>
+                            <span>{chatStatus.tier >= 3 ? '👑 和宠物聊天' : '💬 和宠物聊天'}</span>
+                            <span className="bg-white/25 px-1.5 py-0.5 rounded-full text-[10px]">剩 {chatQuota.remaining}/{chatQuota.limit} 句</span>
+                          </>
+                        )}
+                      </button>
                       {/* 🌿 Ikon Lestari Mingguan 荣誉卡 */}
                       <button
                         type="button"
@@ -2533,8 +2933,8 @@
             {/* 📅 V4 每日签到 + 7天抽奖 */}
             {showCheckin && (
               <div className="fixed inset-0 z-[180] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-                <div className="w-full max-w-sm overflow-hidden bg-white rounded-[2rem] shadow-2xl border border-white">
-                  <div className="p-5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white flex items-start justify-between">
+                <div className="w-full max-w-sm max-h-[88vh] overflow-hidden bg-white rounded-[2rem] shadow-2xl border border-white flex flex-col">
+                  <div className="p-5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white flex items-start justify-between flex-shrink-0">
                     <div>
                       <h3 className="font-black text-xl">📅 每日签到</h3>
                       <p className="text-[11px] font-bold text-white/85 mt-1">累计 7 天，获得 1 次宠物道具抽奖</p>
@@ -2542,7 +2942,7 @@
                     <button onClick={() => { setShowCheckin(false); setDrawResult(null); }} className="text-3xl leading-none font-bold active:scale-90">&times;</button>
                   </div>
 
-                  <div className="p-5 bg-slate-50">
+                  <div className="p-5 bg-slate-50 flex-1 overflow-y-auto">
                     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -2592,13 +2992,21 @@
                       <div className="mt-4 bg-white rounded-2xl border-2 border-indigo-200 shadow-md p-4 text-center animate-[fadeIn_0.2s_ease-out]">
                         <p className="text-xs font-black text-indigo-500 mb-2">🎉 恭喜抽中！</p>
                         <div className="w-28 h-24 mx-auto rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
-                          {drawResult.assetUrl ? <img src={drawResult.assetUrl} alt={drawResult.name} className="w-full h-full object-contain p-1" /> : <span className="text-4xl">🎁</span>}
+                          {renderItemThumbnail(drawResult, drawResult?.subtype === 'ground')}
                         </div>
                         <p className="font-black text-slate-800 mt-2">{drawResult.name}</p>
                         <p className="text-[10px] font-bold text-slate-400 mt-1">已经自动放进你的背包</p>
                         <button onClick={() => { setShowCheckin(false); setDrawResult(null); setShowBackpack(true); }} className="mt-3 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-black shadow-sm active:scale-95">🎒 去背包看看</button>
                       </div>
                     )}
+
+                    <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-3.5 text-left space-y-1.5">
+                      <p className="text-xs font-black text-slate-700">💡 签到与抽签小说明</p>
+                      <p className="text-[11px] font-bold text-slate-500 leading-relaxed">1. <span className="text-slate-700">怎么获得：</span>每天可签到 1 次，累计满 <span className="text-emerald-600 font-black">7 天</span> 获得 1 次抽道具机会（不需要连续，漏签也不会清零）。</p>
+                      <p className="text-[11px] font-bold text-slate-500 leading-relaxed">2. <span className="text-slate-700">可以累积：</span>获得的抽签机会<span className="text-amber-600 font-black">不会过期</span>，可以一直存着，随时想抽或攒多几次一起抽都可以。</p>
+                      <p className="text-[11px] font-bold text-slate-500 leading-relaxed">3. <span className="text-slate-700">会抽到什么：</span>包含场景背景、脚下光圈、前景特效、宠物聊天能力道具、功能道具和性格卡，系统会优先让你抽到还没拥有的道具。</p>
+                      <p className="text-[11px] font-bold text-slate-500 leading-relaxed">4. <span className="text-slate-700">怎么使用：</span>抽到的道具会自动放进右上角 <span className="text-indigo-600 font-black">🎒 我的背包</span>；场景、光圈、特效和宠物能力需在背包点击装备才生效。</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2628,8 +3036,10 @@
                     ) : (
                       <>
                         {[
+                          { slot: 'ability', title: '✨ 宠物能力（装备后开启聊天）', category: 'ability' },
                           { slot: 'background', title: '🖼️ 场景背景', category: 'scene' },
-                          { slot: 'ground', title: '⭕ 脚下光圈', category: 'decoration' }
+                          { slot: 'ground', title: '⭕ 脚下光圈', category: 'decoration' },
+                          { slot: 'foreground', title: '✨ 前景特效', category: 'effect' }
                         ].map(section => {
                           const items = globalItems
                             .filter(item => item.enabled !== false)
@@ -2667,11 +3077,7 @@
                                         className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${equipped ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50 shadow-md' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
                                       >
                                         <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
-                                          {item.assetUrl ? (
-                                            <img src={item.assetUrl} alt={item.name} className={`w-full h-full ${section.slot === 'ground' ? 'object-contain p-2' : 'object-cover'}`} />
-                                          ) : (
-                                            <span className="text-3xl">🎁</span>
-                                          )}
+                                          {renderItemThumbnail(item, section.slot === 'ground')}
                                         </div>
                                         <div className="p-2.5">
                                           <div className="flex items-start justify-between gap-1">
@@ -2692,12 +3098,248 @@
                             </div>
                           );
                         })}
+
+                        {/* 🎒 功能增强道具（点击直接使用） */}
+                        {(() => {
+                          const qtyMap = {};
+                          studentInventory.forEach(entry => {
+                            if (entry?.itemId) qtyMap[String(entry.itemId)] = Number(entry.quantity || 0);
+                          });
+                          const consumables = globalItems
+                            .filter(item => item.enabled !== false)
+                            .filter(item => item.category === 'consumable')
+                            .filter(item => (qtyMap[String(item.itemId)] || 0) > 0);
+                          return (
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-black text-slate-600">🎒 功能道具（点击使用）</p>
+                              </div>
+                              {consumables.length === 0 ? (
+                                <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无此类道具</div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-3">
+                                  {consumables.map(item => {
+                                    const qty = qtyMap[String(item.itemId)] || 0;
+                                    const rare = item.rarity === 'rare';
+                                    const legendary = item.rarity === 'legendary';
+                                    return (
+                                      <button
+                                        key={item.itemId}
+                                        onClick={() => handleUseChatItem(item)}
+                                        disabled={usingItemId !== null}
+                                        className="overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-emerald-400 text-left transition-all active:scale-[0.98] disabled:opacity-60"
+                                      >
+                                        <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden relative">
+                                          {renderItemThumbnail(item, false)}
+                                          <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-slate-900/75 text-white text-[9px] font-black">×{qty}</span>
+                                        </div>
+                                        <div className="p-2.5">
+                                          <div className="flex items-start justify-between gap-1">
+                                            <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${legendary ? 'bg-amber-100 text-amber-700' : rare ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>
+                                              {legendary ? '传说' : rare ? '稀有' : '普通'}
+                                            </span>
+                                          </div>
+                                          <p className="text-[9px] font-black mt-1 text-emerald-600">
+                                            {usingItemId === item.itemId ? '使用中...' : '✨ 点击使用'}
+                                          </p>
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* 🎭 宠物性格卡（抽到哪张就能随时切换） */}
+                        {(() => {
+                          const personaCards = globalItems
+                            .filter(item => item.enabled !== false)
+                            .filter(item => item.category === 'personality' && item.effectType === 'pet_personality')
+                            .filter(item => ownedItemIds.has(String(item.itemId)));
+                          return (
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-black text-slate-600">🎭 宠物性格卡（随时切换）</p>
+                                {chatStatus.personality !== 'default' && (
+                                  <button
+                                    onClick={() => handleSetPersonality('default')}
+                                    disabled={usingItemId !== null}
+                                    className="text-[10px] font-black text-slate-400 hover:text-indigo-500 disabled:opacity-40"
+                                  >
+                                    恢复默认性格
+                                  </button>
+                                )}
+                              </div>
+                              {personaCards.length === 0 ? (
+                                <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无性格卡（抽奖可获得）</div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-3">
+                                  {personaCards.map(item => {
+                                    const personaKey = String(item.effectValue || '');
+                                    const active = chatStatus.personality === personaKey;
+                                    return (
+                                      <button
+                                        key={item.itemId}
+                                        onClick={() => handleSetPersonality(personaKey)}
+                                        disabled={usingItemId !== null}
+                                        className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${active ? 'border-fuchsia-500 ring-2 ring-fuchsia-100 bg-fuchsia-50 shadow-md' : 'border-slate-200 bg-white hover:border-fuchsia-300'}`}
+                                      >
+                                        <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
+                                          {renderItemThumbnail(item, false)}
+                                        </div>
+                                        <div className="p-2.5">
+                                          <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                          <p className={`text-[9px] font-black mt-1 ${active ? 'text-fuchsia-600' : 'text-slate-400'}`}>
+                                            {active ? '✓ 当前性格' : '点击切换'}
+                                          </p>
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </>
                     )}
                   </div>
                 </div>
               </div>
             )}
+            {showPetChat && (() => {
+              const isGoldTheme = chatStatus.tier >= 3;
+              const candyItem = globalItems.find(it => it.enabled !== false && it.effectType === 'chat_daily_bonus');
+              const candyQty = candyItem
+                ? Number((studentInventory.find(e => String(e?.itemId) === String(candyItem.itemId)) || {}).quantity || 0)
+                : 0;
+              const ownedPersonas = globalItems.filter(it =>
+                it.enabled !== false &&
+                it.category === 'personality' &&
+                it.effectType === 'pet_personality' &&
+                ownedItemIds.has(String(it.itemId))
+              );
+              return (
+              <div className="fixed inset-0 z-[175] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                <div className={`w-full max-w-md max-h-[85vh] overflow-hidden bg-white rounded-3xl shadow-2xl border flex flex-col ${isGoldTheme ? 'border-amber-300 ring-2 ring-amber-200/70' : 'border-white'}`}>
+                  <div className={`p-4 text-white flex justify-between items-center ${isGoldTheme ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500' : 'bg-gradient-to-r from-violet-500 to-fuchsia-500'}`}>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center overflow-hidden">
+                        <img src={petImageUrl} alt="Pet" className="w-8 h-8 object-contain" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="font-black text-base leading-tight">{isGoldTheme ? '👑 黄金传声铃' : '💬 和宠物聊天'}</h3>
+                          {chatStatus.memoryUnlocked && (
+                            <span title={chatStatus.longTermMemory ? `记忆：${chatStatus.longTermMemory}` : '长期记忆已开启'} className="px-1.5 py-0.5 rounded-full bg-white/25 text-[9px] font-black">🧠 记忆</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] font-bold text-white/90">
+                          今日剩余 {chatQuota.remaining} / {chatQuota.limit} 句 · {PERSONALITY_LABELS[chatStatus.personality] || '🐾 默认温柔'}
+                        </p>
+                      </div>
+                    </div>
+                    <button onClick={() => setShowPetChat(false)} className="text-3xl font-bold active:scale-90">&times;</button>
+                  </div>
+
+                  {ownedPersonas.length > 0 && (
+                    <div className="px-3 py-2 bg-slate-50 border-b border-slate-100 flex items-center gap-1.5 overflow-x-auto">
+                      <span className="text-[10px] font-black text-slate-400 flex-shrink-0">性格：</span>
+                      <button
+                        type="button"
+                        onClick={() => handleSetPersonality('default')}
+                        disabled={usingItemId !== null}
+                        className={`px-2 py-1 rounded-full text-[10px] font-black flex-shrink-0 transition-all ${chatStatus.personality === 'default' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-500 border border-slate-200'}`}
+                      >
+                        🐾 默认
+                      </button>
+                      {ownedPersonas.map(p => {
+                        const pKey = String(p.effectValue || '');
+                        const active = chatStatus.personality === pKey;
+                        return (
+                          <button
+                            key={p.itemId}
+                            type="button"
+                            onClick={() => handleSetPersonality(pKey)}
+                            disabled={usingItemId !== null}
+                            className={`px-2 py-1 rounded-full text-[10px] font-black flex-shrink-0 transition-all ${active ? 'bg-fuchsia-600 text-white' : 'bg-white text-slate-600 border border-slate-200'}`}
+                          >
+                            {PERSONALITY_LABELS[pKey] || p.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className={`flex-1 overflow-y-auto p-4 space-y-3 min-h-[240px] ${isGoldTheme ? 'bg-amber-50/40' : 'bg-slate-50'}`}>
+                    {chatMessages.map((msg, idx) => (
+                      <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs font-bold leading-relaxed shadow-sm ${
+                          msg.role === 'user'
+                            ? 'bg-indigo-600 text-white rounded-br-sm'
+                            : isGoldTheme
+                              ? 'bg-gradient-to-br from-amber-50 to-yellow-50 text-amber-950 border border-amber-200 rounded-bl-sm'
+                              : 'bg-white text-slate-700 border border-slate-200 rounded-bl-sm'
+                        }`}>
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))}
+                    {chatLoading && (
+                      <div className="flex justify-start">
+                        <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-white border border-slate-200 text-xs font-bold text-slate-400 animate-pulse">
+                          宠物正在认真思考中... 🐾
+                        </div>
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  <div className="p-3 bg-white border-t border-slate-100">
+                    {chatQuota.remaining <= 0 ? (
+                      <div className="text-center py-2 px-3 text-xs font-black text-amber-700 bg-amber-50 rounded-xl border border-amber-200 space-y-2">
+                        <p>🌙 今天的 {chatQuota.limit} 句聊天次数已用完，明天再来吧！</p>
+                        {candyItem && candyQty > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleUseChatItem(candyItem)}
+                            disabled={usingItemId !== null}
+                            className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[11px] font-black shadow-sm active:scale-95 disabled:opacity-50"
+                          >
+                            {usingItemId === candyItem.itemId ? '使用中...' : `🍬 吃一颗${candyItem.name}（+3 句 · 剩 ${candyQty} 颗）`}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          maxLength={120}
+                          value={chatInput}
+                          disabled={chatLoading}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSendPetChat(); }}
+                          placeholder="输入你想对宠物说的话（最多120字）..."
+                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 focus:outline-none focus:border-violet-400"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendPetChat}
+                          disabled={chatLoading || !chatInput.trim()}
+                          className={`px-4 py-2.5 rounded-xl text-white text-xs font-black shadow-sm active:scale-95 disabled:opacity-45 ${isGoldTheme ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-violet-500 to-fuchsia-500'}`}
+                        >
+                          发送
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              );
+            })()}
             <BottomNav onOpenModal={setActiveModal} />
             {showIkonLestariModal && (
               <IkonLestariModal
@@ -2773,7 +3415,7 @@
               // 🎒 切换学生时先清空上一位学生的道具状态，避免短暂显示别人的装备
               setInventoryLoading(true);
               setStudentInventory([]);
-              setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null });
+              setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null, ability: null });
               setShowBackpack(false);
               setShowCheckin(false);
               setDrawResult(null);
@@ -2782,6 +3424,16 @@
               setLatestUpdate(null);
               setUpdateHistory([]);
               setLastSeenUpdate('');
+              setShowPetChat(false);
+              setChatMessages([]);
+              setChatInput('');
+              setChatQuota({ limit: 0, used: 0, remaining: 0 });
+              setChatStatus({
+                unlocked: false, tier: 0, abilityName: '', baseLimit: 0,
+                permanentBonus: 0, permanentBonusCount: 0, maxPermanentBonusCount: 3,
+                dailyBonus: 0, limit: 0, used: 0, remaining: 0,
+                hasRecentMemory: false, memoryUnlocked: false, longTermMemory: '', personality: 'default'
+              });
 
               setStudent(prev => ({ ...prev, id: currentDB.id, name: currentDB.name, totalExp: currentDB.totalExp, unfedFood: currentDB.unfedFood || 0, badges: currentDB.badges || 0, mythUnlocked: currentDB.mythUnlocked || false, petId: currentDB.petId || null, petHistory: currentDB.petHistory || [], pin: currentDB.pin || '123456', pendingRewards: [] }));
               setSelectedStudentForLogin(null);
@@ -2795,6 +3447,7 @@
                   foreground: null,
                   frame: null,
                   sceneObject: null,
+                  ability: null,
                   ...(bagData?.equippedItems || {})
                 });
                 setCheckinData({
@@ -2825,6 +3478,7 @@
                 setInventoryLoading(false);
                 // 新学生装备资料到齐后才进入宠物页面
                 setCurrentView("student");
+                refreshPetChatStatus(currentDB.id, true);
 
                 const rewards = await fetchGAS('getStudentPendingRewards', { studentName: currentDB.name });
                 if (rewards) setStudent(prev => ({ ...prev, pendingRewards: rewards }));
@@ -2850,7 +3504,7 @@
                 console.error('拉取新数据失败:', err);
                 // 读取失败时也只用空装备进入，绝不沿用上一位学生的装备
                 setStudentInventory([]);
-                setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null });
+                setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null, ability: null });
                 setCheckinData({ lastCheckinDate: '', progress: 0, totalCheckins: 0, drawTickets: 0 });
                 setLastSeenUpdate('');
                 setLatestUpdate(null);
