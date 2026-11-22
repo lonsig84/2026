@@ -2687,6 +2687,17 @@
         );
       }
 
+      const HOLIDAY_MAINTENANCE = {
+        forcePreview: true, // 预览开关：设为 true 立即预览；改为 false 则按 startDate ~ endDate 自动生效
+        startDate: '2026-11-28',
+        endDate: '2027-01-03'
+      };
+      const isHolidayMaintenanceActive = () => {
+        if (HOLIDAY_MAINTENANCE.forcePreview) return true;
+        const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kuala_Lumpur' }).format(new Date());
+        return today >= HOLIDAY_MAINTENANCE.startDate && today <= HOLIDAY_MAINTENANCE.endDate;
+      };
+
       if (currentView === 'teacher' && activeTeacher) {
         return <TeacherPanel onExit={() => { setCurrentView('login'); setActiveTeacher(null); }} subject={activeTeacher.subject} teacherName={activeTeacher.name} rules={globalRules} globalStudents={globalStudents} />;
       }
@@ -2716,6 +2727,70 @@
           </div>
         );
       }
+      if (isHolidayMaintenanceActive()) {
+        return (
+          <div className="min-h-screen w-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-violet-950 flex items-center justify-center p-4 relative overflow-hidden">
+            <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-fuchsia-500/20 blur-3xl pointer-events-none"></div>
+
+            <div className="relative z-10 w-full max-w-md bg-white/95 backdrop-blur-md rounded-[2rem] shadow-2xl border border-white p-6 sm:p-8 text-center">
+              <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 border-2 border-amber-200 flex items-center justify-center text-5xl shadow-inner mb-4">
+                🛠️
+              </div>
+              <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[11px] font-black tracking-wide mb-2">
+                假期系统停用与升级公告
+              </span>
+              <h1 className="text-2xl font-black text-slate-800 leading-snug">
+                宠物乐园假期升级中
+              </h1>
+              <p className="text-xs font-bold text-slate-500 mt-3 leading-relaxed">
+                亲爱的小主人们，学校假期期间宠物乐园将暂时关闭，进行系统全面升级与优化，小宠物们也在好好休息充能哦！
+              </p>
+
+              <div className="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-left space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-400">⏸️ 暂停开放时间</span>
+                  <span className="font-black text-rose-600">2026.11.28 — 2027.01.03</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-400">🚀 预计恢复开放</span>
+                  <span className="font-black text-emerald-600">2027年1月4日</span>
+                </div>
+                <div className="pt-2 border-t border-slate-200 text-[11px] font-bold text-slate-500 leading-relaxed">
+                  💡 同学们现有的经验值、宠物、背包道具与抽签机会都会安全保留，假期后我们以全新面貌相见！
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCurrentView('teacher_office')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-black transition-all"
+                >
+                  🏫 教师办公室
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAdminAuth(true)}
+                  className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-[11px] font-black transition-all"
+                >
+                  🔑 班主任后台
+                </button>
+              </div>
+            </div>
+
+            {showAdminAuth && adminPasswordLoaded && (
+              <TeacherLoginModal
+                title="班主任超级后台"
+                correctPassword={adminPassword}
+                onClose={() => setShowAdminAuth(false)}
+                onSuccess={() => { setCurrentView("admin"); setShowAdminAuth(false); }}
+              />
+            )}
+          </div>
+        );
+      }
+
       if (currentView === 'student') {
         return (
           <div className="relative w-screen h-screen flex items-start justify-center bg-slate-50 overflow-y-auto overflow-x-hidden">
