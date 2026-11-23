@@ -1898,6 +1898,8 @@
 
       // 🎒 V5 正式道具系统 + 📅 签到抽奖 + 🔔 更新通知：Items → Inventory → EquippedItems
       const [showBackpack, setShowBackpack] = useState(false);
+      const [backpackTab, setBackpackTab] = useState('scene');
+      const [sceneFilter, setSceneFilter] = useState('all');
       const [globalItems, setGlobalItems] = useState([]);
       const [studentInventory, setStudentInventory] = useState([]);
       const [equippedItems, setEquippedItems] = useState({
@@ -1906,7 +1908,8 @@
         foreground: null,
         frame: null,
         sceneObject: null,
-        ability: null
+        ability: null,
+        motion: null
       });
       const [inventoryLoading, setInventoryLoading] = useState(false);
       const [equippingSlot, setEquippingSlot] = useState(null);
@@ -2069,7 +2072,17 @@
       const currentLevelExp = levelThresholds[currentLevel] || 0;
       const nextLevelExp = levelThresholds[currentLevel + 1] || levelThresholds[currentLevel];
       const progressPercent = isGraduated ? 100 : ((student.totalExp - currentLevelExp) / (nextLevelExp - currentLevelExp)) * 100;
-      const petImageUrl = student.petId ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/${student.petId}/${currentLevel}.webp` : `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/egg.webp`;
+      // 🪄 灵动能力：已制作完成的动态宠物清单（未在清单中的自动降级为原静态图）
+      const ANIMATED_AVATAR_SET = new Set([
+        'corgi/1', 'corgi/2', 'corgi/3', 'corgi/4',
+        'corgi/5', 'corgi/6', 'corgi/7', 'corgi/8'
+      ]);
+      const isMotionEquipped = Boolean(equippedItems.motion);
+      const hasAnimatedAsset = Boolean(student.petId && ANIMATED_AVATAR_SET.has(`${student.petId}/${currentLevel}`));
+      const isAnimatedPetActive = isMotionEquipped && hasAnimatedAsset;
+      const petImageUrl = isAnimatedPetActive
+        ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar-animated/${student.petId}/${currentLevel}.webp`
+        : (student.petId ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/${student.petId}/${currentLevel}.webp` : `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/egg.webp`);
       const canFeed = student.unfedFood > 0 && !isGraduated && student.petId;
 
       // 🎒 V3 正式渲染：完全根据 Items + EquippedItems 显示
@@ -2132,7 +2145,8 @@
         persona_sunny: { icon: '☀️', label: '元气小太阳', bg: 'bg-gradient-to-br from-amber-100 to-orange-100', text: 'text-orange-700' },
         persona_mentor: { icon: '📖', label: '温柔小导师', bg: 'bg-gradient-to-br from-emerald-100 to-cyan-100', text: 'text-teal-700' },
         persona_tsundere: { icon: '😼', label: '傲娇学霸', bg: 'bg-gradient-to-br from-indigo-100 to-purple-100', text: 'text-indigo-700' },
-        persona_funny: { icon: '🤡', label: '幽默小逗比', bg: 'bg-gradient-to-br from-yellow-100 to-lime-100', text: 'text-lime-700' }
+        persona_funny: { icon: '🤡', label: '幽默小逗比', bg: 'bg-gradient-to-br from-yellow-100 to-lime-100', text: 'text-lime-700' },
+        pet_motion: { icon: '🪄', label: '灵动觉醒 · 动态形态', bg: 'bg-gradient-to-br from-fuchsia-100 via-violet-100 to-indigo-100', text: 'text-violet-700' }
       };
 
       const PERSONALITY_LABELS = {
@@ -2345,7 +2359,7 @@
       const handleEquipItem = async (item) => {
         if (!item || !student.id) return;
         const slot = item.subtype;
-        if (!['background', 'ground', 'foreground', 'frame', 'sceneObject', 'ability'].includes(slot)) return;
+        if (!['background', 'ground', 'foreground', 'frame', 'sceneObject', 'ability', 'motion'].includes(slot)) return;
         if (!ownedItemIds.has(String(item.itemId))) {
           alert('这个道具还没有进入你的背包。');
           return;
@@ -2795,7 +2809,7 @@
 
                         {/* 第3层：原有宠物，保留上下浮动 */}
                         <div className="absolute inset-0 z-20 flex items-center justify-center translate-y-2">
-                          <img src={petImageUrl} alt="Pet" className="w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-lg animate-bounce" style={{ animationDuration: '3s' }} />
+                          <img src={petImageUrl} alt="Pet" className={`w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-lg ${isAnimatedPetActive ? '' : 'animate-bounce'}`} style={isAnimatedPetActive ? undefined : { animationDuration: '3s' }} />
                         </div>
 
                         {/* 第4层：全画面特效 */}
@@ -3024,189 +3038,273 @@
                     <button onClick={() => setShowBackpack(false)} className="text-3xl font-bold active:scale-90">&times;</button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-5">
-                    {inventoryLoading ? (
-                      <div className="py-12 text-center text-slate-400 font-bold">正在读取背包...</div>
-                    ) : studentInventory.length === 0 ? (
-                      <div className="py-12 text-center">
-                        <div className="text-5xl mb-3">🎒</div>
-                        <p className="font-black text-slate-600">背包还是空的</p>
-                        <p className="text-xs font-bold text-slate-400 mt-1">以后签到、活动或奖励获得的道具会出现在这里。</p>
-                      </div>
-                    ) : (
+                  {(() => {
+                    const qtyMap = {};
+                    studentInventory.forEach(entry => {
+                      if (entry?.itemId) qtyMap[String(entry.itemId)] = Number(entry.quantity || 0);
+                    });
+                    const enabledOwned = globalItems
+                      .filter(item => item.enabled !== false)
+                      .filter(item => ownedItemIds.has(String(item.itemId)));
+
+                    const sceneCount = enabledOwned.filter(item => ['background', 'ground', 'foreground'].includes(item.subtype)).length;
+                    const abilityCount = enabledOwned.filter(item => ['ability', 'motion'].includes(item.subtype)).length;
+                    const personaCount = enabledOwned.filter(item => item.category === 'personality' && item.effectType === 'pet_personality').length;
+                    const consumableQty = globalItems
+                      .filter(item => item.enabled !== false && item.category === 'consumable')
+                      .reduce((sum, item) => sum + (qtyMap[String(item.itemId)] || 0), 0);
+
+                    const tabs = [
+                      { id: 'scene', label: '🎨 场景装扮', count: sceneCount },
+                      { id: 'ability', label: '✨ 能力形态', count: abilityCount },
+                      { id: 'personality', label: '🎭 宠物性格', count: personaCount },
+                      { id: 'consumable', label: '🎒 功能道具', count: consumableQty }
+                    ];
+
+                    const equipSections = [
+                      { slot: 'background', tab: 'scene', title: '🖼️ 场景背景', category: 'scene' },
+                      { slot: 'ground', tab: 'scene', title: '⭕ 脚下光圈', category: 'decoration' },
+                      { slot: 'foreground', tab: 'scene', title: '✨ 前景特效', category: 'effect' },
+                      { slot: 'ability', tab: 'ability', title: '✨ 宠物能力（装备后开启聊天）', category: 'ability' },
+                      { slot: 'motion', tab: 'ability', title: '🪄 灵动形态（装备后宠物动起来）', category: 'ability' }
+                    ];
+
+                    const visibleEquipSections = equipSections.filter(sec => {
+                      if (sec.tab !== backpackTab) return false;
+                      if (backpackTab === 'scene' && sceneFilter !== 'all') return sec.slot === sceneFilter;
+                      return true;
+                    });
+
+                    const consumables = globalItems
+                      .filter(item => item.enabled !== false && item.category === 'consumable')
+                      .filter(item => (qtyMap[String(item.itemId)] || 0) > 0);
+
+                    const personaCards = enabledOwned.filter(
+                      item => item.category === 'personality' && item.effectType === 'pet_personality'
+                    );
+
+                    return (
                       <>
-                        {[
-                          { slot: 'ability', title: '✨ 宠物能力（装备后开启聊天）', category: 'ability' },
-                          { slot: 'background', title: '🖼️ 场景背景', category: 'scene' },
-                          { slot: 'ground', title: '⭕ 脚下光圈', category: 'decoration' },
-                          { slot: 'foreground', title: '✨ 前景特效', category: 'effect' }
-                        ].map(section => {
-                          const items = globalItems
-                            .filter(item => item.enabled !== false)
-                            .filter(item => item.category === section.category && item.subtype === section.slot)
-                            .filter(item => ownedItemIds.has(String(item.itemId)));
+                        {/* 固定顶部 4 大分类 Tab 栏 */}
+                        {!inventoryLoading && studentInventory.length > 0 && (
+                          <div className="px-3 pt-2.5 pb-2 bg-white border-b border-slate-200 grid grid-cols-4 gap-1.5 shrink-0">
+                            {tabs.map(t => {
+                              const active = backpackTab === t.id;
+                              return (
+                                <button
+                                  key={t.id}
+                                  type="button"
+                                  onClick={() => setBackpackTab(t.id)}
+                                  className={`py-2 px-1 rounded-2xl text-[11px] font-black transition-all flex flex-col items-center justify-center gap-0.5 leading-tight ${
+                                    active
+                                      ? 'bg-amber-500 text-white shadow-sm'
+                                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                  }`}
+                                >
+                                  <span>{t.label}</span>
+                                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${active ? 'bg-white/25 text-white' : 'bg-white text-slate-500'}`}>
+                                    {t.count}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
 
-                          return (
-                            <div key={section.slot}>
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="text-xs font-black text-slate-600">{section.title}</p>
-                                {equippedItems[section.slot] && (
-                                  <button
-                                    onClick={() => handleUnequipSlot(section.slot)}
-                                    disabled={equippingSlot !== null}
-                                    className="text-[10px] font-black text-slate-400 hover:text-rose-500 disabled:opacity-40"
-                                  >
-                                    卸下
-                                  </button>
-                                )}
-                              </div>
-
-                              {items.length === 0 ? (
-                                <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无此类道具</div>
-                              ) : (
-                                <div className="grid grid-cols-2 gap-3">
-                                  {items.map(item => {
-                                    const equipped = equippedItems[section.slot] === item.itemId;
-                                    const rare = item.rarity === 'rare';
-                                    const legendary = item.rarity === 'legendary';
-                                    return (
-                                      <button
-                                        key={item.itemId}
-                                        onClick={() => handleEquipItem(item)}
-                                        disabled={equippingSlot !== null}
-                                        className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${equipped ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50 shadow-md' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
-                                      >
-                                        <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
-                                          {renderItemThumbnail(item, section.slot === 'ground')}
-                                        </div>
-                                        <div className="p-2.5">
-                                          <div className="flex items-start justify-between gap-1">
-                                            <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
-                                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${legendary ? 'bg-amber-100 text-amber-700' : rare ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>
-                                              {legendary ? '传说' : rare ? '稀有' : '普通'}
-                                            </span>
-                                          </div>
-                                          <p className={`text-[9px] font-black mt-1 ${equipped ? 'text-indigo-600' : 'text-slate-400'}`}>
-                                            {equipped ? '✓ 使用中' : '点击装备'}
-                                          </p>
-                                        </div>
-                                      </button>
-                                    );
-                                  })}
+                        <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-5">
+                          {inventoryLoading ? (
+                            <div className="py-12 text-center text-slate-400 font-bold">正在读取背包...</div>
+                          ) : studentInventory.length === 0 ? (
+                            <div className="py-12 text-center">
+                              <div className="text-5xl mb-3">🎒</div>
+                              <p className="font-black text-slate-600">背包还是空的</p>
+                              <p className="text-xs font-bold text-slate-400 mt-1">以后签到、活动或奖励获得的道具会出现在这里。</p>
+                            </div>
+                          ) : (
+                            <>
+                              {/* 🎨 场景装扮子筛选 */}
+                              {backpackTab === 'scene' && (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {[
+                                    { id: 'all', label: '全部' },
+                                    { id: 'background', label: '🖼️ 背景' },
+                                    { id: 'ground', label: '⭕ 光圈' },
+                                    { id: 'foreground', label: '✨ 特效' }
+                                  ].map(f => (
+                                    <button
+                                      key={f.id}
+                                      type="button"
+                                      onClick={() => setSceneFilter(f.id)}
+                                      className={`px-3 py-1 rounded-full text-[11px] font-black transition-all ${
+                                        sceneFilter === f.id
+                                          ? 'bg-indigo-600 text-white shadow-sm'
+                                          : 'bg-white text-slate-500 border border-slate-200 hover:border-indigo-300'
+                                      }`}
+                                    >
+                                      {f.label}
+                                    </button>
+                                  ))}
                                 </div>
                               )}
-                            </div>
-                          );
-                        })}
 
-                        {/* 🎒 功能增强道具（点击直接使用） */}
-                        {(() => {
-                          const qtyMap = {};
-                          studentInventory.forEach(entry => {
-                            if (entry?.itemId) qtyMap[String(entry.itemId)] = Number(entry.quantity || 0);
-                          });
-                          const consumables = globalItems
-                            .filter(item => item.enabled !== false)
-                            .filter(item => item.category === 'consumable')
-                            .filter(item => (qtyMap[String(item.itemId)] || 0) > 0);
-                          return (
-                            <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="text-xs font-black text-slate-600">🎒 功能道具（点击使用）</p>
-                              </div>
-                              {consumables.length === 0 ? (
-                                <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无此类道具</div>
-                              ) : (
-                                <div className="grid grid-cols-2 gap-3">
-                                  {consumables.map(item => {
-                                    const qty = qtyMap[String(item.itemId)] || 0;
-                                    const rare = item.rarity === 'rare';
-                                    const legendary = item.rarity === 'legendary';
-                                    return (
+                              {/* 装备类分组（场景装扮 / 能力形态） */}
+                              {(backpackTab === 'scene' || backpackTab === 'ability') && visibleEquipSections.map(section => {
+                                const items = enabledOwned.filter(
+                                  item =>
+                                    (section.slot === 'motion'
+                                      ? (item.category === 'ability' || item.category === 'motion')
+                                      : item.category === section.category) &&
+                                    item.subtype === section.slot
+                                );
+
+                                return (
+                                  <div key={section.slot}>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <p className="text-xs font-black text-slate-600">{section.title}</p>
+                                      {equippedItems[section.slot] && (
+                                        <button
+                                          onClick={() => handleUnequipSlot(section.slot)}
+                                          disabled={equippingSlot !== null}
+                                          className="text-[10px] font-black text-slate-400 hover:text-rose-500 disabled:opacity-40"
+                                        >
+                                          卸下
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    {items.length === 0 ? (
+                                      <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无此类道具</div>
+                                    ) : (
+                                      <div className="grid grid-cols-2 gap-3">
+                                        {items.map(item => {
+                                          const equipped = equippedItems[section.slot] === item.itemId;
+                                          const rare = item.rarity === 'rare';
+                                          const legendary = item.rarity === 'legendary';
+                                          return (
+                                            <button
+                                              key={item.itemId}
+                                              onClick={() => handleEquipItem(item)}
+                                              disabled={equippingSlot !== null}
+                                              className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${equipped ? 'border-indigo-500 ring-2 ring-indigo-100 bg-indigo-50 shadow-md' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
+                                            >
+                                              <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
+                                                {renderItemThumbnail(item, section.slot === 'ground')}
+                                              </div>
+                                              <div className="p-2.5">
+                                                <div className="flex items-start justify-between gap-1">
+                                                  <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                                  <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${legendary ? 'bg-amber-100 text-amber-700' : rare ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                    {legendary ? '传说' : rare ? '稀有' : '普通'}
+                                                  </span>
+                                                </div>
+                                                <p className={`text-[9px] font-black mt-1 ${equipped ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                                  {equipped ? '✓ 使用中' : '点击装备'}
+                                                </p>
+                                              </div>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+
+                              {/* 🎒 功能增强道具 */}
+                              {backpackTab === 'consumable' && (
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs font-black text-slate-600">🎒 功能道具（点击使用）</p>
+                                  </div>
+                                  {consumables.length === 0 ? (
+                                    <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无此类道具</div>
+                                  ) : (
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {consumables.map(item => {
+                                        const qty = qtyMap[String(item.itemId)] || 0;
+                                        const rare = item.rarity === 'rare';
+                                        const legendary = item.rarity === 'legendary';
+                                        return (
+                                          <button
+                                            key={item.itemId}
+                                            onClick={() => handleUseChatItem(item)}
+                                            disabled={usingItemId !== null}
+                                            className="overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-emerald-400 text-left transition-all active:scale-[0.98] disabled:opacity-60"
+                                          >
+                                            <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden relative">
+                                              {renderItemThumbnail(item, false)}
+                                              <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-slate-900/75 text-white text-[9px] font-black">×{qty}</span>
+                                            </div>
+                                            <div className="p-2.5">
+                                              <div className="flex items-start justify-between gap-1">
+                                                <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${legendary ? 'bg-amber-100 text-amber-700' : rare ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                  {legendary ? '传说' : rare ? '稀有' : '普通'}
+                                                </span>
+                                              </div>
+                                              <p className="text-[9px] font-black mt-1 text-emerald-600">
+                                                {usingItemId === item.itemId ? '使用中...' : '✨ 点击使用'}
+                                              </p>
+                                            </div>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* 🎭 宠物性格卡 */}
+                              {backpackTab === 'personality' && (
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs font-black text-slate-600">🎭 宠物性格卡（随时切换）</p>
+                                    {chatStatus.personality !== 'default' && (
                                       <button
-                                        key={item.itemId}
-                                        onClick={() => handleUseChatItem(item)}
+                                        onClick={() => handleSetPersonality('default')}
                                         disabled={usingItemId !== null}
-                                        className="overflow-hidden rounded-2xl border border-slate-200 bg-white hover:border-emerald-400 text-left transition-all active:scale-[0.98] disabled:opacity-60"
+                                        className="text-[10px] font-black text-slate-400 hover:text-indigo-500 disabled:opacity-40"
                                       >
-                                        <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden relative">
-                                          {renderItemThumbnail(item, false)}
-                                          <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-slate-900/75 text-white text-[9px] font-black">×{qty}</span>
-                                        </div>
-                                        <div className="p-2.5">
-                                          <div className="flex items-start justify-between gap-1">
-                                            <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
-                                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${legendary ? 'bg-amber-100 text-amber-700' : rare ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500'}`}>
-                                              {legendary ? '传说' : rare ? '稀有' : '普通'}
-                                            </span>
-                                          </div>
-                                          <p className="text-[9px] font-black mt-1 text-emerald-600">
-                                            {usingItemId === item.itemId ? '使用中...' : '✨ 点击使用'}
-                                          </p>
-                                        </div>
+                                        恢复默认性格
                                       </button>
-                                    );
-                                  })}
+                                    )}
+                                  </div>
+                                  {personaCards.length === 0 ? (
+                                    <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无性格卡（抽奖可获得）</div>
+                                  ) : (
+                                    <div className="grid grid-cols-2 gap-3">
+                                      {personaCards.map(item => {
+                                        const personaKey = String(item.effectValue || '');
+                                        const active = chatStatus.personality === personaKey;
+                                        return (
+                                          <button
+                                            key={item.itemId}
+                                            onClick={() => handleSetPersonality(personaKey)}
+                                            disabled={usingItemId !== null}
+                                            className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${active ? 'border-fuchsia-500 ring-2 ring-fuchsia-100 bg-fuchsia-50 shadow-md' : 'border-slate-200 bg-white hover:border-fuchsia-300'}`}
+                                          >
+                                            <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
+                                              {renderItemThumbnail(item, false)}
+                                            </div>
+                                            <div className="p-2.5">
+                                              <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                              <p className={`text-[9px] font-black mt-1 ${active ? 'text-fuchsia-600' : 'text-slate-400'}`}>
+                                                {active ? '✓ 当前性格' : '点击切换'}
+                                              </p>
+                                            </div>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
                               )}
-                            </div>
-                          );
-                        })()}
-
-                        {/* 🎭 宠物性格卡（抽到哪张就能随时切换） */}
-                        {(() => {
-                          const personaCards = globalItems
-                            .filter(item => item.enabled !== false)
-                            .filter(item => item.category === 'personality' && item.effectType === 'pet_personality')
-                            .filter(item => ownedItemIds.has(String(item.itemId)));
-                          return (
-                            <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="text-xs font-black text-slate-600">🎭 宠物性格卡（随时切换）</p>
-                                {chatStatus.personality !== 'default' && (
-                                  <button
-                                    onClick={() => handleSetPersonality('default')}
-                                    disabled={usingItemId !== null}
-                                    className="text-[10px] font-black text-slate-400 hover:text-indigo-500 disabled:opacity-40"
-                                  >
-                                    恢复默认性格
-                                  </button>
-                                )}
-                              </div>
-                              {personaCards.length === 0 ? (
-                                <div className="rounded-2xl bg-white border border-dashed border-slate-200 p-4 text-center text-xs font-bold text-slate-400">暂无性格卡（抽奖可获得）</div>
-                              ) : (
-                                <div className="grid grid-cols-2 gap-3">
-                                  {personaCards.map(item => {
-                                    const personaKey = String(item.effectValue || '');
-                                    const active = chatStatus.personality === personaKey;
-                                    return (
-                                      <button
-                                        key={item.itemId}
-                                        onClick={() => handleSetPersonality(personaKey)}
-                                        disabled={usingItemId !== null}
-                                        className={`overflow-hidden rounded-2xl border text-left transition-all active:scale-[0.98] disabled:opacity-60 ${active ? 'border-fuchsia-500 ring-2 ring-fuchsia-100 bg-fuchsia-50 shadow-md' : 'border-slate-200 bg-white hover:border-fuchsia-300'}`}
-                                      >
-                                        <div className="h-24 bg-slate-100 flex items-center justify-center overflow-hidden">
-                                          {renderItemThumbnail(item, false)}
-                                        </div>
-                                        <div className="p-2.5">
-                                          <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
-                                          <p className={`text-[9px] font-black mt-1 ${active ? 'text-fuchsia-600' : 'text-slate-400'}`}>
-                                            {active ? '✓ 当前性格' : '点击切换'}
-                                          </p>
-                                        </div>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
+                            </>
+                          )}
+                        </div>
                       </>
-                    )}
-                  </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -3415,7 +3513,7 @@
               // 🎒 切换学生时先清空上一位学生的道具状态，避免短暂显示别人的装备
               setInventoryLoading(true);
               setStudentInventory([]);
-              setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null, ability: null });
+              setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null, ability: null, motion: null });
               setShowBackpack(false);
               setShowCheckin(false);
               setDrawResult(null);
@@ -3448,6 +3546,7 @@
                   frame: null,
                   sceneObject: null,
                   ability: null,
+                  motion: null,
                   ...(bagData?.equippedItems || {})
                 });
                 setCheckinData({
@@ -3504,7 +3603,7 @@
                 console.error('拉取新数据失败:', err);
                 // 读取失败时也只用空装备进入，绝不沿用上一位学生的装备
                 setStudentInventory([]);
-                setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null, ability: null });
+                setEquippedItems({ background: null, ground: null, foreground: null, frame: null, sceneObject: null, ability: null, motion: null });
                 setCheckinData({ lastCheckinDate: '', progress: 0, totalCheckins: 0, drawTickets: 0 });
                 setLastSeenUpdate('');
                 setLatestUpdate(null);
