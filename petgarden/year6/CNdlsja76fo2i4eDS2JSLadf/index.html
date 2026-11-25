@@ -1884,6 +1884,7 @@
       });
       const [inventoryLoading, setInventoryLoading] = useState(false);
       const [equippingSlot, setEquippingSlot] = useState(null);
+      const [usingConsumableId, setUsingConsumableId] = useState(null);
 
       // 📅 V4 每日签到 + 7天抽奖
       const [showCheckin, setShowCheckin] = useState(false);
@@ -2030,6 +2031,11 @@
       const findItemById = (itemId) =>
         globalItems.find(item => String(item.itemId) === String(itemId));
 
+      const getItemQuantity = (itemId) => {
+        const entry = (studentInventory || []).find(e => String(e.itemId) === String(itemId));
+        return Number(entry?.quantity ?? 0);
+      };
+
       const renderEquippedBackground = () => {
         const item = findItemById(equippedItems.background);
         if (!item || item.subtype !== 'background' || !item.assetUrl) {
@@ -2104,6 +2110,73 @@
           alert('保存失败，请稍后再试。');
         } finally {
           setEquippingSlot(null);
+        }
+      };
+
+      const handleUseConsumable = async (item) => {
+        if (!item || !student.id || usingConsumableId !== null) return;
+        if (!student.petId) {
+          alert('请先领养一只宠物再使用道具哦！');
+          return;
+        }
+        if (isGraduated) {
+          alert('当前宠物已经满级毕业啦，请先安排毕业后再使用哦！');
+          return;
+        }
+        if (getItemQuantity(item.itemId) <= 0) {
+          alert('背包里没有这个道具了。');
+          return;
+        }
+
+        setUsingConsumableId(item.itemId);
+        try {
+          const result = await fetchGAS('useConsumableItem', {
+            username: student.id,
+            itemId: item.itemId
+          });
+          if (!result?.success) {
+            alert(result?.message || '使用失败，请稍后再试。');
+            return;
+          }
+
+          if (Array.isArray(result.inventory)) {
+            setStudentInventory(result.inventory);
+          }
+
+          const oldLevel = getCurrentLevel(student.totalExp);
+          const newExp = Number(result.totalExp ?? (student.totalExp + Number(item.effectValue || 0)));
+          const newLevel = getCurrentLevel(newExp);
+
+          setStudent(prev => ({ ...prev, totalExp: newExp }));
+          setGlobalStudents(gList => gList.map(s => s.name === student.name ? { ...s, totalExp: newExp } : s));
+
+          soundFeed.currentTime = 0;
+          soundFeed.play().catch(() => {});
+
+          const newHearts = Array.from({ length: 8 }, () => ({
+            id: Date.now() + Math.random(),
+            emoji: HEART_EMOJIS[Math.floor(Math.random() * HEART_EMOJIS.length)],
+            left: `${20 + Math.random() * 60}%`,
+            top: `${40 + Math.random() * 20}%`,
+            duration: `${0.6 + Math.random() * 0.8}s`,
+            delay: `${Math.random() * 0.15}s`
+          }));
+          setHearts(prev => [...prev, ...newHearts]);
+          setTimeout(() => { setHearts(prev => prev.filter(h => !newHearts.includes(h))); }, 1500);
+
+          if (newLevel > oldLevel) {
+            setShowBackpack(false);
+            setTimeout(() => {
+              soundLevelUp.currentTime = 0;
+              soundLevelUp.play().catch(() => {});
+              if (newLevel < 8) setShowLevelUp(true);
+            }, 300);
+          }
+        } catch (err) {
+          console.error('使用道具失败:', err);
+          alert('使用失败，请稍后再试。');
+        } finally {
+          setUsingConsumableId(null);
         }
       };
 
@@ -2667,7 +2740,11 @@
                       <div className="mt-4 bg-white rounded-2xl border-2 border-indigo-200 shadow-md p-4 text-center animate-[fadeIn_0.2s_ease-out]">
                         <p className="text-xs font-black text-indigo-500 mb-2">🎉 恭喜抽中！</p>
                         <div className="w-28 h-24 mx-auto rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
-                          {drawResult.assetUrl ? <img src={drawResult.assetUrl} alt={drawResult.name} className="w-full h-full object-contain p-1" /> : <span className="text-4xl">🎁</span>}
+                          {drawResult.renderMode === 'emoji'
+                            ? <span className="text-5xl">{drawResult.assetUrl || '🎁'}</span>
+                            : drawResult.assetUrl
+                              ? <img src={drawResult.assetUrl} alt={drawResult.name} className="w-full h-full object-contain p-1" />
+                              : <span className="text-4xl">🎁</span>}
                         </div>
                         <p className="font-black text-slate-800 mt-2">{drawResult.name}</p>
                         <p className="text-[10px] font-bold text-slate-400 mt-1">已经自动放进你的背包</p>
@@ -2702,6 +2779,58 @@
                       </div>
                     ) : (
                       <>
+                        {(() => {
+                          const consumables = globalItems
+                            .filter(item => item.enabled !== false && item.consumable)
+                            .filter(item => ownedItemIds.has(String(item.itemId)));
+                          if (consumables.length === 0) return null;
+                          return (
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-black text-slate-600">🧪 消耗品道具</p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                {consumables.map(item => {
+                                  const qty = getItemQuantity(item.itemId);
+                                  const isUsing = usingConsumableId === item.itemId;
+                                  const expVal = Number(item.effectValue || 0);
+                                  return (
+                                    <button
+                                      key={item.itemId}
+                                      onClick={() => handleUseConsumable(item)}
+                                      disabled={usingConsumableId !== null}
+                                      className="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-b from-amber-50/70 to-white text-left transition-all hover:border-amber-400 active:scale-[0.98] disabled:opacity-60 shadow-sm"
+                                    >
+                                      <div className="relative h-24 bg-amber-50 flex items-center justify-center overflow-hidden">
+                                        {item.renderMode === 'emoji' ? (
+                                          <span className="text-5xl drop-shadow-sm">{item.assetUrl || '🍬'}</span>
+                                        ) : item.assetUrl ? (
+                                          <img src={item.assetUrl} alt={item.name} className="w-full h-full object-contain p-2" />
+                                        ) : (
+                                          <span className="text-4xl">🍬</span>
+                                        )}
+                                        <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black shadow">
+                                          ×{qty}
+                                        </span>
+                                      </div>
+                                      <div className="p-2.5">
+                                        <div className="flex items-start justify-between gap-1">
+                                          <p className="text-xs font-black text-slate-700 leading-tight">{item.name}</p>
+                                          <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                                            消耗品
+                                          </span>
+                                        </div>
+                                        <p className="text-[10px] font-black text-emerald-600 mt-1">
+                                          {isUsing ? '使用中...' : `点击使用 (+${expVal} EXP)`}
+                                        </p>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
                         {[
                           { slot: 'background', title: '🖼️ 场景背景', category: 'scene' },
                           { slot: 'ground', title: '⭕ 脚下光圈', category: 'decoration' }
