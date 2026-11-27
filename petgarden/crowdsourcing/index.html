@@ -433,6 +433,7 @@
       {"id":"leopard","zh":"小花豹","ms":"Harimau Bintang","en":"Leopard","cat":"nature","bg":"#FFFFFF","done":false,"lv":["tiny spotted leopard cub sitting calmly, blinking green eyes and swaying tail","cute leopard cub wearing a blue ribbon collar, tilting head and wagging tail","curious leopard cub with a blue gem pendant stepping forward, blinking","royal leopard cub wearing a blue velvet cape standing proudly, tail swaying","adorable leopard cub wearing a beaded collar looking up, blinking big eyes","playful leopard cub chewing happily on a wooden stick, swaying tail","graceful young leopard drinking from a stone water bowl, lapping gently","relaxed leopard lounging peacefully on a sturdy tree branch, tail dangling gently"],"imgFolderId":"1KO0BeoHGcNKPCvEdPOBtxHV574lyiTaa","vidFolderId":"133RPygOSsqIny4ObtxpYRP71YKcioJkQ"}
     ];
     var claims = {};
+    var videoCounts = {};
     var currentCat = 'all';
     var soundEnabled = true;
     var audioCtx = null;
@@ -566,6 +567,12 @@
         var bgBadge = p.bg === '#CFE8D5'
           ? '<span class="badge badge-bg-green">浅绿底 #CFE8D5</span>'
           : '<span class="badge badge-bg-white">纯白底 #FFFFFF</span>';
+        var vidCnt = Number(videoCounts[p.id] || 0);
+        var vidBadge = p.done ? '' : (vidCnt >= 8
+          ? '<span class="badge" style="background:linear-gradient(135deg,#00f5d4,#38b000);color:#042411;">🎉 视频 ' + vidCnt + '/8 已集齐</span>'
+          : (vidCnt > 0
+            ? '<span class="badge" style="background:linear-gradient(135deg,#00bbf9,#9d4edd);color:#fff;">🎬 已传 ' + vidCnt + '/8</span>'
+            : '<span class="badge" style="background:rgba(255,255,255,0.12);">🎬 0/8 待上传</span>'));
         var statusBadge = p.done
           ? '<span class="badge badge-done">✅ 已上线完成</span>'
           : (teacher ? '<span class="badge badge-claimed">🙋 ' + escapeHtml(teacher) + '</span>' : '<span class="badge">🔥 待认领</span>');
@@ -594,7 +601,7 @@
             '<div class="pet-info">' +
               '<div class="pet-zh">' + escapeHtml(p.zh) + '</div>' +
               '<div class="pet-sub">' + escapeHtml(p.en) + ' · ' + escapeHtml(p.ms) + '</div>' +
-              '<div class="badges">' + statusBadge + bgBadge + '</div>' +
+              '<div class="badges">' + statusBadge + vidBadge + bgBadge + '</div>' +
             '</div>' +
           '</div>' +
           claimHtml +
@@ -680,25 +687,35 @@
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(function(res) {
-            claims = res || {};
+            if (res && res.claims) {
+              claims = res.claims || {};
+              videoCounts = res.videoCounts || {};
+            } else {
+              claims = res || {};
+            }
             renderPets();
-            if (notify) showToast('🔄 已同步最新认领状态！');
+            if (notify) showToast('🔄 已同步认领与视频上传进度！');
           })
           .withFailureHandler(function(err) {
-            console.error('getClaims error:', err);
+            console.error('getDashboardState error:', err);
             renderPets();
           })
-          .getClaims();
+          .getDashboardState(Boolean(notify));
       } else {
-        fetch(GAS_API_URL + '?action=getClaims')
+        fetch(GAS_API_URL + '?action=getState' + (notify ? '&t=' + Date.now() : ''))
           .then(function(r) { return r.json(); })
           .then(function(res) {
-            claims = res || {};
+            if (res && res.claims) {
+              claims = res.claims || {};
+              videoCounts = res.videoCounts || {};
+            } else {
+              claims = res || {};
+            }
             renderPets();
-            if (notify) showToast('🔄 已同步最新认领状态！');
+            if (notify) showToast('🔄 已同步认领与视频上传进度！');
           })
           .catch(function(err) {
-            console.error('getClaims fetch error:', err);
+            console.error('getState fetch error:', err);
             renderPets();
           });
       }
