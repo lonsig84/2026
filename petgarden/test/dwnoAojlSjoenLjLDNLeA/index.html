@@ -2096,7 +2096,9 @@
         'koel-duck/1', 'koel-duck/2', 'koel-duck/3', 'koel-duck/4',
         'koel-duck/5', 'koel-duck/6', 'koel-duck/7', 'koel-duck/8',
         'poodle/1', 'poodle/2', 'poodle/3', 'poodle/4',
-        'poodle/5', 'poodle/6', 'poodle/7', 'poodle/8'
+        'poodle/5', 'poodle/6', 'poodle/7', 'poodle/8',
+        'azure-dragon/1', 'azure-dragon/2', 'azure-dragon/3', 'azure-dragon/4',
+        'azure-dragon/5', 'azure-dragon/6', 'azure-dragon/7', 'azure-dragon/8'
       ]);
       const isMotionEquipped = Boolean(equippedItems.motion);
       const hasAnimatedAsset = Boolean(student.petId && ANIMATED_AVATAR_SET.has(`${student.petId}/${currentLevel}`));
@@ -2105,7 +2107,7 @@
         ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/${student.petId}/${currentLevel}.webp`
         : `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/egg.webp`;
       const petImageUrl = isAnimatedPetActive
-        ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@d1fd290/avatar-animated/${student.petId}/${currentLevel}.webp`
+        ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@3a51c48/avatar-animated/${student.petId}/${currentLevel}.webp`
         : staticPetImageUrl;
       const handlePetImageError = (e) => {
         const img = e.currentTarget;
