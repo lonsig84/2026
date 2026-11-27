@@ -2077,14 +2077,47 @@
         'corgi/1', 'corgi/2', 'corgi/3', 'corgi/4',
         'corgi/5', 'corgi/6', 'corgi/7', 'corgi/8',
         'nine-tail-fox/1', 'nine-tail-fox/2', 'nine-tail-fox/3', 'nine-tail-fox/4',
-        'nine-tail-fox/5', 'nine-tail-fox/6', 'nine-tail-fox/7', 'nine-tail-fox/8'
+        'nine-tail-fox/5', 'nine-tail-fox/6', 'nine-tail-fox/7', 'nine-tail-fox/8',
+        'golden-cat/1', 'golden-cat/2', 'golden-cat/3', 'golden-cat/4',
+        'golden-cat/5', 'golden-cat/6', 'golden-cat/7', 'golden-cat/8',
+        'labrador/1', 'labrador/2', 'labrador/3', 'labrador/4',
+        'labrador/5', 'labrador/6', 'labrador/7', 'labrador/8',
+        'bichon/1', 'bichon/2', 'bichon/3', 'bichon/4',
+        'bichon/5', 'bichon/6', 'bichon/7', 'bichon/8',
+        'border-collie/1', 'border-collie/2', 'border-collie/3', 'border-collie/4',
+        'border-collie/5', 'border-collie/6', 'border-collie/7', 'border-collie/8',
+        'capybara/1', 'capybara/2', 'capybara/3', 'capybara/4',
+        'capybara/5', 'capybara/6', 'capybara/7', 'capybara/8',
+        'french-bulldog/1', 'french-bulldog/2', 'french-bulldog/3', 'french-bulldog/4',
+        'french-bulldog/5', 'french-bulldog/6', 'french-bulldog/7', 'french-bulldog/8',
+        'husky/1', 'husky/2', 'husky/3', 'husky/4',
+        'husky/5', 'husky/6', 'husky/7', 'husky/8',
+        'koel-duck/1', 'koel-duck/2', 'koel-duck/3', 'koel-duck/4',
+        'koel-duck/5', 'koel-duck/6', 'koel-duck/7', 'koel-duck/8',
+        'poodle/1', 'poodle/2', 'poodle/3', 'poodle/4',
+        'poodle/5', 'poodle/6', 'poodle/7', 'poodle/8'
       ]);
       const isMotionEquipped = Boolean(equippedItems.motion);
       const hasAnimatedAsset = Boolean(student.petId && ANIMATED_AVATAR_SET.has(`${student.petId}/${currentLevel}`));
       const isAnimatedPetActive = isMotionEquipped && hasAnimatedAsset;
+      const staticPetImageUrl = student.petId
+        ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/${student.petId}/${currentLevel}.webp`
+        : `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/egg.webp`;
       const petImageUrl = isAnimatedPetActive
-        ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar-animated/${student.petId}/${currentLevel}.webp`
-        : (student.petId ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/${student.petId}/${currentLevel}.webp` : `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}/avatar/egg.webp`);
+        ? `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@d1fd290/avatar-animated/${student.petId}/${currentLevel}.webp`
+        : staticPetImageUrl;
+      const handlePetImageError = (e) => {
+        const img = e.currentTarget;
+        if (isAnimatedPetActive && img.dataset.fallbackDone !== '1') {
+          if (img.dataset.retried !== '1') {
+            img.dataset.retried = '1';
+            setTimeout(() => { img.src = `${petImageUrl}?retry=1`; }, 1200);
+            return;
+          }
+          img.dataset.fallbackDone = '1';
+          img.src = staticPetImageUrl;
+        }
+      };
       const canFeed = student.unfedFood > 0 && !isGraduated && student.petId;
 
       // 🎒 V3 正式渲染：完全根据 Items + EquippedItems 显示
@@ -2790,7 +2823,7 @@
                   {isGraduated ? (
                     <div className="w-full flex flex-col items-center py-2 animate-[fadeIn_0.2s_ease-out] mb-20">
                       <div className="w-40 h-40 bg-orange-50 rounded-full border-4 border-orange-400 flex items-center justify-center shadow-inner mb-6 relative">
-                        <img src={petImageUrl} className="w-28 h-28 drop-shadow-lg" />
+                        <img src={petImageUrl} onError={handlePetImageError} className="w-28 h-28 drop-shadow-lg" />
                         <span className="absolute top-2 right-2 text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2 py-0.5 rounded-full shadow">Lv.8</span>
                       </div><div className="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-xs font-black shadow-inner mb-3">Lv. 8 【{levelTitles[8] || "🎓 终极毕业体"}】</div>
                       <h3 className="text-2xl font-black text-slate-800 tracking-wide">恭喜毕业！</h3>
@@ -2811,7 +2844,7 @@
 
                         {/* 第3层：原有宠物，保留上下浮动 */}
                         <div className="absolute inset-0 z-20 flex items-center justify-center translate-y-2">
-                          <img src={petImageUrl} alt="Pet" className={`${isAnimatedPetActive ? 'w-32 h-32 sm:w-36 sm:h-36' : 'w-28 h-28 sm:w-32 sm:h-32 animate-bounce'} object-contain drop-shadow-lg`} style={isAnimatedPetActive ? undefined : { animationDuration: '3s' }} />
+                          <img src={petImageUrl} onError={handlePetImageError} alt="Pet" className={`${isAnimatedPetActive ? 'w-32 h-32 sm:w-36 sm:h-36' : 'w-28 h-28 sm:w-32 sm:h-32 animate-bounce'} object-contain drop-shadow-lg`} style={isAnimatedPetActive ? undefined : { animationDuration: '3s' }} />
                         </div>
 
                         {/* 第4层：全画面特效 */}
