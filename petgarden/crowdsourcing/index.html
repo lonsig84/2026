@@ -573,8 +573,8 @@
         var claimHtml = p.done
           ? '<div class="claim-meta" style="color:#86efac;">🎉 此宠物 1~8 阶已制作并上线完成！</div>'
           : '<div class="claim-box">' +
-              '<input class="claim-input" id="inp-' + p.id + '" type="text" value="' + escapeHtml(teacher) + '" placeholder="输入老师名字 / Nama Guru..." onkeydown="if(event.key==='Enter')submitClaim('' + p.id + '', event)" />' +
-              '<button class="claim-btn" onclick="submitClaim('' + p.id + '', event)">💾 保存</button>' +
+              '<input class="claim-input" id="inp-' + p.id + '" data-pet="' + p.id + '" type="text" value="' + escapeHtml(teacher) + '" placeholder="输入老师名字 / Nama Guru..." onkeydown="if(event.keyCode===13)submitClaim(this.dataset.pet, event)" />' +
+              '<button class="claim-btn" data-pet="' + p.id + '" onclick="submitClaim(this.dataset.pet, event)">💾 保存</button>' +
             '</div>' +
             '<div class="claim-meta">' + (teacher ? '✅ 已认领 · 更新于 ' + (c.updatedAt || '刚刚') : '💡 填入名字即可锁定，避免重复制作') + '</div>';
 
@@ -583,7 +583,7 @@
           : '<div class="card-actions">' +
               '<a class="btn btn-cyan" href="https://drive.google.com/drive/folders/' + p.imgFolderId + '" target="_blank" onclick="playPop()">📥 下载底图</a>' +
               '<a class="btn btn-pink" href="https://drive.google.com/drive/folders/' + p.vidFolderId + '" target="_blank" onclick="playPop()">📤 上传视频</a>' +
-              '<button class="btn btn-purple btn-prompt-full" onclick="openPrompts('' + p.id + '', event)">📝 查看 Lv.1–8 提示词 (一键复制)</button>' +
+              '<button class="btn btn-purple btn-prompt-full" data-pet="' + p.id + '" onclick="openPrompts(this.dataset.pet, event)">📝 查看 Lv.1–8 提示词 (一键复制)</button>' +
             '</div>';
 
         return '<div class="' + cardCls + '">' +
@@ -645,7 +645,7 @@
             '<div class="prompt-lv">Level ' + lvl + ' · 文件名：' + pet.id + '_' + lvl + '.mp4</div>' +
             '<div class="prompt-text" id="pt-' + pet.id + '-' + lvl + '">' + escapeHtml(pText) + '</div>' +
           '</div>' +
-          '<button class="btn btn-gold" onclick="copyPrompt('' + pet.id + '', ' + lvl + ', event)">📋 复制</button>' +
+          '<button class="btn btn-gold" data-pet="' + pet.id + '" data-lvl="' + lvl + '" onclick="copyPrompt(this.dataset.pet, this.dataset.lvl, event)">📋 复制</button>' +
         '</div>';
       }).join('');
 
