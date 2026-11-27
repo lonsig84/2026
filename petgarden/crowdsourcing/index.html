@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🐾 Pet Garden · 宠物动态视频众包协同中心</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-pink: #ff2e93;
+      --neon-purple: #9d4edd;
+      --neon-cyan: #00f5d4;
+      --neon-yellow: #fee440;
+      --neon-blue: #00bbf9;
+      --neon-green: #38b000;
+      --glass-bg: rgba(18, 14, 42, 0.74);
+      --glass-border: rgba(255, 255, 255, 0.24);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Fredoka', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: linear-gradient(125deg, #ff0080, #7928ca, #0070f3, #00dfd8, #ffbe0b, #ff0080);
+      background-size: 400% 400%;
+      animation: auroraShift 16s ease infinite;
+    }
+    @keyframes auroraShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    #fx-canvas {
+      position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    }
+    .bg-overlay {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255,46,147,0.28), transparent 45%),
+                  radial-gradient(circle at 80% 80%, rgba(0,245,212,0.25), transparent 45%),
+                  rgba(10, 6, 28, 0.45);
+      backdrop-filter: blur(2px);
+    }
+    .container {
+      position: relative; z-index: 2;
+      max-width: 1360px; margin: 0 auto; padding: 20px 18px 80px;
+    }
+
+    .hero {
+      background: var(--glass-bg);
+      border: 2px solid rgba(255,255,255,0.28);
+      border-radius: 28px;
+      padding: 24px 26px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 0 35px rgba(255,46,147,0.35);
+      backdrop-filter: blur(18px);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 200%; height: 4px;
+      background: linear-gradient(90deg, #ff2e93, #fee440, #00f5d4, #00bbf9, #9d4edd, #ff2e93);
+      animation: rainbowBar 4s linear infinite;
+    }
+    @keyframes rainbowBar { 0%{transform:translateX(0)} 100%{transform:translateX(50%)} }
+
+    .hero-top {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+    }
+    .hero-title {
+      font-size: clamp(1.5rem, 3vw, 2.35rem);
+      font-weight: 900;
+      background: linear-gradient(90deg, #fff, #fee440, #00f5d4, #ff99c8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 20px rgba(255,255,255,0.2);
+      letter-spacing: 0.5px;
+    }
+    .hero-sub {
+      color: #e2e8f0; font-size: 0.96rem; margin-top: 6px; line-height: 1.5;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+    .btn {
+      border: none; border-radius: 14px; padding: 10px 16px;
+      font-family: inherit; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; color: #fff; display: inline-flex; align-items: center; gap: 6px;
+      transition: transform 0.16s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s, filter 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-3px) scale(1.03); filter: brightness(1.1); }
+    .btn:active { transform: scale(0.95); }
+    .btn-pink { background: linear-gradient(135deg, #ff2e93, #ff70a6); box-shadow: 0 6px 20px rgba(255,46,147,0.45); }
+    .btn-cyan { background: linear-gradient(135deg, #00bbf9, #00f5d4); color: #091526; box-shadow: 0 6px 20px rgba(0,245,212,0.4); }
+    .btn-gold { background: linear-gradient(135deg, #ff9f1c, #fee440); color: #1f1200; box-shadow: 0 6px 20px rgba(254,228,64,0.4); }
+    .btn-purple { background: linear-gradient(135deg, #7928ca, #9d4edd); box-shadow: 0 6px 20px rgba(157,78,221,0.45); }
+    .btn-glass { background: rgba(255,255,255,0.14); border: 1.5px solid rgba(255,255,255,0.3); }
+
+    .credit-banner {
+      margin-top: 16px;
+      background: linear-gradient(90deg, rgba(254,228,64,0.22), rgba(255,46,147,0.22), rgba(0,245,212,0.22));
+      border: 1.5px solid rgba(254,228,64,0.6);
+      border-radius: 18px; padding: 13px 18px;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      font-size: 0.92rem; line-height: 1.55;
+    }
+    .credit-badge {
+      background: #fee440; color: #1a1000; font-weight: 900; padding: 3px 10px;
+      border-radius: 999px; font-size: 0.82rem; display: inline-block; margin-right: 6px;
+    }
+
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px; padding: 12px 16px; text-align: center;
+    }
+    .stat-num { font-size: 1.65rem; font-weight: 900; color: #00f5d4; }
+    .stat-label { font-size: 0.8rem; color: #cbd5e1; margin-top: 2px; }
+    .progress-wrap {
+      margin-top: 14px; background: rgba(255,255,255,0.12); border-radius: 999px; height: 14px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .progress-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #ff2e93, #fee440, #00f5d4);
+      border-radius: 999px; transition: width 0.6s ease;
+    }
+
+    .toolbar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 20px;
+      background: var(--glass-bg); padding: 14px 18px; border-radius: 22px;
+      border: 1.5px solid var(--glass-border); backdrop-filter: blur(14px);
+    }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tab {
+      background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+      color: #fff; padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 0.86rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab.active, .tab:hover {
+      background: linear-gradient(135deg, #ff2e93, #fee440);
+      color: #190518; border-color: transparent; transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255,46,147,0.4);
+    }
+    .search-box {
+      padding: 9px 15px; border-radius: 999px; border: 2px solid rgba(0,245,212,0.5);
+      background: rgba(10,8,26,0.7); color: #fff; font-family: inherit; font-size: 0.9rem;
+      min-width: 230px; outline: none;
+    }
+    .search-box:focus { border-color: #fee440; box-shadow: 0 0 15px rgba(254,228,64,0.45); }
+
+    .pet-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+      gap: 18px;
+    }
+    .pet-card {
+      background: var(--glass-bg);
+      border: 2px solid rgba(255,255,255,0.22);
+      border-radius: 24px; padding: 16px;
+      backdrop-filter: blur(16px);
+      display: flex; flex-direction: column; gap: 12px;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s, border-color 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .pet-card:hover {
+      transform: translateY(-6px);
+      border-color: #00f5d4;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.5), 0 0 28px rgba(0,245,212,0.35);
+    }
+    .pet-card.claimed { border-color: rgba(254,228,64,0.75); box-shadow: 0 10px 28px rgba(254,228,64,0.18); }
+    .pet-card.done { border-color: rgba(56,176,0,0.8); background: rgba(12, 38, 28, 0.78); }
+
+    .pet-header { display: flex; align-items: center; gap: 14px; }
+    .pet-avatar-wrap {
+      width: 92px; height: 92px; border-radius: 20px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.35);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .pet-avatar-wrap img { width: 88%; height: 88%; object-fit: contain; transition: transform 0.3s; }
+    .pet-card:hover .pet-avatar-wrap img { transform: scale(1.1) rotate(-3deg); }
+
+    .pet-info { flex: 1; min-width: 0; }
+    .pet-zh { font-size: 1.28rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pet-sub { font-size: 0.82rem; color: #cbd5e1; margin-top: 2px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+    .badge {
+      font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+      background: rgba(255,255,255,0.15); color: #fff;
+    }
+    .badge-bg-green { background: #CFE8D5; color: #0f3d21; }
+    .badge-bg-white { background: #ffffff; color: #1e293b; }
+    .badge-done { background: linear-gradient(135deg, #38b000, #70e000); color: #051d00; }
+    .badge-claimed { background: linear-gradient(135deg, #fee440, #ff9f1c); color: #1e1000; }
+
+    .claim-box {
+      display: flex; gap: 6px; align-items: center;
+      background: rgba(0,0,0,0.28); padding: 7px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .claim-input {
+      flex: 1; min-width: 0; background: transparent; border: none; color: #fff;
+      font-family: inherit; font-size: 0.88rem; padding: 4px 6px; outline: none;
+    }
+    .claim-input::placeholder { color: rgba(255,255,255,0.48); }
+    .claim-btn {
+      border: none; border-radius: 10px; padding: 7px 12px; font-family: inherit;
+      font-weight: 800; font-size: 0.8rem; cursor: pointer;
+      background: linear-gradient(135deg, #fee440, #ff9f1c); color: #1f1100;
+      transition: transform 0.15s;
+    }
+    .claim-btn:hover { transform: scale(1.06); }
+    .claim-meta { font-size: 0.74rem; color: #fde68a; min-height: 16px; padding-left: 4px; }
+
+    .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .card-actions .btn { justify-content: center; padding: 8px 10px; font-size: 0.8rem; border-radius: 12px; }
+    .btn-prompt-full { grid-column: 1 / -1; }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(6, 4, 18, 0.78); backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .modal {
+      background: linear-gradient(160deg, rgba(28, 20, 64, 0.96), rgba(14, 10, 36, 0.98));
+      border: 2px solid rgba(0, 245, 212, 0.55);
+      border-radius: 28px; max-width: 920px; width: 100%; max-height: 88vh;
+      overflow-y: auto; padding: 24px; position: relative;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.7), 0 0 40px rgba(255,46,147,0.35);
+    }
+    .modal-close {
+      position: sticky; top: 0; float: right;
+      background: rgba(255,46,147,0.9); border: none; color: #fff;
+      width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem; font-weight: 900;
+      cursor: pointer; z-index: 10;
+    }
+    .prompt-list { display: grid; gap: 12px; margin-top: 16px; }
+    .prompt-item {
+      background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 18px; padding: 12px 14px;
+      display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    }
+    .prompt-thumb {
+      width: 72px; height: 72px; border-radius: 14px; object-fit: contain; padding: 4px;
+      flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.3);
+    }
+    .prompt-body { flex: 1; min-width: 220px; }
+    .prompt-lv { font-weight: 900; color: #fee440; font-size: 0.92rem; margin-bottom: 4px; }
+    .prompt-text {
+      font-size: 0.82rem; color: #e2e8f0; line-height: 1.45;
+      background: rgba(0,0,0,0.35); padding: 8px 10px; border-radius: 10px;
+      word-break: break-word;
+    }
+
+    .tut-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 14px; }
+    .tut-card {
+      background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 18px; padding: 16px; line-height: 1.6; font-size: 0.9rem;
+    }
+    .tut-card h3 { color: #00f5d4; margin-bottom: 8px; font-size: 1.05rem; }
+    .tut-step { margin-bottom: 8px; padding-left: 8px; border-left: 3px solid #ff2e93; }
+
+    .toast {
+      position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(90px);
+      background: linear-gradient(135deg, #ff2e93, #fee440); color: #190418;
+      font-weight: 900; padding: 12px 24px; border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5); z-index: 2000;
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+  <script>
+    window.addEventListener('error', function(ev) {
+      var g = document.getElementById('petGrid');
+      if (g) g.innerHTML = '<div style="background:#7f1d1d;color:#fecaca;padding:16px;border-radius:16px;grid-column:1/-1;"><b>JS Error:</b> ' + ev.message + ' (line ' + ev.lineno + ')</div>';
+    });
+  </script>
+</head>
+<body>
+  <canvas id="fx-canvas"></canvas>
+  <div class="bg-overlay"></div>
+
+  <div class="container">
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-title">🐾 Pet Garden · 宠物动态视频众包协同中心</div>
+          <div class="hero-sub">
+            各位老师辛苦啦！一起用 Google Flow 让 47 只班级宠物动起来 ✨<br>
+            Pusat Kolaborasi Video Haiwan Peliharaan (SJKC Kg Baru Gedok)
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-gold" onclick="openTutorial()">📖 中文 / BM 制作教程</button>
+          <a class="btn btn-pink" href="https://labs.google/fx/tools/flow" target="_blank" onclick="playPop()">🎬 打开 Google Flow</a>
+          <button class="btn btn-cyan" onclick="refreshClaims(true)">🔄 刷新认领状态</button>
+          <button class="btn btn-glass" id="soundToggle" onclick="toggleSound()">🔊 音效开</button>
+        </div>
+      </div>
+
+      <div class="credit-banner">
+        <div>
+          <span class="credit-badge">⚠️ 重要提醒 / PENTING</span>
+          请务必使用 <b>Personal Gmail（个人谷歌账号）</b> 登录 Google Flow！每天有 <b>50 Credits</b>，每个视频消耗 <b>24 Credits</b>，每天刚好可制作 <b>2 个视频</b>。<br>
+          <span style="color:#fde68a;">Sila guna <b>Personal Gmail</b> untuk log masuk Google Flow (50 kredit/hari, 24 kredit/video = <b>2 video sehari</b>).</span>
+        </div>
+        <div>
+          <a class="btn btn-purple" href="https://drive.google.com/drive/folders/1RL1uyTvYdh3-iznPap9FmzhGpBulYmKz" target="_blank" onclick="playPop()">📁 Drive 总目录</a>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="statTotal">47</div><div class="stat-label">全部宠物 / Jumlah Haiwan</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:#70e000" id="statDone">4</div><div class="stat-label">已上线 / Siap</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:#fee440" id="statClaimed">0</div><div class="stat-label">已认领 / Ditempah</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:#ff70a6" id="statOpen">43</div><div class="stat-label">待认领 / Tersedia</div></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tabs" id="filterTabs">
+        <button class="tab active" data-cat="all">✨ 全部 (47)</button>
+        <button class="tab" data-cat="open">🔥 待认领</button>
+        <button class="tab" data-cat="claimed">🙋 已认领</button>
+        <button class="tab" data-cat="myth">🐉 神兽 Myth</button>
+        <button class="tab" data-cat="dog">🐶 狗狗 Dog</button>
+        <button class="tab" data-cat="cat">🐱 猫咪 Cat</button>
+        <button class="tab" data-cat="nature">🌿 自然萌宠</button>
+        <button class="tab" data-cat="done">✅ 已上线</button>
+      </div>
+      <input type="text" class="search-box" id="searchInput" placeholder="🔍 搜索宠物 / 认领老师名字..." oninput="renderPets()" />
+    </div>
+
+    <div class="pet-grid" id="petGrid"></div>
+  </div>
+
+  <div class="modal-backdrop" id="promptModal" onclick="if(event.target===this)closeModal('promptModal')">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('promptModal')">✕</button>
+      <div id="promptModalContent"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="tutorialModal" onclick="if(event.target===this)closeModal('tutorialModal')">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('tutorialModal')">✕</button>
+      <h2 style="font-size:1.5rem;color:#fee440;margin-bottom:6px;">📖 Google Flow 宠物视频制作教程 (中文 & Bahasa Melayu)</h2>
+      <p style="color:#cbd5e1;font-size:0.9rem;">制作 1 只宠物需要 8 个等级（Lv.1 ~ Lv.8），每天可做 2 个视频，4 天即可完成！</p>
+      <div class="tut-grid">
+        <div class="tut-card">
+          <h3>🇨🇳 中文步骤指南</h3>
+          <div class="tut-step"><b>1. 认领宠物（防撞车）</b>：先在本网页选一只「待认领」宠物，在名字旁输入您的姓名并点击 <b>保存</b>。</div>
+          <div class="tut-step"><b>2. 下载 8 张底图</b>：点击卡片上的 <b>📥 下载底图</b>，把 8 张 <code>16x9.png</code> 下载到电脑或手机。</div>
+          <div class="tut-step"><b>3. 登录 Google Flow</b>：务必使用 <b>Personal Gmail</b> 登录（每日 50 Credits，1 视频 = 24 Credits，每日限 2 个）。</div>
+          <div class="tut-step"><b>4. 设置参数</b>：选择 <b>Video · Frames · 16:9 · x1 · Omni 1.2 Flash (720p, 8s)</b>。</div>
+          <div class="tut-step"><b>5. 上传首尾帧</b>：将<b>同一张底图</b>同时设为 <b>Start frame</b> 和 <b>End frame</b>！</div>
+          <div class="tut-step"><b>6. 复制 Prompt</b>：点本网页的 <b>📝 Lv.1–8 提示词</b>，一键复制对应等级的英文 Prompt 粘贴生成。</div>
+          <div class="tut-step"><b>7. 下载并上传</b>：下载 <b>720p Original size (MP4)</b>，重命名为 <code>宠物ID_等级.mp4</code>（例：<code>shiba_1.mp4</code>），点击 <b>📤 上传视频</b> 放进对应文件夹即可！</div>
+        </div>
+        <div class="tut-card">
+          <h3>🇲🇾 Panduan Bahasa Melayu</h3>
+          <div class="tut-step"><b>1. Tempah Haiwan</b>: Pilih haiwan yang belum ditempah, masukkan nama cikgu di petak nama dan klik <b>Simpan</b> supaya tidak bertindih dengan guru lain.</div>
+          <div class="tut-step"><b>2. Muat Turun Gambar</b>: Klik <b>📥 下载底图</b> untuk memuat turun kesemua 8 keping gambar (<code>Lv.1 – Lv.8</code>).</div>
+          <div class="tut-step"><b>3. Log Masuk Google Flow</b>: Wajib guna <b>Personal Gmail</b> (50 kredit/hari, 1 video = 24 kredit = <b>2 video sehari</b>).</div>
+          <div class="tut-step"><b>4. Tetapan Video</b>: Pilih <b>Video · Frames · 16:9 · x1 · Omni 1.2 Flash (720p, 8s)</b>.</div>
+          <div class="tut-step"><b>5. Start & End Frame</b>: Muat naik gambar yang <b>SAMA</b> sebagai <b>Start frame</b> dan <b>End frame</b>!</div>
+          <div class="tut-step"><b>6. Salin Prompt</b>: Klik <b>📝 Lv.1–8 提示词</b> pada kad haiwan dan tekan <b>Salin</b> untuk menyalin prompt tahap tersebut.</div>
+          <div class="tut-step"><b>7. Muat Naik Video</b>: Muat turun video <b>720p Original size (MP4)</b>, namakan sebagai <code>id_tahap.mp4</code> (cth: <code>shiba_1.mp4</code>) dan muat naik ke folder <b>📤 上传视频</b>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">已复制！</div>
+
+  <script>
+    var GAS_API_URL = 'https://script.google.com/macros/s/AKfycbzJdQLG2mF91S9vSnVoD4qNJ2mZCC_7XgSD-cGySWEHLLEbeJn-lspHYQ9CDX7-aBh41w/exec';
+    var PETS = [
+      {"id":"azure-dragon","zh":"青龙","ms":"Naga Biru","en":"Azure Dragon","cat":"myth","bg":"#FFFFFF","done":false,"lv":["baby green dragon sitting and cradling a glowing pearl, gentle breathing and tail wagging","cute baby dragon sitting with a small flower, swaying tail and blinking happily","little green dragon standing, waving one claw cheerfully, tiny whiskers swaying","scholarly green dragon holding a brush and scroll, nodding head gently and blinking","cheerful baby dragon spreading tiny wings, floating slightly and wagging tail","green dragon holding a small cloud-topped mountain, gentle breathing and glowing aura","proud young azure dragon standing strong, mane and tail flowing softly, blinking","majestic coiled azure dragon holding a glowing water orb, shimmering mist and gentle breathing"],"imgFolderId":"1YVWm55kFc6yDFkvFtNvrdjqK27XxXQBa","vidFolderId":"143Fkxt0ztmIVbTUMMF_CxLXBrsAmmH1e"},
+      {"id":"vermilion-bird","zh":"朱雀","ms":"Burung Merah","en":"Vermilion Bird","cat":"myth","bg":"#FFFFFF","done":false,"lv":["fluffy pink baby bird sitting calmly, blinking big eyes and ruffling tiny feathers","cute red baby bird pecking gently at a small basket of seeds, bobbing head","little red bird perched and looking around curiously, tail feathers swaying","happy red bird perched on a blooming branch, flapping wings and chirping","proud red phoenix chick spreading fiery wings on a pedestal, gentle glow","graceful vermilion bird perched with long tail feathers swaying softly, blinking","majestic red phoenix spreading glowing wings on a bronze stand, gentle flame aura","royal vermilion bird guarding a nest of glowing eggs, proud breathing and feather sway"],"imgFolderId":"1KZDovSOwYVfNLGSMvHAH2_PvJcmZxfFF","vidFolderId":"1qc3APUZtq4lRaVYP7ZRWrrAkDMPGFsfv"},
+      {"id":"white-tiger","zh":"白虎","ms":"Harimau Putih","en":"White Tiger","cat":"myth","bg":"#CFE8D5","done":false,"lv":["baby white tiger cub sleeping peacefully curled up, gentle breathing and ear twitching","cute white tiger cub standing with a small leaf, wagging tail and blinking","playful white tiger cub leaping joyfully in place, paws paddling and tail swaying","curious white tiger cub peeking around a tree trunk, blinking big eyes","sweet white tiger cub hugging a tiny plush tiger toy, gentle swaying and blinking","energetic white tiger cub roaring playfully with a big smile, tail wagging","relaxed white tiger cub lying next to a small watermelon, swaying tail and blinking","festive white tiger cub resting one paw on a pumpkin, proud blinking and tail swish"],"imgFolderId":"1Cc0b0m-DEJW-jK0p3xwuCc4SEhMGj9OY","vidFolderId":"1XZ4gAwoRDovy_D-f9FdphHjQABqXQKuE"},
+      {"id":"pixiu","zh":"貔貅","ms":"Pixiu","en":"Pixiu","cat":"myth","bg":"#FFFFFF","done":false,"lv":["tiny white baby pixiu holding a gold ingot, gentle breathing and blinking","cute orange baby pixiu sitting happily, wagging tiny tail and blinking big eyes","playful golden pixiu leaping with a gold ingot in its mouth, ears bouncing","adorable cream pixiu standing upright holding a jade treasure, blinking happily","cheerful pixiu holding up a lucky gold coin, waving paw and wagging tail","happy pixiu sitting behind a red bowl of gold ingots, rubbing paws joyfully","mighty golden pixiu holding gold ingots in both paws, mane and tail swaying","majestic dark bronze pixiu holding a large treasure bowl, gentle glowing aura"],"imgFolderId":"1Mna4c3Wl9RHL6Pm8faTc7lfYLR4gWQNO","vidFolderId":"1TkpDa-gKxgs4SscxWwhI9LVoS1TBRMxj"},
+      {"id":"suanni","zh":"狻猊","ms":"Suanni","en":"Suanni","cat":"myth","bg":"#FFFFFF","done":false,"lv":["tiny golden lion cub standing shyly, blinking big eyes and wagging curly tail","cute baby suanni holding a small glowing orb, gentle swaying and blinking","playful suanni reaching out toward a floating fire orb, tail curling","fiery-maned baby suanni sitting proudly, flames flickering softly on mane","confident young suanni crossing arms and smiling, fiery mane swaying","calm golden lion suanni resting peacefully, gentle breathing and tail swish","fierce-cute suanni with blazing red mane sitting on a gong, gentle flame glow","majestic suanni surrounded by floating auspicious clouds and coins, proud breathing"],"imgFolderId":"14uqFHk2rrcIY1nolN4o_1BVg0keS_Cw3","vidFolderId":"12i8Rk86gZlqHGycvWFUiYjXyG_8-S6A6"},
+      {"id":"nine-tail-fox","zh":"九尾狐","ms":"Rubah Sembilan Ekor","en":"Nine-Tail Fox","cat":"myth","bg":"#CFE8D5","done":true,"lv":[],"imgFolderId":"1bD6c_s7hOGgeTWN7_c4VWftgPUpnULd0","vidFolderId":"1Cx4MY9s6rxeqntNAJzxvU-q3DGKqlN3t"},
+      {"id":"unicorn","zh":"独角兽","ms":"Unikorn","en":"Unicorn","cat":"myth","bg":"#CFE8D5","done":false,"lv":["sleepy baby white unicorn resting on a fluffy cloud, gentle breathing and ear twitch","cheerful baby unicorn wearing a colorful rainbow ball on its horn, bouncing gently","curious baby unicorn sitting on an open magical book, blinking and swaying tail","graceful young unicorn lifting one front hoof, rainbow mane flowing softly","sweet unicorn holding a tiny glowing star, gentle head nod and tail swish","playful blue-maned unicorn prancing lightly in place, sparkling horn glow","elegant white unicorn sniffing a small yellow flower, mane swaying gently","majestic unicorn rearing slightly with flowing rainbow mane and tail, sparkling aura"],"imgFolderId":"17bpnktSXITm5t6VfCIE_CulANN3LcY9t","vidFolderId":"1kSg5a6H87NwmyBLaVWTHv3hj20BRqsu3"},
+      {"id":"corgi","zh":"柯基","ms":"Anjing Corgi","en":"Corgi","cat":"dog","bg":"#FFFFFF","done":true,"lv":[],"imgFolderId":"1bD6c_s7hOGgeTWN7_c4VWftgPUpnULd0","vidFolderId":"1Cx4MY9s6rxeqntNAJzxvU-q3DGKqlN3t"},
+      {"id":"border-collie","zh":"边牧","ms":"Border Collie","en":"Border Collie","cat":"dog","bg":"#FFFFFF","done":false,"lv":["baby border collie puppy lying down peacefully, gentle breathing and ear twitching","cute border collie puppy sitting alertly, tilting head and wagging tail","playful border collie holding a blue ball, bouncing gently and blinking","attentive border collie sitting and looking up at a floating treat, tail wagging","joyful border collie leaping up toward a floating soap bubble, ears flapping","agile border collie weaving playfully around a pole, wagging tail","balanced border collie standing proudly on a small pedestal, tail wagging gently","smart border collie lying down reading an open book, blinking and wagging tail"],"imgFolderId":"17ueRmCaLtO-4RlV0hB0OG4-lay1RN8Pm","vidFolderId":"17Ejz8khIbZPquzgaH-6C6SI5_rCjeZcx"},
+      {"id":"shiba","zh":"柴犬","ms":"Shiba Inu","en":"Shiba Inu","cat":"dog","bg":"#FFFFFF","done":false,"lv":["tiny shiba puppy sleeping curled up in a wooden bowl, gentle breathing","cute shiba puppy lying with a red ball, blinking big eyes and wagging tail","playful shiba puppy chewing on a slipper, ears bouncing and tail wagging","happy shiba dog doing a playful bow stretch, smiling and wagging tail","curious shiba looking up at a tiny dragonfly, tilting head and blinking","calm shiba inu lying down with paws crossed, gentle breathing and tail swish","handsome shiba wearing a red bandana, sitting proudly and wagging tail","energetic shiba holding a frisbee in its mouth, standing alert and wagging tail"],"imgFolderId":"18nn6i4uZey9oyMc205QsCLJtTzAxgy4_","vidFolderId":"1AIMVWNJzJL8fg8d8TSUOzR1Ehj3rXzGW"},
+      {"id":"golden-retriever","zh":"金毛","ms":"Golden Retriever","cat":"dog","en":"Golden Retriever","bg":"#FFFFFF","done":false,"lv":["sleepy golden retriever puppy wrapped in a cozy blanket, gentle breathing","happy golden puppy sitting in a blue kiddie pool, splashing gently and smiling","cute golden puppy hugging a yellow rubber duck, wagging tail and blinking","cheerful golden puppy trotting with a slipper in its mouth, ears bouncing","cool golden retriever wearing a red cap backwards, wagging tail happily","playful golden retriever running in place with a colorful beach ball","energetic golden retriever leaping up to catch a flying orange frisbee","proud golden retriever lying beside a framed family photo, wagging tail"],"imgFolderId":"1l6vueyT3VmjXWzwD54HDQAh4b8a4Dm7Z","vidFolderId":"1WXcIpQLZ84m4WP6Tc6U7Wa1I0_QIlNh8"},
+      {"id":"husky","zh":"哈士奇","ms":"Husky","en":"Husky","cat":"dog","bg":"#FFFFFF","done":false,"lv":["baby husky puppy sleeping in a cozy bed with a milk bottle, gentle breathing","cute husky puppy sitting and hugging a bone, tilting head and blinking","playful husky puppy resting paws on a snowball, wagging tail happily","energetic husky puppy running in place with a blue frisbee in its mouth","calm husky puppy sitting upright, blinking bright blue eyes and wagging tail","adventurous husky wearing a blue scarf and backpack, nodding gently","studious husky sitting in an armchair reading a book, blinking and swaying","smart husky standing with one paw on a spinning globe, smiling proudly"],"imgFolderId":"13YPHA2vNsaM0pMi0ZO8jrW6bIRzsUwb_","vidFolderId":"1U550SNfJF_m6MDIGGEfAAwMbW1zlUKt1"},
+      {"id":"labrador","zh":"拉布拉多","ms":"Labrador","en":"Labrador","cat":"dog","bg":"#FFFFFF","done":true,"lv":[],"imgFolderId":"1bD6c_s7hOGgeTWN7_c4VWftgPUpnULd0","vidFolderId":"1Cx4MY9s6rxeqntNAJzxvU-q3DGKqlN3t"},
+      {"id":"poodle","zh":"泰迪","ms":"Poodle","en":"Poodle","cat":"dog","bg":"#CFE8D5","done":false,"lv":["fluffy brown poodle puppy sleeping peacefully, gentle breathing and ear twitch","cute poodle puppy peeking out of a cardboard box, blinking and wagging tail","hungry poodle puppy sniffing a bowl of dog food, tail wagging happily","adorable poodle sitting and waving one paw, tilting head and blinking","fluffy brown poodle sitting alertly, blinking big eyes and swaying ears","happy poodle sitting with a bone treat in its mouth, wagging tail","sweet poodle holding a colorful bouquet of flowers, blinking happily","proud poodle sitting upright and looking around, gentle tail wagging"],"imgFolderId":"1dW0Rm1pkugVcMxafYxKvQ9RYzNd3zwyH","vidFolderId":"1KiGfuM9jf-lcpb4QmbS1qPJQBMeqhVzh"},
+      {"id":"bichon","zh":"比熊","ms":"Bichon Frise","en":"Bichon","cat":"dog","bg":"#CFE8D5","done":false,"lv":["fluffy white bichon puppy sleeping peacefully, gentle breathing chest motion","fluffy white puppy resting by a white food bowl, blinking big eyes and wagging tail","happy white bichon puppy trotting in place, fluffy tail wagging and ears bouncing","cute white bichon sitting and waving one paw cheerfully, blinking with a big smile","fluffy white puppy shaking fur playfully with tiny sparkles, wagging tail","joyful white bichon jumping happily toward a fluttering butterfly, ears flying","cool white bichon wearing sunglasses balancing on a skateboard, swaying gently","adorable white bichon wearing a colorful flower crown, winking one eye and waving"],"imgFolderId":"1D_G62n0Qg3c62lQtcw_4_Cbsb0etYnG0","vidFolderId":"1mBwprabo6PzTZGzbSdHpIoAVWjD6zlPf"},
+      {"id":"french-bulldog","zh":"法斗","ms":"French Bulldog","en":"French Bulldog","cat":"dog","bg":"#FFFFFF","done":false,"lv":["wrinkly baby bulldog puppy sleeping peacefully, gentle breathing and ear twitch","chunky bulldog puppy standing alertly, blinking big eyes and wagging stubby tail","cute bulldog sitting and nibbling a bone biscuit with both paws, blinking","hungry bulldog puppy sniffing and eating from a metal bowl, tail wagging","playful bulldog chewing happily on a knotted rope toy, swaying body","happy bulldog sitting with a big grin, tilting head and wagging tail","cheerful bulldog standing with a yellow tennis ball in its mouth, wagging tail","studious bulldog sitting and reading an open book, blinking attentively"],"imgFolderId":"1EJG9QFODF-2JVCPe7qSqzLeDREwU1Vqm","vidFolderId":"1FEpd4eQWr0ZxzYCb-MVl1pNOWx2Xq-6n"},
+      {"id":"samoyed","zh":"萨摩耶","ms":"Samoyed","en":"Samoyed","cat":"dog","bg":"#CFE8D5","done":false,"lv":["tiny white samoyed puppy curled up sleeping in a fluffy round bed, gentle breathing","cute white samoyed puppy behind a food bowl, winking one eye and smiling","playful samoyed resting one paw on a snowball, smiling and wagging fluffy tail","joyful samoyed leaping up to catch a snowball, ears and fur bouncing","happy samoyed lying in soft snow, panting happily with tail wagging","excited samoyed jumping forward with paws out and big smile, fluffy tail swaying","cheerful samoyed trotting happily with a daisy flower, tail curling","proud samoyed sitting with a tiny plush samoyed toy, smiling and blinking"],"imgFolderId":"1Y3RCZ21HSV9zYD_MLtSNv7nEdapwYYY9","vidFolderId":"1olAzjD_01E-rE7gNIYzeUfX71Ih53vXM"},
+      {"id":"schnauzer","zh":"雪纳瑞","ms":"Schnauzer","en":"Schnauzer","cat":"dog","bg":"#FFFFFF","done":false,"lv":["fluffy white schnauzer puppy sleeping peacefully, gentle breathing","cute fluffy schnauzer lying down with a small toy, blinking and tail wagging","happy white schnauzer trotting in place, lifting one paw and wagging tail","alert white schnauzer sitting surrounded by tiny sparkles, blinking","playful schnauzer resting paws on a big round ball, wagging tail","proud schnauzer standing tall in profile, ears perked and tail wagging","energetic schnauzer trotting with a braided rope toy in its mouth","joyful schnauzer leaping happily with a frisbee in its mouth, ears bouncing"],"imgFolderId":"1ENvyQaXAg-nxozWtCasXTPjpWPmyqI4c","vidFolderId":"1LGusAEZH6RgJnFfkM8S13XcTQ9O5H1_H"},
+      {"id":"westie","zh":"西高地犬","ms":"Westie","en":"Westie","cat":"dog","bg":"#CFE8D5","done":false,"lv":["fluffy white westie puppy sleeping peacefully, gentle breathing and ear twitch","cute white westie puppy standing and looking back, wagging tail","adorable westie sitting with a tiny red toy car in its mouth, blinking","playful westie pawing gently at a colorful ball, wagging tail happily","calm westie sitting with a leash in its mouth, blinking and swaying tail","funny westie holding a giant striped sock in its mouth, wagging tail","curious westie sitting next to a chewed paper roll, tilting head and blinking","relaxed westie lying on a blue book chewing a blue bone toy, wagging tail"],"imgFolderId":"1Ra50ekPZ7B0IDrnLVtGzuC3J_LzNWOEh","vidFolderId":"1t76ylCtg0FPniTvFCMTazIydw05bWB-k"},
+      {"id":"black-cat","zh":"小黑猫","ms":"Kucing Hitam","en":"Black Cat","cat":"cat","bg":"#FFFFFF","done":false,"lv":["sleek black kitten with golden bell sitting calmly, blinking big yellow eyes and swaying tail","curious black kitten standing alert, tail curling gently, ears twitching and blinking","playful black kitten batting gently at a white yarn ball, wagging tail","cute black kitten holding a silver fish in its mouth, blinking happily and swaying tail","black kitten sitting and nibbling a tiny treat with one paw, blinking contently","black kitten sitting and grooming its face with one paw, gentle breathing and tail sway","studious black kitten reading an open book, eyes scanning and ears twitching","adorable black kitten tilting head curiously and raising one paw, blinking big eyes"],"imgFolderId":"1Dpm_lBovgRzOYxksArflmxsXuuyfasVV","vidFolderId":"1XkJr0cZnkm0k04Tz2Uy0mHdvZ55zK-te"},
+      {"id":"blue-cat","zh":"蓝猫","ms":"Kucing Biru","en":"Blue Cat","cat":"cat","bg":"#FFFFFF","done":false,"lv":["chubby grey-blue kitten hugging a yellow rubber duck, gentle breathing and blinking","playful grey kitten pouncing gently toward a tiny red ball, tail wagging","cute grey kitten sitting and licking one paw, blinking amber eyes and swaying tail","grey kitten holding a colorful yarn ball with both paws, blinking happily","calm grey-blue kitten sitting upright, blinking slowly with a gentle tail swish","energetic grey kitten riding a skateboard, balancing playfully and swaying tail","curious grey kitten looking down at an open book, blinking and twitching ears","cool grey kitten wearing aviator goggles and scarf, nodding slightly and blinking"],"imgFolderId":"1-rdO8BqApc4MFTxVqBn_jAM4D__8MuXo","vidFolderId":"18DgyqjfCA3aT3UmevitPF-HGJCYzYxcb"},
+      {"id":"calico-cat","zh":"三花猫","ms":"Kucing Belang Tiga","en":"Calico Cat","cat":"cat","bg":"#FFFFFF","done":false,"lv":["cute calico kitten sleeping curled up peacefully, gentle breathing and ear twitch","sweet calico kitten with pink collar sitting upright, blinking and swaying tail","playful calico kitten leaping toward a fluttering butterfly, tail waving","pretty calico kitten wearing a flower crown sitting calmly, blinking happily","cheerful calico kitten wearing a flower crown standing and smiling, swaying tail","adorable calico kitten licking its paw, blinking big eyes and swaying tail","studious calico kitten sitting and reading a red book, blinking attentively","charming calico kitten tilting head with a flower crown, blinking and tail swishing"],"imgFolderId":"1Yekg7KzVf8iSJfCeXwYtO_DgrwxT9rF9","vidFolderId":"1a6cteQZnriwWGoboGZcRicFRBIbpxCa0"},
+      {"id":"garfield","zh":"加菲猫","ms":"Kucing Garfield","en":"Garfield","cat":"cat","bg":"#FFFFFF","done":false,"lv":["chubby orange tabby kitten sleeping on its back with a milk bottle, gentle breathing","cute orange kitten sitting in a litter tray, blinking big eyes and swaying tail","funny orange kitten wearing big round glasses, winking one eye and smiling","playful orange cat peeking out of a black magician top hat, blinking and swaying","diligent orange cat sitting on a stool brushing its teeth, swaying gently","joyful orange cat jumping with paws up toward a butterfly, big happy smile","cool orange cat riding a scooter, balancing playfully and swaying tail","trendy orange cat holding a selfie stick with smartphone, smiling and waving"],"imgFolderId":"1_OluPWERIFF0nn5UkX9xR12oIN5STXqa","vidFolderId":"1Ct27-1UH-T9z08QBfzIOY_5VDSH-IuxT"},
+      {"id":"golden-cat","zh":"金渐层","ms":"Kucing Emas","en":"Golden Cat","cat":"cat","bg":"#FFFFFF","done":true,"lv":[],"imgFolderId":"1bD6c_s7hOGgeTWN7_c4VWftgPUpnULd0","vidFolderId":"1Cx4MY9s6rxeqntNAJzxvU-q3DGKqlN3t"},
+      {"id":"silver-cat","zh":"银渐层","ms":"Kucing Perak","en":"Silver Cat","cat":"cat","bg":"#FFFFFF","done":false,"lv":["tiny silver tabby kitten sleeping curled up on a crescent moon, gentle breathing","cute silver kitten hugging a sparkling silver star, blinking big green eyes","playful silver kitten swatting at a dangling feather toy, tail wagging","sweet silver kitten wearing a white lace collar, blinking softly and swaying tail","curious silver kitten crouching low and wiggling playfully, eyes wide","happy silver kitten sitting with a rainbow ball, tapping it gently and blinking","content silver kitten hugging a blue fish, tail wrapping softly and blinking","graceful silver kitten standing on hind legs waving gently, tail swaying"],"imgFolderId":"1upKkQ7HuX1ARftJqyLwfsUW-2EBBG0uW","vidFolderId":"1vUy0lebVdIPAcwZ9U_xBq6T3wN_bXe97"},
+      {"id":"orange-cat","zh":"橘猫","ms":"Kucing Oren","en":"Orange Cat","cat":"cat","bg":"#FFFFFF","done":false,"lv":["tiny orange kitten sleeping curled up peacefully, gentle breathing and ear twitch","playful orange kitten reaching for a fluttering butterfly, blinking and swaying tail","curious orange kitten standing with paws on a small wooden block, tail wagging","joyful orange kitten leaping cheerfully in mid-air, paws outstretched and smiling","cute orange kitten sitting and hugging a small orange fish, blinking happily","cozy orange kitten peeking out of a cardboard box, blinking sleepily with a smile","confident orange cat walking in place with tail curled high, blinking","relaxed orange cat lounging on a soft cushion, yawning happily and swaying tail"],"imgFolderId":"1Na8eK74Dj0SznjtM7VZig6PPA9pg2A4x","vidFolderId":"1dpYyPTlPOGy8cnDBZbHm6NF5qr3uZGpZ"},
+      {"id":"ragdoll-cat","zh":"布偶猫","ms":"Kucing Ragdoll","en":"Ragdoll Cat","cat":"cat","bg":"#CFE8D5","done":false,"lv":["fluffy ragdoll kitten sleeping with paws tucked, gentle breathing and ear twitch","cute ragdoll kitten playing with a pink yarn ball, blinking blue eyes","adorable ragdoll kitten wearing a blue knit beanie hugging a tiny teddy bear","playful ragdoll kitten prancing lightly with a small toy, tail swaying","curious ragdoll kitten walking slowly in place, tail swishing gently","elegant ragdoll cat wearing a pearl necklace sitting gracefully, blinking","cozy ragdoll cat resting on a fluffy cloud hugging a plush fish, blinking","sweet ragdoll cat sitting beside a pink rose in a vase, blinking softly"],"imgFolderId":"1_qsBogITUlbmiXBWBUtsuYqMpXmkbJVO","vidFolderId":"1WowmHICNyo6j88eJjNwKd6YGcG2oYjsV"},
+      {"id":"tabby-cat","zh":"虎斑猫1","ms":"Kucing Tabby 1","en":"Tabby Cat 1","cat":"cat","bg":"#FFFFFF","done":false,"lv":["tiny brown tabby kitten sleeping curled up peacefully, gentle breathing","playful tabby kitten batting at a red yarn ball, tail wagging happily","energetic tabby kitten playing with a feather wand toy, jumping gently","cute tabby kitten wearing a yellow bandana sitting upright, blinking","sweet tabby kitten clasping paws together happily, smiling and swaying tail","calm tabby cat sitting neatly, blinking big eyes and swishing tail","happy tabby cat hugging a bright orange fish, blinking and swaying tail","studious tabby cat sitting and reading a brown book, blinking attentively"],"imgFolderId":"1ESld3jELWDS_cMOKswKlpEIFvzGXTv_4","vidFolderId":"1H771AnRIiep4yaSl9C-Ec3JR2JAqVyZY"},
+      {"id":"tiger-striped-cat","zh":"虎斑猫2","ms":"Kucing Tabby 2","en":"Tabby Cat 2","cat":"cat","bg":"#FFFFFF","done":false,"lv":["tiny striped tabby kitten sleeping in a woven basket, gentle breathing","playful tabby kitten jumping up toward a tiny green grasshopper, tail waving","curious tabby kitten peeking out of a brown paper bag, blinking big eyes","busy tabby kitten scratching playfully on a cardboard scratcher, tail swaying","proud tabby kitten holding a silver soccer ball in its mouth, wagging tail","agile tabby kitten balancing on top of a wooden stool, tail swaying","happy tabby kitten running cheerfully in place with a big smile","sassy tabby cat sitting with one paw raised, blinking and swaying tail"],"imgFolderId":"1buQkpVOdMw0APnvMQ6iQy-NOJpzUm1Lh","vidFolderId":"1OFxaqVq2s3H20XjS5IaIs71W1ZJ-AkS5"},
+      {"id":"capybara","zh":"卡皮巴拉","ms":"Kapibara","en":"Capybara","cat":"nature","bg":"#FFFFFF","done":false,"lv":["baby capybara sleeping peacefully, gentle breathing and ear twitching","calm capybara sitting quietly, blinking slowly and twitching nose","chill capybara munching gently on a long green leaf, chewing rhythmically","cute capybara wearing a tiny orange on its head while eating a snack","relaxed capybara soaking in a warm wooden tub with an orange on its head, steam rising","clean capybara standing and drying off with a white towel, blinking calmly","vacation capybara lounging on a beach chair under a tiny sun, swaying gently","sweet parent capybara standing proudly beside a tiny baby capybara, blinking"],"imgFolderId":"1RN1oDdHC-hsQZ-zW72cjlP2MqTVhwrr6","vidFolderId":"1EvzajCeJ4SGF-WAjPp_feKvf5ZMFvIN5"},
+      {"id":"succulent-spirit","zh":"多肉精灵","ms":"Roh Sukulen","en":"Succulent Spirit","cat":"nature","bg":"#FFFFFF","done":false,"lv":["tiny succulent baby peeking out of green rosette leaves, blinking happily","cute succulent spirit with a tiny yellow flower sprouting on its head, swaying","cheerful green succulent spirit hugging a four-leaf clover, bouncing gently","adorable leafy spirit standing upright with ear-like leaves, waving gently","whimsical spirit wearing a red polka-dot mushroom hat, swaying playfully","magical fairy-winged succulent spirit waving a glowing wand, floating gently","graceful leafy fairy balancing on one foot holding a glowing flower, wings fluttering","serene succulent fairy sitting cross-legged holding a tiny potted plant, wings glowing"],"imgFolderId":"1lhOFxPYWUEkwz5JQ62OTQhvFNJeM4xEx","vidFolderId":"116xJEjv8brxj9dm_g9ikxOEc6MB4c2ee"},
+      {"id":"red-panda","zh":"小熊猫","ms":"Panda Merah","en":"Red Panda","cat":"nature","bg":"#FFFFFF","done":false,"lv":["baby red panda sleeping curled up with fluffy striped tail, gentle breathing","cute red panda sitting and hugging a green bamboo shoot, blinking happily","playful red panda standing on a wooden stump, waving tail and blinking","cheerful red panda standing on hind legs waving both paws, big smile","helpful red panda holding a basket of fresh green bamboo leaves, swaying","sweet red panda sipping honey from a small jar, blinking contently","happy red panda sitting on a stump holding berries, bouncing gently","friendly red panda standing proudly and waving one paw, tail swaying"],"imgFolderId":"1cuy5_dY0NWcL7OD_FtY3eDGkXD7wFEPq","vidFolderId":"1bV5gHPPZO21chhnyD99FsG0hXLVHRph9"},
+      {"id":"panda","zh":"熊猫","ms":"Panda","en":"Panda","cat":"nature","bg":"#CFE8D5","done":false,"lv":["fluffy baby panda drinking from a milk bottle, gentle breathing and blinking","cute baby panda crawling slowly toward green bamboo leaves, ear twitching","chubby panda sitting and munching on a bamboo shoot, chewing happily","playful panda hugging a green bamboo stalk and peeking around, swaying","relaxed panda sitting in a bamboo grove chewing bamboo, blinking contently","happy panda hugging a fresh cabbage and carrot, smiling and swaying","joyful panda balancing on one foot with arms raised, big cheerful smile","loving mama panda hugging a tiny baby panda, gentle swaying and blinking"],"imgFolderId":"1dhKLZRBKOhbt7S9lQvqf-ZQf22etvgBm","vidFolderId":"1_fYPzrKWx8i0uXJdA2pO6FfRnW3D9i8S"},
+      {"id":"polar-bear","zh":"大白熊","ms":"Beruang Kutub","en":"Polar Bear","cat":"nature","bg":"#CFE8D5","done":false,"lv":["tiny white polar bear cub sleeping while hugging a milk bottle, gentle breathing","curious polar bear cub walking next to a tiny yellow rubber duck, blinking","playful polar bear cub sitting and playing with a colorful yarn ball","happy polar bear cub lying on its back reaching for a butterfly, kicking paws","hungry polar bear cub sitting and eating a fish-shaped pastry, blinking","cozy polar bear wearing a red knit hat and scarf, swaying gently","adventurous polar bear wearing an explorer hat and backpack, saluting","creative polar bear building a little snowman, patting it gently and smiling"],"imgFolderId":"1IdVDsh-FBWNSySNMuCSx9sRsh-_LG3NW","vidFolderId":"14D25IXBELPMuhYtRBDFOJ3q-oCliodCf"},
+      {"id":"koel-duck","zh":"柯尔鸭","ms":"Itik Call","en":"Koel Duck","cat":"nature","bg":"#CFE8D5","done":false,"lv":["cute baby duckling inside eggshell gently wiggling, flapping tiny wings happily, blinking eyes and smiling","fluffy duckling cheerfully bouncing on one foot, flapping wings, blinking big eyes while the tiny ladybug gently flutters its wings","cute fluffy duckling gently swaying side to side, hugging the pink plush ball softly, blinking happily with a warm smile","white duckling gently blowing shimmering rainbow soap bubbles that softly float and wobble, flapping wings slightly, tapping one foot","chubby white duckling resting on cushion, gentle breathing chest motion, tiny yellow head feathers swaying softly, blinking sleepily","white duckling wearing red scarf looking into the mirror, tilting head slightly, blinking cute eyes, gently touching scarf with wing","white duckling balancing playfully with one foot on the snowball, flapping wings slightly, while the tiny duckling on the bottom left gently waddles in place","fluffy white call duck tilting head up cheerfully, blinking one eye, gentle breathing motion while tiny snowflakes drift softly around"],"imgFolderId":"10BaWN5YIhciqBUd9QGeuviRPSsLmUK2L","vidFolderId":"1lUpMPp9Zh3kI9Sari2BO_7YoIR_VhzYy"},
+      {"id":"llama","zh":"羊驼","ms":"Alpaca","en":"Llama","cat":"nature","bg":"#CFE8D5","done":false,"lv":["tiny pink-tinted baby llama sitting with a yarn ball, blinking big eyes","happy brown llama trotting playfully toward a tiny yellow butterfly, ears bouncing","talented llama balancing on a tiny stool under colorful party flags, swaying","dreamy white llama lounging on a fluffy cloud, kicking hooves gently","playful llama spinning a colorful hula hoop around its waist, bouncing","fluffy white llama sitting calmly behind a basket of treats, blinking","dapper llama wearing a neat black tuxedo suit, nodding politely and blinking","festive llama wearing a party hat standing beside a gift box, smiling happily"],"imgFolderId":"106mfOJcGV4c2PAOdwik-aM-PkX7Mni71","vidFolderId":"1euVp3ESaYh-4Y9p6giX59jy5_ap_Qre9"},
+      {"id":"angora-rabbit","zh":"安哥拉兔","ms":"Arnab Angora","en":"Angora Rabbit","cat":"nature","bg":"#CFE8D5","done":false,"lv":["fluffy white bunny tilting head cutely, twitching ears and nose, blinking big dark eyes","happy white bunny hopping gently while holding a fresh carrot in its mouth, ears bouncing","white bunny sitting upright, rubbing cheeks with tiny paws, ears wiggling and blinking","white bunny playfully bouncing next to a colorful ball, ears fluttering, joyful expression","fluffy white bunny lying on its back kicking tiny paws happily and laughing","white bunny peeking and resting paws on a tiny wooden birdhouse, twitching nose and blinking","cool white bunny wearing sunglasses leaning on a giant carrot, tapping one foot playfully","fluffy white bunny holding a small cake with both paws, chewing happily and blinking"],"imgFolderId":"1RQfBymvIeE-ThfT2DEkZVNjO5uUa1hTx","vidFolderId":"1-ipehSkGLQpvgcxgAM-9vpyKtSSN9DnQ"},
+      {"id":"curl-ear-rabbit","zh":"垂耳兔","ms":"Arnab Telinga Labuh","en":"Lop-Ear Rabbit","cat":"nature","bg":"#CFE8D5","done":false,"lv":["tiny lop-eared white bunny hugging its plush toy, blinking and twitching nose","busy lop-eared bunny pushing a tiny red wheelbarrow full of apples, hopping gently","playful lop-eared bunny bouncing over a colorful ball, floppy ears swaying","happy bunny winking one eye while nibbling a strawberry beside a berry basket","musical lop-eared bunny strumming a tiny wooden guitar, nodding to the beat","shy lop-eared bunny peeking out of a cardboard box, twitching nose and blinking","cool lop-eared bunny wearing sunglasses riding a skateboard, scarf flowing","sweet lop-eared bunny holding a wrapped gift box, blushing and blinking happily"],"imgFolderId":"1AUdWzK5lRwRVAk2JdTs2e9tFkKC8PUh7","vidFolderId":"1FJ7BYfJzoyuZnt8LzJ7I0MC_LeC-kWxn"},
+      {"id":"rabbit","zh":"小白兔","ms":"Arnab Putih","en":"White Rabbit","cat":"nature","bg":"#CFE8D5","done":false,"lv":["tiny white bunny sleeping upright while holding a milk bottle, gentle breathing","curious white bunny hopping gently toward a sliced carrot, ears twitching","happy white bunny hugging a big orange carrot, nibbling gently and blinking","cheerful white bunny holding a fresh carrot with leafy top, swaying happily","hungry white bunny hugging a giant crisp lettuce leaf, munching happily","pretty white bunny wearing a daisy flower crown holding white flowers, blinking","adventurous white bunny wearing a yellow vest and carrot backpack, waving","sweet white bunny in a yellow sweater holding a bunch of ripe apples, smiling"],"imgFolderId":"1dEfh2FSfbHqg0-5a61C7Nih2oCS4GAly","vidFolderId":"1Y7kpMCRkFJoWB4XNcS8igrsEov0HvleK"},
+      {"id":"lamb","zh":"小羊仔","ms":"Anak Kambing","en":"Lamb","cat":"nature","bg":"#CFE8D5","done":false,"lv":["fluffy white baby lamb sleeping peacefully, gentle breathing and ear twitching","cute white lamb sitting upright, blinking big eyes and twitching ears","sweet white lamb hugging a brown teddy bear, gentle swaying and blinking","playful white lamb chewing on a colorful ring toy, blinking happily","cute lamb wearing a yellow vest standing and sniffing the ground, tail wagging","joyful lamb in a yellow vest trotting playfully toward a colorful ball","pretty white lamb wearing a flower crown sitting calmly, blinking","cheerful white lamb carrying a woven basket of flowers on its back, smiling"],"imgFolderId":"17jhyzxfgtld-RwnAgT8Nm7reqOfKFhWt","vidFolderId":"1dgmeMyiXz7BJ-TG6yEOikcPNiDt33pcd"},
+      {"id":"chick","zh":"小鸡仔","ms":"Anak Ayam","en":"Chick","cat":"nature","bg":"#FFFFFF","done":false,"lv":["fluffy yellow baby chick inside cracked eggshell, flapping tiny wings and chirping","cute yellow chick taking a bubble bath in a wooden tub, splashing gently","cheerful yellow chick holding a green wheat stalk, swaying and winking happily","sweet yellow chick wearing a daisy straw hat, blinking big eyes and bobbing head","gentle yellow chick hugging a tiny baby duckling toy, swaying warmly","sleepy yellow chick curled up hugging a teddy bear, gentle breathing","happy chick in blue overalls holding a bright sunflower, waving gently","proud chick wearing a straw hat holding a shiny red apple, blinking happily"],"imgFolderId":"1SU1qE8uXDfuYGs3rt6GlHBGA_YEyQz8u","vidFolderId":"1-e2j0ZeiIunB5ebLqXlqwrWyuHmm8BMX"},
+      {"id":"parrot","zh":"虎皮鹦鹉","ms":"Burung Budgie","en":"Parrot","cat":"nature","bg":"#FFFFFF","done":false,"lv":["baby yellow-green parrot peeking out of a cracked eggshell, blinking and chirping","cute budgie pecking gently at a pile of seeds, bobbing head happily","happy parrot perched on a bamboo stick flapping both wings, chirping","curious green-yellow parrot leaning down to sip from a small water dish","fluffy parrot puffing up feathers on a perch, tilting head and blinking","joyful parrot swinging playfully on a wooden swing, flapping wings","clever green parrot resting one foot on a woven rattan ball, tilting head","colorful parrot perched with blooming flowers tucked behind wings, swaying"],"imgFolderId":"18dZm7Ql87jKcEqLD9VfzZIQ5q19zvRPe","vidFolderId":"1PGFW4HoVKW9FuJWlieH0dVBAax_yC3DL"},
+      {"id":"pig","zh":"小猪猪","ms":"Anak Babi","en":"Piggy","cat":"nature","bg":"#FFFFFF","done":false,"lv":["happy pink piggy splashing in a mud puddle holding a tiny carrot, laughing","cheerful piggy in blue overalls waving happily, ears flopping and smiling","excited piggy in overalls holding a red apple and a green apple, bouncing","sweet piggy standing in wildflowers waving at a tiny butterfly, blinking","content piggy sitting beside a basket of colorful fruits, smiling and blinking","playful piggy wearing a straw hat riding a wooden hobby horse, bouncing","chef piggy mixing batter in a blue bowl with a wooden spoon, swaying","proud master chef piggy wearing a chef hat and red cape, waving a spoon"],"imgFolderId":"1qjTLtHHwRy5pyBoqvAv1aDlDzco2-UQQ","vidFolderId":"1_3qm6bwfleyX5nQbjvSuSsAhGks_1seB"},
+      {"id":"monkey","zh":"猴子","ms":"Monyet","en":"Monkey","cat":"nature","bg":"#FFFFFF","done":false,"lv":["tiny baby monkey holding a glowing green leaf, blinking shyly and swaying","cute baby monkey sitting and nibbling a red fruit, ears wiggling and blinking","magical little monkey cradling a glowing pink peach, tail curling gently","playful monkey hanging upside down from a branch holding a glowing banana","calm monkey sitting cross-legged eating a glowing golden banana, smiling","happy monkey wearing a flower crown holding a glowing golden peach","adventurous golden monkey holding a glowing peach, leafy cape swaying","enlightened golden monkey meditating with floating flower crown and glowing orb"],"imgFolderId":"1Q_--jqc_Zn9H74PWX37kOkasPdAmC8YP","vidFolderId":"1gwithhGjNW1It9E_KjFNPv0kh9AzrMJw"},
+      {"id":"horse","zh":"小马驹","ms":"Anak Kuda","en":"Horse","cat":"nature","bg":"#FFFFFF","done":false,"lv":["tiny white foal sleeping curled up peacefully, gentle breathing and ear twitch","cute white foal resting calmly with head raised, blinking and swaying tail","magical young white horse standing among floating sparkles, mane swaying","happy white pony munching on fresh green grass, chewing and swaying tail","thirsty white pony dipping muzzle into a wooden water bucket, splashing gently","noble white warhorse wearing blue knight cape, prancing proudly in place","graceful white horse with saddle trotting smoothly in place, mane flowing","majestic white steed with golden saddle galloping gracefully among soft clouds"],"imgFolderId":"1Pk6XDoZOqp9Zoqj_KkhtuTUzezORuwGd","vidFolderId":"13Ebwy38NT2vRhyrvfeO8MfJYe0ONfqH9"},
+      {"id":"tiger","zh":"老虎","ms":"Harimau","en":"Tiger","cat":"nature","bg":"#FFFFFF","done":false,"lv":["tiny orange tiger cub sleeping peacefully, gentle breathing and ear twitch","cute tiger cub letting out a big sleepy yawn, tail swaying gently","adorable tiger cub wearing a gold bell collar tilting head and blinking","sweet tiger cub wearing a red scarf drinking from a milk bottle, blinking","cozy tiger cub resting in a colorful pastel flower cushion, swaying tail","playful tiger cub peeking through a colorful floral hoop, smiling and blinking","happy tiger cub lying on its back stretching paws playfully, tail wagging","festive tiger cub carrying a lucky red pouch on its back, trotting proudly"],"imgFolderId":"1wf_YFnj3LDfvlJvgRTdWC7ZN7Y9pudKt","vidFolderId":"1tEywQDLkhZm8kT3kTqd9NC47iRlPRrg5"},
+      {"id":"leopard","zh":"小花豹","ms":"Harimau Bintang","en":"Leopard","cat":"nature","bg":"#FFFFFF","done":false,"lv":["tiny spotted leopard cub sitting calmly, blinking green eyes and swaying tail","cute leopard cub wearing a blue ribbon collar, tilting head and wagging tail","curious leopard cub with a blue gem pendant stepping forward, blinking","royal leopard cub wearing a blue velvet cape standing proudly, tail swaying","adorable leopard cub wearing a beaded collar looking up, blinking big eyes","playful leopard cub chewing happily on a wooden stick, swaying tail","graceful young leopard drinking from a stone water bowl, lapping gently","relaxed leopard lounging peacefully on a sturdy tree branch, tail dangling gently"],"imgFolderId":"1KO0BeoHGcNKPCvEdPOBtxHV574lyiTaa","vidFolderId":"133RPygOSsqIny4ObtxpYRP71YKcioJkQ"}
+    ];
+    var claims = {};
+    var currentCat = 'all';
+    var soundEnabled = true;
+    var audioCtx = null;
+
+    function getAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+    function playTone(freq, dur, type, vol, delay) {
+      if (!soundEnabled) return;
+      type = type || 'sine';
+      vol = vol || 0.14;
+      delay = delay || 0;
+      try {
+        var ctx = getAudio();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+        gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + dur);
+      } catch (e) {}
+    }
+    function playPop() { playTone(560, 0.08, 'sine', 0.14, 0); playTone(840, 0.09, 'triangle', 0.1, 0.04); }
+    function playCopy() { playTone(880, 0.1, 'sine', 0.14, 0); playTone(1174, 0.12, 'sine', 0.14, 0.07); playTone(1318, 0.18, 'triangle', 0.14, 0.14); }
+    function playSuccess() { [523,659,784,1046].forEach(function(f,i){ playTone(f, 0.22, 'triangle', 0.15, i*0.07); }); }
+    function playMagic() { [587,740,880,1174].forEach(function(f,i){ playTone(f, 0.16, 'sine', 0.11, i*0.05); }); }
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundToggle').textContent = soundEnabled ? '🔊 音效开' : '🔇 静音';
+      if (soundEnabled) playPop();
+    }
+
+    var canvas = document.getElementById('fx-canvas');
+    var ctx2d = canvas.getContext('2d');
+    var particles = [];
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+    function spawnConfetti(x, y, count) {
+      count = count || 36;
+      var colors = ['#ff2e93','#fee440','#00f5d4','#00bbf9','#9d4edd','#ffffff'];
+      for (var i = 0; i < count; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var speed = 3 + Math.random() * 7;
+        particles.push({
+          x: x || window.innerWidth / 2,
+          y: y || window.innerHeight / 2,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 3,
+          size: 5 + Math.random() * 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 1,
+          decay: 0.015 + Math.random() * 0.015
+        });
+      }
+    }
+    function loopFX() {
+      ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(function(p){ return p.life > 0; });
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.22; p.life -= p.decay;
+        ctx2d.globalAlpha = Math.max(0, p.life);
+        ctx2d.fillStyle = p.color;
+        ctx2d.fillRect(p.x, p.y, p.size, p.size * 0.65);
+      }
+      ctx2d.globalAlpha = 1;
+      requestAnimationFrame(loopFX);
+    }
+    loopFX();
+
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 2200);
+    }
+
+    function buildPrompt(pet, idx) {
+      var bgDesc = pet.bg === '#CFE8D5'
+        ? 'pure solid light green background (#CFE8D5)'
+        : 'pure solid white background';
+      return 'Static camera, locked shot, ' + bgDesc + ', no camera movement. Subtle idle animation: ' + pet.lv[idx] + '. Keep character design and lighting identical, seamless loop.';
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function updateStats() {
+      var doneCount = PETS.filter(function(p){ return p.done; }).length;
+      var claimedCount = PETS.filter(function(p){ return !p.done && claims[p.id] && claims[p.id].teacher; }).length;
+      var openCount = PETS.length - doneCount - claimedCount;
+      document.getElementById('statTotal').textContent = PETS.length;
+      document.getElementById('statDone').textContent = doneCount;
+      document.getElementById('statClaimed').textContent = claimedCount;
+      document.getElementById('statOpen').textContent = openCount;
+      var pct = Math.round(((doneCount + claimedCount) / PETS.length) * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function renderPets() {
+      var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      var grid = document.getElementById('petGrid');
+      var filtered = PETS.filter(function(p) {
+        var c = claims[p.id] || {};
+        var teacher = (c.teacher || '').toLowerCase();
+        if (currentCat === 'done' && !p.done) return false;
+        if (currentCat === 'open' && (p.done || teacher)) return false;
+        if (currentCat === 'claimed' && (p.done || !teacher)) return false;
+        if (['myth','dog','cat','nature'].indexOf(currentCat) !== -1 && p.cat !== currentCat) return false;
+        if (q) {
+          var hay = (p.id + ' ' + p.zh + ' ' + p.ms + ' ' + p.en + ' ' + teacher).toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+
+      grid.innerHTML = filtered.map(function(p) {
+        var c = claims[p.id] || {};
+        var teacher = c.teacher || '';
+        var imgUrl = p.done
+          ? 'https://cdn.jsdelivr.net/gh/lonsig84/pet-assets@e78587e/avatar-animated/' + p.id + '/1.webp'
+          : 'https://cdn.jsdelivr.net/gh/lonsig84/pet-assets/avatar/' + p.id + '/1.webp';
+        var cardCls = p.done ? 'pet-card done' : (teacher ? 'pet-card claimed' : 'pet-card');
+        var bgBadge = p.bg === '#CFE8D5'
+          ? '<span class="badge badge-bg-green">浅绿底 #CFE8D5</span>'
+          : '<span class="badge badge-bg-white">纯白底 #FFFFFF</span>';
+        var statusBadge = p.done
+          ? '<span class="badge badge-done">✅ 已上线完成</span>'
+          : (teacher ? '<span class="badge badge-claimed">🙋 ' + escapeHtml(teacher) + '</span>' : '<span class="badge">🔥 待认领</span>');
+
+        var claimHtml = p.done
+          ? '<div class="claim-meta" style="color:#86efac;">🎉 此宠物 1~8 阶已制作并上线完成！</div>'
+          : '<div class="claim-box">' +
+              '<input class="claim-input" id="inp-' + p.id + '" type="text" value="' + escapeHtml(teacher) + '" placeholder="输入老师名字 / Nama Guru..." onkeydown="if(event.key==='Enter')submitClaim('' + p.id + '', event)" />' +
+              '<button class="claim-btn" onclick="submitClaim('' + p.id + '', event)">💾 保存</button>' +
+            '</div>' +
+            '<div class="claim-meta">' + (teacher ? '✅ 已认领 · 更新于 ' + (c.updatedAt || '刚刚') : '💡 填入名字即可锁定，避免重复制作') + '</div>';
+
+        var actionHtml = p.done
+          ? '<div class="card-actions"><button class="btn btn-glass btn-prompt-full" disabled style="opacity:0.75;cursor:default;">✨ 已完成动态化（无需制作）</button></div>'
+          : '<div class="card-actions">' +
+              '<a class="btn btn-cyan" href="https://drive.google.com/drive/folders/' + p.imgFolderId + '" target="_blank" onclick="playPop()">📥 下载底图</a>' +
+              '<a class="btn btn-pink" href="https://drive.google.com/drive/folders/' + p.vidFolderId + '" target="_blank" onclick="playPop()">📤 上传视频</a>' +
+              '<button class="btn btn-purple btn-prompt-full" onclick="openPrompts('' + p.id + '', event)">📝 查看 Lv.1–8 提示词 (一键复制)</button>' +
+            '</div>';
+
+        return '<div class="' + cardCls + '">' +
+          '<div class="pet-header">' +
+            '<div class="pet-avatar-wrap" style="background:' + p.bg + '">' +
+              '<img src="' + imgUrl + '" alt="' + escapeHtml(p.zh) + '" loading="lazy" />' +
+            '</div>' +
+            '<div class="pet-info">' +
+              '<div class="pet-zh">' + escapeHtml(p.zh) + '</div>' +
+              '<div class="pet-sub">' + escapeHtml(p.en) + ' · ' + escapeHtml(p.ms) + '</div>' +
+              '<div class="badges">' + statusBadge + bgBadge + '</div>' +
+            '</div>' +
+          '</div>' +
+          claimHtml +
+          actionHtml +
+        '</div>';
+      }).join('');
+      updateStats();
+    }
+
+    function submitClaim(petId, ev) {
+      var inp = document.getElementById('inp-' + petId);
+      var name = inp ? inp.value.trim() : '';
+      var pet = PETS.filter(function(x){ return x.id === petId; })[0];
+      if (ev && ev.clientX) spawnConfetti(ev.clientX, ev.clientY, 40);
+      playSuccess();
+      showToast(name ? ('🎉 已为「' + pet.zh + '」登记：' + name) : ('🔓 已取消「' + pet.zh + '」认领'));
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) { if (res && res.claims) { claims = res.claims; renderPets(); } })
+          .withFailureHandler(function(err) { showToast('⚠️ 保存失败：' + err); })
+          .saveClaim(petId, pet.zh, name);
+      } else {
+        claims[petId] = { teacher: name, updatedAt: '同步中...' };
+        renderPets();
+        fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ petId: petId, petZh: pet.zh, teacherName: name })
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(res) { if (res && res.claims) { claims = res.claims; renderPets(); } })
+          .catch(function(err) { console.error('saveClaim fetch error:', err); showToast('⚠️ 同步 Sheet 失败，请稍后重试'); });
+      }
+    }
+
+    function openPrompts(petId, ev) {
+      var pet = PETS.filter(function(x){ return x.id === petId; })[0];
+      if (!pet) return;
+      playMagic();
+      if (ev && ev.clientX) spawnConfetti(ev.clientX, ev.clientY, 22);
+      var listHtml = pet.lv.map(function(_, idx) {
+        var lvl = idx + 1;
+        var pText = buildPrompt(pet, idx);
+        var thumb = 'https://cdn.jsdelivr.net/gh/lonsig84/pet-assets/avatar/' + pet.id + '/' + lvl + '.webp';
+        return '<div class="prompt-item">' +
+          '<img class="prompt-thumb" style="background:' + pet.bg + '" src="' + thumb + '" alt="Lv.' + lvl + '" />' +
+          '<div class="prompt-body">' +
+            '<div class="prompt-lv">Level ' + lvl + ' · 文件名：' + pet.id + '_' + lvl + '.mp4</div>' +
+            '<div class="prompt-text" id="pt-' + pet.id + '-' + lvl + '">' + escapeHtml(pText) + '</div>' +
+          '</div>' +
+          '<button class="btn btn-gold" onclick="copyPrompt('' + pet.id + '', ' + lvl + ', event)">📋 复制</button>' +
+        '</div>';
+      }).join('');
+
+      var html = '<h2 style="font-size:1.45rem;color:#00f5d4;">🐾 ' + escapeHtml(pet.zh) + '（' + escapeHtml(pet.en) + ' / ' + escapeHtml(pet.ms) + '）— Lv.1–8 提示词</h2>' +
+        '<p style="color:#cbd5e1;font-size:0.86rem;margin-top:4px;">背景色：<b style="color:#fee440;">' + pet.bg + '</b> ｜ 上传视频命名：<code>' + pet.id + '_1.mp4</code> ~ <code>' + pet.id + '_8.mp4</code></p>' +
+        '<div class="prompt-list">' + listHtml + '</div>';
+      document.getElementById('promptModalContent').innerHTML = html;
+      document.getElementById('promptModal').classList.add('open');
+    }
+
+    function copyPrompt(petId, lvl, ev) {
+      var el = document.getElementById('pt-' + petId + '-' + lvl);
+      if (!el) return;
+      navigator.clipboard.writeText(el.textContent).then(function() {
+        playCopy();
+        if (ev && ev.clientX) spawnConfetti(ev.clientX, ev.clientY, 28);
+        showToast('✨ 已复制 ' + petId + ' Lv.' + lvl + ' 提示词！');
+      });
+    }
+
+    function openTutorial() {
+      playMagic();
+      document.getElementById('tutorialModal').classList.add('open');
+    }
+    function closeModal(id) {
+      playPop();
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function refreshClaims(notify) {
+      if (notify) playPop();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            claims = res || {};
+            renderPets();
+            if (notify) showToast('🔄 已同步最新认领状态！');
+          })
+          .withFailureHandler(function(err) {
+            console.error('getClaims error:', err);
+            renderPets();
+          })
+          .getClaims();
+      } else {
+        fetch(GAS_API_URL + '?action=getClaims')
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            claims = res || {};
+            renderPets();
+            if (notify) showToast('🔄 已同步最新认领状态！');
+          })
+          .catch(function(err) {
+            console.error('getClaims fetch error:', err);
+            renderPets();
+          });
+      }
+    }
+
+    document.querySelectorAll('#filterTabs .tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        playPop();
+        document.querySelectorAll('#filterTabs .tab').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentCat = btn.dataset.cat;
+        renderPets();
+      });
+    });
+
+    try {
+      renderPets();
+      refreshClaims(false);
+    } catch (e) {
+      document.getElementById('petGrid').innerHTML = '<div style="background:#7f1d1d;color:#fecaca;padding:16px;border-radius:16px;grid-column:1/-1;"><b>Render Error:</b> ' + (e && e.stack ? e.stack : e) + '</div>';
+    }
+  </script>
+</body>
+</html>
